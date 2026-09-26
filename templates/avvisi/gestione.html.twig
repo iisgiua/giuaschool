@@ -3,12 +3,12 @@
 {% block pagina_contenuto %}
 <div class="container-fluid">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.avvisi_gestione'|trans }}</h1>
-  {% include('include/form-inline.html.twig') %}
+  {{ include(('include/form-inline.html.twig')) }}
   <div class="row gs-mb-1">
     <div class="col-sm-6">
     </div>
     <div class="col-sm-6 text-right">
-  {% if dati.azioni.add is defined  %}
+  {% if dati.azioni.add is defined %}
       <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('avvisi_edit') }}" role="button" title="Inserisci un nuovo avviso generico"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Generico</strong></a>
       <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('avvisi_edit_classi', {tipo: 'E'}) }}" role="button" title="Aggiungi un nuovo avviso per l'ingresso posticipato"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Ingresso</strong></a>
       <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('avvisi_edit_classi', {tipo: 'U'}) }}" role="button" title="Aggiungi un nuovo avviso per l'uscita anticipata"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Uscita</strong></a>
@@ -30,32 +30,32 @@
       </tr>
     </thead>
   <tbody>
-  {% for k,a in dati.lista %}
+  {% for k, a in dati.lista %}
       <tr>
         <td><small>{{ a.autore.nome }} {{ a.autore.cognome }}</small></td>
-        <td><small>{{ ('label.avvisi_tipo_'~a.tipo)|trans }}</small></td>
+        <td><small>{{ ('label.avvisi_tipo_' ~ a.tipo)|trans }}</small></td>
         <td>{{ a.data|date('d/m/Y') }}</td>
         <td>{{ a.titolo }}</td>
         <td><small>{% for s in a.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
         <td>
-          <small>{% set inizio=1 %}
-    {% if 'D' in a.speciali %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}DSGA{% endif -%}
-    {% if 'S' in a.speciali %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RSPP{% endif -%}
-    {% if 'R' in a.speciali %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RSU{% endif -%}
-    {% if 'I' in a.speciali %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RAPPRESENTANTI DI ISTITUTO{% endif -%}
-    {% if 'P' in a.speciali %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RAPPRESENTANTI CONSULTA PROVICIALE{% endif -%}
-    {% if 'A' in a.ata and 'T' in a.ata and 'C' in a.ata %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}ATA
+          <small>{% set inizio = 1 %}
+    {% if 'D' in a.speciali %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}DSGA{% endif -%}
+    {% if 'S' in a.speciali %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}RSPP{% endif -%}
+    {% if 'R' in a.speciali %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}RSU{% endif -%}
+    {% if 'I' in a.speciali %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}RAPPRESENTANTI DI ISTITUTO{% endif -%}
+    {% if 'P' in a.speciali %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}RAPPRESENTANTI CONSULTA PROVICIALE{% endif -%}
+    {% if 'A' in a.ata and 'T' in a.ata and 'C' in a.ata %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}ATA
     {%- elseif 'A' in a.ata or 'T' in a.ata or 'C' in a.ata %}
-      {%- if 'A' in a.ata %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}AMMINISTRATIVI{% endif -%}
-      {%- if 'T' in a.ata %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}TECNICI{% endif -%}
-      {%- if 'C' in a.ata %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}COLL.SCOLAST.{% endif -%}
+      {%- if 'A' in a.ata %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}AMMINISTRATIVI{% endif -%}
+      {%- if 'T' in a.ata %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}TECNICI{% endif -%}
+      {%- if 'C' in a.ata %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}COLL.SCOLAST.{% endif -%}
     {% endif -%}
-    {% if a.coordinatori != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}COORDINATORI{% endif -%}
-    {% if a.docenti != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}DOCENTI{% endif -%}
-    {% if a.genitori != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}GENITORI{% endif -%}
-    {% if a.alunni != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}ALUNNI{% endif -%}
-    {% if a.rappresentantiGenitori != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RAPPRESENTANTI GENITORI{% endif -%}
-    {% if a.rappresentantiAlunni != 'N' %}{% if inizio %}{% set inizio=0 %}{% else %}, {% endif %}RAPPRESENTANTI ALUNNI{% endif -%}
+    {% if a.coordinatori != 'N' %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}COORDINATORI{% endif -%}
+    {% if a.docenti != 'N' %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}DOCENTI{% endif -%}
+    {% if a.genitori != 'N' %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}GENITORI{% endif -%}
+    {% if a.alunni != 'N' %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}ALUNNI{% endif -%}
+    {% if a.rappresentantiGenitori != 'N' %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}RAPPRESENTANTI GENITORI{% endif -%}
+    {% if a.rappresentantiAlunni != 'N' %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}RAPPRESENTANTI ALUNNI{% endif -%}
     {% if dati.classi[a.id] is defined and dati.classi[a.id] == 'T' %}
           <br><strong>CLASSI: TUTTE</strong>
     {% elseif dati.classi[a.id] is defined %}
@@ -64,22 +64,22 @@
           </small>
         </td>
         <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_gestione', {'avviso': a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span><span class="sr-only">Visualizza</span></button>
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_gestione', {avviso: a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span><span class="sr-only">Visualizza</span></button>
       {% if dati.azioni[k].edit is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ a.tipo() in ['E', 'U', 'A'] ? path('avvisi_edit_classi', {tipo: a.tipo, avviso: a.id}) : (a.tipo() == 'I' ? path('avvisi_edit_personali', {'avviso': a.id}) : path('avvisi_edit', {'avviso': a.id})) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span><span class="sr-only">Modifica</span></a>
+          <a class="btn btn-primary btn-xs" href="{{ a.tipo() in ['E', 'U', 'A'] ? path('avvisi_edit_classi', {tipo: a.tipo, avviso: a.id}) : (a.tipo() == 'I' ? path('avvisi_edit_personali', {avviso: a.id}) : path('avvisi_edit', {avviso: a.id})) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span><span class="sr-only">Modifica</span></a>
       {% endif %}
       {% if dati.azioni[k].delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {'avviso': a.id}) }}" data-text="{{ 'message.cancella_avviso'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><span class="sr-only">Cancella</span></button>
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {avviso: a.id}) }}" data-text="{{ 'message.cancella_avviso'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><span class="sr-only">Cancella</span></button>
       {% endif %}
         </td>
       </tr>
   {% endfor %}
     </tbody>
   </table>
-  {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'avvisi_gestione'} %}
-  {% include 'include/modal-remote.html.twig' %}
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_avviso'} %}
-  {% include 'include/modal-waiting.html.twig' %}
+  {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'avvisi_gestione'}) }}
+  {{ include('include/modal-remote.html.twig') }}
+  {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_avviso'}) }}
+  {{ include('include/modal-waiting.html.twig') }}
 </div>
 {% endblock %}
 

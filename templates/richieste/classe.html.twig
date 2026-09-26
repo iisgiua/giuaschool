@@ -13,7 +13,7 @@
     <strong class="gs-big"><a href="{{ path('richieste_evacuazione', {classe: info.scheda_evacuazione}) }}"><span class="glyphicon glyphicon-file gs-mr-2"></span><span class="gs-text-normal">Scheda Evacuazione: designazione studenti apri-file, chiudi-fila e assistenti</span></a></strong>
   </div>
     {% endif %}
-    {% for mk,mv in dati.uniche %}
+    {% for mk, mv in dati.uniche %}
   <div class="panel panel-primary">
     <div class="panel-heading"><h3 class="panel-title gs-h3">{{ mv.nome }}</h3></div>
     <div class="panel-body">
@@ -62,7 +62,7 @@
     </div>
   </div>
     {% endfor %}
-    {% for mk,mv in dati.multiple %}
+    {% for mk, mv in dati.multiple %}
   <div class="panel panel-primary">
     <div class="panel-heading"><h3 class="panel-title gs-h3">{{ mv.nome }}</h3></div>
       {% if dati.richieste[mk].nuove is defined %}
@@ -111,7 +111,7 @@
         <strong>{{ 'label.add'|trans }}</strong>
       </a>
       {% if dati.richieste[mk].vecchie is defined %}
-      <button class="btn btn-default gs-modal-confirm-button gs-ml-3" title="Visualizza moduli precedenti" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ mv.nome}}<br>Visualizza moduli precedenti" data-body="gs-richieste-scadute"><strong>Vecchi moduli</strong></button>
+      <button class="btn btn-default gs-modal-confirm-button gs-ml-3" title="Visualizza moduli precedenti" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ mv.nome }}<br>Visualizza moduli precedenti" data-body="gs-richieste-scadute"><strong>Vecchi moduli</strong></button>
       <ul id="gs-richieste-scadute" class="list-group" style="display:none">
         {% for rv in dati.richieste[mk].vecchie %}
         <li class="list-group-item">
@@ -140,8 +140,8 @@
   </div>
     {% endfor %}
   {% endif %}
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_modulo'} %}
-  {% include 'include/modal-info.html.twig' %}
+  {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_modulo'}) }}
+  {{ include('include/modal-info.html.twig') }}
 </div>
 {% endblock %}
 

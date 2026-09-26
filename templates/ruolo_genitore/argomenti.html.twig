@@ -24,8 +24,8 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Clicca per cambiare la materia da visualizzare">{{ info.materia|default('Seleziona una materia') }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for k,v in elenco_materie %}
-          <li{{ v.id == idmateria|default(0) ? ' class="active"' }}><a href="{{ path('genitori_argomenti', {'idmateria': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% for k, v in elenco_materie %}
+          <li{{ v.id == idmateria|default(0) ? ' class="active"' }}><a href="{{ path('genitori_argomenti', {idmateria: v.id}) }}">{{ v.nomeBreve }}</a></li>
     {% endfor %}
         </ul>
       </div>
@@ -36,7 +36,7 @@
     <strong class="gs-big">Non ci sono argomenti o attività registrati per la materia selezionata.</strong>
   </div>
     {% endif %}
-    {% for periodo,v in elenco_dati %}
+    {% for periodo, v in elenco_dati %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -50,12 +50,12 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
+      {% for data, v1 in v %}
         {% for e in v1 %}
       <tr>
           {% if loop.first %}
         <td style="background: #ffffff" rowspan="{{ v1|length }}">
-          <a class="btn btn-primary btn-xs" href="{{ path('genitori_lezioni', {'data': data}) }}" role="button" title="Visualizza le lezioni del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('genitori_lezioni', {data: data}) }}" role="button" title="Visualizza le lezioni del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
         </td>
           {% endif %}
         <td><small>{{ e.argomento|raw }}</small></td>

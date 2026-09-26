@@ -18,7 +18,7 @@
       </tr>
     </thead>
     <tbody>
-    {% for kc,c in dati %}
+    {% for kc, c in dati %}
       <tr>
         <td><strong>{{ c.nome }}</strong></td>
         <td>
@@ -35,7 +35,7 @@
           <button type="button" class="btn btn-primary btn-xs mr-2 mb-1" title="Visualizza i dettagli della consultazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Consultazione: {{ c.nome }}" data-body="consultazione-{{ loop.index }}"><strong>{{ 'label.show'|trans }}</strong></button>
       {% if c.stato == 'C' %}
           <button type="button" class="btn btn-primary btn-xs mr-2 mb-1" title="Visualizza l'esito della consultazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('richieste_esito', {consultazione: c.id}) }}"><strong>Mostra esito</strong></button>
-          <a type="button" class="btn btn-primary btn-xs mr-2 mb-1" title="Scarica il documento con l'esito della consultazione" href="{{ path('richieste_esito', {consultazione: c.id, formato:'P'}) }}"><strong>Scarica esito</strong></button>
+          <a type="button" class="btn btn-primary btn-xs mr-2 mb-1" title="Scarica il documento con l'esito della consultazione" href="{{ path('richieste_esito', {consultazione: c.id, formato: 'P'}) }}"><strong>Scarica esito</strong></button>
       {% endif %}
           <div id="consultazione-{{ loop.index }}" style="display:none">
             <div class="row">
@@ -68,8 +68,8 @@
     {% endfor %}
     </tbody>
   </table>
-  {% include 'include/modal-info.html.twig' %}
-  {% include 'include/modal-remote.html.twig' %}
+  {{ include('include/modal-info.html.twig') }}
+  {{ include('include/modal-remote.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}

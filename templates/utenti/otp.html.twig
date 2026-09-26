@@ -13,7 +13,7 @@
           <strong>L'OTP è stato già associato all'applicazione.
             Per disattivarlo clicca sul pulsante di CONFERMA.</strong>
         </div>
-        {% include('include/form-inline.html.twig') %}
+        {{ include(('include/form-inline.html.twig')) }}
       </div>
   {% else %}
       <div class="pull-left gs-pl-3 gs-pr-5 gs-pt-3 gs-pb-3">
@@ -27,7 +27,7 @@
           </li>
           <li>Avvia l'app <em>Google Authenticator</em> e inquadra con la fotocamera il <em>QRcode</em> mostrato a lato.</li>
           <li>Inserisci e conferma il codice che verrà visualizzato dall'app:
-            {% include('include/form-inline.html.twig') %}
+            {{ include(('include/form-inline.html.twig')) }}
           </li>
         </ol>
       </div>

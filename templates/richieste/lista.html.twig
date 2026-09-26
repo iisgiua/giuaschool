@@ -8,9 +8,9 @@
     <strong class="gs-big">{{ 'message.no_moduli_richieste'|trans }}</strong>
   </div>
   {% else %}
-    {% for mk,mv in dati.autorizzazioni %}
+    {% for mk, mv in dati.autorizzazioni %}
     <div class="panel panel-danger">
-    <div class="panel-heading"><h3 class="panel-title gs-h3">Autorizzazione {{ ('label.tipo_attivita_'~mv.tipo)|trans|lower }}: {{ mv.nome }}</h3></div>
+    <div class="panel-heading"><h3 class="panel-title gs-h3">Autorizzazione {{ ('label.tipo_attivita_' ~ mv.tipo)|trans|lower }}: {{ mv.nome }}</h3></div>
     <div class="panel-body">
       <div class="col-sm-12 gs-big">
         <strong>Data dell'attività: </strong>{{ mv.inizio|date('d/m/Y') }} dalle ore {{ mv.inizio|date('G:i') }} alle ore {{ mv.fine|date('G:i') }}.
@@ -37,7 +37,7 @@
     </div>
   </div>
     {% endfor %}
-    {% for mk,mv in dati.consultazioni %}
+    {% for mk, mv in dati.consultazioni %}
   <div class="panel panel-warning">
     <div class="panel-heading"><h3 class="panel-title gs-h3">Consultazione attiva: {{ mv.nome }}</h3></div>
     <div class="panel-body">
@@ -66,7 +66,7 @@
     </div>
   </div>
     {% endfor %}
-    {% for mk,mv in dati.uniche %}
+    {% for mk, mv in dati.uniche %}
   <div class="panel panel-primary">
     <div class="panel-heading"><h3 class="panel-title gs-h3">{{ mv.nome }}</h3></div>
     <div class="panel-body">
@@ -118,7 +118,7 @@
     </div>
   </div>
     {% endfor %}
-    {% for mk,mv in dati.multiple %}
+    {% for mk, mv in dati.multiple %}
   <div class="panel panel-primary">
     <div class="panel-heading"><h3 class="panel-title gs-h3">{{ mv.nome }}</h3></div>
       {% if dati.richieste[mk].nuove is defined %}
@@ -165,7 +165,7 @@
         <strong>{{ 'label.invia_richiesta'|trans }}</strong>
       </a>
       {% if dati.richieste[mk].vecchie is defined %}
-      <button class="btn btn-default gs-modal-confirm-button gs-ml-3" title="Visualizza richieste scadute" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ mv.nome}}<br>Visualizza richieste scadute" data-body="gs-richieste-scadute"><strong>{{ 'label.richieste_scadute'|trans }}</strong></button>
+      <button class="btn btn-default gs-modal-confirm-button gs-ml-3" title="Visualizza richieste scadute" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ mv.nome }}<br>Visualizza richieste scadute" data-body="gs-richieste-scadute"><strong>{{ 'label.richieste_scadute'|trans }}</strong></button>
       <ul id="gs-richieste-scadute" class="list-group" style="display:none">
         {% for rv in dati.richieste[mk].vecchie %}
         <li class="list-group-item">
@@ -193,8 +193,8 @@
   </div>
     {% endfor %}
   {% endif %}
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_richiesta'} %}
-  {% include 'include/modal-info.html.twig' %}
+  {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_richiesta'}) }}
+  {{ include('include/modal-info.html.twig') }}
 </div>
 {% endblock %}
 

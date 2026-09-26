@@ -9,9 +9,9 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Scrutinio chiuso</h2>
-    {% include 'include/modal-error.html.twig' %}
+    {{ include('include/modal-error.html.twig') }}
   <table class="table table-bordered table-hover table-striped gs-mt-4">
-    <caption class="text-center text-info"><strong class="gs-big">{{ app.session.get('/CONFIG/SCUOLA/periodo'~(periodo == 'P' ? 1 : 2)~'_nome') }}</strong></caption>
+    <caption class="text-center text-info"><strong class="gs-big">{{ app.session.get('/CONFIG/SCUOLA/periodo' ~ (periodo == 'P' ? 1 : 2) ~ '_nome') }}</strong></caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-2">Documento</th>
@@ -30,7 +30,7 @@
         </td>
         <td>
           <div class="gs-mb-2">
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'V', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {classe: classe.id, tipo: 'V', periodo: periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
           </div>
         </td>
       </tr>
@@ -43,7 +43,7 @@
           Formato del documento: <em>PDF</em>
         </td>
         <td>
-        <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'R', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+        <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {classe: classe.id, tipo: 'R', periodo: periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
       <tr>
@@ -55,7 +55,7 @@
           Formato del documento: <em>PDF</em>
         </td>
         <td>
-          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'I', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {classe: classe.id, tipo: 'I', periodo: periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
         </td>
       </tr>
       <tr>
@@ -66,8 +66,8 @@
           Formato del documento: <em>PDF</em>
         </td>
         <td>
-    {% for alunno,a in dati.alunni %}
-          <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno, 'tipo': 'P', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
+    {% for alunno, a in dati.alunni %}
+          <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {classe: classe.id, alunno: alunno, tipo: 'P', periodo: periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
     {% endfor %}
         </td>
       </tr>
@@ -79,8 +79,8 @@
           Formato del documento: <em>PDF</em>
         </td>
         <td>
-    {% for alunno,a in dati.debiti %}
-          <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': alunno, 'tipo': 'D', 'periodo': periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
+    {% for alunno, a in dati.debiti %}
+          <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {classe: classe.id, alunno: alunno, tipo: 'D', periodo: periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
     {% endfor %}
         </td>
       </tr>
@@ -88,10 +88,10 @@
   </table>
     {% if dati.precedente %}
   <div class="row text-center gs-mt-5 gs-mb-5">
-    <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '6'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>
+    <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '6'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>
   </div>
     {% endif %}
-    {% include 'include/modal-waiting.html.twig' %}
+    {{ include('include/modal-waiting.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}

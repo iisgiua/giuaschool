@@ -25,10 +25,10 @@
       <div class="form-group">
         <label class="col-sm-2 control-label" for="registro_add_fine">Ora</label>
         <div class="col-sm-5">
-          <p class="form-control-static"><strong>Inizio alle {{label.inizio }}</strong></p>
+          <p class="form-control-static"><strong>Inizio alle {{ label.inizio }}</strong></p>
         </div>
         <div class="col-sm-5">
-          <strong>Fine alle</strong> {{ form_widget(form.fine, {'attr': {'class': 'gs-inline', 'style': 'width: auto;'}}) }}
+          <strong>Fine alle</strong> {{ form_widget(form.fine, {attr: {class: 'gs-inline', style: 'width: auto;'}}) }}
         </div>
       </div>
       {{ form_widget(form) }}

@@ -14,13 +14,13 @@
         </tr>
       </thead>
       <tbody>
-        {% for k,c in classi %}
+        {% for k, c in classi %}
         <tr>
           <td>
             <strong class="gs-big">{{ c.sede.citta }}</strong>
           </td>
           <td>
-            <a class="btn btn-primary gs-mr-3" href="{{ path('coordinatore_assenze', {'classe': c.id}) }}" role="button" title="Classe {{ c.anno }}{{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }} - {{ c.corso.nomeBreve }}"><strong>{{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-'~c.gruppo) }}</strong></a>
+            <a class="btn btn-primary gs-mr-3" href="{{ path('coordinatore_assenze', {classe: c.id}) }}" role="button" title="Classe {{ c.anno }}{{ c.sezione }}{{ c.gruppo ? ('-' ~ c.gruppo) }} - {{ c.corso.nomeBreve }}"><strong>{{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-' ~ c.gruppo) }}</strong></a>
             <em>{{ c.corso.nomeBreve }}</em>
           </td>
         </tr>
@@ -41,7 +41,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for sezione,v in tutte %}
+        {% for sezione, v in tutte %}
         <tr>
           <td>
             <strong class="gs-big">{{ v[0].sede.citta }}</strong>
@@ -50,8 +50,8 @@
             <strong class="gs-big">{{ sezione }}</strong><br>
           </td>
           <td>
-            {% for k1,v1 in v %}
-            <a class="btn btn-primary gs-mr-3" href="{{ path('coordinatore_assenze', {'classe': v1.id}) }}" role="button" title="{{ v1 }} - {{ v1.corso.nomeBreve }}">{{ v1 }}</a>
+            {% for k1, v1 in v %}
+            <a class="btn btn-primary gs-mr-3" href="{{ path('coordinatore_assenze', {classe: v1.id}) }}" role="button" title="{{ v1 }} - {{ v1.corso.nomeBreve }}">{{ v1 }}</a>
             {% endfor %}
           </td>
         </tr>

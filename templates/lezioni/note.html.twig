@@ -10,7 +10,7 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_note'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
-    {% for periodo,v in dati %}
+    {% for periodo, v in dati %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -22,12 +22,12 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
-        {% for tipo,v2 in v1 %}
-          {% for k,e in v2 %}
+      {% for data, v1 in v %}
+        {% for tipo, v2 in v1 %}
+          {% for k, e in v2 %}
       <tr>
         <td>
-          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': data, 'vista': 'G'}) }}" role="button" title="Visualizza il registro del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'G'}) }}" role="button" title="Visualizza il registro del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
         </td>
           {% if tipo == 'classe' %}
         <td>
@@ -40,7 +40,7 @@
         <td>{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}</td>
           {% endif %}
         <td><small>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></small></td>
-        <td><small>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br)~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</small></td>
+        <td><small>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br) ~ '<br><em>(' ~ e.provvedimento_doc ~ ')</em>')|raw }}</small></td>
       </tr>
           {% endfor %}
         {% endfor %}

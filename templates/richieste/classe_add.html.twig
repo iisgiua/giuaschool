@@ -3,14 +3,14 @@
 {% block pagina_contenuto %}
 <div class="container-fluid">
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans }}</h1>
-  {{ form_start(form[0], {'attr': {'class': 'form-inline gs-mb-2'}}) }}
+  {{ form_start(form[0], {attr: {class: 'form-inline gs-mb-2'}}) }}
   {{ form_errors(form[0]) }}
   <div class="panel panel-primary">
     <div class="panel-heading">
       <h3 class="panel-title gs-h3">{{ form[1]|trans }}</h3>
     </div>
     <div class="panel-body gs-big">
-      {% include info.modulo with {form: form[0]} %}
+      {{ include(info.modulo, {form: form[0]}) }}
   {% if info.allegati > 0 %}
       <hr>
       <div style="width:96%;margin-right:2%;margin-left:2%;" class="form-group">
@@ -27,7 +27,7 @@
     </div>
   </div>
   {{ form_end(form[0]) }}
-  {% include 'include/modal-waiting.html.twig' %}
+  {{ include('include/modal-waiting.html.twig') }}
 </div>
 {% endblock %}
 
@@ -46,7 +46,7 @@
 <script>
 Dropzone.autoDiscover = false;
 var DZ = new Dropzone(".dropzone", {
-  url: "{{ path('file_upload', {'pagina': 'richieste_add', 'param': 'files'}) }}",
+  url: "{{ path('file_upload', {pagina: 'richieste_add', param: 'files'}) }}",
   maxFiles: {{ info.allegati }},
   maxFilesize: 50,
   acceptedFiles: ".pdf,.jpg,.jpeg",
@@ -72,7 +72,7 @@ var DZ = new Dropzone(".dropzone", {
       });
     });
     this.on("removedfile", function(file) {
-      $.post("{{ path('file_remove', {'pagina': 'richieste_add', 'param': 'files'}) }}", {"files": file.uploaded});
+      $.post("{{ path('file_remove', {pagina: 'richieste_add', param: 'files'}) }}", {"files": file.uploaded});
       if (file.status == 'success') {
         $('#documento_submit').attr('disabled', true);
       }

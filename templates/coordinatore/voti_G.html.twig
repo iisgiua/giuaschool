@@ -14,7 +14,7 @@
     {% if voto.unico.vars.value is not empty %}
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < dati.valutazioni[info.materiaTipo].med ? 'danger' : (voto.unico.vars.value < dati.valutazioni[info.materiaTipo].suff ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ dati.valutazioni[info.materiaTipo].lista[voto.unico.vars.value] }}</span>
             <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Modifica la valutazione per la materia"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
-            <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
+            <div style="display:inline-block">{{ form_widget(voto.unico, {attr: {class: 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
     {% else %}
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-mr-4 gs-big">--</span>
             <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Modifica la valutazione per la materia"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
@@ -32,7 +32,7 @@
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}
-{{ form_end(form, {'render_rest': false}) }}
+{{ form_end(form, {render_rest: false}) }}
 
 <script>
 var voti = [{{ dati.valutazioni[info.materiaTipo].voti|raw }}];

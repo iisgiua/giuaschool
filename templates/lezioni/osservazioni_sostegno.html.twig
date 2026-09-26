@@ -17,9 +17,9 @@
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
   <div class="row gs-mb-4">
     <div class="col-sm-6">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {'cattedra': cattedra.id, 'classe': classe.id, 'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {cattedra: cattedra.id, classe: classe.id, data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
       <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {'cattedra': cattedra.id, 'classe': classe.id, 'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {cattedra: cattedra.id, classe: classe.id, data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni_personali') }}" role="button" title="Visualizza il diario personale in cui inserire le proprie osservazioni"><span class="glyphicon glyphicon-book gs-mr-3"></span><strong>Diario personale</strong></a>
@@ -30,7 +30,7 @@
     <strong class="gs-big">{{ errore }}</strong>
   </div>
     {% endif %}
-    {% for periodo in ['Secondo Quadrimestre','Primo Quadrimestre'] %}
+    {% for periodo in ['Secondo Quadrimestre', 'Primo Quadrimestre'] %}
       {% if dati.lista[periodo] is defined %}
   <div class="row gs-mb-1">
     <div class="col-sm-10 text-info">
@@ -50,8 +50,8 @@
       </tr>
     </thead>
     <tbody>
-        {% for alunno_id,v in dati.lista[periodo] %}
-          {% for data,v1 in v %}
+        {% for alunno_id, v in dati.lista[periodo] %}
+          {% for data, v1 in v %}
             {% if loop.first %}
       <tr>
         <td class="col-sm-3">
@@ -104,8 +104,8 @@
       </tr>
     </thead>
     <tbody>
-        {% for alunno_id,v in dati.sostegno[periodo] %}
-          {% for data,v1 in v %}
+        {% for alunno_id, v in dati.sostegno[periodo] %}
+          {% for data, v1 in v %}
             {% if loop.first %}
       <tr>
         <td class="col-sm-3">
@@ -143,7 +143,7 @@
     {% if dati.add is defined %}
   <div><a class="btn btn-primary btn-xs pull-right" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno"><span class="glyphicon glyphicon-plus gs-mr-2"></span>{{ 'label.add'|trans }}</a></div>
     {% endif %}
-    {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_lezione'} %}
+    {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_lezione'}) }}
   {% endif %}
 </div>
 {% endblock %}
@@ -181,7 +181,7 @@ $(document).ready(function() {
   $('#gs-button-date').datepicker()
     .on('changeDate', function(ev){
       $('#gs-button-date').datepicker('hide');
-      url = "{{ path('lezioni_osservazioni', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': '9999-99-99'}) }}";
+      url = "{{ path('lezioni_osservazioni', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: '9999-99-99'}) }}";
       url = url.replace("9999-99-99", ev.format());
       window.location.href = url;
   });

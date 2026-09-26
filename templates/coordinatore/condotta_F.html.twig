@@ -12,7 +12,7 @@
             <strong>{{ dati.alunni[voto.alunno.vars.value][0] }} {{ dati.alunni[voto.alunno.vars.value][1] }} ({{ dati.alunni[voto.alunno.vars.value][2]|date('d/m/Y') }})</strong>
           </div>
           <div class="col-sm-6 text-right">
-            <strong>Percentuale di assenze: <span class="label label-info gs-big">{{ dati.assenze[voto.alunno.vars.value].percentuale|number_format(2,   ',') }}%</span></strong>
+            <strong>Percentuale di assenze: <span class="label label-info gs-big">{{ dati.assenze[voto.alunno.vars.value].percentuale|number_format(2, ',') }}%</span></strong>
           </div>
         </div>
         <div class="form-group gs-mb-2">
@@ -21,7 +21,7 @@
     {% if voto.unico.vars.value is not empty %}
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < dati.valutazioni.med ? 'danger' : (voto.unico.vars.value < dati.valutazioni.suff ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ dati.valutazioni.lista[voto.unico.vars.value] }}</span>
             <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi la valutazione per la condotta"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
-            <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
+            <div style="display:inline-block">{{ form_widget(voto.unico, {attr: {class: 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
     {% else %}
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-mr-4 gs-big">--</span>
             <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi la valutazione per la condotta"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
@@ -32,7 +32,7 @@
         <div id="row_{{ voto.motivazione.vars.id }}" class="form-group gs-mb-2">
           <label class="control-label col-sm-2" for="{{ voto.motivazione.vars.id }}">Descrittori</label>
           <div class="col-sm-10">
-            {{ form_widget(voto.motivazione, {'attr': {'rows': 4, 'readonly': 'readonly'}}) }}
+            {{ form_widget(voto.motivazione, {attr: {rows: 4, readonly: 'readonly'}}) }}
           </div>
         </div>
         <div class="form-group gs-mb-2">
@@ -57,7 +57,7 @@
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}
-{{ form_end(form, {'render_rest': false}) }}
+{{ form_end(form, {render_rest: false}) }}
 
 <script>
 var voti = [{{ dati.valutazioni.voti|raw }}];

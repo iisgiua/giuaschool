@@ -1,5 +1,5 @@
-{### dropzone-nostore: DropZone senza memorizzazione permanente ###}
-{###    parametri: dz_id,dz_pagina,dz_param,dz_numfile,dz_maxdim,dz_accettati,dz_idsubmit ###}
+{## # dropzone-nostore: DropZone senza memorizzazione permanente # ##}
+{## #    parametri: dz_id,dz_pagina,dz_param,dz_numfile,dz_maxdim,dz_accettati,dz_idsubmit # ##}
 <script src="{{ asset('vendor/dropzone-5.7.2/js/dropzone.min.js') }}"></script>
 <script>
 Dropzone.autoDiscover = false;
@@ -14,7 +14,7 @@ $(document).ready(function() {
   var preview_template = preview.parent().html();
   preview.parent().empty();
   $(".dropzone").dropzone({
-    url: "{{ path('file_upload', {'pagina': dz_pagina, 'param': dz_param}) }}",
+    url: "{{ path('file_upload', {pagina: dz_pagina, param: dz_param}) }}",
     paramName: "{{ dz_param }}",
     maxFiles: {{ dz_numfile }},
     maxFilesize: {{ dz_maxdim }},
@@ -52,7 +52,7 @@ $(document).ready(function() {
         $(id_previews+" li.dz-error").removeClass("dz-error uploading").addClass("error");
       });
       this.on("removedfile", function(file) {
-        $.post("{{ path('file_remove', {'pagina': dz_pagina, 'param': dz_param}) }}", {"{{ dz_param }}": file.uploaded});
+        $.post("{{ path('file_remove', {pagina: dz_pagina, param: dz_param}) }}", {"{{ dz_param }}": file.uploaded});
 {% if dz_idsubmit %}
         $("#{{ dz_idsubmit }}").prop('disabled', true);
 {% endif %}

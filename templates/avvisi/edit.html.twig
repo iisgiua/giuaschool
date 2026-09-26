@@ -199,7 +199,7 @@
     </div>
   </div>
 </div>
-  {% include 'include/modal-waiting.html.twig' %}
+  {{ include('include/modal-waiting.html.twig') }}
 {% endblock %}
 
 {% block pagina_css %}
@@ -218,7 +218,7 @@
 Dropzone.autoDiscover = false;
 $(document).ready(function() {
   $("#gs-dz-allegati").dropzone({
-    url: "{{ path('file_upload', {'pagina': 'avvisi_edit', 'param': 'allegati'}) }}",
+    url: "{{ path('file_upload', {pagina: 'avvisi_edit', param: 'allegati'}) }}",
     maxFiles: 10,
     maxFilesize: 50,
     acceptedFiles: ".pdf,.zip,.doc,.docx,.rtf,.xls,.xlsx",
@@ -244,9 +244,9 @@ $(document).ready(function() {
       });
       this.on("removedfile", function(file) {
         if (file.uploaded) {
-          $.post("{{ path('file_remove', {'pagina': 'avvisi_edit', 'param': 'allegati'}) }}", {"allegati": file.uploaded});
+          $.post("{{ path('file_remove', {pagina: 'avvisi_edit', param: 'allegati'}) }}", {"allegati": file.uploaded});
         } else if (file.existent) {
-          $.post("{{ path('file_remove', {'pagina': 'avvisi_edit', 'param': 'allegati'}) }}", {"allegati": file.existent});
+          $.post("{{ path('file_remove', {pagina: 'avvisi_edit', param: 'allegati'}) }}", {"allegati": file.existent});
           this.options.maxFiles++;
         }
       });
@@ -883,11 +883,11 @@ function alunniSearch(page) {
     {% endif %}
     {% set sez = '' %}
     {% for key, choice in group %}
-      {% if choice.data.sezione~choice.data.gruppo != sez %}
+      {% if choice.data.sezione ~ choice.data.gruppo != sez %}
         {% if sez != '' %}
   </div>
         {% endif %}
-        {% set sez = choice.data.sezione~choice.data.gruppo %}
+        {% set sez = choice.data.sezione ~ choice.data.gruppo %}
   <div class="row">
       {% endif %}
       {{- form_widget(form[key], {

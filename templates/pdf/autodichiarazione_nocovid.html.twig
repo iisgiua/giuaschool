@@ -9,7 +9,7 @@
   {{ dichiarazione.genitoreNome }} {{ dichiarazione.genitoreSesso == 'M' ? 'nato' : 'nata' }}
   il {{ dichiarazione.genitoreNascita|date('d/m/Y') }}
   a {{ dichiarazione.genitoreCitta }},
-  {{ ('label.genitore_ruolo_'~dichiarazione.genitoreRuolo)|trans }} dell'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }}
+  {{ ('label.genitore_ruolo_' ~ dichiarazione.genitoreRuolo)|trans }} dell'alunn{{ alunno.sesso == 'M' ? 'o' : 'a' }}
   <strong>{{ alunno.cognome }} {{ alunno.nome }}</b> (codice fiscale {{ alunno.codiceFiscale }})
   frequentante la <strong>classe {{ alunno.classe }}</strong>
   presso l'<i>{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}</i>,

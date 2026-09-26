@@ -64,7 +64,7 @@
             data-classe="{{ r.classe }}"
             data-valore-data="{{ r.data ? r.data|date('d/m/Y') }}"
             data-campi="{{ r.valori|length }}"
-      {% for c,cv in r.definizioneRichiesta.campi %}
+      {% for c, cv in r.definizioneRichiesta.campi %}
             data-campo-{{ loop.index }}="{{ c }}"
             data-valore-{{ loop.index }}="{{ cv[0] == 'date' ? r.valori[c]|date('d/m/Y') : (cv[0] == 'time' ? r.valori[c]|date('H:i') : (cv[0] == 'bool' ? (r.valori[c] ? 'SI' : 'NO') : r.valori[c])) }}"
       {% endfor %}
@@ -79,7 +79,7 @@
     {% endfor %}
     </tbody>
   </table>
-  {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'richieste_modulo_lista'} %}
+  {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'richieste_modulo_lista'}) }}
   <div class="modal fade" id="gs-info-modulo" tabindex="-1" role="dialog" aria-labelledby="gs-info-modulo-titolo">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
@@ -161,7 +161,7 @@ $(document).ready(function() {
   });
   // init
   var sedi = [];
-  {% for s,n in info.sedi %}
+  {% for s, n in info.sedi %}
   sedi[{{ s }}] = '{{ n }}';
   {% endfor %}
   $('#filtro_sede').change();

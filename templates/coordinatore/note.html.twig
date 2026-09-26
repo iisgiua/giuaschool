@@ -8,10 +8,10 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_note'|trans }} {{ classe }}</h1>
-    {% for periodo,v in dati %}
+    {% for periodo, v in dati %}
   <div class="row gs-mb-1">
     <div class="col-sm-12 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_note', {'classe': classe.id, 'tipo': 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_note', {classe: classe.id, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped">
@@ -25,9 +25,9 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
-        {% for tipo,v2 in v1 %}
-          {% for k,e in v2 %}
+      {% for data, v1 in v %}
+        {% for tipo, v2 in v1 %}
+          {% for k, e in v2 %}
       <tr>
         <td><strong>{{ e.data }}</strong></td>
           {% if tipo == 'classe' %}
@@ -41,7 +41,7 @@
         <td>{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}</td>
           {% endif %}
         <td><small>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></small></td>
-        <td><small>{{ e.provvedimento|raw|nl2br ? (e.provvedimento~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</small></td>
+        <td><small>{{ e.provvedimento|raw|nl2br ? (e.provvedimento ~ '<br><em>(' ~ e.provvedimento_doc ~ ')</em>')|raw }}</small></td>
       </tr>
           {% endfor %}
         {% endfor %}

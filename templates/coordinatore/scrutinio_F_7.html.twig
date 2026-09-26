@@ -8,7 +8,7 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe }}</h1>
-    {% include 'include/modal-error.html.twig' %}
+    {{ include('include/modal-error.html.twig') }}
     {{ form_start(form) }}
     {% if classe.anno == 1 %}
   <div class="alert alert-success text-center gs-mb-3" role="alert">
@@ -31,20 +31,20 @@
         </tr>
       </thead>
       <tbody>
-      {% for alunno,a in dati.alunni %}
+      {% for alunno, a in dati.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
         {% if a.bes != 'N' %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_' ~ a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
         {% endif %}
           </td>
-          <td><strong class="gs-big">{{ dati.esiti[alunno].media|number_format(2,',') }}</strong></td>
+          <td><strong class="gs-big">{{ dati.esiti[alunno].media|number_format(2, ',') }}</strong></td>
           <td>
         {% if dati.esiti[alunno].dati.certificazione is defined and dati.esiti[alunno].dati.certificazione %}
-            <button type="button" class="btn btn-success gs-button-remote" title="Modifica la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {'alunno': alunno, 'periodo': 'F', 'classe': classe.id }) }}"><strong>COMPILATA</strong></button>
+            <button type="button" class="btn btn-success gs-button-remote" title="Modifica la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {alunno: alunno, periodo: 'F', classe: classe.id}) }}"><strong>COMPILATA</strong></button>
         {% else %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Compila la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {'alunno': alunno, 'periodo': 'F', 'classe': classe.id }) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Compila la certificazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_certificazione', {alunno: alunno, periodo: 'F', classe: classe.id}) }}"><span class="glyphicon glyphicon-edit"></span></button>
         {% endif %}
           </td>
         </tr>
@@ -74,23 +74,23 @@
         </tr>
       </thead>
       <tbody>
-      {% for alunno,a in dati.alunni %}
+      {% for alunno, a in dati.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
         {% if a.bes != 'N' %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_' ~ a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
         {% endif %}
           </td>
-          <td><strong class="gs-big">{{ dati.esiti[alunno].media|number_format(2,',') }}</strong></td>
+          <td><strong class="gs-big">{{ dati.esiti[alunno].media|number_format(2, ',') }}</strong></td>
         {% if classe.anno > 3 %}
           <td><strong class="gs-big">{{ dati.esiti[alunno].creditoPrecedente }}</strong></td>
         {% endif %}
           <td>
         {% if dati.esiti[alunno].credito %}
-            <button type="button" class="btn btn-xs btn-{{ dati.esiti[alunno].credito == dati.esiti[alunno].dati.creditoMinimo ? 'info' : 'success' }} gs-button-remote" title="Modifica il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {'alunno': alunno, 'periodo': 'F', classe: classe.id}) }}"><strong class="gs-big gs-pl-2 gs-pr-2">{{ dati.esiti[alunno].credito }}</strong></button>
+            <button type="button" class="btn btn-xs btn-{{ dati.esiti[alunno].credito == dati.esiti[alunno].dati.creditoMinimo ? 'info' : 'success' }} gs-button-remote" title="Modifica il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {alunno: alunno, periodo: 'F', classe: classe.id}) }}"><strong class="gs-big gs-pl-2 gs-pr-2">{{ dati.esiti[alunno].credito }}</strong></button>
         {% else %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {'alunno': alunno, 'periodo': 'F', classe: classe.id}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {alunno: alunno, periodo: 'F', classe: classe.id}) }}"><span class="glyphicon glyphicon-edit"></span></button>
         {% endif %}
           </td>
         </tr>
@@ -101,15 +101,15 @@
     {% endif %}
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
-      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '6'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
+      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '6'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
     </div>
     <div class="text-right col-sm-6">
       <button class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Conferma e vai avanti</strong></button>
     </div>
   </div>
     {{ form_end(form) }}
-    {% include 'include/modal-remote.html.twig' %}
-    {% include 'include/modal-waiting.html.twig' %}
+    {{ include('include/modal-remote.html.twig') }}
+    {{ include('include/modal-waiting.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}

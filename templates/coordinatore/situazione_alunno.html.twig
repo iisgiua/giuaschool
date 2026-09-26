@@ -2,15 +2,15 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_situazione_alunno'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.cognome~' '~alunno.nome }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_situazione_alunno'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.cognome ~ ' ' ~ alunno.nome }}</h1>
   <div class="row gs-mb-0">
     <div class="text-center">
-      <a class="btn btn-primary btn-xs gs-mr-2{{ tipo == 'V' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {'alunno': alunno.id, 'tipo': 'V', 'formato': 'H'}) }}" role="button" title="Mostra la situazione dei voti dell'alunno"><strong>Voti</strong></a>
-      <a class="btn btn-primary btn-xs gs-mr-2{{ tipo == 'S' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {'alunno': alunno.id, 'tipo': 'S', 'formato': 'H'}) }}" role="button" title="Mostra la situazione degli scrutini dell'alunno"><strong>Scrutini</strong></a>
-      <a class="btn btn-primary btn-xs gs-mr-2{{ tipo == 'A' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {'alunno': alunno.id, 'tipo': 'A', 'formato': 'H'}) }}" role="button" title="Mostra la situazione delle assenze dell'alunno"><strong>Assenze</strong></a>
-      <a class="btn btn-primary btn-xs gs-mr-2{{ tipo == 'N' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {'alunno': alunno.id, 'tipo': 'N', 'formato': 'H'}) }}" role="button" title="Mostra la situazione delle note dell'alunno"><strong>Note</strong></a>
-      <a class="btn btn-primary btn-xs gs-mr-2{{ tipo == 'O' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {'alunno': alunno.id, 'tipo': 'O', 'formato': 'H'}) }}" role="button" title="Mostra la situazione delle osservazioni sull'alunno"><strong>Osservazioni</strong></a>
-      <a class="btn btn-primary btn-xs{{ tipo == 'T' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {'alunno': alunno.id, 'tipo': 'T', 'formato': 'H'}) }}" role="button" title="Mostra la situazione complessiva dell'alunno"><strong>Tutto</strong></a>
+      <a class="btn btn-primary btn-xs gs-mr-2{{ tipo == 'V' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {alunno: alunno.id, tipo: 'V', formato: 'H'}) }}" role="button" title="Mostra la situazione dei voti dell'alunno"><strong>Voti</strong></a>
+      <a class="btn btn-primary btn-xs gs-mr-2{{ tipo == 'S' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {alunno: alunno.id, tipo: 'S', formato: 'H'}) }}" role="button" title="Mostra la situazione degli scrutini dell'alunno"><strong>Scrutini</strong></a>
+      <a class="btn btn-primary btn-xs gs-mr-2{{ tipo == 'A' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {alunno: alunno.id, tipo: 'A', formato: 'H'}) }}" role="button" title="Mostra la situazione delle assenze dell'alunno"><strong>Assenze</strong></a>
+      <a class="btn btn-primary btn-xs gs-mr-2{{ tipo == 'N' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {alunno: alunno.id, tipo: 'N', formato: 'H'}) }}" role="button" title="Mostra la situazione delle note dell'alunno"><strong>Note</strong></a>
+      <a class="btn btn-primary btn-xs gs-mr-2{{ tipo == 'O' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {alunno: alunno.id, tipo: 'O', formato: 'H'}) }}" role="button" title="Mostra la situazione delle osservazioni sull'alunno"><strong>Osservazioni</strong></a>
+      <a class="btn btn-primary btn-xs{{ tipo == 'T' ? ' disabled' }}" href="{{ path('coordinatore_situazione_alunno', {alunno: alunno.id, tipo: 'T', formato: 'H'}) }}" role="button" title="Mostra la situazione complessiva dell'alunno"><strong>Tutto</strong></a>
     </div>
   </div>
   <div class="row gs-mb-4">
@@ -18,14 +18,14 @@
       <a class="btn btn-success btn-sm" href="{{ path(info.back) }}" role="button" title="Ritorna alla pagina precedente"><span class="glyphicon glyphicon-backward gs-mr-3"></span><strong>{{ 'label.indietro'|trans }}</strong></a>
     </div>
     <div class="col-sm-6 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_situazione_alunno', {'alunno': alunno.id, 'tipo': tipo, 'formato': 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_situazione_alunno', {alunno: alunno.id, tipo: tipo, formato: 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
   {% if dati.voti is defined %}
-    {% for materia,v in dati.voti %}
-      {% for periodo,v1 in v %}
+    {% for materia, v in dati.voti %}
+      {% for periodo, v1 in v %}
   <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>Valutazioni: {{materia}} - {{ periodo }}</strong></caption>
+    <caption class="text-info text-center gs-big gs-pb-0"><strong>Valutazioni: {{ materia }} - {{ periodo }}</strong></caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-2">Data</th>
@@ -36,11 +36,11 @@
       </tr>
     </thead>
     <tbody>
-        {% for data,v2 in v1 %}
+        {% for data, v2 in v1 %}
           {% for e in v2 %}
       <tr>
         <td><small>{{ e.data }}</small></td>
-        <td><small>{{ ('label.voti_'~e.tipo)|trans }}</small></td>
+        <td><small>{{ ('label.voti_' ~ e.tipo)|trans }}</small></td>
         <td><small>{{ e.argomento }}</small></td>
         <td>{% if e.voto > 0 %}<span class="label {{ not e.media ? 'gs-label-secondary' : (e.voto < 5 ? 'label-danger' : (e.voto < 6 ? 'label-warning' : 'label-success')) }} gs-big">{{ e.voto_str }}</span>{{ not e.media ? '<br><strong>NON IN MEDIA</strong>' : '' }}{% endif %}</td>
         <td><small>{{ e.giudizio }}</small></td>
@@ -57,11 +57,11 @@
     {% endfor %}
   {% endif %}
   {% if dati.scrutini is defined %}
-    {% for periodo,v in dati.scrutini %}
+    {% for periodo, v in dati.scrutini %}
       {% if (periodo == 'P' or periodo == 'S') and not alunno.frequenzaEstero %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-0">
-      <strong>Scrutinio del {{ ('label.periodo_'~periodo)|trans }}</strong><br>
+      <strong>Scrutinio del {{ ('label.periodo_' ~ periodo)|trans }}</strong><br>
       <em><small>Presa visione: {{ v.visto }}</small></em>
     </caption>
     <thead class="bg-success">
@@ -72,7 +72,7 @@
       </tr>
     </thead>
     <tbody>
-        {% for materia,m in v.materie %}
+        {% for materia, m in v.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
           {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
@@ -82,7 +82,7 @@
         <td>
           <span class="label label-{{ v.voti[materia].unico < v.valutazioni[m.tipo].med ? 'danger' : (v.voti[materia].unico < v.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-big">{{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}</span>
             {% if v.debiti[materia] is defined %}
-          <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</small>
+          <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_' ~ v.debiti[materia].recupero)|trans }}</small>
           <br><small><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</small>
             {% endif %}
         </td>
@@ -97,7 +97,7 @@
       {% elseif periodo == 'F' %}
         {% if v.esito.esito == 'L' %}
   <div class="alert alert-warning gs-mt-4 text-center" role="alert">
-    <strong class="gs-big">{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+    <strong class="gs-big">{{ ('label.periodo_' ~ periodo)|trans }}</strong><br>
     <strong class="gs-big">{{ 'label.no_scrutinabile_assenze'|trans }}</strong>
     <div class="text-info gs-big">
       <em><small>Presa visione: {{ v.visto }}</small></em>
@@ -105,7 +105,7 @@
   </div>
         {% elseif v.esito.esito == 'R' %}
   <div class="alert alert-warning gs-mt-4 text-center" role="alert">
-    <strong class="gs-big">{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+    <strong class="gs-big">{{ ('label.periodo_' ~ periodo)|trans }}</strong><br>
     <strong class="gs-big">{{ 'label.no_scrutinabile_cessata_frequenza'|trans }}</strong>
     <div class="text-info gs-big">
       <em><small>Presa visione: {{ v.visto }}</small></em>
@@ -113,7 +113,7 @@
  </div>
         {% elseif v.esito.esito == 'E' %}
   <div class="alert alert-warning gs-mt-4 text-center" role="alert">
-    <strong class="gs-big">{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+    <strong class="gs-big">{{ ('label.periodo_' ~ periodo)|trans }}</strong><br>
     <strong class="gs-big">{{ 'label.frequenza_estero'|trans }}</strong>
     <div class="text-info gs-big">
       <em><small>Presa visione: {{ v.visto }}</small></em>
@@ -122,7 +122,7 @@
         {% else %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-0">
-      <strong>{{ ('label.periodo_'~periodo)|trans }} - Esito: {{ ('label.esito_'~v.esito.esito)|trans }}</strong><br>
+      <strong>{{ ('label.periodo_' ~ periodo)|trans }} - Esito: {{ ('label.esito_' ~ v.esito.esito)|trans }}</strong><br>
       <em><small>Presa visione: {{ v.visto }}</small></em>
     </caption>
     <thead class="bg-success">
@@ -133,7 +133,7 @@
       </tr>
     </thead>
     <tbody>
-          {% for materia,m in v.materie %}
+          {% for materia, m in v.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
             {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
@@ -143,7 +143,7 @@
         <td>
           <span class="label label-{{ v.voti[materia].unico < v.valutazioni[m.tipo].med ? 'danger' : (v.voti[materia].unico < v.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-big">{{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}</span>
               {% if v.esito.esito == 'S' and v.debiti[materia] is defined %}
-          <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</small>
+          <br><small><strong>Modalità di recupero:</strong> {{ ('label.recupero_' ~ v.debiti[materia].recupero)|trans }}</small>
           <br><small><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</small>
               {% endif %}
         </td>
@@ -159,7 +159,7 @@
       {% elseif periodo == 'G' %}
         {% if v.esito.esito == 'X' %}
   <div class="alert alert-warning gs-mt-4 text-center" role="alert">
-    <strong class="gs-big">{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+    <strong class="gs-big">{{ ('label.periodo_' ~ periodo)|trans }}</strong><br>
     <strong class="gs-big">{{ 'label.esito_X'|trans }}</strong>
     <div class="text-info gs-big">
       <em><small>Presa visione: {{ v.visto }}</small></em>
@@ -168,7 +168,7 @@
         {% else %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-0">
-      <strong>{{ ('label.periodo_'~periodo)|trans }} - Esito: {{ ('label.esito_'~v.esito.esito)|trans }}</strong><br>
+      <strong>{{ ('label.periodo_' ~ periodo)|trans }} - Esito: {{ ('label.esito_' ~ v.esito.esito)|trans }}</strong><br>
       <em><small>Presa visione: {{ v.visto }}</small></em>
     </caption>
     <thead class="bg-success">
@@ -179,7 +179,7 @@
       </tr>
     </thead>
     <tbody>
-          {% for materia,m in v.materie %}
+          {% for materia, m in v.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
             {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
@@ -234,7 +234,7 @@
       </tr>
     </tbody>
   </table>
-    {% for periodo,v in dati.assenze.lista %}
+    {% for periodo, v in dati.assenze.lista %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big gs-pb-0"><strong>Assenze {{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -246,13 +246,13 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
-        {% for tipo,e in v1 %}
+      {% for data, v1 in v %}
+        {% for tipo, e in v1 %}
       <tr>
           {% if tipo == 'assenza' %}
         <td><strong>{{ e.data }}{% if e.giorni > 1 %} - {{ e.data_fine }}{% endif %}</strong></td>
         <td><strong>Assenza{% if e.giorni > 1 %} di {{ e.giorni }} giorni{% endif %}</strong></td>
-        <td><small>{{ e.motivazione ? 'Motivazione assenza: '~e.motivazione }}</small></td>
+        <td><small>{{ e.motivazione ? 'Motivazione assenza: ' ~ e.motivazione }}</small></td>
         <td>{% if not e.giustificato %}<span class="label label-danger">Da giustificare</span>{% endif %}</td>
           {% elseif tipo == 'ritardo' %}
         <td><strong>{{ e.data }}</strong></td>
@@ -284,7 +284,7 @@
     {% endfor %}
   {% endif %}
   {% if dati.note is defined %}
-    {% for periodo,v in dati.note %}
+    {% for periodo, v in dati.note %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>Note disciplinari {{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -296,20 +296,20 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
-        {% for tipo,v2 in v1 %}
-          {% for k,e in v2 %}
+      {% for data, v1 in v %}
+        {% for tipo, v2 in v1 %}
+          {% for k, e in v2 %}
       <tr>
           {% if tipo == 'classe' %}
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Nota di classe</strong></td>
         <td>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></td>
-        <td>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br)~'<br><em>('~e.nota_doc~')</em>')|raw }}</td>
+        <td>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br) ~ '<br><em>(' ~ e.nota_doc ~ ')</em>')|raw }}</td>
           {% else %}
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Nota individuale</strong></td>
         <td>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></td>
-        <td>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br)~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</td>
+        <td>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br) ~ '<br><em>(' ~ e.provvedimento_doc ~ ')</em>')|raw }}</td>
           {% endif %}
       </tr>
           {% endfor %}
@@ -324,7 +324,7 @@
     {% endfor %}
   {% endif %}
   {% if dati.osservazioni is defined %}
-    {% for periodo,v in dati.osservazioni %}
+    {% for periodo, v in dati.osservazioni %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>Osservazioni {{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -335,8 +335,8 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
-        {% for k,e in v1 %}
+      {% for data, v1 in v %}
+        {% for k, e in v1 %}
       <tr>
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>{{ e.materia }}</strong><br><small><em>({{ e.docente }})</em></small></td>

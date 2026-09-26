@@ -1,4 +1,4 @@
-{% for k,a in dati %}
+{% for k, a in dati %}
 <div class="modal-header gs-pb-0 gs-noborder">
   <h3 class="modal-title gs-h3">{{ a.data|date('j') }} {{ info.mesi[a.data|date('n')] }} {{ a.data|date('Y') }}</h3>
   <h4 class="modal-title gs-h4"><em>{{ a.titolo }}</em></h4>
@@ -10,11 +10,11 @@
   </div>
   {% if a.allegati|length > 0 %}
   <div class="gs-mt-2">
-    {% for n,f in a.allegati %}
+    {% for n, f in a.allegati %}
     <div class="gs-mt-3 gs-mb-3">
-      <strong>Allegato {{ n+1 }}:</strong> {{ f.titolo }}
-      <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('avvisi_download', {'avviso': a.id, 'allegato': n, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
-      <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('avvisi_download', {'avviso': a.id, 'allegato': n, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+      <strong>Allegato {{ n + 1 }}:</strong> {{ f.titolo }}
+      <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('avvisi_download', {avviso: a.id, allegato: n, tipo: 'D'}) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
+      <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('avvisi_download', {avviso: a.id, allegato: n, tipo: 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
     </div>
     {% endfor %}
   </div>
@@ -26,7 +26,7 @@
     </div>
     <div class="gs-pl-2 gs-pr-2">
       <strong>Tipo:</strong>
-      {% if     a.tipo == 'U' %}Uscita anticipata di una o più classi
+      {% if a.tipo == 'U' %}Uscita anticipata di una o più classi
       {% elseif a.tipo == 'E' %}Ingresso posticipato di una o più classi
       {% elseif a.tipo == 'A' %}Svolgimento attività
       {% elseif a.tipo == 'C' %}Avviso generico
@@ -39,14 +39,14 @@
     </div>
   </div>
   <div class="text-center gs-mt-2">
-    <a class="btn btn-success" href="{{ path('avvisi_classe_firma', {'classe': info.classe.id, 'avviso': a.id}) }}" role="button" title="Conferma la lettura dell'avviso alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
+    <a class="btn btn-success" href="{{ path('avvisi_classe_firma', {classe: info.classe.id, avviso: a.id}) }}" role="button" title="Conferma la lettura dell'avviso alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
   </div>
 </div>
 <hr class="gs-hr gs-mb-0">
 {% endfor %}
 <div class="gs-mt-2 gs-mb-3 text-center">
 {% if dati|length > 1 %}
-  <a class="btn btn-success gs-mr-4" href="{{ path('avvisi_classe_firma', {'classe': info.classe.id}) }}" role="button" title="Conferma la lettura di tutti gli avvisi alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
+  <a class="btn btn-success gs-mr-4" href="{{ path('avvisi_classe_firma', {classe: info.classe.id}) }}" role="button" title="Conferma la lettura di tutti gli avvisi alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
 {% endif %}
   <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Annulla</strong></button>
 </div>

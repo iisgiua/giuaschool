@@ -1,20 +1,20 @@
-{% if is_granted('IS_AUTHENTICATED_FULLY') %} {#----- menubar mostrata quando un utente è connesso -----#}
-  {% if is_granted('ROLE_DOCENTE') %} {#----- DOCENTE/STAFF/PRESIDE -----#}
-    {% include 'ruolo_docente/menu.html.twig' %}
-  {% elseif is_granted('ROLE_GENITORE') %} {#----- GENITORE -----#}
-    {% include 'ruolo_genitore/menu_genitore.html.twig' %}
-  {% elseif is_granted('ROLE_ALUNNO') %} {#----- ALUNNO -----#}
-    {% include 'ruolo_genitore/menu_alunno.html.twig' %}
-  {% elseif is_granted('ROLE_ATA') %} {#----- ATA -----#}
-    {% include 'ruolo_ata/menu.html.twig' %}
-  {% elseif is_granted('ROLE_AMMINISTRATORE') %} {#----- AMMINISTRATORE -----#}
-    {% include 'ruolo_amministratore/menu.html.twig' %}
-  {% else %} {#----- UTENTE GENERICO -----#}
+{% if is_granted('IS_AUTHENTICATED_FULLY') %} {#- ---- menubar mostrata quando un utente è connesso ---- -#}
+  {% if is_granted('ROLE_DOCENTE') %} {#- ---- DOCENTE/STAFF/PRESIDE ---- -#}
+    {{ include('ruolo_docente/menu.html.twig') }}
+  {% elseif is_granted('ROLE_GENITORE') %} {#- ---- GENITORE ---- -#}
+    {{ include('ruolo_genitore/menu_genitore.html.twig') }}
+  {% elseif is_granted('ROLE_ALUNNO') %} {#- ---- ALUNNO ---- -#}
+    {{ include('ruolo_genitore/menu_alunno.html.twig') }}
+  {% elseif is_granted('ROLE_ATA') %} {#- ---- ATA ---- -#}
+    {{ include('ruolo_ata/menu.html.twig') }}
+  {% elseif is_granted('ROLE_AMMINISTRATORE') %} {#- ---- AMMINISTRATORE ---- -#}
+    {{ include('ruolo_amministratore/menu.html.twig') }}
+  {% else %} {#- ---- UTENTE GENERICO ---- -#}
 <ul class="nav navbar-nav gs-navbar-nav">
-    {% include 'ruolo_utente/menu.html.twig' %}
+    {{ include('ruolo_utente/menu.html.twig') }}
 </ul>
   {% endif %}
-{% else %} {#----- menubar mostrata quando nessun utente è connesso -----#}
+{% else %} {#- ---- menubar mostrata quando nessun utente è connesso ---- -#}
 <ul class="nav navbar-nav gs-navbar-nav">
   <li role="presentation"{{ app.request.attributes.get('_route') == 'login_form' ? ' class="active"' }}>
     <a href="{{ path('login_form') }}" title="Accedi al registro usando utente e password"><span class="glyphicon glyphicon-user gs-mr-2"></span>Accesso al Registro Elettronico</a>

@@ -22,9 +22,9 @@
     <strong>Filtro utenti:</strong>
     <div class="gs-ml-4">
   {% for u in dati.utenti %}
-    {{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }}) {{ u.anno }}ª {{ u.sezione }}{{ u.gruppo ? ('-'~u.gruppo) }}
+    {{ u.cognome }} {{ u.nome }} ({{ u.dataNascita|date('d/m/Y') }}) {{ u.anno }}ª {{ u.sezione }}{{ u.gruppo ? ('-' ~ u.gruppo) }}
     {% if 'A' in dati.avviso.destinatari %}
-      {{ u.letto ? '- Letto dall\'alunno in data '~(u.letto|date('d/m/Y G:i')) : '- Non letto dall\'alunno' }}
+      {{ u.letto ? '- Letto dall\'alunno in data ' ~ (u.letto|date('d/m/Y G:i')) : '- Non letto dall\'alunno' }}
     {% endif %}
     {% if 'G' in dati.avviso.destinatari %}
       {% if u.letto_genitore1 or u.letto_genitore2 %}
@@ -100,7 +100,7 @@
     <div class="gs-ml-4">
       Classi: {{ (dati.statistiche.classi[1] / dati.statistiche.classi[0] * 100)|number_format(0) }}%  ({{ dati.statistiche.classi[1] }} su {{ dati.statistiche.classi[0] }})
   {% if dati.statistiche.classi[1] < dati.statistiche.classi[0] %}
-      <br><em class="gs-ml-2">Da leggere in:</em> {% for c in dati.statistiche.classi[2] %}{{ c }}{{ not loop.last ? ', '}}{% endfor %}
+      <br><em class="gs-ml-2">Da leggere in:</em> {% for c in dati.statistiche.classi[2] %}{{ c }}{{ not loop.last ? ', ' }}{% endfor %}
   {% endif %}
     </div>
 {% endif %}

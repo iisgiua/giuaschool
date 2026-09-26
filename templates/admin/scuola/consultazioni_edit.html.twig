@@ -5,7 +5,7 @@
 {% block pagina_contenuto %}
 <div class="container">
   <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
-  {% include 'admin/include/form.html.twig' with {form: form[0], form_help: form[1]} %}
+  {{ include('admin/include/form.html.twig', {form: form[0], form_help: form[1]}) }}
 </div>
 {% endblock %}
 
@@ -81,11 +81,11 @@ $(document).ready(function() {
     {% endif %}
     {% set sez = '' %}
     {% for key, choice in group %}
-      {% if choice.data.sezione~choice.data.gruppo != sez %}
+      {% if choice.data.sezione ~ choice.data.gruppo != sez %}
         {% if sez != '' %}
     </div>
         {% endif %}
-        {% set sez = choice.data.sezione~choice.data.gruppo %}
+        {% set sez = choice.data.sezione ~ choice.data.gruppo %}
     <div class="row">
       {% endif %}
       {{- form_widget(form[key], {

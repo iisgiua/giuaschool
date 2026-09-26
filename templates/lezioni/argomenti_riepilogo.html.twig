@@ -6,12 +6,12 @@
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
   <div class="row gs-mb-1">
     <div class="col-sm-6">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {'cattedra': (cattedra ? cattedra.id : 0), 'data': data_prec|date('Y-m-d')}) }}" role="button" title="Mese precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {cattedra: (cattedra ? cattedra.id : 0), data: data_prec|date('Y-m-d')}) }}" role="button" title="Mese precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
       <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia mese"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ mesi[data|date('n')] }} {{ data|date('Y') }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {'cattedra': (cattedra ? cattedra.id : 0), 'data': data_succ|date('Y-m-d')}) }}" role="button" title="Mese successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {cattedra: (cattedra ? cattedra.id : 0), data: data_succ|date('Y-m-d')}) }}" role="button" title="Mese successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti', {'cattedra': cattedra.id, 'classe': classe.id}) }}" role="button" title="Visualizza gli argomenti e le attività delle lezioni svolte"><span class="glyphicon glyphicon-zoom-in gs-mr-3"></span><strong>Elenco argomenti</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti', {cattedra: cattedra.id, classe: classe.id}) }}" role="button" title="Visualizza gli argomenti e le attività delle lezioni svolte"><span class="glyphicon glyphicon-zoom-in gs-mr-3"></span><strong>Elenco argomenti</strong></a>
     </div>
   </div>
   {% if dati.lista is defined %}
@@ -19,10 +19,10 @@
     <thead class="bg-success">
       <tr>
         <th>Alunno</th>
-    {% for dt,v in dati.lista %}
+    {% for dt, v in dati.lista %}
         <th class="gs-pr-0 gs-pl-0">
-          <a class="btn btn-{{ v.durata > 0 ? 'primary' : 'default' }} btn-xs" href="{{ path('lezioni_registro_firme', {'cattedra': (cattedra ? cattedra.id : 0), 'classe': (classe ? classe.id : 0), 'data': dt, 'vista': 'G'}) }}" role="button" title="Visualizza le lezioni del giorno"><strong>{{ v.data }}</strong></a><br>
-          <small>ore: {{ v.durata > 0 ? v.durata : '-'}}</small>
+          <a class="btn btn-{{ v.durata > 0 ? 'primary' : 'default' }} btn-xs" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: dt, vista: 'G'}) }}" role="button" title="Visualizza le lezioni del giorno"><strong>{{ v.data }}</strong></a><br>
+          <small>ore: {{ v.durata > 0 ? v.durata : '-' }}</small>
         </th>
     {% endfor %}
       </tr>
@@ -35,16 +35,16 @@
         <td class="gs-pt-1 gs-pb-1">
           <small><strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong></small>
         </td>
-        {% for dt,v in dati.lista %}
+        {% for dt, v in dati.lista %}
           {% if v[a.id]['classe'] is defined %}
         <td class="gs-pr-0 gs-pl-0 gs-pt-1 gs-pb-1">
             {% if v[a.id]['assenze'] is defined and v.durata > 0 %}
               {% if v[a.id]['assenze'] >= 1 %}
-                {% for ore in 1 .. (v[a.id]['assenze']|round(0,'floor')) %}
+                {% for ore in 1..(v[a.id]['assenze']|round(0, 'floor')) %}
           <span class="label label-default gs-pr-1 gs-pl-1" title="Assenza di un'ora">A</span>
                 {% endfor %}
               {% endif %}
-              {% if v[a.id]['assenze'] > (v[a.id]['assenze']|round(0,'floor')) %}
+              {% if v[a.id]['assenze'] > (v[a.id]['assenze']|round(0, 'floor')) %}
           <span class="label label-default gs-pr-1 gs-pl-1" title="Assenza di mezz'ora">a</span>
               {% endif %}
             {% endif %}
@@ -66,7 +66,7 @@
                 {% endif %}
                   <strong>Data: {{ v.data }} {{ info.data_label }}</strong>
                 </p>
-                <p><strong>Tipo: {{ ('label.voti_'~voto.tipo)|trans }}</strong></p>
+                <p><strong>Tipo: {{ ('label.voti_' ~ voto.tipo)|trans }}</strong></p>
                 {% if voto.argomento is not empty %}
                 <p><strong>Argomenti o descrizione della prova:</strong><br>{{ voto.argomento }}</p>
                 {% endif %}
@@ -93,7 +93,7 @@
     <strong class="gs-big">{{ 'message.nessun_dato'|trans }}</strong>
   </div>
   {% endif %}
-  {% include 'include/modal-info.html.twig' %}
+  {{ include('include/modal-info.html.twig') }}
 </div>
 {% endblock %}
 
@@ -129,7 +129,7 @@ $(document).ready(function() {
   $('#gs-button-date').datepicker()
     .on('changeDate', function(ev){
       $('#gs-button-date').datepicker('hide');
-      url = "{{ path('lezioni_argomenti_riepilogo', {'cattedra': (cattedra ? cattedra.id : 0), 'data': '9999-99-99'}) }}";
+      url = "{{ path('lezioni_argomenti_riepilogo', {cattedra: (cattedra ? cattedra.id : 0), data: '9999-99-99'}) }}";
       url = url.replace("9999-99-99", ev.format());
       window.location.href = url;
   });

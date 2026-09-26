@@ -48,7 +48,7 @@
         <td>{{ m.materiaBreve }}</td>
         <td><small>{{ m.moduloBreve }}</small></td>
         <td>
-          <button type="button" class="btn btn-xs btn-primary" title="Dettagli del modulo formativo" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ ('label.modulo_formativo_tipo_'~m.tipo)|trans }}" data-body="lezione-{{ m.lezione_id }}"><strong>{{ 'label.show'|trans }}</strong></button>
+          <button type="button" class="btn btn-xs btn-primary" title="Dettagli del modulo formativo" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ ('label.modulo_formativo_tipo_' ~ m.tipo)|trans }}" data-body="lezione-{{ m.lezione_id }}"><strong>{{ 'label.show'|trans }}</strong></button>
           <div id="lezione-{{ m.lezione_id }}" style="display:none">
             <h3 class="gs-h3 text-center gs-mt-1 text-primary">{{ m.modulo }}</h3>
             <p><strong>Lezione:</strong> {{ m.data|date('d/m/Y') }} dalle {{ m.inizio|date('H:i') }} alle {{ m.fine|date('H:i') }}</p>
@@ -61,7 +61,7 @@
     {% endfor %}
     </tbody>
   </table>
-  {% include 'include/modal-info.html.twig' %}
+  {{ include('include/modal-info.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}

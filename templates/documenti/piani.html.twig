@@ -21,25 +21,25 @@
     {% for d in dati %}
       <tr>
         <td>
-          <strong>{{ d.anno }}ª {{ d.sezione }}{{ d.gruppo ? ('-'~d.gruppo) }}</strong> - {{ d.corso }} - {{ d.sede }}<br>
+          <strong>{{ d.anno }}ª {{ d.sezione }}{{ d.gruppo ? ('-' ~ d.gruppo) }}</strong> - {{ d.corso }} - {{ d.sede }}<br>
           <strong>{{ d.materia }}</strong>
         </td>
         <td>
       {% if d.documento %}
-          <a href="{{ path('documenti_download', {'documento': d.documento.id}) }}" title="Scarica il piano di lavoro indicato">
+          <a href="{{ path('documenti_download', {documento: d.documento.id}) }}" title="Scarica il piano di lavoro indicato">
           <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.documento.allegati[0].titolo }}</strong>
           </a><br>
-          <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
+          <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1000)|number_format(0, ',', '.') }} kB</small>
       {% else %}
           <strong class="gs-big text-danger">{{ 'label.documento_mancante'|trans }}</strong>
       {% endif %}
         </td>
         <td>
       {% if d.add is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('documenti_piani_add', {'classe': d.classe_id, 'materia': d.materia_id }) }}" role="button" title="Inserisci il piano di lavoro"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('documenti_piani_add', {classe: d.classe_id, materia: d.materia_id}) }}" role="button" title="Inserisci il piano di lavoro"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
       {% endif %}
       {% if d.delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il piano di lavoro indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'documento': d.documento.id}) }}" data-text="{{ 'message.cancella_piano'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il piano di lavoro indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {documento: d.documento.id}) }}" data-text="{{ 'message.cancella_piano'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
       {% endif %}
         </td>
       </tr>
@@ -47,7 +47,7 @@
     </tbody>
   </table>
   {% endif %}
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_piano'} %}
+  {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_piano'}) }}
 </div>
 {% endblock %}
 

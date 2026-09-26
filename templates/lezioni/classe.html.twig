@@ -14,7 +14,7 @@
         </tr>
       </thead>
       <tbody>
-  {% for k,v in cattedre %}
+  {% for k, v in cattedre %}
         <tr>
           <td>
             <strong class="gs-big">{{ v[0].classe.sede.citta }}</strong>
@@ -23,8 +23,8 @@
             <em>{{ v[0].classe.corso.nomeBreve }}</em>
           </td>
           <td>
-    {% for k1,v1 in v %}
-            <a class="btn btn-primary gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': v1.id, 'classe': 0}) }}" role="button" title="{{ v1.classe }} - {{ v1.materia.nome }}"><strong>{{ v1.classe }} - {{ v1.materia.nomeBreve }}{% if v1.materia.tipo == 'S' and v1.alunno %} {{ loop.index }}{% endif %}</strong></a>
+    {% for k1, v1 in v %}
+            <a class="btn btn-primary gs-mr-3" href="{{ path('lezioni_registro_firme', {cattedra: v1.id, classe: 0}) }}" role="button" title="{{ v1.classe }} - {{ v1.materia.nome }}"><strong>{{ v1.classe }} - {{ v1.materia.nomeBreve }}{% if v1.materia.tipo == 'S' and v1.alunno %} {{ loop.index }}{% endif %}</strong></a>
       {% if v1.materia.tipo == 'S' and v1.alunno %}
             <button type="button" class="btn btn-xs btn-default gs-mr-5" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v1.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>
       {% endif %}
@@ -46,7 +46,7 @@
         </tr>
       </thead>
       <tbody>
-  {% for k,v in classi %}
+  {% for k, v in classi %}
         <tr>
           <td>
             <strong class="gs-big">{{ v[0].sede.citta }}</strong>
@@ -55,11 +55,11 @@
             <strong class="gs-big">{{ v[0].sezione }}</strong><br>
           </td>
           <td>
-    {% for k1,v1 in v %}
+    {% for k1, v1 in v %}
       {% if v1.id in cattedre|keys %}
-            <button type="button" class="btn bbtntn-default btn-sm gs-mr-3 gs-modal-confirm-button" title="{{v1}} - {{ v1.corso.nome }}" data-toggle="modal" data-target="#gs-modal-confirm" data-text="Stai entrando nel registro come SOSTITUTO in una tua classe. Vuoi continuare?" data-href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}"><strong>{{ v1 }}</strong></button>
+            <button type="button" class="btn bbtntn-default btn-sm gs-mr-3 gs-modal-confirm-button" title="{{ v1 }} - {{ v1.corso.nome }}" data-toggle="modal" data-target="#gs-modal-confirm" data-text="Stai entrando nel registro come SOSTITUTO in una tua classe. Vuoi continuare?" data-href="{{ path('lezioni_registro_firme', {cattedra: 0, classe: v1.id}) }}"><strong>{{ v1 }}</strong></button>
       {% else %}
-            <a class="btn btn-primary btn-sm gs-mr-3" href="{{ path('lezioni_registro_firme', {'cattedra': 0, 'classe': v1.id}) }}" role="button" title="{{ v1 }} - {{ v1.corso.nome }}"><strong>{{ v1 }}</strong></a>
+            <a class="btn btn-primary btn-sm gs-mr-3" href="{{ path('lezioni_registro_firme', {cattedra: 0, classe: v1.id}) }}" role="button" title="{{ v1 }} - {{ v1.corso.nome }}"><strong>{{ v1 }}</strong></a>
       {% endif %}
     {% endfor %}
           </td>
@@ -68,7 +68,7 @@
       </tbody>
     </table>
   </div>
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': ''} %}
+  {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: ''}) }}
 </div>
 {% endblock %}
 

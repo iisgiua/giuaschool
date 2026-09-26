@@ -18,14 +18,14 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per cambiare la materia da visualizzare">{{ info.materia }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for k,v in materie %}
-          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('genitori_argomenti', {'idmateria': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% for k, v in materie %}
+          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('genitori_argomenti', {idmateria: v.id}) }}">{{ v.nomeBreve }}</a></li>
     {% endfor %}
         </ul>
       </div>
     </div>
   </div>
-    {% for periodo,v in dati %}
+    {% for periodo, v in dati %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -37,13 +37,13 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
-        {% for materia,v2 in v1 %}
+      {% for data, v1 in v %}
+        {% for materia, v2 in v1 %}
           {% for e in v2 %}
       <tr>
             {% if loop.first %}
         <td  style="background: #ffffff" rowspan="{{ v2|length }}">
-          <a class="btn btn-primary btn-xs" href="{{ path('genitori_lezioni', {'data': data}) }}" role="button" title="Visualizza le lezioni del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('genitori_lezioni', {data: data}) }}" role="button" title="Visualizza le lezioni del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
         </td>
         <td rowspan="{{ v2|length }}"><small>{{ materia }}</small></td>
             {% endif %}

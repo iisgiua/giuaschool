@@ -139,7 +139,7 @@ $(document).ready(function() {
     $('input[name^="voti_classe[lista]"][name$="[media]"][value=0]').prop('checked', true);
     $('input[name^="voti_classe[lista]"][name$="[media]"]').prop('disabled', true);
   }
-  {% for k,f in form.lista %}
+  {% for k, f in form.lista %}
     {% if f.voto.vars.value > 0 %}
   $("input#voti_classe_lista_{{ k }}_voto").parent().siblings('span').text(formatter({{ f.voto.vars.value }}));
     {% elseif not f.giudizio.vars.value and form.visibile.vars.value == 1 %}
@@ -165,7 +165,7 @@ function formatter(val) {
         <span style="display:inline-block;width:3em;padding:0.6em 0.2em;" class="label {{ form.voto.vars.value >= 6 ? 'label-success' : (form.voto.vars.value < 5 ? 'label-danger' : 'label-warning') }} gs-mr-1 gs-big">--</span>
         <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi un voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
         <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
-        <div style="display:inline">{{ form_widget(form.voto, {'attr': {'class': 'slider', 'data-slider-value': form.voto.vars.value}}) }}</div>
+        <div style="display:inline">{{ form_widget(form.voto, {attr: {class: 'slider', 'data-slider-value': form.voto.vars.value}}) }}</div>
   {% else %}
         <span style="display:inline-block;width:3em;padding:0.6em 0.2em;" class="label label-default gs-mr-1 gs-big">--</span>
         <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi un voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>

@@ -27,7 +27,7 @@
       </tr>
     </thead>
     <tbody>
-    {% for k,a in dati.lista %}
+    {% for k, a in dati.lista %}
       <tr>
         <td>{{ a.data|date('d/m/Y') }}</td>
         <td>{{ a.titolo }}</td>
@@ -40,10 +40,10 @@
         <td>
           <button type="button" class="btn btn-xs btn-primary" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-info" data-info-date="{{ a.data|date('j/n/Y') }}" data-info-title="{{ a.titolo }}" data-info-id="{{ a.id }}" data-body="avviso-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
       {% if dati.azioni[k].edit is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_coordinatore', {'avviso': a.id}) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_coordinatore', {avviso: a.id}) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span></a>
       {% endif %}
       {% if dati.azioni[k].delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {'avviso': a.id}) }}" data-text="{{ 'message.cancella_avviso_coordinatore'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {avviso: a.id}) }}" data-text="{{ 'message.cancella_avviso_coordinatore'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
       {% endif %}
           <div id="avviso-{{ loop.index }}" style="display:none">
             <div class="alert alert-info gs-mt-0 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
@@ -52,11 +52,11 @@
             </div>
       {% if a.allegati|length > 0 %}
             <div class="alert alert-success gs-mt-2 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
-        {% for n,f in a.allegati %}
+        {% for n, f in a.allegati %}
               <div class="gs-mt-3 gs-mb-3">
-                <strong>Allegato {{ n+1 }}:</strong> {{ f.titolo }}
-                <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('avvisi_download', {'avviso': a.id, 'allegato': n, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
-                <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('avvisi_download', {'avviso': a.id, 'allegato': n, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+                <strong>Allegato {{ n + 1 }}:</strong> {{ f.titolo }}
+                <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('avvisi_download', {avviso: a.id, allegato: n, tipo: 'D'}) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
+                <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('avvisi_download', {avviso: a.id, allegato: n, tipo: 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
               </div>
         {% endfor %}
             </div>
@@ -88,7 +88,7 @@
                 <div class="bg-success gs-ml-5 gs-mr-2 gs-pr-2 gs-pl-2">
             {% for u in dati.statistiche[k].genitori.elenco %}
                   <div class="row">
-                    <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.cognome_gen == '#NESSUN DATO#' ? '--' : u.cognome_gen }} {{ u.nome_gen == '#NESSUN DATO#' ? '--' : u.nome_gen }})</div>
+                    <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-' ~ u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.cognome_gen == '#NESSUN DATO#' ? '--' : u.cognome_gen }} {{ u.nome_gen == '#NESSUN DATO#' ? '--' : u.nome_gen }})</div>
                     <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
                   </div>
             {% endfor %}
@@ -103,7 +103,7 @@
                 <div class="bg-success gs-ml-5 gs-mr-2 gs-pr-2 gs-pl-2">
             {% for u in dati.statistiche[k].alunni.elenco %}
                   <div class="row">
-                    <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }}</div>
+                    <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-' ~ u.gruppo }} - {{ u.cognome }} {{ u.nome }}</div>
                     <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
                   </div>
             {% endfor %}
@@ -119,9 +119,9 @@
     {% endfor %}
     </tbody>
   </table>
-    {% include 'include/modal-info.html.twig' %}
-    {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_avviso'} %}
-    {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'avvisi_coordinatore'} %}
+    {{ include('include/modal-info.html.twig') }}
+    {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_avviso'}) }}
+    {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'avvisi_coordinatore'}) }}
   {% endif %}
 </div>
 {% endblock %}

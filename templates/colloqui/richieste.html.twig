@@ -18,8 +18,8 @@
   <div class="panel panel-primary">
     <div class="panel-heading">
       <h3 class="panel-title text-center">
-        <span class="pull-left"><strong>{{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i')}} alle {{ r.fine|date('G:i')}}</strong></span>
-        <span class="pull-right">{{ ('label.tipo_colloquio_'~r.tipo)|trans }}: {{ r.luogo }}</span>
+        <span class="pull-left"><strong>{{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i') }} alle {{ r.fine|date('G:i') }}</strong></span>
+        <span class="pull-right">{{ ('label.tipo_colloquio_' ~ r.tipo)|trans }}: {{ r.luogo }}</span>
         <span>- {{ r.valide }}/{{ r.numero }} -</span>
       </h3>
     </div>
@@ -89,8 +89,8 @@
   <div class="text-right gs-mt-5">
     <button class="btn btn-default gs-button-remote" type="button" title="Visualizza le richieste dei ricevimenti passati o disabilitati" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('colloqui_storico') }}"><strong>Vecchie richieste</strong></button>
   </div>
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.rifiuto_colloquio'} %}
-  {% include 'include/modal-remote.html.twig' %}
+  {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.rifiuto_colloquio'}) }}
+  {{ include('include/modal-remote.html.twig') }}
 </div>
 {% endblock %}
 

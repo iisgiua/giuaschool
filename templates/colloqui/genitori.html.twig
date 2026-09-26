@@ -13,12 +13,12 @@
     <div class="panel-heading"><h3 class="panel-title gs-h3">{{ 'title.richieste_colloqui'|trans }}</h3></div>
     <ul class="list-group">
       {% for r in dati.richieste %}
-      <li class="list-group-item container-fluid{{ r.stato == 'A' or r.stato == 'N' ? ' list-group-item-warning'}}">
+      <li class="list-group-item container-fluid{{ r.stato == 'A' or r.stato == 'N' ? ' list-group-item-warning' }}">
         <div class="col-sm-4">
           <strong>
-            {{ r.data|format_date('full')|title }} alle {{ r.appuntamento|date('G:i')}} -
+            {{ r.data|format_date('full')|title }} alle {{ r.appuntamento|date('G:i') }} -
             Prof.{{ r.sesso == 'F' ? 'ssa' }} {{ r.cognome }} {{ r.nome }}<br>
-            Modalità: {{ ('label.tipo_colloquio_'~r.tipo)|trans }}<br>
+            Modalità: {{ ('label.tipo_colloquio_' ~ r.tipo)|trans }}<br>
             {% if r.tipo == 'D' %}<a href="{{ r.luogo }}" target="_blank">{{ r.luogo }}</a>{% else %}{{ r.luogo }}{% endif %}
           </strong>
         </div>
@@ -52,7 +52,7 @@
   <div class="alert alert-info">
     <strong class="gs-big">{{ 'title.ore_colloqui'|trans }}</strong>
     <ul class="list-group">
-    {% for docente,c in dati.docenti %}
+    {% for docente, c in dati.docenti %}
       <li class="list-group-item container-fluid">
         <div class="col-sm-4 gs-big"><strong>{{ c[0].docente }}</strong></div>
         <div class="col-sm-6 gs-big"><em>{% for m in c %}{{ m.tipo == 'I' ? 'Lab. ' }}{{ m.materia }}{{ not loop.last ? '<br>' }}{% endfor %}</em></div>
@@ -61,7 +61,7 @@
     {% endfor %}
     </ul>
   </div>
-    {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.disdetta_colloquio'} %}
+    {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.disdetta_colloquio'}) }}
   {% endif %}
 </div>
 {% endblock %}

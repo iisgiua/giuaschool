@@ -2,7 +2,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% for tipo,messaggi in app.flashes %}
+  {% for tipo, messaggi in app.flashes %}
     {% for msg in messaggi %}
   <div class="alert alert-{{ tipo }} gs-mt-5" role="alert"><strong>{{ msg|trans }}<strong></div>
     {% endfor %}
@@ -14,13 +14,13 @@
     <div class="panel-body" >
       <dl class="dl-horizontal gs-big">
         <dt class="text-primary">Utente:</dt>
-        <dd>{% if is_granted('ROLE_GENITORE') %}{{ ('#' not in (app.user.nome~app.user.cognome)) ? (app.user.nome~' '~app.user.cognome) }} <em>genitore di</em> {{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %}</dd>
+        <dd>{% if is_granted('ROLE_GENITORE') %}{{ ('#' not in (app.user.nome ~ app.user.cognome)) ? (app.user.nome ~ ' ' ~ app.user.cognome) }} <em>genitore di</em> {{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %}</dd>
         <dt class="text-primary">Ruolo:</dt>
-        <dd><strong>{{ ('label.'~app.user.roles[0])|trans }}</strong>
+        <dd><strong>{{ ('label.' ~ app.user.roles[0])|trans }}</strong>
         </dd>
   {% if is_granted('ROLE_ATA') %}
         <dt class="text-primary">Mansioni:</dt>
-        <dd>{{ ('label.ata_tipo_'~app.user.tipo)|trans }}</dd>
+        <dd>{{ ('label.ata_tipo_' ~ app.user.tipo)|trans }}</dd>
         <dt class="text-primary">Segreteria:</dt>
         <dd>{{ app.user.segreteria ? 'ABILITATO' : 'NON ABILITATO' }}</dd>
   {% endif %}

@@ -38,17 +38,17 @@
           <td><small>{{ u.cognome }}</small></td>
           <td><small>{{ u.nome }}</small></td>
           <td><small>{{ u.username }}</small></td>
-          <td><small>{{ u.sede ? u.sede.citta  }}</small></td>
-          <td><small>{{ ('label.ata_tipo_'~u.tipo)|trans }}</small></td>
+          <td><small>{{ u.sede ? u.sede.citta }}</small></td>
+          <td><small>{{ ('label.ata_tipo_' ~ u.tipo)|trans }}</small></td>
           <td class="pb-0">
             <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ u.cognome }} {{ u.nome }}" data-cont-id="info-utente-{{ u.id }}">{{ 'label.show'|trans }}</button>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('ata_modifica_edit', {'id': u.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('ata_password', {'id': u.id, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password e la invia all'utente tramite email">{{ 'label.email_password'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('ata_password', {'id': u.id, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('ata_modifica_edit', {id: u.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('ata_password', {id: u.id, tipo: 'E'}) }}" role="button" title="Genera una nuova password e la invia all'utente tramite email">{{ 'label.email_password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('ata_password', {id: u.id, tipo: 'P'}) }}" role="button" title="Genera una nuova password e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
     {% if u.abilitato %}
-            <a class="btn btn-danger btn-xs mb-1" href="{{ path('ata_abilita', {'id': u.id, 'abilita': 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
+            <a class="btn btn-danger btn-xs mb-1" href="{{ path('ata_abilita', {id: u.id, abilita: 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
     {% else %}
-            <a class="btn btn-success btn-xs mb-1" href="{{ path('ata_abilita', {'id': u.id, 'abilita': 1}) }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
+            <a class="btn btn-success btn-xs mb-1" href="{{ path('ata_abilita', {id: u.id, abilita: 1}) }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
     {% endif %}
             <div class="d-none" id="info-utente-{{ u.id }}">
               <dl class="row">
@@ -61,7 +61,7 @@
                 <dt class="col-sm-2 text-right">{{ 'label.codice_fiscale'|trans }}</dt>
                 <dd class="col-sm-4">{{ u.codiceFiscale }}</dd>
                 <dt class="col-sm-2 text-right">{{ 'label.ata_tipo'|trans }}</dt>
-                <dd class="col-sm-4">{{ ('label.ata_tipo_'~u.tipo)|trans }}</dd>
+                <dd class="col-sm-4">{{ ('label.ata_tipo_' ~ u.tipo)|trans }}</dd>
                 <dt class="col-sm-2 text-right">{{ 'label.ata_segreteria'|trans }}</dt>
                 <dd class="col-sm-4">{{ (u.segreteria ? 'label.si' : 'label.no')|trans }}</dd>
                 <dt class="col-sm-2 text-right">{{ 'label.sede'|trans }}</dt>

@@ -18,11 +18,11 @@
         <div class="form-group gs-mb-0">
           <div class="col-sm-6 text-center gs-mt-2 gs-mb-2">
             <strong class="gs-big gs-mr-2">Media</strong>
-            <span class="label label-info gs-big">{{ dati.esito.media|number_format(2,',') }}</span>
+            <span class="label label-info gs-big">{{ dati.esito.media|number_format(2, ',') }}</span>
           </div>
           <div class="col-sm-6 text-center gs-mt-2 gs-mb-2">
             <strong class="gs-big gs-mr-2">Assenze</strong>
-            <span class="label label-info gs-big">{{ dati.scrutinio.dati.scrutinabili[alunno.id].percentuale|number_format(2,',') }}%</span>
+            <span class="label label-info gs-big">{{ dati.scrutinio.dati.scrutinabili[alunno.id].percentuale|number_format(2, ',') }}%</span>
           </div>
         </div>
       </li>
@@ -223,7 +223,7 @@
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}
-{{ form_end(form, {'render_rest': false}) }}
+{{ form_end(form, {render_rest: false}) }}
 
 <script>
 $(document).ready(function() {

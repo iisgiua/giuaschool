@@ -20,7 +20,7 @@
             <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Visualizza le proposte di voto"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Visualizza</button>
           </div>
           <div class="gs-show-hide-item" style="display:none">
-      {% for doc,prop in dati.proposte[voto.alunno.vars.value].proposte %}
+      {% for doc, prop in dati.proposte[voto.alunno.vars.value].proposte %}
             <div style="border-bottom: solid #000 1px;" class="col-sm-4 col-sm-offset-1 gs-pt-1 gs-pb-0 gs-pl-0">{{ doc }}</div>
             <div style="border-bottom: solid #000 1px;" class="col-sm-1 text-right gs-pt-1 gs-pb-0 gs-pr-0"><span class="label label-{{ prop < dati.valutazioni.med ? 'danger' : (prop < dati.valutazioni.suff ? 'warning' : 'success') }}">{{ dati.valutazioni.lista[prop] }}</span></div>
       {% endfor %}
@@ -33,7 +33,7 @@
     {% if voto.unico.vars.value is not empty %}
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < dati.valutazioni.med ? 'danger' : (voto.unico.vars.value < dati.valutazioni.suff ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ dati.valutazioni.lista[voto.unico.vars.value] }}</span>
             <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Modifica la valutazione per la materia"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
-            <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
+            <div style="display:inline-block">{{ form_widget(voto.unico, {attr: {class: 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
     {% else %}
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-mr-4 gs-big">--</span>
             <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Modifica la valutazione per la materia"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
@@ -51,7 +51,7 @@
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}
-{{ form_end(form, {'render_rest': false}) }}
+{{ form_end(form, {render_rest: false}) }}
 
 <script>
 var voti = [{{ dati.valutazioni.voti|raw }}];

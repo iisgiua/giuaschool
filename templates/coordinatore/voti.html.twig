@@ -14,23 +14,23 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ info.periodo ? info.lista[info.periodo].nome : 'Scegli' }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p,d in info.lista %}
+    {% for p, d in info.lista %}
       {% if d.nome %}
-          <li{{ info.periodo == p ? ' class="active"' }}><a href="{{ path('coordinatore_voti', {'classe': info.classe.id, 'periodo': p}) }}">{{ d.nome }}</a></li>
+          <li{{ info.periodo == p ? ' class="active"' }}><a href="{{ path('coordinatore_voti', {classe: info.classe.id, periodo: p}) }}">{{ d.nome }}</a></li>
       {% endif %}
     {% endfor %}
         </ul>
       </div>
     </div>
     <div class="col-sm-4 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_voti', {'classe': info.classe.id, 'periodo': info.periodo, 'tipo': 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_voti', {classe: info.classe.id, periodo: info.periodo, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped">
     <thead class="bg-success">
       <tr>
         <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
-    {% for materia,m in dati.materie %}
+    {% for materia, m in dati.materie %}
         <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
           <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
         </th>
@@ -39,17 +39,17 @@
       </tr>
     </thead>
     <tbody>
-    {% for alunno,a in dati.alunni %}
+    {% for alunno, a in dati.alunni %}
       <tr>
         <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
           <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2 gs-mt-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
           <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
-          {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
+          {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a, g: dati.genitori[a.id]}) }}
         </td>
-      {% for materia,m in dati.materie %}
+      {% for materia, m in dati.materie %}
         <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if dati.medie[alunno][materia] is defined %}
-          <span class="label label-{{ dati.medie[alunno][materia] < 5 ? 'danger' : (dati.medie[alunno][materia] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno][materia]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</span>
+          <span class="label label-{{ dati.medie[alunno][materia] < 5 ? 'danger' : (dati.medie[alunno][materia] < 6 ? 'warning' : 'success') }}">{{ dati.medie[alunno][materia]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</span>
         {% else %}
           <span>--</span>
         {% endif %}
@@ -57,7 +57,7 @@
       {% endfor %}
         <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
       {% if dati.medie[alunno][0] is defined %}
-          <span class="gs-big"><span class="label label-{{ dati.medie[alunno][0] < 5 ? 'danger' : (dati.medie[alunno][0] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno][0]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</span></span>
+          <span class="gs-big"><span class="label label-{{ dati.medie[alunno][0] < 5 ? 'danger' : (dati.medie[alunno][0] < 6 ? 'warning' : 'success') }}">{{ dati.medie[alunno][0]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</span></span>
       {% else %}
           <span>--</span>
       {% endif %}
@@ -66,7 +66,7 @@
     {% endfor %}
     </tbody>
   </table>
-    {% include 'include/modal-info.html.twig' %}
+    {{ include('include/modal-info.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}

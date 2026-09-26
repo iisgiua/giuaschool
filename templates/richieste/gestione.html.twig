@@ -3,7 +3,7 @@
 {% block pagina_contenuto %}
 <div class="container-fluid">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.richieste.gestione'|trans }}</h1>
-  {% include 'include/form-inline.html.twig' with {form: form[0], form_success: '', form_help: ''} %}
+  {{ include('include/form-inline.html.twig', {form: form[0], form_success: '', form_help: ''}) }}
   <table class="table table-bordered table-hover table-striped gs-mb-0">
     <thead class="bg-success">
       <tr>
@@ -48,7 +48,7 @@
           data-valore-data="{{ r.data|date('d/m/Y') }}"
     {% endif %}
           data-campi="{{ r.valori|length }}"
-    {% for c,cv in r.definizioneRichiesta.campi %}
+    {% for c, cv in r.definizioneRichiesta.campi %}
           data-campo-{{ loop.index }}="{{ c }}"
           data-valore-{{ loop.index }}="{{ r.valori[c] is empty ? '' : (cv[0] == 'date' ? r.valori[c]|date('d/m/Y') : (cv[0] == 'time' ? r.valori[c]|date('H:i') : r.valori[c])) }}"
     {% endfor %}
@@ -74,15 +74,15 @@
   <nav aria-label="Navigazione tra le pagine" class="text-center">
     <ul class="pagination pagination-sm gs-mt-2">
     {% if info.pagina > 1 %}
-      <li><a href="{{ path('richieste_gestione', {'pagina': info.pagina - 1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
+      <li><a href="{{ path('richieste_gestione', {pagina: info.pagina - 1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
     {% else %}
       <li class="disabled"><span title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></span></li>
     {% endif %}
-    {% for i in 1 .. dati.maxPagine %}
-      <li {{ info.pagina == i ? 'class="active"' }}><a href="{{ path('richieste_gestione', {'pagina': i}) }}">{{ i }}</a></li>
+    {% for i in 1..dati.maxPagine %}
+      <li {{ info.pagina == i ? 'class="active"' }}><a href="{{ path('richieste_gestione', {pagina: i}) }}">{{ i }}</a></li>
     {% endfor %}
     {% if info.pagina < dati.maxPagine %}
-      <li><a href="{{ path('richieste_gestione', {'pagina': info.pagina + 1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
+      <li><a href="{{ path('richieste_gestione', {pagina: info.pagina + 1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
     {% else %}
       <li class="disabled"><span title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></span></li>
     {% endif %}
@@ -182,7 +182,7 @@ $(document).ready(function() {
   });
   // init
   var sedi = [];
-  {% for s,n in info.sedi %}
+  {% for s, n in info.sedi %}
   sedi[{{ s }}] = '{{ n }}';
   {% endfor %}
   $('#filtro_classe optgroup').hide();

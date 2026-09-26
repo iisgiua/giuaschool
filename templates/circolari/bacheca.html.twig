@@ -2,25 +2,25 @@
 
 {% block pagina_menu %}
   {% if is_granted('ROLE_DOCENTE') %}
-    {% include 'ruolo_docente/menu.html.twig' with {'attivo': 'bacheca'} %}
+    {{ include('ruolo_docente/menu.html.twig', {attivo: 'bacheca'}) }}
   {% elseif is_granted('ROLE_ATA') %}
-    {% include 'ruolo_ata/menu.html.twig' %}
+    {{ include('ruolo_ata/menu.html.twig') }}
   {% elseif is_granted('ROLE_GENITORE') %}
-    {% include 'ruolo_genitore/menu_genitore.html.twig' %}
+    {{ include('ruolo_genitore/menu_genitore.html.twig') }}
   {% elseif is_granted('ROLE_ALUNNO') %}
-    {% include 'ruolo_genitore/menu_alunno.html.twig' %}
+    {{ include('ruolo_genitore/menu_alunno.html.twig') }}
   {% elseif is_granted('ROLE_UTENTE') %}
-    {% include 'ruolo_utente/menu.html.twig' %}
+    {{ include('ruolo_utente/menu.html.twig') }}
   {% endif %}
 {% endblock %}
 
 {% block pagina_submenu %}
   {% if is_granted('ROLE_DOCENTE') %}
-    {% include 'ruolo_docente/menu_bacheca.html.twig' %}
+    {{ include('ruolo_docente/menu_bacheca.html.twig') }}
   {% elseif is_granted('ROLE_ATA') %}
-    {% include 'ruolo_ata/menu_bacheca.html.twig' %}
+    {{ include('ruolo_ata/menu_bacheca.html.twig') }}
   {% elseif is_granted('ROLE_UTENTE') and not is_granted('ROLE_GENITORE') and not is_granted('ROLE_ALUNNO') %}
-    {% include 'ruolo_utente/menu_bacheca.html.twig' %}
+    {{ include('ruolo_utente/menu_bacheca.html.twig') }}
   {% endif %}
 {% endblock %}
 
@@ -39,7 +39,7 @@
       </div>
       <div class="form-group" title="{{ form.oggetto.vars.label|trans }}">
         <label class="sr-only control-label" for="circolare_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
-        {{ form_widget(form.oggetto, {'attr': {'style': 'width:30em'}}) }}
+        {{ form_widget(form.oggetto, {attr: {style: 'width:30em'}}) }}
       </div>
       <div class="form-group _col-sm-2">
         {{ form_widget(form.submit) }}
@@ -80,20 +80,20 @@
               <div class="list-group-item-text">
                 <div class="gs-mt-3 gs-mb-3">
                   <strong>Documento:</strong> {{ c.circolare.allegati[0].titolo }}
-                  <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {'circolare': c.circolare.id, 'allegato': 0, 'tipo': 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
-                  <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {'circolare': c.circolare.id, 'allegato': 0, 'tipo': 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+                  <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {circolare: c.circolare.id, allegato: 0, tipo: 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
+                  <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {circolare: c.circolare.id, allegato: 0, tipo: 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
                 </div>
               </div>
             </div>
       {% if c.circolare.allegati|length > 1 %}
             <div class="list-group-item">
               <div class="list-group-item-text">
-        {% for n,a in c.circolare.allegati %}
-          {% if not loop.first  %}
+        {% for n, a in c.circolare.allegati %}
+          {% if not loop.first %}
                 <div class="gs-mt-3 gs-mb-3">
                   <strong>Allegato {{ n }}:</strong> {{ a.titolo }}
-                  <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {'circolare': c.circolare.id, 'allegato': n, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
-                  <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {'circolare': c.circolare.id, 'allegato': n, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+                  <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {circolare: c.circolare.id, allegato: n, tipo: 'D'}) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
+                  <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {circolare: c.circolare.id, allegato: n, tipo: 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
                 </div>
           {% endif %}
         {% endfor %}
@@ -108,7 +108,7 @@
         {% else %}
                 <div>
                   <em>La circolare non è stata ancora letta.</em>
-                  <a class="btn btn-xs btn-success pull-right gs-ml-3" href="{{ path('circolari_firma', {'circolare': c.circolare.id}) }}" role="button" title="Conferma la lettura della circolare"><strong>Conferma lettura</strong></a>
+                  <a class="btn btn-xs btn-success pull-right gs-ml-3" href="{{ path('circolari_firma', {circolare: c.circolare.id}) }}" role="button" title="Conferma la lettura della circolare"><strong>Conferma lettura</strong></a>
                 </div>
         {% endif %}
       {% else %}
@@ -127,9 +127,9 @@
     <strong class="gs-big">Nessuna circolare presente</strong>
   </div>
   {% endif %}
-  {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'circolari_bacheca'} %}
-  {% include 'include/modal-info.html.twig' %}
-  {% include 'include/modal-waiting.html.twig' %}
+  {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'circolari_bacheca'}) }}
+  {{ include('include/modal-info.html.twig') }}
+  {{ include('include/modal-waiting.html.twig') }}
 </div>
 {% endblock %}
 

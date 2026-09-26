@@ -8,9 +8,9 @@
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">Classe non definita</h1>
   {% endif %}
   <div class="gs-lessons-nav gs-mb-1">
-    {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+    {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
     <button class="gs-lessons-nav-date" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-    {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+    {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
   </div>
   {% if errore %}
   <div class="alert alert-warning" role="alert">
@@ -28,7 +28,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for k,v in dati['lezioni'] %}
+      {% for k, v in dati['lezioni'] %}
       <tr>
         <td class="gs-lessons-ora"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}>{{ k }}ª: <span class="gs-lessons-orario">{{ v.inizio }} - {{ v.fine }}</span></td>
         <td>
@@ -44,7 +44,7 @@
         <td><small>{{ (v.sostegno|first)|raw }}</small></td>
         {% endif %}
       </tr>
-        {% for g,m in v.materia|filter((m, g) => g != v.materia|keys|first) %}
+        {% for g, m in v.materia|filter((m, g) => g != v.materia|keys|first) %}
       <tr>
         <td>
           {% if g == 'R:S' %}<span class="gs-lessons-gruppo">Gruppo: Religione</span><br>{% elseif g == 'R:N' %}<span class="gs-lessons-gruppo">Gruppo: N.A.</span><br>{% elseif g == 'R:A' %}<span class="gs-lessons-gruppo">Gruppo: Mat. Alt.</span><br>{% elseif g[0:1] == 'C' %}<span class="gs-lessons-gruppo">Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ g[2:] }}</span><br>{% endif %}
@@ -98,7 +98,7 @@ $(document).ready(function() {
   $('#gs-button-date').datepicker()
     .on('changeDate', function(ev){
       $('#gs-button-date').datepicker('hide');
-      url = "{{ path('genitori_lezioni', {'data': '9999-99-99'}) }}";
+      url = "{{ path('genitori_lezioni', {data: '9999-99-99'}) }}";
       url = url.replace("9999-99-99", ev.format());
       window.location.href = url;
   });

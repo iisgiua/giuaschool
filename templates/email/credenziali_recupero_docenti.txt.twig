@@ -3,7 +3,6 @@ ISTITUTO DI ISTRUZIONE SUPERIORE
 
 Docente: {{ sesso }} {{ utente.nome }} {{ utente.cognome }}
 
-
 Nuove credenziali di accesso al Registro Elettronico:
   * Utente: {{ username }}
   * Password: {{ password }}
@@ -13,7 +12,6 @@ attenzione ad inserire correttamente caratteri maiuscoli e minuscoli, senza aggi
 
 Il Registro Elettronico è accessibile all'indirizzo internet seguente:
   {{ app.session.get('/CONFIG/ISTITUTO/url_registro') }}
-
 
 --------------------
 ATTENZIONE: questo messaggio è stato generato automaticamente a seguito di una

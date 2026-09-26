@@ -8,8 +8,8 @@
 <div class="modal-body">
 {% for r in dati.storico %}
   <h4 class="gs-h4 gs-mb-1">
-    <span>{{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i')}} alle {{ r.fine|date('G:i')}}</span>
-    <span class="gs-normal">({{ ('label.tipo_colloquio_'~r.tipo)|trans }}: {{ r.luogo }})</span>
+    <span>{{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i') }} alle {{ r.fine|date('G:i') }}</span>
+    <span class="gs-normal">({{ ('label.tipo_colloquio_' ~ r.tipo)|trans }}: {{ r.luogo }})</span>
     {% if not r.abilitato %}- DISABILITATO{% endif %}
   </h4>
   <div class="panel panel-default">

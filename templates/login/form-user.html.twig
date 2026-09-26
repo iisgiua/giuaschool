@@ -3,7 +3,7 @@
     <strong>
       Accesso
 {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
-  {% set lt = ['A','G','D','T']|filter(e => e not in app.session.get('/CONFIG/ACCESSO/id_provider_tipo')|split('')) %}
+  {% set lt = ['A', 'G', 'D', 'T']|filter(e => e not in app.session.get('/CONFIG/ACCESSO/id_provider_tipo')|split('')) %}
   {% for t in lt %}
       {% if t == 'A' %}ALUNNI{% elseif t == 'G' %}GENITORI{% elseif t == 'D' %}DOCENTI{% elseif t == 'T' %}PERSONALE ATA{% endif %}{% if not loop.last %},{% endif %}
   {% endfor %}

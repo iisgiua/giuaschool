@@ -1,13 +1,13 @@
 <ul class="nav navbar-nav gs-navbar-nav">
   <li{{ app.request.attributes.get('_route') == 'login_home' ? ' class="active"' }}><a href="{{ path('login_home') }}" title="Visualizza la pagina principale"><span class="glyphicon glyphicon-home gs-mr-2" aria-hidden="true"></span>Home</a></li>
-  <li class="dropdown{{ app.request.attributes.get('_route') in ['genitori_lezioni','genitori_argomenti'] ? ' active' }}">
+  <li class="dropdown{{ app.request.attributes.get('_route') in ['genitori_lezioni', 'genitori_argomenti'] ? ' active' }}">
     <a href="#" title="Lezioni svolte in classe: argomenti e attività" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-blackboard gs-mr-2" aria-hidden="true"></span>Lezioni</a>
     <ul role="menu" class="dropdown-menu gs-dropdown-menu">
       <li role="presentation"{{ app.request.attributes.get('_route') == 'genitori_lezioni' ? ' class="active"' }}><a href="{{ path('genitori_lezioni') }}" title="Mostra le lezioni svolte in classe giorno per giorno">Lezioni svolte</a></li>
       <li role="presentation"{{ app.request.attributes.get('_route') == 'genitori_argomenti' ? ' class="active"' }}><a href="{{ path('genitori_argomenti') }}" title="Mostra gli argomenti e le attività di ogni materia">Argomenti e attività</a></li>
     </ul>
   </li>
-  <li class="dropdown{{ app.request.attributes.get('_route') in ['genitori_voti','genitori_assenze','genitori_note','genitori_osservazioni'] ? ' active' }}">
+  <li class="dropdown{{ app.request.attributes.get('_route') in ['genitori_voti', 'genitori_assenze', 'genitori_note', 'genitori_osservazioni'] ? ' active' }}">
     <a href="#" title="Situazione dell'alunno: voti, assenze, note e osservazioni" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-search gs-mr-2" aria-hidden="true"></span>Situazione</a>
     <ul role="menu" class="dropdown-menu gs-dropdown-menu">
       <li role="presentation"{{ app.request.attributes.get('_route') == 'genitori_voti' ? ' class="active"' }}><a href="{{ path('genitori_voti') }}" title="Mostra le le valutazioni di ogni materia">Voti</a></li>
@@ -18,7 +18,7 @@
   </li>
   <li{{ app.request.attributes.get('_route') == 'genitori_pagelle' ? ' class="active"' }}><a href="{{ path('genitori_pagelle') }}" title="Pagelle e comunicazioni sugli scrutini"><span class="glyphicon glyphicon-file gs-mr-2" aria-hidden="true"></span>Pagelle</a></li>
   <li{{ app.request.attributes.get('_route')[:10] == 'richieste_' ? ' class="active"' }}><a href="{{ path('richieste_lista') }}" title="Gestione dei moduli di richiesta, autorizzazione e altro"><span class="glyphicon glyphicon-pencil gs-mr-2" aria-hidden="true"></span>Moduli</a></li>
-  <li class="dropdown{{ app.request.attributes.get('_route') in ['avvisi_bacheca','circolari_bacheca','documenti_bacheca'] ? ' active' }}">
+  <li class="dropdown{{ app.request.attributes.get('_route') in ['avvisi_bacheca', 'circolari_bacheca', 'documenti_bacheca'] ? ' active' }}">
     <a href="#" title="Visualizza circolari, avvisi e documenti" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a>
     <ul role="menu" class="dropdown-menu gs-dropdown-menu">
       <li{{ app.request.attributes.get('_route') == 'circolari_bacheca' ? ' class="active"' }} ><a href="{{ path('circolari_bacheca') }}" title="Visualizza le circolari indirizzate agli studenti">Circolari</a></li>

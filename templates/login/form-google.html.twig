@@ -2,7 +2,7 @@
   <div class="panel-title text-center">
     <strong>Accesso
   {% for t in app.session.get('/CONFIG/ACCESSO/id_provider_tipo')|split('') %}
-      {% if t == 'A' %}ALUNNI{% elseif t == 'G' %}GENITORI{% elseif t == 'D' %}DOCENTI{% elseif t == 'T' %}PERSONALE ATA{% endif %}{% if not loop.last and t in ['A','G','D','T'] %},{% endif %}
+      {% if t == 'A' %}ALUNNI{% elseif t == 'G' %}GENITORI{% elseif t == 'D' %}DOCENTI{% elseif t == 'T' %}PERSONALE ATA{% endif %}{% if not loop.last and t in ['A', 'G', 'D', 'T'] %},{% endif %}
   {% endfor %}
     </strong>
   </div>

@@ -15,7 +15,7 @@
       </div>
       <div class="form-group" title="{{ form.oggetto.vars.label|trans }}">
         <label class="sr-only control-label" for="circolare_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
-        {{ form_widget(form.oggetto, {'attr': {'style': 'width:30em'}}) }}
+        {{ form_widget(form.oggetto, {attr: {style: 'width:30em'}}) }}
       </div>
       <div class="form-group _col-sm-2">
         {{ form_widget(form.submit) }}
@@ -40,7 +40,7 @@
         <td>{{ c.circolare.data|date('d/m/Y') }}</td>
         <td><small>{{ c.circolare.titolo }}</small></td>
         <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {'circolare': c.circolare.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {circolare: c.circolare.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
         </td>
       </tr>
     {% endfor %}
@@ -51,9 +51,9 @@
     <strong class="gs-big">Nessuna circolare presente</strong>
   </div>
   {% endif %}
-  {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'circolari_archivio'} %}
-  {% include 'include/modal-remote.html.twig' %}
-  {% include 'include/modal-waiting.html.twig' %}
+  {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'circolari_archivio'}) }}
+  {{ include('include/modal-remote.html.twig') }}
+  {{ include('include/modal-waiting.html.twig') }}
 </div>
 {% endblock %}
 

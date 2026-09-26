@@ -31,7 +31,7 @@
             <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong>
           </a>
           {% for a in label.richiesta.allegati %}
-          <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id:  label.richiesta.id, documento: loop.index}) }}" title="Scarica l'allegato alla richiesta">
+          <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: label.richiesta.id, documento: loop.index}) }}" title="Scarica l'allegato alla richiesta">
             <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'allegato {{ loop.index }}</strong>
           </a>
           {% endfor %}

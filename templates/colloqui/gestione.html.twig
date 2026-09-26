@@ -28,17 +28,17 @@
         <td>
       {% if d.ricevimento.data < date('today') %}
           <span class="glyphicon glyphicon-ban-circle text-danger gs-mr-2" aria-hidden="true"></span>
-          <em>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i')}} alle {{ d.ricevimento.fine|date('G:i')}}</em>
+          <em>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i') }} alle {{ d.ricevimento.fine|date('G:i') }}</em>
       {% elseif d.ricevimento.abilitato %}
           <span class="glyphicon glyphicon-ok text-success gs-mr-2" aria-hidden="true"></span>
-          <strong>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i')}} alle {{ d.ricevimento.fine|date('G:i')}}</strong>
+          <strong>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i') }} alle {{ d.ricevimento.fine|date('G:i') }}</strong>
       {% else %}
           <span class="glyphicon glyphicon-remove text-danger gs-mr-2" aria-hidden="true"></span>
-          <strong>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i')}} alle {{ d.ricevimento.fine|date('G:i')}}</strong>
+          <strong>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i') }} alle {{ d.ricevimento.fine|date('G:i') }}</strong>
       {% endif %}
         </td>
         <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}{{ d.ricevimento.sede.nomeBreve }}{% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
-        <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}{{ ('label.tipo_colloquio_'~d.ricevimento.tipo)|trans }}{% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
+        <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}{{ ('label.tipo_colloquio_' ~ d.ricevimento.tipo)|trans }}{% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
         <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}<small>{{ d.ricevimento.luogo }}</small>{% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
         <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}{{ d.ricevimento.durata }} minuti ({{ d.ricevimento.numero }} colloqui){% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
         <td>
@@ -66,7 +66,7 @@
     <button class="btn btn-danger gs-modal-confirm-button gs-mr-3 gs-mb-1" title="Cancella i ricevimenti disabilitati" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_delete', {tipo: 'D'}) }}" data-text="{{ 'message.colloquio_cancella_disabilitati'|trans }}"><strong>Cancella disabilitati</strong></button>
     <button class="btn btn-danger gs-modal-confirm-button gs-mr-3 gs-mb-1" title="Cancella tutti i ricevimenti senza richieste" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_delete', {tipo: 'T'}) }}" data-text="{{ 'message.colloquio_cancella_tutti'|trans }}"><strong>Cancella tutti</strong></button>
   </div>
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.colloquio_modifica_con_richieste'} %}
+  {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.colloquio_modifica_con_richieste'}) }}
 </div>
 {% endblock %}
 

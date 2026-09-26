@@ -24,7 +24,7 @@
     <div class="text-right col-sm-6 gs-pr-2"><strong class="gs-big">TOTALE:</strong></div>
     <div class="col-sm-6 gs-pl-2"><strong class="gs-big">{{ (dati.totale.utenti / dati.destinatari.utenti * 100)|number_format(2) }}%</strong> ({{ dati.totale.utenti }} su {{ dati.destinatari.utenti }})</div>
   </div>
-{% for nome,v in dati.lista %}
+{% for nome, v in dati.lista %}
   {% if info.consultazione.campi[nome][0] == 'bool' %}
   <div class="text-center text-primary gs-mt-4"><strong class="gs-big">{{ nome|upper }}</strong></div>
     {% if 'GN' in info.consultazione.richiedenti %}

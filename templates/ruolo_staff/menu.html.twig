@@ -3,7 +3,7 @@
     <li role="presentation" class="dropdown{{ app.request.attributes.get('_route')[:6] == 'avvisi' ? ' active' }}">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Gestione degli avvisi">Avvisi<span class="caret gs-ml-3"></span></a>
       <ul class="dropdown-menu">
-        <li{{ app.request.attributes.get('_route')[:11] in ['avvisi_gest','avvisi_edit'] ? ' class="active"' }}><a href="{{ path('avvisi_gestione') }}" title="Gestione degli avvisi">Gestione</a></li>
+        <li{{ app.request.attributes.get('_route')[:11] in ['avvisi_gest', 'avvisi_edit'] ? ' class="active"' }}><a href="{{ path('avvisi_gestione') }}" title="Gestione degli avvisi">Gestione</a></li>
         <li{{ app.request.attributes.get('_route') == 'avvisi_archivio' ? ' class="active"' }}><a href="{{ path('avvisi_archivio') }}" title="Archivio degli avvisi degli anni passati">Archivio</a></li>
       </ul>
     </li>

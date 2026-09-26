@@ -19,19 +19,19 @@
     <div class="col-sm-8">
       <strong class="gs-big">Periodo:</strong>
       <div style="display:inline-block" class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ ((periodo and periodo != 'R' and periodo != 'X') ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ ((periodo and periodo != 'R' and periodo != 'X') ? ('label.periodo_' ~ periodo) : 'label.scegli_periodo')|trans }}<span class="caret gs-ml-3"></span></button>
         <ul style="z-index: 1010" class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p in ['A','P','S','F','G'] %}
+    {% for p in ['A', 'P', 'S', 'F', 'G'] %}
       {% if lista_periodi[p] is defined %}
-          <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_svolto', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
+          <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_svolto', {cattedra: cattedra.id, classe: classe.id, periodo: p}) }}">{{ ('label.periodo_' ~ p)|trans }}</a></li>
       {% endif %}
     {% endfor %}
         </ul>
       </div>
     </div>
     <div class="col-sm-4 text-right">
-    {% if cattedra.materia.tipo != 'S'  %}
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_scrutinio_proposte', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': 0}) }}" role="button" title="Visualizza le proposte dei voti"><span class="glyphicon glyphicon-pencil gs-mr-3"></span><strong>Proposte</strong></a>
+    {% if cattedra.materia.tipo != 'S' %}
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_scrutinio_proposte', {cattedra: cattedra.id, classe: classe.id, periodo: 0}) }}" role="button" title="Visualizza le proposte dei voti"><span class="glyphicon glyphicon-pencil gs-mr-3"></span><strong>Proposte</strong></a>
     {% endif %}
     </div>
   </div>
@@ -42,7 +42,7 @@
       <thead class="bg-success">
         <tr>
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
-        {% for materia,m in dati.materie %}
+        {% for materia, m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
           </th>
@@ -53,12 +53,12 @@
         </tr>
       </thead>
       <tbody>
-        {% for alunno,a in dati.alunni %}
+        {% for alunno, a in dati.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
           </td>
-          {% for materia,m in dati.materie %}
+          {% for materia, m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             {% if m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
@@ -68,7 +68,7 @@
           </td>
           {% endfor %}
           <td>
-            <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno] }}</span></span>
+            <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success') }}">{{ dati.medie[alunno] }}</span></span>
           </td>
         </tr>
         {% endfor %}
@@ -76,14 +76,14 @@
     </table>
   </div>
       {% else %}
-        {% for g,gd in dati.gruppi %}
+        {% for g, gd in dati.gruppi %}
   <div id="gs-fixed-header">
     <table class="table table-bordered table-hover table-striped">
       <caption class="text-primary text-center gs-h2">Classe {{ classe }}-{{ g }}</caption>
       <thead class="bg-success">
         <tr>
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
-        {% for materia,m in gd.materie %}
+        {% for materia, m in gd.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
           </th>
@@ -94,12 +94,12 @@
         </tr>
       </thead>
       <tbody>
-        {% for alunno,a in gd.alunni %}
+        {% for alunno, a in gd.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
           </td>
-          {% for materia,m in gd.materie %}
+          {% for materia, m in gd.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             {% if m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
@@ -109,7 +109,7 @@
           </td>
           {% endfor %}
           <td>
-            <span class="gs-big"><span class="label label-{{ gd.medie[alunno] < 5 ? 'danger' : (gd.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ gd.medie[alunno] }}</span></span>
+            <span class="gs-big"><span class="label label-{{ gd.medie[alunno] < 5 ? 'danger' : (gd.medie[alunno] < 6 ? 'warning' : 'success') }}">{{ gd.medie[alunno] }}</span></span>
           </td>
         </tr>
         {% endfor %}
@@ -125,7 +125,7 @@
       <thead class="bg-success">
         <tr>
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
-        {% for materia,m in dati.materie %}
+        {% for materia, m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
           </th>
@@ -139,12 +139,12 @@
         </tr>
       </thead>
       <tbody>
-        {% for alunno,a in dati.alunni %}
+        {% for alunno, a in dati.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
           </td>
-          {% for materia,m in dati.materie %}
+          {% for materia, m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             {% if m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
@@ -154,7 +154,7 @@
           </td>
           {% endfor %}
           <td>
-            <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno] }}</span></span>
+            <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success') }}">{{ dati.medie[alunno] }}</span></span>
           </td>
           <td>
           {% if dati.esiti[alunno].esito == 'A' %}
@@ -171,14 +171,14 @@
     </table>
   </div>
       {% else %}
-        {% for g,gd in dati.gruppi %}
+        {% for g, gd in dati.gruppi %}
   <div id="gs-fixed-header">
     <table class="table table-bordered table-hover table-striped">
       <caption class="text-primary text-center gs-h2">Classe {{ classe }}-{{ g }}</caption>
       <thead class="bg-success">
         <tr>
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
-          {% for materia,m in gd.materie %}
+          {% for materia, m in gd.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
           </th>
@@ -192,12 +192,12 @@
         </tr>
       </thead>
       <tbody>
-          {% for alunno,a in gd.alunni %}
+          {% for alunno, a in gd.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
           </td>
-            {% for materia,m in gd.materie %}
+            {% for materia, m in gd.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
               {% if m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
@@ -207,7 +207,7 @@
           </td>
             {% endfor %}
           <td>
-            <span class="gs-big"><span class="label label-{{ gd.medie[alunno] < 5 ? 'danger' : (gd.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ gd.medie[alunno] }}</span></span>
+            <span class="gs-big"><span class="label label-{{ gd.medie[alunno] < 5 ? 'danger' : (gd.medie[alunno] < 6 ? 'warning' : 'success') }}">{{ gd.medie[alunno] }}</span></span>
           </td>
           <td>
             {% if gd.esiti[alunno].esito == 'A' %}
@@ -232,7 +232,7 @@
       <thead class="bg-success">
         <tr>
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
-        {% for materia,m in dati.materie %}
+        {% for materia, m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
           </th>
@@ -246,12 +246,12 @@
         </tr>
       </thead>
       <tbody>
-        {% for alunno,a in dati.alunni %}
+        {% for alunno, a in dati.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
           </td>
-          {% for materia,m in dati.materie %}
+          {% for materia, m in dati.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             {% if m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
@@ -268,11 +268,11 @@
           {% endfor %}
           <td>
               {% if dati.esiti[alunno].esito == 'X' and dati.rinviati.esiti[alunno] is defined and dati.rinviati.esiti[alunno].esito != 'X' %}
-            <span class="gs-big"><span class="label label-{{ dati.rinviati.medie[alunno] < 5 ? 'danger' : (dati.rinviati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.rinviati.medie[alunno] }}</span></span>
+            <span class="gs-big"><span class="label label-{{ dati.rinviati.medie[alunno] < 5 ? 'danger' : (dati.rinviati.medie[alunno] < 6 ? 'warning' : 'success') }}">{{ dati.rinviati.medie[alunno] }}</span></span>
               {% elseif dati.esiti[alunno].esito == 'X' %}
-            <span class="gs-big"><span class="label label-{{ dati.finale.medie[alunno] < 5 ? 'danger' : (dati.finale.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.finale.medie[alunno] }}</span></span>
+            <span class="gs-big"><span class="label label-{{ dati.finale.medie[alunno] < 5 ? 'danger' : (dati.finale.medie[alunno] < 6 ? 'warning' : 'success') }}">{{ dati.finale.medie[alunno] }}</span></span>
               {% else %}
-            <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.medie[alunno] }}</span></span>
+            <span class="gs-big"><span class="label label-{{ dati.medie[alunno] < 5 ? 'danger' : (dati.medie[alunno] < 6 ? 'warning' : 'success') }}">{{ dati.medie[alunno] }}</span></span>
               {% endif %}
           </td>
           <td>
@@ -290,14 +290,14 @@
     </table>
   </div>
       {% else %}
-        {% for g,gd in dati.gruppi %}
+        {% for g, gd in dati.gruppi %}
   <div id="gs-fixed-header">
     <table class="table table-bordered table-hover table-striped">
       <caption class="text-primary text-center gs-h2">Classe {{ classe }}-{{ g }}</caption>
       <thead class="bg-success">
         <tr>
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
-          {% for materia,m in gd.materie %}
+          {% for materia, m in gd.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
           </th>
@@ -311,12 +311,12 @@
         </tr>
       </thead>
       <tbody>
-          {% for alunno,a in gd.alunni %}
+          {% for alunno, a in gd.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
           </td>
-            {% for materia,m in gd.materie %}
+            {% for materia, m in gd.materie %}
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
               {% if m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
@@ -333,11 +333,11 @@
           {% endfor %}
           <td>
             {% if gd.esiti[alunno].esito == 'X' and gd.rinviati.esiti[alunno] is defined and gd.rinviati.esiti[alunno].esito != 'X' %}
-            <span class="gs-big"><span class="label label-{{ dati.rinviati.gruppi[g].medie[alunno] < 5 ? 'danger' : (dati.rinviati.gruppi[g].medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.rinviati.gruppi[g].medie[alunno] }}</span></span>
+            <span class="gs-big"><span class="label label-{{ dati.rinviati.gruppi[g].medie[alunno] < 5 ? 'danger' : (dati.rinviati.gruppi[g].medie[alunno] < 6 ? 'warning' : 'success') }}">{{ dati.rinviati.gruppi[g].medie[alunno] }}</span></span>
             {% elseif gd.esiti[alunno].esito == 'X' %}
-            <span class="gs-big"><span class="label label-{{ dati.finale.gruppi[g].medie[alunno] < 5 ? 'danger' : (dati.finale.gruppi[g].medie[alunno] < 6 ? 'warning' : 'success')}}">{{ dati.finale.gruppi[g].medie[alunno] }}</span></span>
+            <span class="gs-big"><span class="label label-{{ dati.finale.gruppi[g].medie[alunno] < 5 ? 'danger' : (dati.finale.gruppi[g].medie[alunno] < 6 ? 'warning' : 'success') }}">{{ dati.finale.gruppi[g].medie[alunno] }}</span></span>
             {% else %}
-            <span class="gs-big"><span class="label label-{{ gd.medie[alunno] < 5 ? 'danger' : (gd.medie[alunno] < 6 ? 'warning' : 'success')}}">{{ gd.medie[alunno] }}</span></span>
+            <span class="gs-big"><span class="label label-{{ gd.medie[alunno] < 5 ? 'danger' : (gd.medie[alunno] < 6 ? 'warning' : 'success') }}">{{ gd.medie[alunno] }}</span></span>
             {% endif %}
           </td>
           <td>
@@ -370,7 +370,7 @@
         </tr>
       </thead>
       <tbody>
-      {% for alunno,a in dati.alunni %}
+      {% for alunno, a in dati.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
@@ -399,7 +399,7 @@
           </td>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
           {% if a.media %}
-            <span class="gs-big"><span class="label label-{{ a.media < 6 ? 'danger' : 'success' }}">{{ a.media|number_format(2,',') }}</span></span>
+            <span class="gs-big"><span class="label label-{{ a.media < 6 ? 'danger' : 'success' }}">{{ a.media|number_format(2, ',') }}</span></span>
           {% else %}
             <span> --- </span>
           {% endif %}
@@ -435,7 +435,7 @@
       </tbody>
     </table>
   </div>
-      {% include 'include/modal-info.html.twig' %}
+      {{ include('include/modal-info.html.twig') }}
     {% else %}
   <div class="alert alert-info gs-mt-4" role="alert">
     <strong class="gs-big">{{ 'message.no_scrutini_svolti'|trans }}</strong>

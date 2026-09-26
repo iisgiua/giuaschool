@@ -14,7 +14,7 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio per gli esami degli studenti con sospensione del giudizio<br>della classe {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">{% if dati.periodo == 'G' %}Alunni con giudizio sospeso{% else %}Sessione supplettiva per gli alunni con giudizio sospeso{% endif %}</h2>
-    {% include 'include/modal-error.html.twig' %}
+    {{ include('include/modal-error.html.twig') }}
     {% for messaggio in app.flashes('avviso') %}
       {% if loop.first %}
   <div class="alert alert-warning gs-mb-3" role="alert">
@@ -30,10 +30,10 @@
       <thead class="bg-success">
         <tr>
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
-    {% for materia,m in dati.materie %}
+    {% for materia, m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
       {% if dati.errori[materia] is defined and dati.errori[materia] == 1 and dati.modifica %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci i voti mancanti" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_proposte', {'classe': classe.id, 'materia': materia, 'periodo': periodo}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci i voti mancanti" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_proposte', {classe: classe.id, materia: materia, periodo: periodo}) }}"><span class="glyphicon glyphicon-edit"></span></button>
             <br>
       {% endif %}
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
@@ -42,15 +42,15 @@
         </tr>
       </thead>
       <tbody>
-    {% for alunno,a in dati.alunni %}
+    {% for alunno, a in dati.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
       {% if a.bes != 'N' %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_'~a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_' ~ a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
       {% endif %}
           </td>
-      {% for materia,m in dati.materie %}
+      {% for materia, m in dati.materie %}
         {% if m.tipo != 'R' and dati.voti[alunno][materia].unico < 6 %}
             <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2 bg-danger">
               <span class="label {{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'label-danger' : 'label-warning' }}" title="Valutazione dello scrutinio finale">{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</span>
@@ -82,8 +82,8 @@
   </div>
     {% endif %}
     {{ form_end(form) }}
-    {% include 'include/modal-remote.html.twig' %}
-    {% include 'include/modal-waiting.html.twig' %}
+    {{ include('include/modal-remote.html.twig') }}
+    {{ include('include/modal-waiting.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}

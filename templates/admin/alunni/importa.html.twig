@@ -7,8 +7,8 @@
   <div class="card bg-success border rounded mb-3">
     <div class="card-header text-white py-1"><strong>Nuovi utenti</strong></div>
     <div class="card-body py-1">
-    {% for k,v in dati.NEW %}
-      <p class="text-white my-0 small"># {{ k }}: {% for fk,fv in v %}{% if not loop.first %}, {% endif%}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
+    {% for k, v in dati.NEW %}
+      <p class="text-white my-0 small"># {{ k }}: {% for fk, fv in v %}{% if not loop.first %}, {% endif %}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
     {% endfor %}
     </div>
   </div>
@@ -17,8 +17,8 @@
   <div class="card bg-warning border rounded mb-3">
     <div class="card-header text-white py-1"><strong>Utenti modificati</strong></div>
     <div class="card-body py-1">
-    {% for k,v in dati.EDIT %}
-      <p class="text-white my-0 small"># {{ k }}: {% for fk,fv in v %}{% if not loop.first %}, {% endif%}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
+    {% for k, v in dati.EDIT %}
+      <p class="text-white my-0 small"># {{ k }}: {% for fk, fv in v %}{% if not loop.first %}, {% endif %}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
     {% endfor %}
     </div>
   </div>
@@ -27,8 +27,8 @@
   <div class="card bg-info border rounded mb-3">
     <div class="card-header text-white py-1"><strong>Utenti non modificati</strong></div>
     <div class="card-body py-1">
-    {% for k,v in dati.NONE %}
-      <p class="text-white my-0 small"># {{ k }}: {% for fk,fv in v %}{% if not loop.first %}, {% endif%}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
+    {% for k, v in dati.NONE %}
+      <p class="text-white my-0 small"># {{ k }}: {% for fk, fv in v %}{% if not loop.first %}, {% endif %}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
     {% endfor %}
     </div>
   </div>
@@ -37,8 +37,8 @@
   <div class="card bg-info border rounded mb-3">
     <div class="card-header text-white py-1"><strong>Utenti non inseriti</strong></div>
     <div class="card-body py-1">
-    {% for k,v in dati.NONEW %}
-      <p class="text-white my-0 small"># {{ k }}: {% for fk,fv in v %}{% if not loop.first %}, {% endif%}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
+    {% for k, v in dati.NONEW %}
+      <p class="text-white my-0 small"># {{ k }}: {% for fk, fv in v %}{% if not loop.first %}, {% endif %}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
     {% endfor %}
     </div>
   </div>

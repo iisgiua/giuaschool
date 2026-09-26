@@ -2,7 +2,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_voti'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_voti'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome ~ ' ' ~ alunno.cognome }}</h1>
   {% if errore %}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
@@ -14,14 +14,14 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per cambiare la materia da visualizzare">{{ info.materia }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for k,v in materie %}
-          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('genitori_voti', {'idmateria': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% for k, v in materie %}
+          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('genitori_voti', {idmateria: v.id}) }}">{{ v.nomeBreve }}</a></li>
     {% endfor %}
         </ul>
       </div>
     </div>
   </div>
-    {% for periodo,v in dati %}
+    {% for periodo, v in dati %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -35,12 +35,12 @@
       </tr>
     </thead>
     <tbody>
-      {% for materia,v1 in v %}
-        {% for data,v2 in v1 %}
+      {% for materia, v1 in v %}
+        {% for data, v2 in v1 %}
           {% for e in v2 %}
       <tr>
         <td><strong>{{ e.data }}</strong></td>
-        <td>{{ ('label.voti_'~e.tipo)|trans }}</td>
+        <td>{{ ('label.voti_' ~ e.tipo)|trans }}</td>
         <td><small>{{ e.docente }}</small></td>
         <td><small>{{ e.argomento }}</small></td>
         <td>

@@ -2,13 +2,13 @@
 
 {% block pagina_menu %}
   {% if is_granted('ROLE_DOCENTE') %}
-    {% include 'ruolo_docente/menu.html.twig' with {'attivo': 'agenda'} %}
+    {{ include('ruolo_docente/menu.html.twig', {attivo: 'agenda'}) }}
   {% elseif is_granted('ROLE_ATA') %}
-    {% include 'ruolo_ata/menu.html.twig' %}
+    {{ include('ruolo_ata/menu.html.twig') }}
   {% elseif is_granted('ROLE_GENITORE') %}
-    {% include 'ruolo_genitore/menu_genitore.html.twig' %}
+    {{ include('ruolo_genitore/menu_genitore.html.twig') }}
   {% elseif is_granted('ROLE_ALUNNO') %}
-    {% include 'ruolo_genitore/menu_alunno.html.twig' %}
+    {{ include('ruolo_genitore/menu_alunno.html.twig') }}
   {% endif %}
 {% endblock %}
 
@@ -23,13 +23,13 @@
       <div class="alert alert-warning" role="alert">
         <div class="text-center"><strong class="gs-big">{{ (info.tipo == 'V' ? 'message.verifiche_presenti' : 'message.compiti_presenti')|trans|raw }}</strong></div>
         <ol>
-    {% for k,a in info.previsti.avvisi %}
+    {% for k, a in info.previsti.avvisi %}
           <li><strong>Materia: {{ a.cattedra.materia.tipo == 'S' ? a.materia.nomeBreve : a.cattedra.materia.nomeBreve }}</strong><br>
             <small><strong>Destinatari:
       {% if info.previsti.destinatari[k]|length > 0 %}
             {{ info.previsti.destinatari[k]|raw }}
       {% else %}
-              {% if a.cattedra.classe.gruppo == '' %}TUTTA LA CLASSE{% else %}GRUPPO {{a.cattedra.classe}}{% endif %}
+              {% if a.cattedra.classe.gruppo == '' %}TUTTA LA CLASSE{% else %}GRUPPO {{ a.cattedra.classe }}{% endif %}
       {% endif %}
             </strong></small>
           </li>
@@ -107,7 +107,7 @@
     </div>
   </div>
 </div>
-  {% include 'include/modal-waiting.html.twig' %}
+  {{ include('include/modal-waiting.html.twig') }}
 {% endblock %}
 
 {% block pagina_css %}
@@ -230,7 +230,7 @@ $(document).ready(function() {
   var cattedre_classe = [{% for c in dati.choice %}{{ c.classe.id }},{% endfor %}];
   var cattedre_sede = [{% for c in dati.choice %}{{ c.classe.sede.id }},{% endfor %}];
   var cattedre_sost = [{% for c in dati.choice %}{{ c.materia.tipo == 'S' ? 1 : 0 }},{% endfor %}];
-  var cattedre_alu = [{% for c in dati.choice %}{{ c.alunno ? ('['~c.alunno.id~',"'~c.alunno.cognome~' '~c.alunno.nome~' ('~c.alunno.dataNascita|date('d/m/Y')~')"]')|raw : 'null' }},{% endfor %}];
+  var cattedre_alu = [{% for c in dati.choice %}{{ c.alunno ? ('[' ~ c.alunno.id ~ ',"' ~ c.alunno.cognome ~ ' ' ~ c.alunno.nome ~ ' (' ~ c.alunno.dataNascita|date('d/m/Y') ~ ')"]')|raw : 'null' }},{% endfor %}];
   var idc = $('#avviso_cattedra').val();
   if (cattedre_sost[idc]) {
     var idm = $('#avviso_materia').val();

@@ -10,11 +10,11 @@
         {{ form_widget(form[0].sede) }}
       </div>
       <div class="input-group date">
-        {{ form_widget(form[0].inizio, {'attr': {'widget': false}}) }}
+        {{ form_widget(form[0].inizio, {attr: {widget: false}}) }}
         <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
       </div>
       <div class="input-group date">
-        {{ form_widget(form[0].fine, {'attr': {'widget': false}}) }}
+        {{ form_widget(form[0].fine, {attr: {widget: false}}) }}
         <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
       </div>
       <div class="form-group">
@@ -44,14 +44,14 @@
         <td><strong class="big">{{ c.classe }}</strong></td>
         <td><strong class="big">{{ c.tot }}</strong> ({{ c.nc }} note di classe, {{ c.ni }} note individuali)</td>
         <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza le note disciplinari della classe" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('scheda_note', {'classe': c.classe.id, 'inizio': info.inizio, 'fine': info.fine}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2" ></span>Mostra note</button>
+          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza le note disciplinari della classe" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('scheda_note', {classe: c.classe.id, inizio: info.inizio, fine: info.fine}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2" ></span>Mostra note</button>
         </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
-    {% include 'include/modal-remote.html.twig' %}
-    {% include 'include/paginate.html.twig' with {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'staff_studenti_condotta'} %}
+    {{ include('include/modal-remote.html.twig') }}
+    {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'staff_studenti_condotta'}) }}
   {% endif %}
 </div>
 {% endblock %}

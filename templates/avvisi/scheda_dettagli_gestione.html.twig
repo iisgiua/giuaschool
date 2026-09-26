@@ -65,8 +65,8 @@
   <div class="row gs-mt-2">
     <div class="col-sm-2"><strong>Allegati:</strong></div>
     <div class="col-sm-10">
-    {% for n,a in avviso.allegati %}
-      <a target="_blank" href="{{ path('avvisi_download', {'avviso': avviso.id, 'allegato': n}) }}" title="Scarica l'allegato"><strong>{{ a.titolo }}</strong></a><br>
+    {% for n, a in avviso.allegati %}
+      <a target="_blank" href="{{ path('avvisi_download', {avviso: avviso.id, allegato: n}) }}" title="Scarica l'allegato"><strong>{{ a.titolo }}</strong></a><br>
     {% endfor %}
     </div>
   </div>
@@ -211,7 +211,7 @@
     <div id="gs-collapse-coordinatori" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
           {% for u in dati.statistiche.coordinatori.elenco %}
       <div class="row">
-        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
+        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-' ~ u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.username }})</div>
         <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
       </div>
           {% endfor %}
@@ -243,7 +243,7 @@
     <div id="gs-collapse-genitori" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
           {% for u in dati.statistiche.genitori.elenco %}
       <div class="row">
-        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.cognome_gen == '#NESSUN DATO#' ? '--' : u.cognome_gen }} {{ u.nome_gen == '#NESSUN DATO#' ? '--' : u.nome_gen }})</div>
+        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-' ~ u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.cognome_gen == '#NESSUN DATO#' ? '--' : u.cognome_gen }} {{ u.nome_gen == '#NESSUN DATO#' ? '--' : u.nome_gen }})</div>
         <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
       </div>
           {% endfor %}
@@ -259,7 +259,7 @@
     <div id="gs-collapse-alunni" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
           {% for u in dati.statistiche.alunni.elenco %}
       <div class="row">
-        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }}</div>
+        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-' ~ u.gruppo }} - {{ u.cognome }} {{ u.nome }}</div>
         <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
       </div>
           {% endfor %}
@@ -275,7 +275,7 @@
     <div id="gs-collapse-rappresentanti_L" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
         {% for u in dati.statistiche.rappresentanti_L.elenco %}
       <div class="row">
-        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.cognome_gen == '#NESSUN DATO#' ? '--' : u.cognome_gen }} {{ u.nome_gen == '#NESSUN DATO#' ? '--' : u.nome_gen }})</div>
+        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-' ~ u.gruppo }} - {{ u.cognome }} {{ u.nome }} ({{ u.cognome_gen == '#NESSUN DATO#' ? '--' : u.cognome_gen }} {{ u.nome_gen == '#NESSUN DATO#' ? '--' : u.nome_gen }})</div>
         <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
       </div>
         {% endfor %}
@@ -291,7 +291,7 @@
     <div id="gs-collapse-rappresentanti_S" class="collapse bg-info gs-ml-4 gs-mr-2 gs-pr-2 gs-pl-2">
         {% for u in dati.statistiche.rappresentanti_S.elenco %}
       <div class="row">
-        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-'~u.gruppo }} - {{ u.cognome }} {{ u.nome }}</div>
+        <div class="col-sm-8">{{ u.anno }}{{ u.sezione }}{{ u.gruppo ? '-' ~ u.gruppo }} - {{ u.cognome }} {{ u.nome }}</div>
         <div class="col-sm-4 text-right">{{ u.letto|date('d/m/Y H:i') }}</div>
       </div>
         {% endfor %}
@@ -302,7 +302,7 @@
     <div class="gs-ml-4">
       Classi:  {{ dati.statistiche.classi.percentuale|number_format(0) }}% ({{ dati.statistiche.classi.letti }} su {{ dati.statistiche.classi.totali }})
       {% if dati.statistiche.classi.letti < dati.statistiche.classi.totali %}
-      <br><em class="gs-ml-2">Da leggere in:</em> {% for c in dati.statistiche.classi.elenco %}{{ c.anno }}{{ c.sezione }}{{ c.gruppo ? '-'~c.gruppo }}{{ not loop.last ? ', '}}{% endfor %}
+      <br><em class="gs-ml-2">Da leggere in:</em> {% for c in dati.statistiche.classi.elenco %}{{ c.anno }}{{ c.sezione }}{{ c.gruppo ? '-' ~ c.gruppo }}{{ not loop.last ? ', ' }}{% endfor %}
       {% endif %}
     </div>
     {% endif %}

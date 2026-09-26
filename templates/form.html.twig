@@ -6,13 +6,13 @@
   <div class="form-group">
     <div class="{{ block('form_label_class') }}"></div>
     <div class="{{ block('form_group_class') }}">
-      {{ form_widget(form, {'attr': {'widget': false, 'class': attr.class|default('btn-default') ~ ' gs-mr-3'}}) }}
+      {{ form_widget(form, {attr: {widget: false, class: attr.class|default('btn-default') ~ ' gs-mr-3'}}) }}
   {% elseif attr.widget is defined and attr.widget == 'gs-button-end' %}
-      {{ form_widget(form, {'attr': {'widget': false, 'class': attr.class|default('btn-default')}}) }}
+      {{ form_widget(form, {attr: {widget: false, class: attr.class|default('btn-default')}}) }}
     </div>
   </div>
   {% elseif attr.widget is defined and attr.widget == 'gs-button-inline' %}
-      {{ form_widget(form, {'attr': {'widget': false, 'class': attr.class|default('btn-default') ~ ' gs-mr-3'}}) }}
+      {{ form_widget(form, {attr: {widget: false, class: attr.class|default('btn-default') ~ ' gs-mr-3'}}) }}
   {% else %}
   <div class="form-group">
     <div class="{{ block('form_label_class') }}"></div>
@@ -36,7 +36,7 @@
 {% apply spaceless %}
   {% if attr.widget is defined and attr.widget == 'gs-picker' %}
     <div class="input-group date">
-      {{ form_widget(form, {'attr': {'widget': false, 'autocomplete': 'off'}}) }}
+      {{ form_widget(form, {attr: {widget: false, autocomplete: 'off'}}) }}
       <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
     </div>
   {% else %}
@@ -49,7 +49,7 @@
 {% apply spaceless %}
   {% if attr.widget is defined and attr.widget == 'gs-picker' %}
     <div class="input-group time">
-      {{ form_widget(form, {'attr': {'widget': false, 'autocomplete': 'off'}}) }}
+      {{ form_widget(form, {attr: {widget: false, autocomplete: 'off'}}) }}
       <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-time"></span></span>
     </div>
   {% else %}
@@ -70,7 +70,7 @@
     {% set num_col = 4 %}
   {% endif %}
   {% if num_col is defined %}
-    {% set label_attr = label_attr|merge({class: label_attr.class|replace({('checkbox-grouped-'~num_col): 'gs-checkbox-inline col-sm-'~(12/num_col)})|trim}) %}
+    {% set label_attr = label_attr|merge({class: label_attr.class|replace({('checkbox-grouped-' ~ num_col): 'gs-checkbox-inline col-sm-' ~ (12 / num_col)})|trim}) %}
     {% for group_label, group in choices %}
       <div class="gs-big text-center"><strong><em>{{ group_label }}</em></strong></div>
       <div class="clearfix">
@@ -87,7 +87,7 @@
     <div class="row">
       <div class="col-sm-6">
         {% for child in form %}
-          {% if loop.index <= (((form.children|length)+1)/2) %}
+          {% if loop.index <= (((form.children|length) + 1) / 2) %}
             {{- form_widget(child, {
                 parent_label_class: label_attr.class|default(''),
                 translation_domain: choice_translation_domain,
@@ -97,7 +97,7 @@
       </div>
       <div class="col-sm-6">
         {% for child in form %}
-          {% if loop.index > (((form.children|length)+1)/2) %}
+          {% if loop.index > (((form.children|length) + 1) / 2) %}
             {{- form_widget(child, {
                 parent_label_class: label_attr.class|default(''),
                 translation_domain: choice_translation_domain,

@@ -4,12 +4,12 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=0.8, minimum-scale=0.8, maximum-scale=0.8, viewport-fit=cover">
-    <meta name="keywords" content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0 .. (app.session.get('/CONFIG/ISTITUTO/num_sedi')-1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_citta')|lower }}{% endfor %}">
+    <meta name="keywords" content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0..(app.session.get('/CONFIG/ISTITUTO/num_sedi') - 1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_citta')|lower }}{% endfor %}">
     <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}">
     <meta name="author" content="Antonello Dessì">
     <title>{{ pagina_titolo|trans }}</title>
     <link href="{{ asset('vendor/bootstrap-italia/css/bootstrap-italia.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/main.css?v='~(filedate('css/main.css')|date('U'))) }}" rel="stylesheet">
+    <link href="{{ asset('css/main.css?v=' ~ (filedate('css/main.css')|date('U'))) }}" rel="stylesheet">
 {% block pagina_css %}
 {% endblock %}
 {% block pagina_js_inizio %}
@@ -36,13 +36,13 @@
     <link rel="mask-icon" href="{{ asset('safari-pinned-tab.svg') }}" color="#0066CC">
   </head>
   <body>
-{### scorciatoie per tastiera/screen reader ###}
+{## # scorciatoie per tastiera/screen reader # ##}
     <div class="skiplinks">
       <a class="sr-only sr-only-focusable" href="#gs-main">Vai al contenuto</a>
       <a class="sr-only sr-only-focusable" href="#gs-footer">Vai a fine pagina</a>
     </div>
-{### FINE scorciatoie per tastiera/screen reader ###}
-{### intestazione pagina ###}
+{## # FINE scorciatoie per tastiera/screen reader # ##}
+{## # intestazione pagina # ##}
     <header id="gs-header" class="it-header-wrapper it-header-sticky">
       <div class="it-header-slim-wrapper p-0">
         <div class="container-fluid">
@@ -81,7 +81,7 @@
                         <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#user"></use>
                       </svg>
                     </span>
-                    <span class="d-none d-lg-block">{% if is_granted('ROLE_GENITORE') %}{{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %} <small>({{ ('label.'~app.user.roles[0])|trans }})</small></span>
+                    <span class="d-none d-lg-block">{% if is_granted('ROLE_GENITORE') %}{{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %} <small>({{ ('label.' ~ app.user.roles[0])|trans }})</small></span>
                   </a>
   {% if is_granted('IS_IMPERSONATOR') %}
                   <a class="btn btn-default btn-icon rounded-0" href="{{ path('sistema_alias_exit') }}" title="{{ 'title.alias_exit'|trans }}">
@@ -113,18 +113,18 @@
           </div>
         </div>
       </div>
-{### menu ###}
+{## # menu # ##}
 {{ include('admin/layout-menu.html.twig') }}
-{### FINE menu ###}
+{## # FINE menu # ##}
     </header>
-{### FINE intestazione pagina ###}
-{### contenuto pagina ###}
+{## # FINE intestazione pagina # ##}
+{## # contenuto pagina # ##}
     <main id="gs-main" class="clearfix pb-5">
 {% block pagina_contenuto %}
 {% endblock %}
     </main>
-{### FINE contenuto pagina ###}
-{### piè di pagina ###}
+{## # FINE contenuto pagina # ##}
+{## # piè di pagina # ##}
     <footer id="gs-footer" class="it-footer clearfix">
       <div class="it-footer-main">
         <div class="container">
@@ -138,17 +138,17 @@
                   </a>
                 </h2>
                 <h3 class="d-none d-md-block">
-                  {% for ks in 0 .. (app.session.get('/CONFIG/ISTITUTO/num_sedi')-1) %}{{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_citta') }}{{ not loop.last ? ' - '}}{% endfor %}
+                  {% for ks in 0..(app.session.get('/CONFIG/ISTITUTO/num_sedi') - 1) %}{{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_citta') }}{{ not loop.last ? ' - ' }}{% endfor %}
                 </h3>
               </div>
             </div>
           </section>
           <section>
             <div class="row pt-4 pb-2">
-              {% for ks in 0 .. (app.session.get('/CONFIG/ISTITUTO/num_sedi')-1) %}
+              {% for ks in 0..(app.session.get('/CONFIG/ISTITUTO/num_sedi') - 1) %}
               <div class="col-lg-3 col-md-6">
-                <h4>{{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_nome') }}</h4>
-                <p>{{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_telefono') }}</p>
+                <h4>{{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_nome') }}</h4>
+                <p>{{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_telefono') }}</p>
               </div>
               {% endfor %}
               <div class="col-lg-3 col-md-6">
@@ -227,20 +227,20 @@
         </div>
       </div>
     </footer>
-{### FINE piè di pagina ###}
-{### link TornaSu ###}
+{## # FINE piè di pagina # ##}
+{## # link TornaSu # ##}
     <a class="back-to-top back-to-top-small shadow" href="#" aria-hidden="true" data-attribute="back-to-top" title="Vai a inizio pagina">
       <svg class="icon icon-light" aria-hidden="true">
         <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#arrow-up"></use>
       </svg>
     </a>
-{### FINE link TornaSu ###}
-{### caricamento javascript ###}
+{## # FINE link TornaSu # ##}
+{## # caricamento javascript # ##}
     <script>window.__PUBLIC_PATH__ = "{{ asset('vendor/bootstrap-italia/fonts') }}"</script>
     <script src="{{ asset('vendor/bootstrap-italia/js/bootstrap-italia.bundle.min.js') }}"></script>
-    <script src="{{ asset('js/main.js?v='~(filedate('js/main.js')|date('U'))) }}"></script>
+    <script src="{{ asset('js/main.js?v=' ~ (filedate('js/main.js')|date('U'))) }}"></script>
 {% block pagina_js_fine %}
 {% endblock %}
-{### FINE caricamento javascript ###}
+{## # FINE caricamento javascript # ##}
   </body>
 </html>

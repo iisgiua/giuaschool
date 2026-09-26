@@ -7,8 +7,8 @@
   <div class="card bg-success border rounded mb-3">
     <div class="card-header text-white py-1"><strong>Dati inseriti</strong></div>
     <div class="card-body py-1">
-    {% for k,v in dati.NEW %}
-      <p class="text-white my-0 small"># {{ k }}: {% for fk,fv in v %}{% if not loop.first %}, {% endif%}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
+    {% for k, v in dati.NEW %}
+      <p class="text-white my-0 small"># {{ k }}: {% for fk, fv in v %}{% if not loop.first %}, {% endif %}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
     {% endfor %}
     </div>
   </div>
@@ -17,8 +17,8 @@
   <div class="card bg-warning border rounded mb-3">
     <div class="card-header text-white py-1"><strong>Dati modificati</strong></div>
     <div class="card-body py-1">
-    {% for k,v in dati.EDIT %}
-      <p class="text-white my-0 small"># {{ k }}: {% for fk,fv in v %}{% if not loop.first %}, {% endif%}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
+    {% for k, v in dati.EDIT %}
+      <p class="text-white my-0 small"># {{ k }}: {% for fk, fv in v %}{% if not loop.first %}, {% endif %}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
     {% endfor %}
     </div>
   </div>
@@ -27,8 +27,8 @@
   <div class="card bg-info border rounded mb-3">
     <div class="card-header text-white py-1"><strong>Dati non modificati</strong></div>
     <div class="card-body py-1">
-    {% for k,v in dati.NONE %}
-      <p class="text-white my-0 small"># {{ k }}: {% for fk,fv in v %}{% if not loop.first %}, {% endif%}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
+    {% for k, v in dati.NONE %}
+      <p class="text-white my-0 small"># {{ k }}: {% for fk, fv in v %}{% if not loop.first %}, {% endif %}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
     {% endfor %}
     </div>
   </div>
@@ -37,16 +37,16 @@
   <div class="card bg-info border rounded mb-3">
     <div class="card-header text-white py-1"><strong>Dati non inseriti</strong></div>
     <div class="card-body py-1">
-    {% for k,v in dati.NONEW %}
-      <p class="text-white my-0 small"># {{ k }}: {% for fk,fv in v %}{% if not loop.first %}, {% endif%}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
+    {% for k, v in dati.NONEW %}
+      <p class="text-white my-0 small"># {{ k }}: {% for fk, fv in v %}{% if not loop.first %}, {% endif %}<strong>{{ fk }}</strong>="{{ fv }}"{% endfor %}</p>
     {% endfor %}
     </div>
   </div>
   {% endif %}
-  {% include 'admin/include/form.html.twig' with {form: form[0], form_help: form[1]} %}
+  {{ include('admin/include/form.html.twig', {form: form[0], form_help: form[1]}) }}
 </div>
 {% endblock %}
 
 {% block pagina_js_fine %}
-  {% include 'admin/include/dropzone-nostore.html.twig' with {dz_id: 'importa_csv_file', dz_pagina: 'docenti_importa', dz_param: 'file', dz_numfile: 1, dz_maxdim: 10, dz_accettati: '.csv', dz_idsubmit: 'importa_csv_submit'} %}
+  {{ include('admin/include/dropzone-nostore.html.twig', {dz_id: 'importa_csv_file', dz_pagina: 'docenti_importa', dz_param: 'file', dz_numfile: 1, dz_maxdim: 10, dz_accettati: '.csv', dz_idsubmit: 'importa_csv_submit'}) }}
 {% endblock %}

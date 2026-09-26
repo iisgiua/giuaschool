@@ -6,7 +6,7 @@
   <h3 class="modal-title gs-h3">Classe {{ info.classe }} - {{ info.classe.sede.nomeBreve }}</h3>
 </div>
 <div class="modal-body">
-  {% for periodo,v in dati %}
+  {% for periodo, v in dati %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -18,9 +18,9 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
-        {% for tipo,v2 in v1 %}
-          {% for k,e in v2 %}
+      {% for data, v1 in v %}
+        {% for tipo, v2 in v1 %}
+          {% for k, e in v2 %}
       <tr>
         <td><strong>{{ e.data }}</strong></td>
           {% if tipo == 'classe' %}
@@ -34,7 +34,7 @@
         <td>{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}</td>
           {% endif %}
         <td><small>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></small></td>
-        <td><small>{{ e.provvedimento|raw|nl2br ? (e.provvedimento~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</small></td>
+        <td><small>{{ e.provvedimento|raw|nl2br ? (e.provvedimento ~ '<br><em>(' ~ e.provvedimento_doc ~ ')</em>')|raw }}</small></td>
       </tr>
           {% endfor %}
         {% endfor %}

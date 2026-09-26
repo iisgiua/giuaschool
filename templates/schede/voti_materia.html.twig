@@ -7,11 +7,11 @@
   <h4 class="modal-title gs-h4"><em>{{ info.materia }}</em></h4>
 </div>
 <div class="modal-body">
-{% for periodo,v in dati.lista %}
-  {% for tipo in ['S','O','P'] %}
+{% for periodo, v in dati.lista %}
+  {% for tipo in ['S', 'O', 'P'] %}
     {% if v[tipo] is defined %}
   <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }} - {{ ('label.voti_'~tipo)|trans }}</strong></caption>
+    <caption class="text-info text-center gs-big"><strong>{{ periodo }} - {{ ('label.voti_' ~ tipo)|trans }}</strong></caption>
     <thead class="bg-success">
       <tr>
         <th class="col-sm-2">{{ info.edcivica ? 'Materia e ' }}Data</th>
@@ -20,7 +20,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v[tipo] %}
+      {% for data, v1 in v[tipo] %}
         {% for e in v1 %}
       <tr>
         <td{{ e.docente_id ? ' class="bg-info"' }}>
@@ -28,7 +28,7 @@
         </td>
         <td{{ e.docente_id ? ' class="bg-info"' }}>
           <small>{{ e.argomento }}</small>
-          {% if e.docente_id %}<br><small><em>({{ e.nome}} {{ e.cognome}})</em></small>{% endif %}
+          {% if e.docente_id %}<br><small><em>({{ e.nome }} {{ e.cognome }})</em></small>{% endif %}
         </td>
         <td{{ e.docente_id ? ' class="bg-info"' }}>
           {% if not e.visibile or not e.media %}
@@ -39,14 +39,14 @@
           {% endif %}
           {% if e.voto > 0 %}<span class="label label-{{ e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success') }} gs-big">{{ e.voto_str }}</span>{{ e.giudizio is not empty ? '<br>' }}{% endif %}
           <small>{{ e.giudizio }}</small>
-          {% if e.docente_id %}<br><small><em>({{ e.nome}} {{ e.cognome}})</em></small>{% endif %}
+          {% if e.docente_id %}<br><small><em>({{ e.nome }} {{ e.cognome }})</em></small>{% endif %}
         </td>
       </tr>
         {% endfor %}
       {% endfor %}
       {% if dati.media[periodo][tipo] is defined %}
       <tr>
-        <td colspan="2" class="bg-success text-right gs-big"><strong><em>Media {{ ('label.voti_'~tipo)|trans }}</em></strong></td>
+        <td colspan="2" class="bg-success text-right gs-big"><strong><em>Media {{ ('label.voti_' ~ tipo)|trans }}</em></strong></td>
         <td class="bg-success"><strong class="gs-big"><em>{{ dati.media[periodo][tipo]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</em></strong></td>
       </tr>
       {% endif %}
@@ -82,7 +82,7 @@
     <strong class="gs-big"><em>{{ scr.voto ? scr.voto : 'Non sono presenti valutazioni' }}</em></strong>
     {% if scr.info is not empty %}
     <div class="text-left">
-      <strong class="">Recupero: <em>{{ ('label.recupero_'~scr.info.recupero)|trans }}</em></strong><br>
+      <strong class="">Recupero: <em>{{ ('label.recupero_' ~ scr.info.recupero)|trans }}</em></strong><br>
       <strong class="">Debito:<br>&nbsp;&nbsp;<em>{{ scr.info.debito }}</em></strong><br>
     </div>
     {% endif %}

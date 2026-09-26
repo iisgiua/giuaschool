@@ -37,13 +37,13 @@
           <td><small>{{ c.classe }}</small></td>
           <td><small>{{ c.materia.nomeBreve }}</small></td>
           <td><small>{{ c.docente.cognome }} {{ c.docente.nome }} ({{ c.docente.username }})</small></td>
-          <td><small>{{ ('label.tipo_'~c.tipo)|trans }}{{ c.docenteSupplenza ? ' (supplente di '~c.docenteSupplenza.cognome~' '~c.docenteSupplenza.nome~')' }}</small></td>
+          <td><small>{{ ('label.tipo_' ~ c.tipo)|trans }}{{ c.docenteSupplenza ? ' (supplente di ' ~ c.docenteSupplenza.cognome ~ ' ' ~ c.docenteSupplenza.nome ~ ')' }}</small></td>
           <td class="pb-0">
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_cattedre_edit', {'id': c.id}) }}" role="button" title="Modifica i dati della cattedra">{{ 'label.edit'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_cattedre_edit', {id: c.id}) }}" role="button" title="Modifica i dati della cattedra">{{ 'label.edit'|trans }}</a>
     {% if c.attiva %}
-            <a class="btn btn-danger btn-xs mb-1" href="{{ path('docenti_cattedre_abilita', {'id': c.id, 'abilita': 0}) }}" role="button" title="Disabilita la cattedra">{{ 'label.disable'|trans }}</a>
+            <a class="btn btn-danger btn-xs mb-1" href="{{ path('docenti_cattedre_abilita', {id: c.id, abilita: 0}) }}" role="button" title="Disabilita la cattedra">{{ 'label.disable'|trans }}</a>
     {% else %}
-            <a class="btn btn-success btn-xs mb-1" href="{{ path('docenti_cattedre_abilita', {'id': c.id, 'abilita': 1}) }}" role="button" title="Abilita la cattedra">{{ 'label.enable'|trans }}</a>
+            <a class="btn btn-success btn-xs mb-1" href="{{ path('docenti_cattedre_abilita', {id: c.id, abilita: 1}) }}" role="button" title="Abilita la cattedra">{{ 'label.enable'|trans }}</a>
     {% endif %}
           </td>
         </tr>

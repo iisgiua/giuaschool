@@ -10,7 +10,7 @@
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_assenze'|trans }} {{ classe }}</h1>
   <div class="row gs-mb-1">
     <div class="col-sm-12 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_assenze', {'classe': classe.id, 'tipo': 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_assenze', {classe: classe.id, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped">
@@ -26,7 +26,7 @@
       </tr>
     </thead>
     <tbody>
-    {% for alunno,a in dati.alunni %}
+    {% for alunno, a in dati.alunni %}
       <tr>
         <td>
           <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
@@ -37,7 +37,7 @@
       {% if a.frequenzaEstero %}
           <br><em class="text-danger">Frequenta all'estero</em>
       {% endif %}
-          {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
+          {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a, g: dati.genitori[a.id]}) }}
         </td>
         <td>
       {% if dati.statistiche[alunno].assenze is defined %}
@@ -101,7 +101,7 @@
       </tr>
     </thead>
     <tbody>
-    {% for alunno,a in dati.trasferiti %}
+    {% for alunno, a in dati.trasferiti %}
       <tr>
         <td>
           <strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong>
@@ -114,7 +114,7 @@
     </tbody>
   </table>
     {% endif %}
-    {% include 'include/modal-info.html.twig' %}
+    {{ include('include/modal-info.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}

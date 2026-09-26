@@ -6,21 +6,21 @@
   {% if errore %}
   <div class="row gs-mb-5">
     <div class="col-sm-12">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_statistiche', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_statistiche', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
       <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_statistiche', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_statistiche', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
   </div>
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-  {% include('include/form-inline.html.twig') %}
+  {{ include(('include/form-inline.html.twig')) }}
   <div class="row gs-mb-4">
     <div class="col-sm-12">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_statistiche', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_statistiche', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
       <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_statistiche', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_statistiche', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
   </div>
   <table class="table table-bordered table-hover table-striped gs-mb-0">
@@ -32,7 +32,7 @@
       </tr>
     </thead>
     <tbody>
-    {% for k,a in dati %}
+    {% for k, a in dati %}
       <tr>
         <td>{{ a.sede }}</td>
         <td>{{ a.classe }}</td>
@@ -78,7 +78,7 @@ $(document).ready(function() {
   $('#gs-button-date').datepicker()
     .on('changeDate', function(ev){
       $('#gs-button-date').datepicker('hide');
-      url = "{{ path('staff_studenti_statistiche', {'data': '9999-99-99'}) }}";
+      url = "{{ path('staff_studenti_statistiche', {data: '9999-99-99'}) }}";
       url = url.replace("9999-99-99", ev.format());
       window.location.href = url;
   });
@@ -93,7 +93,7 @@ $(document).ready(function() {
   });
   // init
   var sedi = [];
-  {% for s,n in info.sedi %}
+  {% for s, n in info.sedi %}
   sedi[{{ s }}] = '{{ n }}';
   {% endfor %}
   if ($('#staff_studenti_statistiche_sede').val() > 0) {

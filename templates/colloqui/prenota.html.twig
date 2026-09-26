@@ -19,7 +19,7 @@
         <div class="col-sm-6">
           <span class="gs-big">
   {% for m in info.materie %}
-          {{ loop.index > 1 ? '<br>'}}{{ m }}
+          {{ loop.index > 1 ? '<br>' }}{{ m }}
   {% endfor %}
           </span>
         </div>
@@ -43,7 +43,7 @@
         <div class="col-sm-10">
           <ul class="list-unstyled">
     {% for r in dati.esauriti %}
-            <li><em>{{ r.ricevimento.data|format_date('full')|title }} dalle {{ r.ricevimento.inizio|date('G:i')}} alle {{ r.ricevimento.fine|date('G:i')}}</em></li>
+            <li><em>{{ r.ricevimento.data|format_date('full')|title }} dalle {{ r.ricevimento.inizio|date('G:i') }} alle {{ r.ricevimento.fine|date('G:i') }}</em></li>
     {% endfor %}
           </ul>
         </div>
@@ -55,7 +55,7 @@
         <div class="col-sm-10">
           <ul class="list-unstyled">
     {% for r in dati.prossimi %}
-            <li><em>{{ r.ricevimento.data|format_date('full')|title }} dalle {{ r.ricevimento.inizio|date('G:i')}} alle {{ r.ricevimento.fine|date('G:i')}}</em></li>
+            <li><em>{{ r.ricevimento.data|format_date('full')|title }} dalle {{ r.ricevimento.inizio|date('G:i') }} alle {{ r.ricevimento.fine|date('G:i') }}</em></li>
     {% endfor %}
           </ul>
         </div>

@@ -2,13 +2,13 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_note'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_note'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome ~ ' ' ~ alunno.cognome }}</h1>
   {% if errore %}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-    {% for periodo,v in dati %}
+    {% for periodo, v in dati %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -20,20 +20,20 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
-        {% for tipo,v2 in v1 %}
-          {% for k,e in v2 %}
+      {% for data, v1 in v %}
+        {% for tipo, v2 in v1 %}
+          {% for k, e in v2 %}
       <tr>
           {% if tipo == 'classe' %}
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Nota di classe</strong></td>
         <td>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></td>
-        <td>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br)~'<br><em>('~e.nota_doc~')</em>')|raw }}</td>
+        <td>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br) ~ '<br><em>(' ~ e.nota_doc ~ ')</em>')|raw }}</td>
           {% else %}
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Nota individuale</strong></td>
         <td>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></td>
-        <td>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br)~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</td>
+        <td>{{ e.provvedimento ? ((e.provvedimento|raw|nl2br) ~ '<br><em>(' ~ e.provvedimento_doc ~ ')</em>')|raw }}</td>
           {% endif %}
       </tr>
           {% endfor %}

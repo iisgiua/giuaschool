@@ -30,8 +30,8 @@
             <div class="col-sm-offset-3 col-sm-9">
               <div class="label label-success"><strong class="gs-big">Fuori classe</strong></div>
               <span><strong>{% if dati[app.vars.value.id].oraInizio %}dalle {{ dati[app.vars.value.id].oraInizio|date('H:i') }}{% if dati[app.vars.value.id].oraFine %} alle {{ dati[app.vars.value.id].oraFine|date('H:i') }}{% endif %}{% else %}tutto il giorno{% endif %}</strong> -
-              <strong>{{ ('label.presenza_tipo_'~dati[app.vars.value.id].tipo)|trans }}</strong>
-              ({{dati[app.vars.value.id].descrizione}})
+              <strong>{{ ('label.presenza_tipo_' ~ dati[app.vars.value.id].tipo)|trans }}</strong>
+              ({{ dati[app.vars.value.id].descrizione }})
             </div>
           </div>
         {% else %}
@@ -47,7 +47,7 @@
       {{ form_widget(form.cancel) }}
     </div>
   </div>
-  {{ form_end(form, {'render_rest': false}) }}
+  {{ form_end(form, {render_rest: false}) }}
 </div>
 {% endblock %}
 
@@ -83,7 +83,7 @@ $(document).ready(function() {
         if (this.checked) {
           $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted');
           $(this).parent().removeClass('text-muted').addClass('text-success');
-          {#-- $(this).parent().parent().find('div.time').css('visibility', 'hidden'); #}
+          {#- - $(this).parent().parent().find('div.time').css('visibility', 'hidden'); #}
         } else {
           $(this).parent().removeClass('text-success').addClass('text-muted');
         }
@@ -92,21 +92,21 @@ $(document).ready(function() {
         if (this.checked) {
           $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted');
           $(this).parent().removeClass('text-muted').addClass('text-danger');
-          {#-- $(this).parent().parent().find('div.time').css('visibility', 'hidden'); #}
+          {#- - $(this).parent().parent().find('div.time').css('visibility', 'hidden'); #}
         } else {
           $(this).parent().removeClass('text-danger ').addClass('text-muted');
         }
         break;
-      {#-- case 'R': #}
-        {#-- if (this.checked) { #}
-          {#-- $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted'); #}
-          {#-- $(this).parent().removeClass('text-muted').addClass('text-warning'); #}
-          {#-- $(this).parent().parent().find('div.time').css('visibility', 'visible'); #}
-        {#-- } else { #}
-          {#-- $(this).parent().removeClass('text-warning').addClass('text-muted'); #}
-          {#-- $(this).parent().parent().find('div.time').css('visibility', 'hidden'); #}
-        {#-- } #}
-        {#-- break; #}
+      {#- - case 'R': #}
+        {#- - if (this.checked) { #}
+          {#- - $(this).parent().siblings('label').removeClass('text-success text-warning text-danger').addClass('text-muted'); #}
+          {#- - $(this).parent().removeClass('text-muted').addClass('text-warning'); #}
+          {#- - $(this).parent().parent().find('div.time').css('visibility', 'visible'); #}
+        {#- - } else { #}
+          {#- - $(this).parent().removeClass('text-warning').addClass('text-muted'); #}
+          {#- - $(this).parent().parent().find('div.time').css('visibility', 'hidden'); #}
+        {#- - } #}
+        {#- - break; #}
     }
   }).change();
 });
@@ -124,8 +124,8 @@ $(document).ready(function() {
   {% else %}
     {{ form_widget(form.presenza) }}
   {% endif %}
-    {#-- {{ form_widget(form.ora) }} #}
-    {#-- {{ form_errors(form.ora) }} #}
+    {#- - {{ form_widget(form.ora) }} #}
+    {#- - {{ form_errors(form.ora) }} #}
     {{ form_widget(form.id) }}
   </div>
 {% endblock %}

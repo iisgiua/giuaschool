@@ -54,9 +54,9 @@ $(document).ready(function() {
   <label for="{{ item.vars.id }}" class="list-group-item gs-row-radio">
     <div class="row">
       <div class="col-sm-6">
-        <input type="radio" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" required="required" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}{{ item.vars.attr['disabled'] is defined ? ' disabled="disabled"'}}> <strong>{{ item.vars.label|trans }}</strong>
+        <input type="radio" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" required="required" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"' }}{{ item.vars.attr['disabled'] is defined ? ' disabled="disabled"' }}> <strong>{{ item.vars.label|trans }}</strong>
       </div>
-      <div class="col-sm-6"><em>{{ ('message.tipo_notifica_'~item.vars.value)|trans }}</em></div>
+      <div class="col-sm-6"><em>{{ ('message.tipo_notifica_' ~ item.vars.value)|trans }}</em></div>
     </div>
   </label>
   {% endfor %}
@@ -70,18 +70,18 @@ $(document).ready(function() {
   <label for="{{ item.vars.id }}" class="list-group-item gs-row-checkbox">
     <div class="row">
       <div class="col-sm-6">
-        <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> <strong>{{ item.vars.label|trans }}</strong>
+        <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"' }}> <strong>{{ item.vars.label|trans }}</strong>
       </div>
-      <div class="col-sm-6"><em>{{ ('message.abilitato_notifica_'~item.vars.value)|trans }}</em></div>
+      <div class="col-sm-6"><em>{{ ('message.abilitato_notifica_' ~ item.vars.value)|trans }}</em></div>
     </div>
   </label>
     {% elseif app.user.controllaRuolo('GA') %}
   <label for="{{ item.vars.id }}" class="list-group-item gs-row-checkbox">
     <div class="row">
       <div class="col-sm-6">
-        <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"'}}> <strong>{{ item.vars.label|trans }}</strong>
+        <input type="checkbox" id="{{ item.vars.id }}" name="{{ item.vars.full_name }}" value="{{ item.vars.value }}"{{ item.vars.checked ? ' checked="checked"' }}> <strong>{{ item.vars.label|trans }}</strong>
       </div>
-      <div class="col-sm-6"><em>{{ ('message.abilitato_notifica_'~item.vars.value)|trans }}</em></div>
+      <div class="col-sm-6"><em>{{ ('message.abilitato_notifica_' ~ item.vars.value)|trans }}</em></div>
     </div>
   </label>
     {% endif %}

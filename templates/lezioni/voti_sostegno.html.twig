@@ -9,15 +9,15 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_voti_dettagli'|trans }} {{ classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ alunno.cognome~' '~alunno.nome }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ alunno.cognome ~ ' ' ~ alunno.nome }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
   <div class="row gs-mb-1">
     <div class="col-sm-8">
       <strong class="gs-big">Materia:</strong>
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere la materia">{{ info.materia_scelta }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for k,v in materie %}
-          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('lezioni_voti_sostegno', {'cattedra': cattedra.id, 'materia': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% for k, v in materie %}
+          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('lezioni_voti_sostegno', {cattedra: cattedra.id, materia: v.id}) }}">{{ v.nomeBreve }}</a></li>
     {% endfor %}
         </ul>
       </div>
@@ -27,8 +27,8 @@
     </div>
   </div>
     {% if idmateria %}
-      {% for periodo,v in dati %}
-        {% for materia,v1 in v %}
+      {% for periodo, v in dati %}
+        {% for materia, v1 in v %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -40,11 +40,11 @@
       </tr>
     </thead>
     <tbody>
-          {% for data,v2 in v1 %}
+          {% for data, v2 in v1 %}
             {% for e in v2 %}
       <tr>
         <td><strong>{{ e.data }}</strong></td>
-        <td>{{ ('label.voti_'~e.tipo)|trans }}</td>
+        <td>{{ ('label.voti_' ~ e.tipo)|trans }}</td>
         <td><small>{{ e.argomento }}</small></td>
         <td>
           {% if e.voto > 0 %}<span class="label {{ not e.media ? 'gs-label-secondary' : (e.voto < 5 ? 'label-danger' : (e.voto < 6 ? 'label-warning' : 'label-success')) }} gs-big">{{ e.voto_str }}</span>{{ not e.media ? '<br><strong>NON IN MEDIA</strong>' }}{{ e.giudizio is not empty ? '<br>' }}{% endif %}

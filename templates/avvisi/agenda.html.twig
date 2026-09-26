@@ -2,13 +2,13 @@
 
 {% block pagina_menu %}
   {% if is_granted('ROLE_DOCENTE') %}
-    {% include 'ruolo_docente/menu.html.twig' with {'attivo': 'agenda'} %}
+    {{ include('ruolo_docente/menu.html.twig', {attivo: 'agenda'}) }}
   {% elseif is_granted('ROLE_ATA') %}
-    {% include 'ruolo_ata/menu.html.twig' %}
+    {{ include('ruolo_ata/menu.html.twig') }}
   {% elseif is_granted('ROLE_GENITORE') %}
-    {% include 'ruolo_genitore/menu_genitore.html.twig' %}
+    {{ include('ruolo_genitore/menu_genitore.html.twig') }}
   {% elseif is_granted('ROLE_ALUNNO') %}
-    {% include 'ruolo_genitore/menu_alunno.html.twig' %}
+    {{ include('ruolo_genitore/menu_alunno.html.twig') }}
   {% endif %}
 {% endblock %}
 
@@ -16,28 +16,28 @@
 <div class="container-fluid">
   <h1 class="text-center gs-h2 gs-mt-0 gs-mb-2">{{ (info.visualizzazione == 'P' ? 'title.agenda_eventi' : 'title.agenda_verifiche')|trans }}</h1>
   <div class="row text-center gs-mb-3">
-    {% if info.url_prec %}<a class="btn btn-success btn-sm" href="{{ path('avvisi_agenda', {'mese': info.url_prec, 'visualizzazione': info.visualizzazione, 'classe': info.classeId, }) }}" role="button" title="Mese precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+    {% if info.url_prec %}<a class="btn btn-success btn-sm" href="{{ path('avvisi_agenda', {mese: info.url_prec, visualizzazione: info.visualizzazione, classe: info.classeId}) }}" role="button" title="Mese precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
     <strong class="gs-big gs-mr-4 gs-ml-4">{{ info.nome_mese }}</strong>
-    {% if info.url_succ %}<a class="btn btn-success btn-sm" href="{{ path('avvisi_agenda', {'mese': info.url_succ, 'visualizzazione': info.visualizzazione, 'classe': info.classeId}) }}" role="button" title="Mese successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+    {% if info.url_succ %}<a class="btn btn-success btn-sm" href="{{ path('avvisi_agenda', {mese: info.url_succ, visualizzazione: info.visualizzazione, classe: info.classeId}) }}" role="button" title="Mese successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
   </div>
   {% if app.user.controllaRuolo('DSP') %}
   <div class="row gs-mb-1">
     <div class="col-sm-6">
       <strong class="gs-big">Visualizzazione:</strong>
       <div style="display:inline-block" class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per cambiare il tipo di visualizzazione"><strong id="gs-visualizza-tipo">{{ info.visualizzazione == 'P' ? 'Normale' : 'Verifiche '~info.classe }}</strong><span class="caret gs-ml-3"></span></button>
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per cambiare il tipo di visualizzazione"><strong id="gs-visualizza-tipo">{{ info.visualizzazione == 'P' ? 'Normale' : 'Verifiche ' ~ info.classe }}</strong><span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-          <li{{ info.visualizzazione == 'P' ? ' class="active"'}}><a href="{{ path('avvisi_agenda', {'mese': info.url_mese}) }}">Normale</a></li>
-    {% for c,n in dati.filtro %}
-          <li{{ info.classeId == c ? ' class="active"'}}><a href="{{ path('avvisi_agenda', {'mese': info.url_mese, 'visualizzazione': 'V', 'classe': c}) }}">Verifiche {{ n }}</a></li>
+          <li{{ info.visualizzazione == 'P' ? ' class="active"' }}><a href="{{ path('avvisi_agenda', {mese: info.url_mese}) }}">Normale</a></li>
+    {% for c, n in dati.filtro %}
+          <li{{ info.classeId == c ? ' class="active"' }}><a href="{{ path('avvisi_agenda', {mese: info.url_mese, visualizzazione: 'V', classe: c}) }}">Verifiche {{ n }}</a></li>
     {% endfor %}
         </ul>
       </div>
     </div>
     <div class="col-sm-6 text-right">
     {% if dati.azioni.add is defined %}
-      <a class="btn btn-primary gs-mr-3" href="{{ path('avvisi_edit_agenda', {'tipo': 'V'}) }}" role="button" title="Aggiungi una nuova verifica"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi verifica</strong></a>
-      <a class="btn btn-default" href="{{ path('avvisi_edit_agenda', {'tipo': 'P'}) }}" role="button" title="Aggiungi nuovi compiti per casa"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi compiti</strong></a>
+      <a class="btn btn-primary gs-mr-3" href="{{ path('avvisi_edit_agenda', {tipo: 'V'}) }}" role="button" title="Aggiungi una nuova verifica"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi verifica</strong></a>
+      <a class="btn btn-default" href="{{ path('avvisi_edit_agenda', {tipo: 'P'}) }}" role="button" title="Aggiungi nuovi compiti per casa"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi compiti</strong></a>
     {% endif %}
     </div>
   </div>
@@ -55,7 +55,7 @@
     </thead>
     <tbody>
       <tr>
-  {% for i in (1-info.inizio) .. info.ultimo_giorno %}
+  {% for i in (1 - info.inizio)..info.ultimo_giorno %}
     {% if i < 1 %}
       <td class="gs-calendar-empty">&nbsp;</td>
     {% else %}
@@ -74,21 +74,21 @@
         {% if info.visualizzazione == 'P' and dati[i] is defined %}
         <div class="gs-calendar-events">
           {% if dati[i].Q is defined %}
-          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza i colloqui previsti in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'Q'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Colloqui</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza i colloqui previsti in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'Q'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Colloqui</strong></button>
           {% endif %}
           {% if dati[i].V is defined %}
-          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'V'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'V'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche</strong></button>
           {% endif %}
           {% if dati[i].A is defined %}
-          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le attività previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'A'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Attività</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le attività previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'A'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Attività</strong></button>
           {% endif %}
           {% if dati[i].P is defined %}
-          <button class="gs-calendar-event gs-button-remote" type="button" title="Visualizza i compiti per casa assegnati per questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'P'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Compiti</strong></button>
+          <button class="gs-calendar-event gs-button-remote" type="button" title="Visualizza i compiti per casa assegnati per questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'P'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Compiti</strong></button>
           {% endif %}
         </div>
         {% elseif dati[i] is defined %}
         <div class="gs-calendar-events">
-          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data per la classe indicata" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'S', 'classe': info.classeId}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche: {{ dati[i] }}</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data per la classe indicata" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'S', classe: info.classeId}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche: {{ dati[i] }}</strong></button>
         </div>
         {% endif %}
       </td>
@@ -96,15 +96,15 @@
     {% endif %}
   {% endfor %}
   {% if info.fine > 0 %}
-    {% for i in 1 .. info.fine %}
+    {% for i in 1..info.fine %}
         <td class="gs-calendar-empty">&nbsp;</td>
     {% endfor %}
   {% endif %}
       </tr>
     </tbody>
   </table>
-  {% include 'include/modal-remote.html.twig' %}
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_verifica'} %}
+  {{ include('include/modal-remote.html.twig') }}
+  {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_verifica'}) }}
 </div>
 {% endblock %}
 

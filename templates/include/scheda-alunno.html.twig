@@ -12,7 +12,7 @@
       <h3 class="gs-h3 text-center gs-mt-1">Dati alunn{{ a.sesso == 'M' ? 'o' : 'a' }}</h3>
       <div class="row">
         <div class="col-sm-6">Residenza: {{ a.citta }}</div>
-        <div class="col-sm-6">Religione: {{ ('label.religione_'~a.religione)|trans }}</div>
+        <div class="col-sm-6">Religione: {{ ('label.religione_' ~ a.religione)|trans }}</div>
       </div>
     </div>
   </div>
@@ -21,7 +21,7 @@
       <h3 class="gs-h3 text-center gs-mt-1">Dati utente</h3>
       <p>Profilo <strong>STUDENTE</strong>: {{ a.username }} (ultimo accesso: {{ a.ultimoAccesso ? a.ultimoAccesso|date('d/m/Y H:i') : 'MAI' }})</p>
     {% for g1 in g %}
-      <p>Profilo <strong>GENITORE{{ ('#' not in (g1.nome~g1.cognome)) ? (' - '~g1.nome~' '~g1.cognome) }}</strong>: {{ g1.username }} (ultimo accesso: {{ g1.ultimoAccesso ? g1.ultimoAccesso|date('d/m/Y H:i') : 'MAI' }})</p>
+      <p>Profilo <strong>GENITORE{{ ('#' not in (g1.nome ~ g1.cognome)) ? (' - ' ~ g1.nome ~ ' ' ~ g1.cognome) }}</strong>: {{ g1.username }} (ultimo accesso: {{ g1.ultimoAccesso ? g1.ultimoAccesso|date('d/m/Y H:i') : 'MAI' }})</p>
     {% endfor %}
     </div>
   </div>
@@ -32,7 +32,7 @@
     </div>
     <div class="list-group-item-text" style="display:none">
       <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>
-      <p>Tipologia: {{ ('label.bes_'~a.bes)|trans }}</p>
+      <p>Tipologia: {{ ('label.bes_' ~ a.bes)|trans }}</p>
       {% if a.noteBes %}<p>Descrizione:<br><em>{{ a.noteBes|raw }}</em></p>{% endif %}
     </div>
   </div>

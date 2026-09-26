@@ -2,13 +2,13 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_assenze'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_assenze'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome ~ ' ' ~ alunno.cognome }}</h1>
   {% if errore %}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-    {% include 'include/modal-error.html.twig' %}
+    {{ include('include/modal-error.html.twig') }}
     {% if dati.giustifica and
       ((dati.evidenza.assenza is defined and dati.evidenza.assenza|length > 0) or
       (dati.evidenza.ritardo is defined and dati.evidenza.ritardo|length > 0) or
@@ -23,26 +23,26 @@
       </tr>
     </thead>
     <tbody>
-      {% for tipo,e in dati.evidenza %}
+      {% for tipo, e in dati.evidenza %}
         {% for v in e %}
       <tr>
           {% if tipo == 'assenza' %}
         <td class="text-danger"><strong>{{ v.data }}{% if v.giorni > 1 %} - {{ v.data_fine }}{% endif %}</strong></td>
         <td><strong>Assenza{% if v.giorni > 1 %} di più giorni{% endif %}</strong></td>
         <td>
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {'assenza': v.id}) }}" title="Giustifica l'assenza"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {assenza: v.id}) }}" title="Giustifica l'assenza"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
         </td>
           {% elseif tipo == 'ritardo' %}
         <td class="text-danger"><strong>{{ v.data }}</strong></td>
         <td><strong>Ritardo</strong> ({{ v.ora|date('H:i') }})</td>
         <td>
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {'entrata': v.id}) }}" title="Giustifica il ritardo"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {entrata: v.id}) }}" title="Giustifica il ritardo"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
         </td>
           {% elseif tipo == 'uscita' %}
         <td class="text-danger"><strong>{{ v.data }}</strong></td>
         <td><strong>Uscita anticipata</strong> ({{ v.ora|date('H:i') }})</td>
         <td>
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {'uscita': v.id}) }}" title="Giustifica l'uscita anticipata"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {uscita: v.id}) }}" title="Giustifica l'uscita anticipata"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
         </td>
           {% endif %}
       </tr>
@@ -75,7 +75,7 @@
     </tbody>
   </table>
   <div id="gs-giustificazioni"></div>
-    {% for periodo,v in dati.lista %}
+    {% for periodo, v in dati.lista %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">
@@ -87,18 +87,18 @@
       </tr>
     </thead>
     <tbody>
-      {% for data,v1 in v %}
-        {% for tipo,e in v1 %}
+      {% for data, v1 in v %}
+        {% for tipo, e in v1 %}
       <tr>
           {% if tipo == 'assenza' %}
         <td><strong>{{ e.data }}{% if e.giorni > 1 %} - {{ e.data_fine }}{% endif %}</strong></td>
         <td><strong>Assenza</strong></td>
-        <td><small>{{ e.motivazione ? 'Motivazione assenza: '~e.motivazione }}</small></td>
+        <td><small>{{ e.motivazione ? 'Motivazione assenza: ' ~ e.motivazione }}</small></td>
         <td>
             {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
-          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {'assenza': e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
+          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {assenza: e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
             {% elseif not e.giustificato and e.permesso and dati.giustifica %}
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {'assenza': e.id}) }}" title="Giustifica l'assenza"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {assenza: e.id}) }}" title="Giustifica l'assenza"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
             {% elseif not e.giustificato %}
           <span class="label label-danger">Da giustificare</span>
             {% endif %}
@@ -115,9 +115,9 @@
         </td>
         <td>
             {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
-          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {'entrata': e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
+          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {entrata: e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
             {% elseif not e.giustificato and e.permesso and dati.giustifica %}
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {'entrata': e.id}) }}" title="Giustifica il ritardo"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {entrata: e.id}) }}" title="Giustifica il ritardo"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
             {% elseif not e.giustificato %}
           <span class="label label-danger">Da giustificare</span>
             {% endif %}
@@ -132,9 +132,9 @@
         </td>
         <td>
             {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
-          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {'uscita': e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
+          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {uscita: e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
             {% elseif not e.giustificato and e.permesso and dati.giustifica %}
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {'uscita': e.id}) }}" title="Giustifica l'uscita anticipata"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {uscita: e.id}) }}" title="Giustifica l'uscita anticipata"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
             {% elseif not e.giustificato %}
           <span class="label label-danger">Da giustificare</span>
             {% endif %}
@@ -143,7 +143,7 @@
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Fuori classe</strong> ({% if e.inizio %}dalle {{ e.inizio|date('H:i') }}{% if e.fine %} alle {{ e.fine|date('H:i') }}{% endif %}{% else %}tutto il giorno{% endif %})</td>
         <td>
-          <small>{{ ('label.presenza_tipo_'~e.tipo)|trans }}: {{e.descrizione}}</small>
+          <small>{{ ('label.presenza_tipo_' ~ e.tipo)|trans }}: {{ e.descrizione }}</small>
         </td>
         <td>&nbsp;</td>
           {% endif %}
@@ -152,7 +152,7 @@
       {% endfor %}
     </tbody>
   </table>
-      {% include 'include/modal-remote.html.twig' %}
+      {{ include('include/modal-remote.html.twig') }}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti assenze</strong>

@@ -1,7 +1,7 @@
 {% extends 'ruolo_ata/index.html.twig' %}
 
 {% block pagina_submenu %}
-  {% include 'ruolo_ata/menu_segreteria.html.twig' %}
+  {{ include('ruolo_ata/menu_segreteria.html.twig') }}
 {% endblock %}
 
 {% block pagina_contenuto %}
@@ -11,13 +11,13 @@
   {% if dati.note is defined %}
   <p class="text-center gs-big"><strong><em>{{ dati.note }}</em></strong></p>
   {% endif %}
-  {% for mese,v in dati.mese  %}
+  {% for mese, v in dati.mese %}
   <table class="table table-bordered">
     <caption class="text-info text-center gs-big"><strong>{{ v.nome }}</strong></caption>
     <thead class="bg-success">
       <tr>
-    {% for giorno in v.inizio .. v.fine %}
-      {% if (date(v.anno~'-'~mese~'-'~giorno)|date('w') != 0) and v[giorno] is not defined %}
+    {% for giorno in v.inizio..v.fine %}
+      {% if (date(v.anno ~ '-' ~ mese ~ '-' ~ giorno)|date('w') != 0) and v[giorno] is not defined %}
         <th class="text-center gs-pr-0 gs-pl-0">{{ giorno }}</th>
       {% endif %}
     {% endfor %}
@@ -25,8 +25,8 @@
     </thead>
     <tbody>
       <tr>
-    {% for giorno in v.inizio .. v.fine %}
-      {% if (date(v.anno~'-'~mese~'-'~giorno)|date('w') != 0) and v[giorno] is not defined %}
+    {% for giorno in v.inizio..v.fine %}
+      {% if (date(v.anno ~ '-' ~ mese ~ '-' ~ giorno)|date('w') != 0) and v[giorno] is not defined %}
         {% if dati.iscritto[mese][giorno] is defined and dati.iscritto[mese][giorno] == 'N' %}
         <td class="text-center gs-pr-0 gs-pl-0 gs-bg-muted">&nbsp;</td>
         {% else %}
@@ -43,7 +43,7 @@
   <p class="text-center gs-mb-5">Legenda: <strong>A</strong> = assenza, <strong>R</strong> = ingresso in ritardo, <strong>U</strong> = uscita anticipata.</p>
   <div>
     <a class="btn btn-primary gs-mr-3" href="{{ path('segreteria_assenze') }}" role="button" title="Torna alla pagina di scelta degli alunni"><span class="glyphicon glyphicon-backward gs-mr-3" aria-hidden="true"></span><strong>{{ 'label.indietro'|trans }}</strong></a>
-    <a class="btn btn-success" href="{{ path('segreteria_assenze_stampa', {'alunno': alunno.id}) }}" role="button" title="Crea un documento PDF per la stampa dei dati"><span class="glyphicon glyphicon-print gs-mr-3" aria-hidden="true"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+    <a class="btn btn-success" href="{{ path('segreteria_assenze_stampa', {alunno: alunno.id}) }}" role="button" title="Crea un documento PDF per la stampa dei dati"><span class="glyphicon glyphicon-print gs-mr-3" aria-hidden="true"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
   </div>
 </div>
 {% endblock %}

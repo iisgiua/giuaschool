@@ -2,7 +2,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_voti'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_voti'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome ~ ' ' ~ alunno.cognome }}</h1>
   {% if errore %}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
@@ -14,14 +14,14 @@
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per cambiare la materia da visualizzare">{{ info.materia }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for k,v in materie %}
-          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('genitori_voti', {'idmateria': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% for k, v in materie %}
+          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('genitori_voti', {idmateria: v.id}) }}">{{ v.nomeBreve }}</a></li>
     {% endfor %}
         </ul>
       </div>
     </div>
   </div>
-    {% for periodo,v in dati %}
+    {% for periodo, v in dati %}
   <table class="gs-grades-table">
     {% if periodo %}
     <caption class="gs-grades-caption"><strong>{{ periodo }}</strong></caption>
@@ -35,12 +35,12 @@
       </tr>
     </thead>
     <tbody>
-      {% for materia,v1 in v %}
+      {% for materia, v1 in v %}
       <tr>
         <td class="gs-grades-materia">{{ materia }}</td>
         {% for row in ['S', 'O', 'P'] %}
         <td>
-          {% for data,v2 in v1 %}
+          {% for data, v2 in v1 %}
             {% for e in v2 %}
               {% if e.tipo == row %}
                 {% if not e.media %}
@@ -55,7 +55,7 @@
               <div class="list-group-item-text">
                 <p><strong>Data:</strong> {{ e.data }}</p>
                 <p><strong>Tipo:</strong> {{ e.tipo == 'S' ? 'Scritto' : (e.tipo == 'O' ? 'Orale' : 'Pratico') }}</p>
-                <p><strong>Docente:</strong> {{e.docente }}</p>
+                <p><strong>Docente:</strong> {{ e.docente }}</p>
               {% if e.argomento is not empty %}
                 <p><strong>Argomenti o descrizione della prova:</strong><br>{{ e.argomento }}</p>
               {% endif %}
@@ -77,7 +77,7 @@
       {% endfor %}
     </tbody>
   </table>
-      {% include 'include/modal-info.html.twig' %}
+      {{ include('include/modal-info.html.twig') }}
     {% else %}
   <div class="alert alert-info gs-mt-4" role="alert">
     <strong class="gs-big">Non sono presenti valutazioni</strong>

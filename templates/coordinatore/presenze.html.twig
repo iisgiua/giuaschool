@@ -8,7 +8,7 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans({classe: info.classe}) }}</h1>
-    {% for type,msgs in app.flashes %}
+    {% for type, msgs in app.flashes %}
       {% for msg in msgs %}
   <div class="alert alert-{{ type }} text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert"><strong>{{ msg|trans }}</strong></div>
       {% endfor %}
@@ -20,11 +20,11 @@
         {{ form_widget(form[0].alunno) }}
       </div>
       <div class="input-group date" title="Data iniziale per il filtro">
-        {{ form_widget(form[0].inizio, {'attr': {'widget': false}}) }}
+        {{ form_widget(form[0].inizio, {attr: {widget: false}}) }}
         <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
       </div>
       <div class="input-group date" title="Data finale per il filtro">
-        {{ form_widget(form[0].fine, {'attr': {'widget': false}}) }}
+        {{ form_widget(form[0].fine, {attr: {widget: false}}) }}
         <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
       </div>
       <div class="form-group _col-sm-2">
@@ -47,7 +47,7 @@
       <tr>
         <td>{{ p.alunno }}</td>
         <td>{{ p.data|date('d/m/Y') }} {% if p.oraInizio %}dalle {{ p.oraInizio|date('H:i') }}{% if p.oraFine %} alle {{ p.oraFine|date('H:i') }}{% endif %}{% else %}tutto il giorno{% endif %}</td>
-        <td><small>{{ ('label.presenza_tipo_'~p.tipo)|trans }}: {{p.descrizione}}</small></td>
+        <td><small>{{ ('label.presenza_tipo_' ~ p.tipo)|trans }}: {{ p.descrizione }}</small></td>
         <td>
       {% if p.data > info.oggi %}
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_presenze_edit', {id: p.id, classe: info.classe.id}) }}" role="button" title="Modifica i dati della presenza fuori classe"><strong>{{ 'label.edit'|trans }}</strong></a>
@@ -63,7 +63,7 @@
       <a class="btn btn-primary" href="{{ path('coordinatore_presenze_add', {classe: info.classe.id}) }}" role="button" title="Pianifica nuove presenze fuori classe"><strong>Aggiungi</strong></a>
     </div>
   </div>
-  {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'coordinatore_presenze'} %}
+  {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'coordinatore_presenze'}) }}
   {% endif %}
 </div>
 {% endblock %}

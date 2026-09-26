@@ -20,13 +20,13 @@
   {% for c in dati.lista %}
         <tr>
           <td><small>{{ c.cognome }} {{ c.nome }} ({{ c.dataNascita|date('d/m/Y') }})</small></td>
-          <td><small>{{ c.anno ? c.anno~'ª '~c.sezione~(c.gruppo ? ('-'~c.gruppo)) }}</small></td>
+          <td><small>{{ c.anno ? c.anno ~ 'ª ' ~ c.sezione ~ (c.gruppo ? ('-' ~ c.gruppo)) }}</small></td>
           <td><small>{{ c.cambio.inizio|date('d/m/Y') }}</small></td>
           <td><small>{{ c.cambio.fine|date('d/m/Y') }}</small></td>
           <td><small>{{ c.cambio.note }}</small></td>
           <td class="pb-0">
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_classe_edit', {'id': c.cambio.id}) }}" role="button" title="Modifica i dati del cambio classe">{{ 'label.edit'|trans }}</a>
-            <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('alunni_classe_delete', {'id': c.cambio.id}) }}" role="button" title="Cancella i dati del cambio classe">{{ 'label.delete'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_classe_edit', {id: c.cambio.id}) }}" role="button" title="Modifica i dati del cambio classe">{{ 'label.edit'|trans }}</a>
+            <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('alunni_classe_delete', {id: c.cambio.id}) }}" role="button" title="Cancella i dati del cambio classe">{{ 'label.delete'|trans }}</a>
           </td>
         </tr>
   {% endfor %}

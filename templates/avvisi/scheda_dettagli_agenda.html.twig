@@ -7,7 +7,7 @@
   <h4 class="modal-title gs-h4"><em>{% if info.tipo == 'A' %}Attività previste{% elseif info.tipo == 'V' or info.tipo == 'S' %}Verifiche previste{% elseif info.tipo == 'P' %}Compiti assegnati per casa{% elseif info.tipo == 'Q' %}Colloqui confermati{% endif %}</em></h4>
 </div>
 <div class="modal-body">
-{% for k,e in dati.eventi %}
+{% for k, e in dati.eventi %}
   <div class="alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2" role="alert">
   {% if info.tipo == 'A' %}
   {# ---------- ATTIVITA' ---------- #}
@@ -38,26 +38,26 @@
     {% if app.user.controllaRuolo('DSP') %}
     <div class="text-right">
       {% if dati.azioni[k].edit is defined %}
-      <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_agenda', {'tipo': info.tipo == 'S' ? 'V' : info.tipo, 'avviso': e.id}) }}" role="button" title="{{ info.tipo == 'P' ? 'Modifica i compiti per casa' : 'Modifica la verifica' }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
+      <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_agenda', {tipo: info.tipo == 'S' ? 'V' : info.tipo, avviso: e.id}) }}" role="button" title="{{ info.tipo == 'P' ? 'Modifica i compiti per casa' : 'Modifica la verifica' }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
       {% endif %}
       {% if dati.azioni[k].delete is defined %}
-      <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="{{ info.tipo == 'P' ? 'Cancella i compiti per casa' : 'Cancella la verifica' }}" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {'avviso': e.id}) }}" data-text="{{ (info.tipo == 'P' ? 'message.cancella_compito' : 'message.cancella_verifica')|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
+      <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="{{ info.tipo == 'P' ? 'Cancella i compiti per casa' : 'Cancella la verifica' }}" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {avviso: e.id}) }}" data-text="{{ (info.tipo == 'P' ? 'message.cancella_compito' : 'message.cancella_verifica')|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
       {% endif %}
     </div>
     {% endif %}
   {% elseif info.tipo == 'Q' %}
   {# ---------- COLLOQUI ---------- #}
     {% if app.user.controllaRuolo('DSP') %}
-    <strong class="gs-text-normal gs-big">Classe {{ e.anno }}ª {{ e.sezione }}{{ e.gruppo ? ('-'~e.gruppo) }} - Alunn{{ e.sesso == 'M' ? 'o' : 'a' }} {{ e.cognome }} {{ e.nome }} ({{ e.dataNascita|date('d/m/Y') }}) </strong><br>
+    <strong class="gs-text-normal gs-big">Classe {{ e.anno }}ª {{ e.sezione }}{{ e.gruppo ? ('-' ~ e.gruppo) }} - Alunn{{ e.sesso == 'M' ? 'o' : 'a' }} {{ e.cognome }} {{ e.nome }} ({{ e.dataNascita|date('d/m/Y') }}) </strong><br>
     <strong class="gs-text-normal">Appuntamento alle ore {{ e.appuntamento|date('G:i') }}</strong><br>
-    <strong class="gs-text-normal">{{ ('label.tipo_colloquio_'~e.tipo)|trans }}: {{ e.luogo }}</strong>
+    <strong class="gs-text-normal">{{ ('label.tipo_colloquio_' ~ e.tipo)|trans }}: {{ e.luogo }}</strong>
       {% if e.messaggio is not empty %}
     <br><span class="gs-text-normal">Messaggio ai genitori: <em>{{ e.messaggio }}</em></span>
       {% endif %}
     {% else %}
     <strong class="gs-text-normal gs-big">Prof.{{ e.sessoDocente == 'F' ? 'ssa' }} {{ e.cognomeDocente }} {{ e.nomeDocente }}</strong><br>
     <strong class="gs-text-normal">Appuntamento alle ore {{ e.appuntamento|date('G:i') }}</strong><br>
-    <strong class="gs-text-normal">{{ ('label.tipo_colloquio_'~e.tipo)|trans }}: {{ e.luogo }}</strong>
+    <strong class="gs-text-normal">{{ ('label.tipo_colloquio_' ~ e.tipo)|trans }}: {{ e.luogo }}</strong>
       {% if e.messaggio is not empty %}
     <br><span class="gs-text-normal">Messaggio del docente: <em>{{ e.messaggio }}</em></span>
       {% endif %}
