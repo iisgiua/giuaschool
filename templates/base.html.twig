@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{{ pagina_titolo|trans }}</title>
-    <meta name="keywords" content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0 .. (app.session.get('/CONFIG/ISTITUTO/num_sedi')-1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_citta')|lower }}{% endfor %}">
+    <meta name="keywords" content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0..(app.session.get('/CONFIG/ISTITUTO/num_sedi') - 1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_citta')|lower }}{% endfor %}">
     <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}">
     <meta name="author" content="Antonello Dessì">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -18,7 +18,7 @@
     <!--[if IE 10]>
     <link href="{{ asset('vendor/bootstrap/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
     <![endif]-->
-    <link href="{{ asset('css/tema.css?v='~(filedate('css/tema.css')|date('U'))) }}" rel="stylesheet">
+    <link href="{{ asset('css/main.css?v=' ~ (filedate('css/main.css')|date('U'))) }}" rel="stylesheet">
 {% block pagina_css %}
 {% endblock %}
     <!--[if lt IE 9]>
@@ -98,7 +98,7 @@
                 <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                 <span class="gs-hdr-user">
                   <span class="gs-hdr-user-name">{% if is_granted('ROLE_GENITORE') %}{{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %}</span>
-                  <small class="gs-hdr-user-role">{{ ('label.'~app.user.roles[0])|trans }}</small>
+                  <small class="gs-hdr-user-role">{{ ('label.' ~ app.user.roles[0])|trans }}</small>
                 </span>
               </a>
             </div>
@@ -168,7 +168,7 @@
     <!--[if IE 10]>
     <script src="{{ asset('vendor/bootstrap/js/ie10-viewport-bug-workaround.js') }}"></script>
     <![endif]-->
-    <script src="{{ asset('js/script.js?v='~(filedate('js/script.js')|date('U'))) }}"></script>
+    <script src="{{ asset('js/script.js?v=' ~ (filedate('js/script.js')|date('U'))) }}"></script>
     <script>
     /* pannello di navigazione mobile: apre/chiude la barra laterale sotto i 992px */
     (function () {

@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{{ pagina_titolo|trans }}</title>
-    <meta name="keywords" content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0 .. (app.session.get('/CONFIG/ISTITUTO/num_sedi')-1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_'~ks~'_citta')|lower }}{% endfor %}">
+    <meta name="keywords" content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0..(app.session.get('/CONFIG/ISTITUTO/num_sedi') - 1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_citta')|lower }}{% endfor %}">
     <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}">
     <meta name="author" content="Antonello Dessì">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -18,7 +18,7 @@
     <!--[if IE 10]>
     <link href="{{ asset('vendor/bootstrap/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
     <![endif]-->
-    <link href="{{ asset('css/tema.css?v='~(filedate('css/tema.css')|date('U'))) }}" rel="stylesheet">
+    <link href="{{ asset('css/main.css?v=' ~ (filedate('css/main.css')|date('U'))) }}" rel="stylesheet">
 {% block pagina_css %}
 {% endblock %}
     <!--[if lt IE 9]>
@@ -54,7 +54,7 @@
 
     <!-- login page container -->
     <div class="gs-login-container" id="gs-top">
-      
+
       <!-- simple header with logo and back button -->
       <div class="gs-login-header">
         <div class="gs-login-content-wrapper">
@@ -104,46 +104,51 @@
     </div>
 
     <!-- footer -->
-    <footer class="gs-login-footer">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-sm-12 hidden-xs text-center small">
-            <div class="row">
-              <strong>{{ app.session.get('/CONFIG/ISTITUTO/tipo') }}<br><em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em></strong>
-            </div>
-            <div class="row">
-              <div class="col-sm-6">
-                <address class="text-center">
-                  <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_nome') }}</strong><br>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_0_telefono') }}
-                </address>
+    <div class="gs-footer-container clearfix">
+      <footer class="footer" id="gs-footer" tabindex="-1" style="outline:none;">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-sm-12 text-center small">
+              <div class="row">
+                <strong>{{ app.session.get('/CONFIG/ISTITUTO/tipo') }}<br><em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em></strong>
               </div>
-              {% if app.session.get('/CONFIG/ISTITUTO/num_sedi') > 1 %}
-              <div class="col-sm-6">
-                <address class="text-center">
-                  <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_nome') }}</strong><br>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_1_telefono') }}
-                </address>
+              <div class="row">
+                <div class="col-sm-6">
+                  <address class="text-center">
+                    <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_nome') }}</strong><br>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_0_telefono') }}
+                  </address>
+                </div>
+                {% if app.session.get('/CONFIG/ISTITUTO/num_sedi') > 1 %}
+                <div class="col-sm-6">
+                  <address class="text-center">
+                    <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_nome') }}</strong><br>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_1_telefono') }}
+                  </address>
+                </div>
+                {% endif %}
               </div>
-              {% endif %}
             </div>
           </div>
         </div>
-      </div>
-      <div class="container-fluid text-center gs-mt-2">
-        <p class="small">
-          <a href="{{ path('info_noteLegali') }}">Note legali</a> |
-          <a href="{{ path('info_privacy') }}">Privacy</a> |
-          <a href="{{ path('info_cookie') }}">Cookie</a> |
-          <a href="{{ path('info_credits') }}">Credits</a>
-        </p>
-      </div>
-    </footer>
+        <div class="container-fluid text-center gs-footer-legal">
+          <p class="small">
+            <a href="{{ path('info_noteLegali') }}">Note legali</a>
+            <span class="separator">|</span>
+            <a href="{{ path('info_privacy') }}">Privacy</a>
+            <span class="separator">|</span>
+            <a href="{{ path('info_cookie') }}">Cookie</a>
+            <span class="separator">|</span>
+            <a href="{{ path('info_credits') }}">Credits</a>
+          </p>
+        </div>
+      </footer>
+    </div>
 
     <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
     <!--[if IE 10]>
     <script src="{{ asset('vendor/bootstrap/js/ie10-viewport-bug-workaround.js') }}"></script>
     <![endif]-->
-    <script src="{{ asset('js/script.js?v='~(filedate('js/script.js')|date('U'))) }}"></script>
+    <script src="{{ asset('js/script.js?v=' ~ (filedate('js/script.js')|date('U'))) }}"></script>
 {% block pagina_js_fine %}
 {% endblock %}
   </body>
