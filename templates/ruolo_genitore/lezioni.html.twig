@@ -7,20 +7,18 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">Classe non definita</h1>
   {% endif %}
-  <div class="row gs-mb-1">
-    <div class="col-sm-12">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
-      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
-    </div>
+  <div class="gs-lessons-nav gs-mb-1">
+    {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+    <button class="gs-lessons-nav-date" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
+    {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
   </div>
   {% if errore %}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-  <table class="table table-bordered table-hover table-striped">
-    <thead class="bg-success">
+  <table class="gs-lessons-table">
+    <thead>
       <tr>
         <th class="col-sm-2">Ora</th>
         <th class="col-sm-2">Materia</th>
@@ -32,12 +30,12 @@
     <tbody>
       {% for k,v in dati['lezioni'] %}
       <tr>
-        <td style="background-color: white;"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}><strong>{{ k }}ª: <span class="text-info">{{ v.inizio }} - {{ v.fine }}</span></strong></td>
+        <td class="gs-lessons-ora"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}>{{ k }}ª: <span class="gs-lessons-orario">{{ v.inizio }} - {{ v.fine }}</span></td>
         <td>
         {% if not v.materia|first is empty %}
-          <strong>{% if v.materia|keys|first == 'R:S' %}Gruppo: Religione<br>{% elseif v.materia|keys|first == 'R:N' %}Gruppo: N.A.<br>{% elseif v.materia|keys|first == 'R:A' %}Gruppo: Mat. Alt.<br>{% elseif v.materia|keys|first[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ v.materia|keys|first[2:] }}<br>{% endif %}</strong>
-          {{ v.materia|first }}
-          <br>(<em>{% for d in v.docenti|first %}{{ d }}{{ not loop.last ? ', ' }}{% endfor %}</em>)
+          {% if v.materia|keys|first == 'R:S' %}<span class="gs-lessons-gruppo">Gruppo: Religione</span><br>{% elseif v.materia|keys|first == 'R:N' %}<span class="gs-lessons-gruppo">Gruppo: N.A.</span><br>{% elseif v.materia|keys|first == 'R:A' %}<span class="gs-lessons-gruppo">Gruppo: Mat. Alt.</span><br>{% elseif v.materia|keys|first[0:1] == 'C' %}<span class="gs-lessons-gruppo">Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ v.materia|keys|first[2:] }}</span><br>{% endif %}
+          <strong>{{ v.materia|first }}</strong>
+          <span class="gs-lessons-docenti">{% for d in v.docenti|first %}{{ d }}{{ not loop.last ? ', ' }}{% endfor %}</span>
         {% endif %}
         </td>
         <td><small>{{ (v.argomenti|first)|raw }}</small></td>
@@ -49,9 +47,9 @@
         {% for g,m in v.materia|filter((m, g) => g != v.materia|keys|first) %}
       <tr>
         <td>
-          <strong>{% if g == 'R:S' %}Gruppo: Religione<br>{% elseif g == 'R:N' %}Gruppo: N.A.<br>{% elseif g == 'R:A' %}Gruppo: Mat. Alt.<br>{% elseif g[0:1] == 'C' %}Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ g[2:] }}<br>{% endif %}</strong>
-          {{ m }}
-          <br>(<em>{% for d in v.docenti[g] %}{{ d }}{{ not loop.last ? ', ' }}{% endfor %}</em>)
+          {% if g == 'R:S' %}<span class="gs-lessons-gruppo">Gruppo: Religione</span><br>{% elseif g == 'R:N' %}<span class="gs-lessons-gruppo">Gruppo: N.A.</span><br>{% elseif g == 'R:A' %}<span class="gs-lessons-gruppo">Gruppo: Mat. Alt.</span><br>{% elseif g[0:1] == 'C' %}<span class="gs-lessons-gruppo">Gruppo: {{ classe.anno }}{{ classe.sezione }}-{{ g[2:] }}</span><br>{% endif %}
+          <strong>{{ m }}</strong>
+          <span class="gs-lessons-docenti">{% for d in v.docenti[g] %}{{ d }}{{ not loop.last ? ', ' }}{% endfor %}</span>
         </td>
         <td><small>{{ v.argomenti[g]|raw }}</small></td>
         <td><small>{{ v.argomenti[g]|raw }}</small></td>

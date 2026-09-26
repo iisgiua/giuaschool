@@ -4,7 +4,7 @@
 <div class="container-fluid">
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_pagelle'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
   {% if errore %}
-  <div class="alert alert-warning" role="alert">
+  <div class="alert alert-info" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}

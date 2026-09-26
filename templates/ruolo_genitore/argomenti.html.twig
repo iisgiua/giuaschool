@@ -1,6 +1,8 @@
 {% extends 'ruolo_genitore/index.html.twig' %}
 
 {% block pagina_contenuto %}
+{% set elenco_materie = materie|default([]) %}
+{% set elenco_dati = dati|default([]) %}
 <div class="container-fluid">
   {% if classe %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_argomenti'|trans }} {{ classe }}</h1>
@@ -11,21 +13,30 @@
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
+  {% elseif elenco_materie|length == 0 %}
+  <div class="alert alert-info" role="alert">
+    <strong class="gs-big">Non ci sono materie da visualizzare per questa classe.</strong>
+  </div>
   {% else %}
   <div class="row gs-mb-1">
     <div class="col-xs-12">
       <strong class="gs-big">Materia:</strong>
       <div style="display:inline-block" class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per cambiare la materia da visualizzare">{{ info.materia }}<span class="caret gs-ml-3"></span></button>
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Clicca per cambiare la materia da visualizzare">{{ info.materia|default('Seleziona una materia') }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for k,v in materie %}
-          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('genitori_argomenti', {'idmateria': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% for k,v in elenco_materie %}
+          <li{{ v.id == idmateria|default(0) ? ' class="active"' }}><a href="{{ path('genitori_argomenti', {'idmateria': v.id}) }}">{{ v.nomeBreve }}</a></li>
     {% endfor %}
         </ul>
       </div>
     </div>
   </div>
-    {% for periodo,v in dati %}
+    {% if elenco_dati|length == 0 %}
+  <div class="alert alert-info gs-mt-3" role="alert">
+    <strong class="gs-big">Non ci sono argomenti o attività registrati per la materia selezionata.</strong>
+  </div>
+    {% endif %}
+    {% for periodo,v in elenco_dati %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
     <thead class="bg-success">

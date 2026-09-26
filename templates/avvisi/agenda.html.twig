@@ -42,8 +42,8 @@
     </div>
   </div>
   {% endif %}
-  <table class="table table-bordered gs-mb-5">
-    <thead class="bg-success">
+  <table class="gs-calendar gs-mb-5">
+    <thead>
       <tr>
         <th class="text-center col-sm-2">{{ 'label.lunedi'|trans }}</th>
         <th class="text-center col-sm-2">{{ 'label.martedi'|trans }}</th>
@@ -57,7 +57,7 @@
       <tr>
   {% for i in (1-info.inizio) .. info.ultimo_giorno %}
     {% if i < 1 %}
-      <td class="gs-bg-muted">&nbsp;</td>
+      <td class="gs-calendar-empty">&nbsp;</td>
     {% else %}
       {% if loop.index % 7 == 0 %}
         {% if not loop.last %}
@@ -65,30 +65,30 @@
     <tr>
         {% endif %}
       {% elseif dati.festivi[i] is defined %}
-      <td class="text-center bg-warning gs-td-middle gs-pt-5 gs-pb-5">
-        <strong class="text-warning gs-big">{{ i }}</strong>
+      <td class="gs-calendar-holiday">
+        <strong class="gs-calendar-day-number">{{ i }}</strong>
       </td>
       {% else %}
-      <td class="text-center gs-td-middle {{ dati[i] is defined ? 'bg-info gs-pt-1 gs-pb-1' : 'gs-pt-5 gs-pb-5' }}">
-        <strong class="gs-big">{{ i }}</strong>
+      <td class="{{ dati[i] is defined ? 'gs-calendar-has-events' : '' }}">
+        <strong class="gs-calendar-day-number">{{ i }}</strong>
         {% if info.visualizzazione == 'P' and dati[i] is defined %}
-        <div class="btn-group-vertical" role="group">
+        <div class="gs-calendar-events">
           {% if dati[i].Q is defined %}
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i colloqui previsti in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'Q'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Colloqui</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza i colloqui previsti in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'Q'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Colloqui</strong></button>
           {% endif %}
           {% if dati[i].V is defined %}
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'V'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'V'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche</strong></button>
           {% endif %}
           {% if dati[i].A is defined %}
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza le attività previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'A'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Attività</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le attività previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'A'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Attività</strong></button>
           {% endif %}
           {% if dati[i].P is defined %}
-          <button class="btn btn-xs btn-default gs-button-remote" type="button" title="Visualizza i compiti per casa assegnati per questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'P'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Compiti</strong></button>
+          <button class="gs-calendar-event gs-button-remote" type="button" title="Visualizza i compiti per casa assegnati per questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'P'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Compiti</strong></button>
           {% endif %}
         </div>
         {% elseif dati[i] is defined %}
-        <div>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data per la classe indicata" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'S', 'classe': info.classeId}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche: {{ dati[i] }}</strong></button>
+        <div class="gs-calendar-events">
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data per la classe indicata" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {'data': info.url_mese~'-'~('%02d'|format(i)), 'tipo': 'S', 'classe': info.classeId}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche: {{ dati[i] }}</strong></button>
         </div>
         {% endif %}
       </td>
@@ -97,7 +97,7 @@
   {% endfor %}
   {% if info.fine > 0 %}
     {% for i in 1 .. info.fine %}
-        <td class="gs-bg-muted">&nbsp;</td>
+        <td class="gs-calendar-empty">&nbsp;</td>
     {% endfor %}
   {% endif %}
       </tr>
