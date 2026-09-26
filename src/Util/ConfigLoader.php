@@ -153,7 +153,7 @@ class ConfigLoader {
     $utente = $this->security->getUser();
     if ($utente && ($utente instanceOf Amministratore)) {
       // imposta il nuovo tema
-      $tema = 'tema-new';
+      $tema = 'admin';
     }
     // imposta tema
     $this->reqstack->getSession()->set('/APP/APP/tema', $tema);

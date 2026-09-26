@@ -1,0 +1,270 @@
+{% extends 'admin/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="margin-top:-2.5rem">
+      <thead class="thead-light">
+        <tr class="sticky-top">
+          <th class="col-auto" scope="col">{{ 'label.stato'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.cognome'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.nome'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.data_nascita'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.bes'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.classe'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for a in dati.lista %}
+        <tr{% if not a.abilitato %} class="table-danger"{% endif %}>
+          <td>
+    {% if a.abilitato %}
+            <span title="{{ 'label.utente_attivo'|trans }}">
+              <svg class="icon icon-xs icon-success" aria-hidden="true">
+                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#check"></use>
+              </svg>
+            </span>
+    {% else %}
+            <span title="{{ 'label.utente_disabilitato'|trans }}">
+              <svg class="icon icon-sm icon-danger" aria-hidden="true">
+                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#ban"></use>
+              </svg>
+            </span>
+    {% endif %}
+          </td>
+          <td><small>{{ a.cognome }}</small></td>
+          <td><small>{{ a.nome }}</small></td>
+          <td><small>{{ a.dataNascita|date('d/m/Y') }}</small></td>
+          <td><small>{{ ('label.bes_'~a.bes)|trans }}</small></td>
+          <td><small>{{ a.classe }}</small></td>
+          <td class="pb-0">
+            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-info-{{ a.id }}">{{ 'label.show'|trans }}</button>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_modifica_edit', {'id': a.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'username': a.username, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password per l'alunno e la invia tramite email">{{ 'label.email_password'|trans }}</a>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'username': a.username, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password per l'alunno e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
+    {% if a.abilitato %}
+            <a class="btn btn-danger btn-xs mb-1" href="{{ path('alunni_abilita', {'id': a.id, 'abilita': 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
+    {% else %}
+            <a class="btn btn-success btn-xs mb-1" href="{{ path('alunni_abilita', {'id': a.id, 'abilita': 1}) }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
+    {% endif %}
+            <button type="button" class="btn btn-secondary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-scelta-genitore" title="Genera una nuova password per il genitore e la invia tramite email"
+              data-title="Scegli il genitore a cui inviare la password"
+              data-button1="{{ (dati.genitori[a.id][0].email and dati.genitori[a.id][0].email[-6:] != '.local') ? 'Invia' }}"
+              data-gen1="{{ dati.genitori[a.id][0].nome }} {{ dati.genitori[a.id][0].cognome }} ({{ dati.genitori[a.id][0].username }})" data-email1="{{ (dati.genitori[a.id][0].email and dati.genitori[a.id][0].email[-6:] != '.local') ? (': '~dati.genitori[a.id][0].email) }}"
+              data-href1="{{ path('alunni_password', {'username': dati.genitori[a.id][0].username, 'tipo': 'E'}) }}"
+              data-button2="{{ (dati.genitori[a.id][1].email and dati.genitori[a.id][1].email[-6:] != '.local') ? 'Invia' }}"
+              data-gen2="{{ dati.genitori[a.id][1].nome }} {{ dati.genitori[a.id][1].cognome }} ({{ dati.genitori[a.id][1].username }})" data-email2="{{ (dati.genitori[a.id][1].email and dati.genitori[a.id][1].email[-6:] != '.local') ? (': '~dati.genitori[a.id][1].email) }}"
+              data-href2="{{ path('alunni_password', {'username': dati.genitori[a.id][1].username, 'tipo': 'E'}) }}">{{ 'label.email_password_genitore'|trans }}</button>
+            <button type="button" class="btn btn-secondary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-scelta-genitore" title="Genera una nuova password per il genitore e la scarica come documento PDF"
+              data-title="Scegli il genitore di cui scaricare la password"
+              data-button1="Scarica"
+              data-gen1="{{ dati.genitori[a.id][0].nome }} {{ dati.genitori[a.id][0].cognome }} ({{ dati.genitori[a.id][0].username }})" data-email1=""
+              data-href1="{{ path('alunni_password', {'username': dati.genitori[a.id][0].username, 'tipo': 'P'}) }}"
+              data-button2="Scarica"
+              data-gen2="{{ dati.genitori[a.id][1].nome }} {{ dati.genitori[a.id][1].cognome }} ({{ dati.genitori[a.id][1].username }})" data-email2=""
+              data-href2="{{ path('alunni_password', {'username': dati.genitori[a.id][1].username, 'tipo': 'P'}) }}">{{ 'label.pdf_password_genitore'|trans }}</button>
+            <div class="modal fade" id="gs-scelta-genitore" tabindex="-1" role="dialog" aria-labelledby="gs-scelta-genitore-titolo">
+              <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                  <div class="modal-header border-bottom">
+                    <h5 class="modal-title" id="gs-scelta-genitore-titolo"></h5>
+                    <button type="button" class="close p-0" data-dismiss="modal" aria-label="{{ 'label.close'|trans }}">
+                      <svg class="icon" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#times') }}"></use></svg>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col-sm-10 mb-2"><strong id="gs-scelta-genitore-1"></strong><span id="gs-scelta-genitore-1-email"></span></div>
+                      <div class="col-sm-2 mb-2"><a id="gs-scelta-genitore-1-href" class="btn btn-primary btn-xs" href="" role="button"><strong></strong></a></div>
+                      <div class="col-sm-10"><strong id="gs-scelta-genitore-2"></strong><span id="gs-scelta-genitore-2-email"></span></div>
+                      <div class="col-sm-2"><a id="gs-scelta-genitore-2-href" class="btn btn-primary btn-xs" href="" role="button"><strong></strong></a></div>
+                    </div>
+                  </div>
+                  <div class="modal-footer mx-auto">
+                    <button type="button" class="btn btn-secondary btn-xs mx-auto" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="gs-info-{{ a.id }}" tabindex="-1" role="dialog" aria-labelledby="gs-info-{{ a.id }}-titolo">
+              <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                  <div class="modal-header border-bottom">
+                    <div>
+                      <h5 class="modal-title" id="gs-info-{{ a.id }}-titolo">{{ a.cognome }} {{ a.nome }}</h5>
+                      <ul class="nav nav-tabs nav-tabs-cards" role="tablist">
+                        <li class="nav-item">
+                          <a class="nav-link active" id="gs-alunno-{{ a.id }}-tab" data-toggle="pill" href="#gs-alunno-{{ a.id }}" role="tab" aria-controls="gs-alunno-{{ a.id }}" aria-selected="true"><strong>Alunno</strong></a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link" id="gs-genitore1-{{ a.id }}-tab" data-toggle="pill" href="#gs-genitore1-{{ a.id }}" role="tab" aria-controls="gs-genitore1-{{ a.id }}" aria-selected="false"><strong>Genitore 1</strong></a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link" id="gs-genitore2-{{ a.id }}-tab" data-toggle="pill" href="#gs-genitore2-{{ a.id }}" role="tab" aria-controls="gs-genitore2-{{ a.id }}" aria-selected="false"><strong>Genitore 2</strong></a>
+                        </li>
+                      </ul>
+                    </div>
+                    <button type="button" class="close p-0" data-dismiss="modal" aria-label="{{ 'label.close'|trans }}">
+                      <svg class="icon" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#times') }}"></use></svg>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="tab-content">
+                      <div class="tab-pane fade show active" id="gs-alunno-{{ a.id }}" role="tabpanel" aria-labelledby="gs-alunno-{{ a.id }}-tab">
+                        <dl class="row">
+                          <dt class="col-sm-2 text-right">{{ 'label.nome'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.nome }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.cognome'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.cognome }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.sesso'|trans }}</dt>
+                          <dd class="col-sm-4">{{ (a.sesso == 'M' ? 'label.maschile' : 'label.femminile')|trans }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.data_nascita'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.dataNascita|date('d/m/Y') }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.comune_nascita'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.comuneNascita }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.provincia_nascita'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.provinciaNascita }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.codice_fiscale'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.codiceFiscale }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.citta'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.citta }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.provincia'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.provincia }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.indirizzo'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.indirizzo }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.religione'|trans }}</dt>
+                          <dd class="col-sm-4">{{ ('label.religione_'~a.religione)|trans }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.bes'|trans }}</dt>
+                          <dd class="col-sm-4">{{ ('label.bes_'~a.bes)|trans }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.note_bes'|trans }}</dt>
+                          <dd class="col-sm-10">{{ a.noteBes|raw }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.credito3'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.credito3 }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.credito4'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.credito4 }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.classe'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.classe }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.frequenza_estero'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.frequenzaEstero ? 'Si' : 'No' }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.username }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.email }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.spid ? 'Si' : 'No' }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.ultimo_accesso'|trans }}</dt>
+                          <dd class="col-sm-4">{{ a.ultimoAccesso ? (a.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
+                        </dl>
+                      </div>
+                      <div class="tab-pane fade" id="gs-genitore1-{{ a.id }}" role="tabpanel" aria-labelledby="gs-genitore1-{{ a.id }}-tab">
+                        <dl class="row">
+                          <dt class="col-sm-2 text-right">{{ 'label.nome'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].nome }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.cognome'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].cognome }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.codice_fiscale'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].codiceFiscale }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.numeri_telefono'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].numeriTelefono|join(', ') }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
+                          <dd class="col-sm-10">{{ dati.genitori[a.id][0].spid ? 'Si' : 'No' }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].username }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][0].email }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.ultimo_accesso'|trans }}</dt>
+                          <dd class="col-sm-10">{{ dati.genitori[a.id][0].ultimoAccesso ? (dati.genitori[a.id][0].ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
+                        </dl>
+                      </div>
+                      <div class="tab-pane fade" id="gs-genitore2-{{ a.id }}" role="tabpanel" aria-labelledby="gs-genitore2-{{ a.id }}-tab">
+                        <dl class="row">
+                          <dt class="col-sm-2 text-right">{{ 'label.nome'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].nome }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.cognome'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].cognome }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.codice_fiscale'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].codiceFiscale }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.numeri_telefono'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].numeriTelefono|join(', ') }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
+                          <dd class="col-sm-10">{{ dati.genitori[a.id][1].spid ? 'Si' : 'No' }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].username }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
+                          <dd class="col-sm-4">{{ dati.genitori[a.id][1].email }}</dd>
+                          <dt class="col-sm-2 text-right">{{ 'label.ultimo_accesso'|trans }}</dt>
+                          <dd class="col-sm-10">{{ dati.genitori[a.id][1].ultimoAccesso ? (dati.genitori[a.id][1].ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer mx-auto">
+                    <button type="button" class="btn btn-primary btn-xs mx-auto" data-dismiss="modal">{{ 'label.close'|trans }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+  {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="7">
+            <a class="btn btn-primary btn-sm" href="{{ path('alunni_modifica_edit') }}" role="button" title="Nuovo utente">{{ 'label.add'|trans }}</a>
+            <a class="btn btn-primary btn-sm" href="{{ path('alunni_passwordFiltro', {'genitore': 0}) }}" role="button" title="Genera le nuove password per gli alunni selezionati e le scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
+            <a class="btn btn-primary btn-sm" href="{{ path('alunni_passwordFiltro', {'genitore': 1}) }}" role="button" title="Genera le nuove password per i genitori degli alunni selezionati e le scarica come documento PDF">{{ 'label.pdf_password_genitore'|trans }}</a>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {{ include('admin/include/paginazione.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_modifica'}) }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('admin/include/thfloat.html.twig') }}
+<script>
+$(document).ready(function() {
+  $('#gs-scelta-genitore').on('show.bs.modal', function (e) {
+    var title = $(e.relatedTarget).data('title');
+    var button1 = $(e.relatedTarget).data('button1');
+    var gen1 = $(e.relatedTarget).data('gen1');
+    var email1 = $(e.relatedTarget).data('email1');
+    var href1 = $(e.relatedTarget).data('href1');
+    var button2 = $(e.relatedTarget).data('button2');
+    var gen2 = $(e.relatedTarget).data('gen2');
+    var email2 = $(e.relatedTarget).data('email2');
+    var href2 = $(e.relatedTarget).data('href2');
+    $(this).find('#gs-scelta-genitore-titolo').text(title);
+    if (button1) {
+      $('#gs-scelta-genitore-1-href').show();
+      $('#gs-scelta-genitore-1-href strong').text(button1);
+    } else {
+      $('#gs-scelta-genitore-1-href').hide();
+    }
+    if (button2) {
+      $('#gs-scelta-genitore-2-href').show();
+      $('#gs-scelta-genitore-2-href strong').text(button2);
+    } else {
+      $('#gs-scelta-genitore-2-href').hide();
+    }
+    $(this).find('#gs-scelta-genitore-1').text(gen1);
+    $(this).find('#gs-scelta-genitore-1-email').text(email1);
+    $(this).find('#gs-scelta-genitore-1-href').attr('href', href1);
+    $(this).find('#gs-scelta-genitore-2').text(gen2);
+    $(this).find('#gs-scelta-genitore-2-email').text(email2);
+    $(this).find('#gs-scelta-genitore-2-href').attr('href', href2);
+  });
+  $("#gs-paginazione").on("submit", function() {
+    var p = $("#jumpToPage").val();
+    window.location.href = "{{ path('alunni_modifica') }}/"+p;
+    return false;
+  });
+});
+</script>
+{% endblock %}

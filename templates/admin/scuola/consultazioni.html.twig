@@ -1,0 +1,78 @@
+{% extends 'admin/layout-base.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {{ include('admin/include/flash.html.twig') }}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="_margin-top:-2.5rem">
+      <thead class="thead-light">
+        <tr class="sticky-top">
+          <th class="col-auto" scope="col">{{ 'label.stato'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.nome_consultazione'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.inizio'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.fine'|trans }}</th>
+          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for c in dati %}
+        <tr{% if not c.abilitata %} class="table-danger"{% endif %}>
+          <td>
+    {% if c.abilitata %}
+            <span title="{{ 'label.stato_abilitato'|trans }}">
+              <svg class="icon icon-xs icon-success" aria-hidden="true">
+                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#check"></use>
+              </svg>
+            </span>
+    {% else %}
+            <span title="{{ 'label.stato_disabilitato'|trans }}">
+              <svg class="icon icon-sm icon-danger" aria-hidden="true">
+                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#ban"></use>
+              </svg>
+            </span>
+    {% endif %}
+          </td>
+          <td>{{ c.nome }}</td>
+          <td>{{ c.inizio|date('d/m/Y H:i') }}</td>
+          <td>{{ c.fine|date('d/m/Y H:i') }}</td>
+          <td>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_consultazioni_edit', {'id': c.id}) }}" role="button" title="Modifica i dati della consultazione">{{ 'label.edit'|trans }}</a>
+            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella la consultazione" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ c.nome }}" data-contenuto="{{ 'message.cancella_consultazione'|trans }}" data-href="{{ path('scuola_moduli_delete', {'id': c.id}) }}">{{ 'label.delete'|trans }}</button>
+    {% if c.abilitata %}
+            <a class="btn btn-danger btn-xs mb-1" href="{{ path('scuola_moduli_abilita', {'id': c.id, 'abilita': 0}) }}" role="button" title="Disabilita la consultazione">{{ 'label.disable'|trans }}</a>
+    {% else %}
+            <a class="btn btn-success btn-xs mb-1" href="{{ path('scuola_moduli_abilita', {'id': c.id, 'abilita': 1}) }}" role="button" title="Abilita la consultazione">{{ 'label.enable'|trans }}</a>
+    {% endif %}
+          </td>
+        </tr>
+  {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5">
+            <a class="btn btn-primary btn-sm" href="{{ path('scuola_consultazioni_edit') }}" role="button" title="Nuovo modulo">{{ 'label.add'|trans }}</a>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {{ include('admin/include/modal-confirm.html.twig') }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('admin/include/thfloat.html.twig') }}
+<script>
+$(document).ready(function() {
+  $('#gs-modal-confirm').on('show.bs.modal', function (e) {
+    var titolo = $(e.relatedTarget).data('titolo');
+    var contenuto = $(e.relatedTarget).data('contenuto');
+    var href = $(e.relatedTarget).data('href');
+    $(this).find('#gs-modal-confirm-titolo').html(titolo);
+    $(this).find('#gs-modal-confirm-contenuto').html(contenuto);
+    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+  });
+});
+</script>
+{% endblock %}
