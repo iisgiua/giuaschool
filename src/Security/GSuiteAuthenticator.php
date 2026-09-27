@@ -84,21 +84,25 @@ class GSuiteAuthenticator extends OAuth2Authenticator {
    * @throws AuthenticationException Eccezione lanciata per ogni tipo di errore di autenticazione
    */
   public function authenticate(Request $request): Passport {
-      // crea e restituisce il passaporto
+    // legge se è login speciale
+    $loginSpeciale = (int) $request->getSession()->get('login_speciale', 0);
+    // crea e restituisce il passaporto
+    $attributes = ['login_speciale' => $loginSpeciale];
     return new SelfValidatingPassport(
-      new UserBadge($request->getClientIp(), $this->getUser(...)));
+      new UserBadge($request->getClientIp(), $this->getUser(...), $attributes));
   }
 
   /**
    * Restituisce l'utente corrispondente all'identificativo fornito
    *
    * @param string $ip Indirizzo IP della richiesta di accesso
+   * @param array $attributes Informazioni aggiuntive per l'autenticazione
    *
    * @return UserInterface|null L'utente trovato o null se errore
    *
    * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
-  public function getUser(string $ip): ?UserInterface {
+  public function getUser(string $ip, array $attributes): ?UserInterface {
     $user = null;
     // trova utente Google
     $client = $this->clientRegistry->getClient('gsuite');
@@ -110,8 +114,11 @@ class GSuiteAuthenticator extends OAuth2Authenticator {
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // autenticato su Google: controlla se esiste nel registro
-    $user = $this->em->getRepository(Utente::class)->findOneBy(['email' => $userGoogle->getEmail(),
-      'abilitato' => 1]);
+    $params = ['email' => $userGoogle->getEmail(), 'abilitato' => 1];
+    if ($attributes['login_speciale']) {
+      $params['loginSpeciale'] = 1;
+    }
+    $user = $this->em->getRepository(Utente::class)->findOneBy($params);
     if (!$user) {
       // utente non esiste nel registro
       $this->logger->error('Utente non valido nell\'autenticazione Google.',
@@ -124,14 +131,19 @@ class GSuiteAuthenticator extends OAuth2Authenticator {
     $idProvider = $this->em->getRepository(Configurazione::class)->getParametro('id_provider');
     $idProviderTipo = $this->em->getRepository(Configurazione::class)->getParametro('id_provider_tipo');
     $spid = $this->em->getRepository(Configurazione::class)->getParametro('spid');
+    $loginSpeciale = $attributes['login_speciale'];
     if (!$idProvider || !$user->controllaRuolo($idProviderTipo)) {
-      // errore: utente non abilitato deve usare accesso con id provider
+      // errore: utente non abilitato all'accesso con id provider
       $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite Google.',
         ['email' => $user->getEmail(), 'ruolo' => $user->getCodiceRuolo(), 'ip' => $ip]);
       throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_idprovider');
     }
-    if ($spid == 'obbligatorio' && !$user->controllaRuolo('A')) {
-      // errore: SPID/CIE obbligatorio e utente non è alunno
+    // se SPID/CIE è obbligatorio e non è stato effettuato il login speciale
+    if (!$loginSpeciale && (
+        $spid == 'O' ||
+        (in_array($spid, ['A', 'M']) && !$user->controllaRuolo('A')) ||
+        ($spid == 'M' && $user->controllaRuoloFunzione('AM')))) {
+      // errore: SPID/CIE obbligatorio
       $this->logger->error('Tipo di accesso non valido per l\'autenticazione tramite Google.',
         ['email' => $user->getEmail(), 'ruolo' => $user->getCodiceRuolo(), 'ip' => $ip]);
       throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_idprovider');
@@ -153,7 +165,10 @@ class GSuiteAuthenticator extends OAuth2Authenticator {
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login
-    $request->getSession()->set('/APP/UTENTE/tipo_accesso', 'Google');
+    $loginSpeciale = (int) $request->getSession()->get('login_speciale', 0);
+    $request->getSession()->remove('login_speciale');
+    $tipoAccesso = ($loginSpeciale ? 'Google/speciale' : 'Google');
+    $request->getSession()->set('/APP/UTENTE/tipo_accesso', $tipoAccesso);
     // controlla presenza altri profili
     if (empty($token->getUser()->getListaProfili())) {
       // non sono presenti altri profili: imposta ultimo accesso dell'utente
@@ -166,7 +181,7 @@ class GSuiteAuthenticator extends OAuth2Authenticator {
     }
     // log azione
     $this->dblogger->logAzione('ACCESSO', 'Login', [
-      'Login' => 'Google',
+      'Login' => $tipoAccesso,
       'Username' => $token->getUser()->getUserIdentifier(),
       'Ruolo' => $token->getUser()->getRoles()[0],
       'Lista profili' => $token->getUser()->getListaProfili()]);
@@ -185,10 +200,12 @@ class GSuiteAuthenticator extends OAuth2Authenticator {
    * @return Response|null Pagina di risposta o null per continuare la richiesta della pagina senza autenticazione
    */
    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
+    $loginSpeciale = (int) $request->getSession()->get('login_speciale', 0);
+    $request->getSession()->remove('login_speciale');
     // messaggio di errore
     $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login
-    return new RedirectResponse($this->router->generate('login_form'));
+    return new RedirectResponse($this->router->generate($loginSpeciale ? 'login_utente' : 'login_form'));
   }
 
 }

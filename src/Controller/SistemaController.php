@@ -1860,8 +1860,8 @@ class SistemaController extends BaseController {
       $client = $form->get('client')->getData();
       $secret = $form->get('secret')->getData();
       // controlli
-      if ($abilitato != 'no' && (empty($client) || empty($secret))) {
-        // errore        $form->addError(new FormError($trans->trans('exception.spid_no_client_secret')));
+      if ($abilitato != 'N' && (empty($client) || empty($secret))) {
+        // errore
         $form->addError(new FormError($trans->trans('exception.spid_no_client_secret')));
       }
       if ($form->isValid()) {

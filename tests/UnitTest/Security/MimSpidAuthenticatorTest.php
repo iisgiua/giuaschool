@@ -455,7 +455,7 @@ class MimSpidAuthenticatorTest extends DatabaseTestCase {
     $utente->setAbilitato(false);
     $utente->setSpid(true);
     $this->em->flush();
-    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'si');
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'S');
     try {
       $exception = null;
       $res = $sa->getUser($utente->getCodiceFiscale(), ['ip' => '1.2.3.4']);
@@ -494,7 +494,7 @@ class MimSpidAuthenticatorTest extends DatabaseTestCase {
     $utente->setAbilitato(true);
     $utente->setSpid(true);
     $this->em->flush();
-    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'no');
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'N');
     try {
       $exception = null;
       $res = $sa->getUser($utente->getCodiceFiscale(), ['ip' => '1.2.3.4']);
@@ -511,7 +511,7 @@ class MimSpidAuthenticatorTest extends DatabaseTestCase {
     // utente corretto
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
-    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'si');
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'S');
     try {
       $exception = null;
       $res = $sa->getUser($utente->getCodiceFiscale(), ['ip' => '1.2.3.4']);

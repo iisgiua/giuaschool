@@ -748,6 +748,11 @@ label.filtro_nome: Filtra per nome
 label.mimspid_abilitazione: Abilita l'accesso SPID/CIE
 label.mimspid_client: Codice del client configurato sul SIDI
 label.mimspid_secret: Codice segreto configurato sul SIDI
+label.spid_N: SPID/CIE non abilitato
+label.spid_S: SPID/CIE abilitato ma non obbligatorio
+label.spid_O: SPID/CIE obbligatorio per tutti
+label.spid_A: SPID/CIE obbligatorio per tutti tranne gli alunni
+label.spid_M: SPID/CIE obbligatorio per tutti tranne gli alunni minorenni
 
 
 ##### PAGINE #####

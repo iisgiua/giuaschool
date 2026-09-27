@@ -32,7 +32,10 @@ return [
     'src/Repository/AppTicketRepository.php',
   ],
   'sqlCommand' => [
-    ["UPDATE gs_configurazione SET descrizione='Indica la modalit&agrave; dell\'accesso SPID/CIE: \<em>no</em> = non abilitato, <em>si</em> = abilitato, <em>obbligatorio</em> = obbligatorio per tutti gli utenti tranne gli alunni.<br>[si|no|obbligatorio]' WHERE parametro='spid';", ""],
+    ["UPDATE gs_configurazione SET descrizione='Indica la modalit&agrave; dell\'accesso SPID/CIE: <em>N</em> = non abilitato, <em>S</em> = non obbligatorio, <em>O</em> = obbligatorio per tutti, <em>A</em> = obbligatorio per tutti tranne gli alunni, <em>M</em> = obbligatorio per tutti tranne gli alunni minorenni.<br>[S|N|O|A|M]' WHERE parametro='spid';", ""],
+    ["UPDATE gs_configurazione SET valore='S' WHERE parametro='spid' AND valore='si';", ""],
+    ["UPDATE gs_configurazione SET valore='N' WHERE parametro='spid' AND valore='no';", ""],
+    ["UPDATE gs_configurazione SET valore='O' WHERE parametro='spid' AND valore='obbligatorio';", ""],
     ["UPDATE gs_configurazione SET descrizione='Nel caso si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati (A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore, U=utente generico)\<br>[testo]' WHERE parametro='id_provider_tipo';", ""],
     ["UPDATE gs_configurazione SET descrizione='Nel caso non si utilizzi un identity provider esterno, indica il ruolo degli utenti abilitati all\'uso dell\'OTP (A=alunno, G=genitore. D=docente, S=staff, P=preside, T=ata, M=amministratore, U=utente generico)\<br>[testo]' WHERE parametro='otp_tipo';", ""],
     ["DROP TABLE IF EXISTS gs_spid;", "SELECT 1 FROM DUAL WHERE (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gs_spid') = 0;"],

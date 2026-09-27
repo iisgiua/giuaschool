@@ -242,10 +242,12 @@ class ModuloType extends AbstractType {
       $builder
         ->add('abilitato', ChoiceType::class, ['label' => 'label.mimspid_abilitazione',
           'data' => $options['values'][0],
-          'choices' => ['label.si' => 'si', 'label.no' => 'no'],
-          'expanded' => true,
-          'multiple' => false,
-          'label_attr' => ['class' => 'radio-inline'],
+          'choices' => ['label.spid_N' => 'N', 'label.spid_S' => 'S', 'label.spid_O' => 'O',
+            'label.spid_A' => 'A', 'label.spid_M' => 'M'],
+          'placeholder' => 'label.mimspid_abilitazione',
+          'label_attr' => ['class' => 'sr-only'],
+          'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
           'required' => true])
         ->add('client', TextType::class, ['label' => 'label.mimspid_client',
           'data' => $options['values'][1],

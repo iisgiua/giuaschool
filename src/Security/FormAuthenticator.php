@@ -118,7 +118,7 @@ class FormAuthenticator extends AbstractAuthenticator {
    * Restituisce l'utente corrispondente all'identificatore fornito
    *
    * @param string $username Identificatore dell'utente
-   * @param array $attributes Informazioni aggiuntive per la ricerca dell'utente
+   * @param array $attributes Informazioni aggiuntive per l'autenticazione
    *
    * @return UserInterface|null L'utente trovato o null se errore
    *
@@ -138,10 +138,6 @@ class FormAuthenticator extends AbstractAuthenticator {
       throw new CustomUserMessageAuthenticationException('exception.invalid_user');
     }
     // restituisce profilo attivo
-    if ($attributes['login_speciale']) {
-      // login speciale: non controlla profili
-      return $user;
-    }
     return $this->controllaProfili($user);
   }
 
@@ -166,7 +162,10 @@ class FormAuthenticator extends AbstractAuthenticator {
     $spid = $this->em->getRepository(Configurazione::class)->getParametro('spid');
     $loginSpeciale = $credentials['login_speciale'];
     // se SPID/CIE è obbligatorio e non è stato effettuato il login speciale
-    if ($spid == 'obbligatorio' && !$loginSpeciale) {
+    if (!$loginSpeciale && (
+        $spid == 'O' ||
+        (in_array($spid, ['A', 'M']) && !$user->controllaRuolo('A')) ||
+        ($spid == 'M' && $user->controllaRuoloFunzione('AM')))) {
       // errore: utente deve usare accesso SPID/CIE
       $this->logger->error('Tipo di accesso non valido per l\'autenticazione tramite form.', [
         'username' => $user->getUserIdentifier(),

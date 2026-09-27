@@ -26,7 +26,7 @@
   <div class="alert alert-danger gs-mt-4 gs-mb-4 gs-big" role="alert">{{ errore.message|trans }}</div>
     {% endif %}
     {# --- SPID/CIE obbligatorio --- #}
-    {% if app.session.get('/CONFIG/ACCESSO/spid') == 'obbligatorio' %}
+    {% if app.session.get('/CONFIG/ACCESSO/spid') in ['O', 'A', 'M'] %}
   <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-3">
       {# --- GOOGLE attivo --- #}
       {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
@@ -55,7 +55,7 @@
     </div>
   </div>
         {# --- SPID/CIE --- #}
-        {% if app.session.get('/CONFIG/ACCESSO/spid') == 'si' %}
+        {% if app.session.get('/CONFIG/ACCESSO/spid') == 'S' %}
   <div class="panel panel-default">
     {{ include('login/form-spid.html.twig') }}
   </div>
@@ -67,7 +67,7 @@
       {{ include('login/form-user.html.twig') }}
     </div>
         {# --- SPID/CIE --- #}
-        {% if app.session.get('/CONFIG/ACCESSO/spid') == 'si' %}
+        {% if app.session.get('/CONFIG/ACCESSO/spid') == 'S' %}
     <div class="panel panel-default">
       {{ include('login/form-spid.html.twig') }}
     </div>
@@ -81,7 +81,7 @@
 
 {% block pagina_css %}
 {{ parent() }}
-{% if app.session.get('/CONFIG/ACCESSO/spid') != 'no' %}
+{% if app.session.get('/CONFIG/ACCESSO/spid') != 'N' %}
 <link href="{{ asset('vendor/spid/css/spid-sp-access-button.min.css') }}" rel="stylesheet">
 {% endif %}
 {% endblock %}

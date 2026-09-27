@@ -95,15 +95,13 @@ class LoginController extends BaseController {
    * @param Request $request Pagina richiesta
    * @param ConfigLoader $config Gestore della configurazione su database
    * @param NotificheUtil $notifiche Classe di utilità per la gestione delle notifiche
-   * @param LoggerInterface $logger Gestore dei log su file
    *
    * @return Response Pagina di risposta
    *
    */
   #[Route(path: '/', name: 'login_home', methods: ['GET'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function home(Request $request, ConfigLoader $config, NotificheUtil $notifiche,
-                       LoggerInterface $logger): Response {
+  public function home(Request $request, ConfigLoader $config, NotificheUtil $notifiche): Response {
     if ($request->query->get('reload') == 'yes') {
       // ricarica configurazione di sistema
       $config->carica();
@@ -159,15 +157,18 @@ class LoginController extends BaseController {
       // legge configurazione: id_provider
       $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider', '');
       $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
-      $spid = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/spid', 'no');
+      $spid = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/spid', 'N');
       if (!$utente) {
         // utente non esiste
         $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', [
           'email' => $email,
           'ip' => $request->getClientIp()]);
         $errore = 'exception.invalid_recovery_email';
-      } elseif ($spid == 'obbligatorio' && !$utente->controllaRuolo('A')) {
-        // errore: niente recupero password se SPID obbligatorio e utente non alunno
+      } elseif (!$utente->getLoginSpeciale() &&
+                $spid == 'O' ||
+                (in_array($spid, ['A', 'M']) && !$utente->controllaRuolo('A')) ||
+                ($spid == 'M' && $utente->controllaRuoloFunzione('AM'))) {
+        // errore: niente recupero password se SPID/CIE obbligatorio
         $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
           'email' => $email,
           'ip' => $request->getClientIp()]);
@@ -354,6 +355,7 @@ class LoginController extends BaseController {
    * Esegue il login tramite token
    *
    */
+  //@TODO rimuovere
   #[Route(path: '/login/token/', name: 'login_token', methods: ['POST'])]
   public function token(): void {
   }
@@ -362,6 +364,7 @@ class LoginController extends BaseController {
    * Connette utente tramite token OTP, dopo aver eseguito la procedura di autenticazione con token
    *
    */
+  //@TODO rimuovere
   #[Route(path: '/login/connect/{token}', name: 'login_connect', methods: ['GET'])]
   public function connect(): void {
   }

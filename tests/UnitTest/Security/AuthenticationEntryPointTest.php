@@ -102,9 +102,11 @@ class AuthenticationEntryPointTest extends DatabaseTestCase {
     // session: inserisce in coda session
     $this->mockedSession = $this->createMock(Session::class);
     $this->mockedSession->method('get')->willReturnCallback(
-      function($key, $default=null) { $this->session[$key] ?? $default; });
+      function($key, $default=null) { return $this->session[$key] ?? $default; });
     $this->mockedSession->method('set')->willReturnCallback(
       function($key, $val) { $this->session[$key] = $val; });
+    $this->mockedSession->method('remove')->willReturnCallback(
+      function($key) { unset($this->session[$key]); });
   }
 
   /**

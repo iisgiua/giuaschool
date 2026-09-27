@@ -154,9 +154,11 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     // session: inserisce in coda session
     $this->mockedSession = $this->createMock(Session::class);
     $this->mockedSession->method('get')->willReturnCallback(
-      function($key, $default=null) { $this->session[$key] ?? $default; });
+      function($key, $default=null) { return $this->session[$key] ?? $default; });
     $this->mockedSession->method('set')->willReturnCallback(
       function($key, $val) { $this->session[$key] = $val; });
+    $this->mockedSession->method('remove')->willReturnCallback(
+      function($key) { unset($this->session[$key]); });
   }
 
   /**
@@ -210,15 +212,27 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
+    // chiamata standard
     $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], null);
     $req->setSession($this->mockedSession);
-    // esegue
     $res = $ga->authenticate($req);
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    $passport = new SelfValidatingPassport(new UserBadge('1.2.3.4', $ga->getUser(...)));
+    $passport = new SelfValidatingPassport(new UserBadge('1.2.3.4', $ga->getUser(...), ['login_speciale' => 0]));
+    $this->assertEquals($passport, $res);
+    // login speciale
+    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], null);
+    $this->session['login_speciale'] = 1;
+    $req->setSession($this->mockedSession);
+    $res = $ga->authenticate($req);
+    $this->assertCount(0, $this->logs);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(1, $this->session);
+    $this->assertSame(1, $this->session['login_speciale']);
+    $passport = new SelfValidatingPassport(new UserBadge('1.2.3.4', $ga->getUser(...), ['login_speciale' => 1]));
     $this->assertEquals($passport, $res);
   }
 
@@ -237,10 +251,11 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     // utente Google inesistente
+    $attributes = ['login_speciale' => 0];
     $this->mockedGoogleUser = null;
     try {
       $exception = null;
-      $res = $ga->getUser('1.2.3.4');
+      $res = $ga->getUser('1.2.3.4', $attributes);
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
@@ -255,7 +270,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->mockedGoogleUser = new GoogleUser(['email' => 'email.non.esistente@dominio.fittizio']);
     try {
       $exception = null;
-      $res = $ga->getUser('1.2.3.4');
+      $res = $ga->getUser('1.2.3.4', $attributes);
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
@@ -273,7 +288,27 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
     try {
       $exception = null;
-      $res = $ga->getUser('1.2.3.4');
+      $res = $ga->getUser('1.2.3.4', $attributes);
+    } catch (CustomUserMessageAuthenticationException $e) {
+      $exception = $e->getMessage();
+    }
+    $this->assertSame('exception.invalid_user', $exception);
+    $this->assertCount(1, $this->logs);
+    $this->assertSame(['email' => $this->mockedGoogleUser->getEmail(), 'ip' => '1.2.3.4'], $this->logs['error'][0][1]);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
+    // utente non abilitato al login speciale
+    $attributes = ['login_speciale' => 1];
+    $this->logs = [];
+    $utente = $this->getReference('docente_curricolare_1');
+    $utente->setAbilitato(true);
+    $utente->setLoginSpeciale(false);
+    $this->em->flush();
+    $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
+    try {
+      $exception = null;
+      $res = $ga->getUser('1.2.3.4', $attributes);
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
@@ -284,6 +319,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
     // id provider non attivo
+    $attributes = ['login_speciale' => 0];
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     $utente->setAbilitato(true);
@@ -292,7 +328,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider', '');
     try {
       $exception = null;
-      $res = $ga->getUser('1.2.3.4');
+      $res = $ga->getUser('1.2.3.4', $attributes);
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
@@ -310,7 +346,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'AG');
     try {
       $exception = null;
-      $res = $ga->getUser('1.2.3.4');
+      $res = $ga->getUser('1.2.3.4', $attributes);
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
@@ -326,10 +362,10 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
-    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'obbligatorio');
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'A');
     try {
       $exception = null;
-      $res = $ga->getUser('1.2.3.4');
+      $res = $ga->getUser('1.2.3.4', $attributes);
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
@@ -339,16 +375,38 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
     $this->assertCount(0, $this->session);
-    // utente corretto
+    // utente corretto su login standard
     $this->logs = [];
     $utente = $this->getReference('docente_curricolare_1');
     $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
-    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'si');
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'S');
     try {
       $exception = null;
-      $res = $ga->getUser('1.2.3.4');
+      $res = $ga->getUser('1.2.3.4', $attributes);
+    } catch (CustomUserMessageAuthenticationException $e) {
+      $exception = $e->getMessage();
+    }
+    $this->assertNull($exception);
+    $this->assertCount(0, $this->logs);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(0, $this->session);
+    $this->assertSame($utente, $res);
+    // utente corretto su login speciale
+    $attributes = ['login_speciale' => 1];
+    $this->logs = [];
+    $utente = $this->getReference('alunno_1A_1');
+    $utente->setLoginSpeciale(true);
+    $this->em->flush();
+    $this->mockedGoogleUser = new GoogleUser(['email' => $utente->getEmail()]);
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
+    $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'ADS');
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'A');
+    try {
+      $exception = null;
+      $res = $ga->getUser('1.2.3.4', $attributes);
     } catch (CustomUserMessageAuthenticationException $e) {
       $exception = $e->getMessage();
     }
@@ -412,6 +470,28 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertSame($utente->getListaProfili(), $this->session['/APP/UTENTE/lista_profili']);
     $this->assertEquals($ultimoAccesso, $utente->getUltimoAccesso());
     $this->assertSame('login_home', $res->getTargetUrl());
+    // login speciale
+    $this->logs = [];
+    $this->dbLogs = [];
+    $this->conf = false;
+    $this->session = [];
+    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], null);
+    $this->session['login_speciale'] = 1;
+    $req->setSession($this->mockedSession);
+    $utente = $this->getReference('docente_curricolare_1');
+    $tok = new PreAuthenticatedToken($utente, 'fw', []);
+    $ultimoAccesso = $utente->getUltimoAccesso() ? (clone $utente->getUltimoAccesso()) : null;
+    $adesso = new DateTime();
+    $res = $ga->onAuthenticationSuccess($req, $tok, 'fw');
+    $this->assertCount(0, $this->logs);
+    $this->assertCount(1, $this->dbLogs);
+    $this->assertSame(['Login', ['Login' => 'Google/speciale', 'Username' => $utente->getUsername(), 'Ruolo' => 'ROLE_DOCENTE', 'Lista profili' => []]], $this->dbLogs['ACCESSO'][0]);
+    $this->assertTrue($this->conf);
+    $this->assertCount(2, $this->session);
+    $this->assertSame('Google/speciale', $this->session['/APP/UTENTE/tipo_accesso']);
+    $this->assertSame($ultimoAccesso ? $ultimoAccesso->format('d/m/Y H:i:s') : null, $this->session['/APP/UTENTE/ultimo_accesso']);
+    $this->assertGreaterThanOrEqual($adesso, $utente->getUltimoAccesso());
+    $this->assertSame('login_home', $res->getTargetUrl());
   }
 
   /**
@@ -426,6 +506,7 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->session = [];
     $ga = new GSuiteAuthenticator($this->mockedRouter, $this->em, $this->mockedLogger,
       $this->mockedDbLog, $this->mockedConfig, $this->mockedOAuth2);
+    // con login standard
     $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], null);
     $req->setSession($this->mockedSession);
     $exc = new CustomUserMessageAuthenticationException('Test');
@@ -436,6 +517,22 @@ class GSuiteAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(1, $this->session);
     $this->assertSame($exc, $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]);
     $this->assertSame('login_form', $res->getTargetUrl());
+    // con login speciale
+    $this->logs = [];
+    $this->dbLogs = [];
+    $this->conf = false;
+    $this->session = [];
+    $req = new Request([], [], ['_route' => 'login_gsuite_check'], [], [], [], null);
+    $this->session['login_speciale'] = 1;
+    $req->setSession($this->mockedSession);
+    $exc = new CustomUserMessageAuthenticationException('Test');
+    $res = $ga->onAuthenticationFailure($req, $exc);
+    $this->assertCount(0, $this->logs);
+    $this->assertCount(0, $this->dbLogs);
+    $this->assertFalse($this->conf);
+    $this->assertCount(1, $this->session);
+    $this->assertSame($exc, $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]);
+    $this->assertSame('login_utente', $res->getTargetUrl());
   }
 
 }

@@ -164,7 +164,7 @@ class MimSpidAuthenticator extends OAuth2Authenticator {
     $this->controllaManutenzione($user);
     // legge configurazione
     $spid = $this->em->getRepository(Configurazione::class)->getParametro('spid');
-    if ($spid == 'no') {
+    if ($spid == 'N') {
       // errore: SPID/CIE non è abilitato
       $this->logger->error('Tipo di accesso non valido per l\'autenticazione tramite SPID/CIE.',
         ['codiceFiscale' => $codiceFiscale, 'ruolo' => $user->getCodiceRuolo(), 'ip' => $attributes['ip']]);
