@@ -210,11 +210,14 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/circolari/delete/{circolare}', name: 'circolari_delete', requirements: ['circolare' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/circolari/delete/{circolare}', name: 'circolari_delete', requirements: ['circolare' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_STAFF')]
-  public function delete(LogHandler $dblogger, ComunicazioniUtil $com,
-                         #[MapEntity] Circolare $circolare
-                         ): Response {
+  public function delete(Request $request, LogHandler $dblogger, ComunicazioniUtil $com,
+                         #[MapEntity] Circolare $circolare): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo permessi
     if (!$com->azioneCircolare('delete', $circolare->getData(), $this->getUser(), $circolare)) {
       // errore

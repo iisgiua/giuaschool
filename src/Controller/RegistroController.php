@@ -1022,10 +1022,14 @@ class RegistroController extends BaseController
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/registro/delete/{classe}/{data}/{ora}', name: 'lezioni_registro_delete', requirements: ['classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'ora' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/registro/delete/{classe}/{data}/{ora}', name: 'lezioni_registro_delete', requirements: ['classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'ora' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(TranslatorInterface $trans, RegistroUtil $reg,
+  public function delete(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                          LogHandler $dblogger, int $classe, string $data, int $ora): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla classe
     $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
@@ -1441,10 +1445,14 @@ class RegistroController extends BaseController
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/registro/annotazione/delete/{id}', name: 'lezioni_registro_annotazione_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/registro/annotazione/delete/{id}', name: 'lezioni_registro_annotazione_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function annotazioneDelete(RegistroUtil $reg, ComunicazioniUtil $com,
+  public function annotazioneDelete(Request $request, RegistroUtil $reg, ComunicazioniUtil $com,
                                     LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla annotazione
     $annotazione = $this->em->getRepository(Annotazione::class)->find($id);
     if (!$annotazione) {
@@ -1702,9 +1710,13 @@ class RegistroController extends BaseController
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/registro/nota/delete/{id}', name: 'lezioni_registro_nota_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/registro/nota/delete/{id}', name: 'lezioni_registro_nota_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function notaDelete(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+  public function notaDelete(Request $request, RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla nota
     $nota = $this->em->getRepository(Nota::class)->find($id);
     if (!$nota) {
@@ -1742,9 +1754,13 @@ class RegistroController extends BaseController
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/registro/nota/cancel/{id}', name: 'lezioni_registro_nota_cancel', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/registro/nota/cancel/{id}', name: 'lezioni_registro_nota_cancel', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function notaCancel(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+  public function notaCancel(Request $request, RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla nota
     $nota = $this->em->getRepository(Nota::class)->find($id);
     if (!$nota) {

@@ -943,10 +943,14 @@ class VotiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/lezioni/voti/cancella/{id}', name: 'lezioni_voti_cancella', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/voti/cancella/{id}', name: 'lezioni_voti_cancella', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function votiCancella(RegistroUtil $reg, LogHandler $dblogger,
+  public function votiCancella(Request $request, RegistroUtil $reg, LogHandler $dblogger,
                                int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo voto
     $valutazione = $this->em->getRepository(Valutazione::class)->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);

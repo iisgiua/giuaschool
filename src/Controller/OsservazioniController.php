@@ -294,9 +294,13 @@ class OsservazioniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/osservazioni/delete/{id}', name: 'lezioni_osservazioni_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/osservazioni/delete/{id}', name: 'lezioni_osservazioni_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function osservazioneDelete(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+  public function osservazioneDelete(Request $request, RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla osservazione
     $osservazione = $this->em->getRepository(OsservazioneAlunno::class)->find($id);
     if (!$osservazione) {
@@ -539,10 +543,14 @@ class OsservazioniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/osservazioni/personali/delete/{id}', name: 'lezioni_osservazioni_personali_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/osservazioni/personali/delete/{id}', name: 'lezioni_osservazioni_personali_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function osservazionePersonaleDelete(RegistroUtil $reg,
+  public function osservazionePersonaleDelete(Request $request, RegistroUtil $reg,
                                               LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla osservazione
     $osservazione = $this->em->getRepository(OsservazioneClasse::class)->find($id);
     if (!$osservazione) {

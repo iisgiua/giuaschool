@@ -667,10 +667,14 @@ class CoordinatoreController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/coordinatore/presenze/delete/{id}/{classe}', name: 'coordinatore_presenze_delete', requirements: ['id' => '\d+', 'classe' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/coordinatore/presenze/delete/{id}/{classe}', name: 'coordinatore_presenze_delete', requirements: ['id' => '\d+', 'classe' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function presenzeDelete(RegistroUtil $reg, LogHandler $dblogger, int $id,
+  public function presenzeDelete(Request $request, RegistroUtil $reg, LogHandler $dblogger, int $id,
                                  int $classe): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla presenza
     $presenza = $this->em->getRepository(Presenza::class)->find($id);
     if (!$presenza) {

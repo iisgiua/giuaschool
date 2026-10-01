@@ -260,11 +260,15 @@ class AutorizzazioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/autorizzazioni/abilita/{autorizzazione}/{abilita}', name: 'autorizzazioni_abilita', requirements: ['autorizzazione' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/autorizzazioni/abilita/{autorizzazione}/{abilita}', name: 'autorizzazioni_abilita', requirements: ['autorizzazione' => '\d+', 'abilita' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_STAFF')]
-  public function abilita(LogHandler $dblogger,
+  public function abilita(Request $request, LogHandler $dblogger,
                           #[MapEntity] DefinizioneAutorizzazione $autorizzazione,
                           int $abilita): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // abilita o disabilita
     $autorizzazione->setAbilitata($abilita == 1);
     // memorizza modifiche

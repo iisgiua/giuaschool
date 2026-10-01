@@ -162,9 +162,13 @@ class AlunniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/alunni/abilita/{id}/{abilita}', name: 'alunni_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/alunni/abilita/{id}/{abilita}', name: 'alunni_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function abilita(int $id, int $abilita): Response {
+  public function abilita(Request $request, int $id, int $abilita): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo alunno
     $alunno = $this->em->getRepository(Alunno::class)->find($id);
     if (!$alunno) {
@@ -700,9 +704,13 @@ class AlunniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/alunni/classe/delete/{id}', name: 'alunni_classe_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/alunni/classe/delete/{id}', name: 'alunni_classe_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function classeDelete(int $id): Response {
+  public function classeDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     $cambio = $this->em->getRepository(CambioClasse::class)->find($id);
     if (!$cambio) {
       // errore
@@ -990,9 +998,13 @@ class AlunniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/alunni/rappresentanti/delete/{ruolo}/{id}', name: 'alunni_rappresentanti_delete', requirements: ['ruolo' => 'A|G', 'id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/alunni/rappresentanti/delete/{ruolo}/{id}', name: 'alunni_rappresentanti_delete', requirements: ['ruolo' => 'A|G', 'id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function rappresentantiDelete(string $ruolo, int $id): Response {
+  public function rappresentantiDelete(Request $request, string $ruolo, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla utente
     $utente = ($ruolo == 'A') ?
       $this->em->getRepository(Alunno::class)->find($id) :

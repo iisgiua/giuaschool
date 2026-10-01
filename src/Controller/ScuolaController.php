@@ -316,9 +316,14 @@ class ScuolaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/scuola/sedi/delete/{id}', name: 'scuola_sedi_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/scuola/sedi/delete/{id}', name: 'scuola_sedi_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function sediDelete(int $id): Response {
+  public function sediDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
+
     // controlla sede
     $sede = $this->em->getRepository(Sede::class)->find($id);
     if (!$sede) {
@@ -410,9 +415,14 @@ class ScuolaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/scuola/corsi/delete/{id}', name: 'scuola_corsi_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/scuola/corsi/delete/{id}', name: 'scuola_corsi_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function corsiDelete(int $id): Response {
+  public function corsiDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
+
     // controlla corso
     $corso = $this->em->getRepository(Corso::class)->find($id);
     if (!$corso) {
@@ -504,9 +514,14 @@ class ScuolaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/scuola/materie/delete/{id}', name: 'scuola_materie_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/scuola/materie/delete/{id}', name: 'scuola_materie_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function materieDelete(int $id): Response {
+  public function materieDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
+
     // controlla materia
     $materia = $this->em->getRepository(Materia::class)->find($id);
     if (!$materia) {
@@ -613,9 +628,14 @@ class ScuolaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/scuola/classi/delete/{id}', name: 'scuola_classi_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/scuola/classi/delete/{id}', name: 'scuola_classi_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function classiDelete(int $id): Response {
+  public function classiDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
+
     // controlla classe
     $classe = $this->em->getRepository(Classe::class)->find($id);
     if (!$classe) {
@@ -740,9 +760,14 @@ class ScuolaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/scuola/festivita/delete/{id}', name: 'scuola_festivita_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/scuola/festivita/delete/{id}', name: 'scuola_festivita_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function festivitaDelete(int $id): Response {
+  public function festivitaDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
+
     // controlla festività
     $festivita = $this->em->getRepository(Festivita::class)->find($id);
     if (!$festivita) {
@@ -851,9 +876,14 @@ class ScuolaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/scuola/orario/delete/{id}', name: 'scuola_orario_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/scuola/orario/delete/{id}', name: 'scuola_orario_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function orarioDelete(int $id): Response {
+  public function orarioDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
+
     // controlla orario
     $orario = $this->em->getRepository(Orario::class)->find($id);
     if (!$orario) {
@@ -1070,9 +1100,14 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/scuola/moduli/delete/{id}', name: 'scuola_moduli_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/scuola/moduli/delete/{id}', name: 'scuola_moduli_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function moduliDelete(int $id): Response {
+  public function moduliDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
+
     // controlla modulo
     $modulo = $this->em->getRepository(DefinizioneRichiesta::class)->find($id);
     if (!$modulo) {
@@ -1103,9 +1138,14 @@ class ScuolaController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/scuola/moduli/abilita/{id}/{abilita}', name: 'scuola_moduli_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/scuola/moduli/abilita/{id}/{abilita}', name: 'scuola_moduli_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function moduliAbilita(int $id, int $abilita): Response {
+  public function moduliAbilita(Request $request, int $id, int $abilita): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
+
     // controlla modulo
     $modulo = $this->em->getRepository(DefinizioneRichiesta::class)->find($id);
     if (!$modulo) {
@@ -1195,9 +1235,14 @@ class ScuolaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/scuola/moduliFormativi/delete/{id}', name: 'scuola_moduliFormativi_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/scuola/moduliFormativi/delete/{id}', name: 'scuola_moduliFormativi_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function moduliFormativiDelete(int $id): Response {
+  public function moduliFormativiDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
+
     // controlla esistenza
     $moduloFormativo = $this->em->getRepository(ModuloFormativo::class)->find($id);
     if (!$moduloFormativo) {

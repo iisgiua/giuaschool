@@ -151,9 +151,13 @@ class AtaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/ata/abilita/{id}/{abilita}', name: 'ata_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/ata/abilita/{id}/{abilita}', name: 'ata_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function abilita(int $id, int $abilita): Response {
+  public function abilita(Request $request, int $id, int $abilita): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla ata
     $ata = $this->em->getRepository(Ata::class)->find($id);
     if (!$ata) {
@@ -419,9 +423,13 @@ class AtaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/ata/rappresentanti/delete/{id}', name: 'ata_rappresentanti_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/ata/rappresentanti/delete/{id}', name: 'ata_rappresentanti_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function rappresentantiDelete(int $id): Response {
+  public function rappresentantiDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla utente
     $utente = $this->em->getRepository(Ata::class)->find($id);
     if (!$utente) {
