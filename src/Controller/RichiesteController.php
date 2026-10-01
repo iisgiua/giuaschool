@@ -1063,16 +1063,10 @@ class RichiesteController extends BaseController {
     // pagina di risposta
     if ($formato == 'C') {
       // crea documento CSV
-      $csv = $this->renderView('richieste/modulo_evacuazione.csv.twig', [
-        'dati' => $dati,
-        'info' => $info]);
-      // invia il documento
+      // crea documento CSV
+      // il nome del file dipende dal tipo di modulo esportato
       $nomefile = $criteri['tipo'] == 'V' ? 'prove-evacuazione.csv' : 'designazioni-evacuazione.csv';
-      $response = new Response($csv);
-      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-      $response->headers->set('Content-Disposition', $disposition);
-      $response->headers->set('Content-Type', 'text/csv');
-      return $response;
+      return $this->renderCsv('richieste', 'modulo_evacuazione', $nomefile, $dati, $info);
     } elseif ($formato == 'Z') {
       // crea archivio ZIP
       $zipPath = $this->getParameter('kernel.project_dir').'/FILES/tmp/evacuazione-'.uniqid().'.zip';
@@ -1187,16 +1181,7 @@ class RichiesteController extends BaseController {
     // pagina di risposta
     if ($formato == 'C') {
       // crea documento CSV
-      $csv = $this->renderView('richieste/modulo_lista.csv.twig', [
-        'dati' => $dati,
-        'info' => $info]);
-      // invia il documento
-      $nomefile = 'modulo.csv';
-      $response = new Response($csv);
-      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-      $response->headers->set('Content-Disposition', $disposition);
-      $response->headers->set('Content-Type', 'text/csv');
-      return $response;
+      return $this->renderCsv('richieste', 'modulo_lista', 'modulo.csv', $dati, $info);
     }
     // visualizza pagina HTML
     return $this->renderHtml('richieste', 'modulo_lista', $dati, $info, [$form->createView()]);

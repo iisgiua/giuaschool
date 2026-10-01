@@ -1,16 +1,14 @@
-{% autoescape false %}
 {% if dati.lista|length > 0 %}
 "Sede","Classe","Data","Docente","Inviato"
-  {%- for c, cv in dati.lista[0].definizioneRichiesta.campi %},"{{ c }}"{% endfor -%}
+  {%- for c, cv in dati.lista[0].definizioneRichiesta.campi %},{{ c|csv }}{% endfor -%}
   {{ '\n' }}
 
   {%- for r in dati.lista %}
-"{{ r.classe.sede.nomeBreve }}","{{ r.classe }}","{{ r.data|date('d/m/Y') }}","{{ r.utente.cognome }} {{ r.utente.nome }}","{{ r.inviata|date('d/m/Y H:i') }}"
+{{ r.classe.sede.nomeBreve|csv }},{{ r.classe|csv }},{{ (r.data ? r.data|date('d/m/Y') : '')|csv }},{{ (r.utente.cognome ~ ' ' ~ r.utente.nome)|csv }},{{ r.inviata|date('d/m/Y H:i')|csv }}
     {%- for c, cv in r.definizioneRichiesta.campi -%}
-      ,"{{ cv[0] == 'date' ? r.valori[c]|date('d/m/Y') : (cv[0] == 'time' ? r.valori[c]|date('H:i') : r.valori[c]|replace({'"': '""'})) }}"
+      ,{{ (cv[0] == 'date' ? r.valori[c]|date('d/m/Y') : (cv[0] == 'time' ? r.valori[c]|date('H:i') : (cv[0] == 'bool' ? (r.valori[c] ? 'SI' : 'NO') : r.valori[c])))|csv }}
     {%- endfor -%}
     {{ '\n' }}
   {%- endfor -%}
 
 {% endif %}
-{% endautoescape %}
