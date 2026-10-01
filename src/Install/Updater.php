@@ -187,7 +187,7 @@ class Updater {
     $vars = [
       'APP_ENV' => ['prod', 'definisce l\'ambiente correntemente utilizzato'],
       'APP_SECRET' => [bin2hex(random_bytes(20)), 'codice segreto univoco usato nella gestione della sicurezza'],
-      'DATABASE_URL' => ['mysql://giuaschool:giuaschool@localhost:3306/giuaschool', 'parametri di connessione al database'],
+      'DATABASE_URL' => ['', 'parametri di connessione al database'],
       'MAILER_DSN' => ['null://null', 'parametri di connessione al server email'],
       'MESSENGER_TRANSPORT_DSN' => ['doctrine://default','parametri di configurazione per l\'invio dei messaggi' ],
       'GOOGLE_API_KEY' => ['', 'autenticazione tramite Google Workspace'],
@@ -207,7 +207,9 @@ class Updater {
         if (!empty($var[1])) {
           $newEnv .= "\n".'### '.$var[1]."\n";
         }
-        $newEnv .= $key."='".($this->env[$key] ?? $var[0])."'\n";
+        $value = (string) ($this->env[$key] ?? $var[0]);
+        $value = str_replace(["\\", "'", "\n", "\r"], ["\\\\", "\\'", '', ''], $value);
+        $newEnv .= $key."='".$value."'\n";
       }
     }
     // aggiunge variabili
@@ -215,6 +217,7 @@ class Updater {
     $otherVars = '';
     foreach ($newVars as $key => $value) {
       if (!in_array($key, $toDelete, true)) {
+        $value = str_replace(["\\", "'", "\n", "\r"], ["\\\\", "\\'", '', ''], (string) $value);
         $otherVars .= $key."='".$value."'\n";
       }
     }
@@ -267,7 +270,8 @@ class Updater {
       $this->sys['build'] = '0';
     }
     // controlla token
-    if (empty($token) || empty($this->sys['token']) || $token != $this->sys['token']) {
+    if (empty($token) || empty($this->sys['token']) ||
+      !hash_equals((string) $this->sys['token'], (string) $token)) {
       // errore di sicurezza
       throw new Exception('Errore di sicurezza nell\'invio dei dati', 0);
     }
@@ -310,7 +314,8 @@ class Updater {
     // carica variabili di sistema
     $this->readSys();
     // controlla token
-    if (empty($token) || empty($this->sys['token']) || $token != $this->sys['token']) {
+    if (empty($token) || empty($this->sys['token']) ||
+      !hash_equals((string) $this->sys['token'], (string) $token)) {
       // errore di sicurezza
       throw new Exception('Errore di sicurezza nell\'invio dei dati', 0);
     }
@@ -321,12 +326,32 @@ class Updater {
    *
    * @param boolean $noSchema Se vero non usa lo schema per la connessione
    */
-  private function connectDb(bool $noSchema=false): void {
-    // connessione al database
-    $db = parse_url((string) $this->env['DATABASE_URL']);
-    $dsn = $db['scheme'].':host='.$db['host'].';port='.$db['port'].
-      ($noSchema ? '' : (';dbname='.substr($db['path'], 1)));
-    $this->pdo = new PDO($dsn, $db['user'], $db['pass']);
+  private function connectDb(bool $noSchema = false): void {
+    // recupera URL
+    $url = trim((string) ($this->env['DATABASE_URL'] ?? ''));
+
+    // errore se non impostata
+    if ($url === '') {
+      throw new Exception('Parametro DATABASE_URL non configurato. Impostare la connessione al database.');
+    }
+
+    // parsing URL
+    $db = parse_url($url);
+    if ($db === false || empty($db['scheme']) || empty($db['host'])) {
+      throw new Exception('Parametro DATABASE_URL non valido.');
+    }
+
+    // credenziali
+    $user = urldecode($db['user'] ?? '');
+    $pass = urldecode($db['pass'] ?? '');
+    $port = $db['port'] ?? 3306;
+
+    // DSN
+    $dsn = $db['scheme'].':host='.$db['host'].';port='.$port.
+      ($noSchema ? '' : (';dbname='.substr($db['path'] ?? '', 1)));
+
+    // connessione
+    $this->pdo = new PDO($dsn, $user, $pass);
     $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
   }
 
@@ -970,24 +995,56 @@ class Updater {
    */
   private function database(int $step): void {
     if (isset($_POST['install']['submit'])) {
+      $dbUser = (string) ($_POST['install']['db_user'] ?? '');
+      $dbPassword = (string) ($_POST['install']['db_password'] ?? '');
+      $dbServer = (string) ($_POST['install']['db_server'] ?? '');
+      $dbPort = (string) ($_POST['install']['db_port'] ?? '3306');
+      $dbName = (string) ($_POST['install']['db_name'] ?? '');
+
+      if (!preg_match('/^[a-zA-Z0-9_\-]+$/', $dbName)) {
+        throw new Exception('Nome del database non valido. Sono consentiti solo caratteri alfanumerici, trattini e trattini bassi.', $step);
+      }
+      if (!preg_match('/^[a-zA-Z0-9_\.\-]+$/', $dbServer)) {
+        throw new Exception('Nome server database non valido.', $step);
+      }
+      if ($dbPort !== '' && (!ctype_digit($dbPort) || (int) $dbPort < 1 || (int) $dbPort > 65535)) {
+        throw new Exception('Porta database non valida.', $step);
+      }
+      if (!preg_match('/^[a-zA-Z0-9_\.\-]+$/', $dbUser)) {
+        throw new Exception('Nome utente database non valido.', $step);
+      }
+
       // salva configurazione
-      $this->env['DATABASE_URL'] = 'mysql://'.$_POST['install']['db_user'].':'.
-        $_POST['install']['db_password'].'@'.$_POST['install']['db_server'].':'.
-        $_POST['install']['db_port'].'/'.$_POST['install']['db_name'];
+      $this->env['DATABASE_URL'] = 'mysql://'.urlencode($dbUser).':'.
+        urlencode($dbPassword).'@'.$dbServer.':'.
+        $dbPort.'/'.$dbName;
       $_SESSION['GS_INSTALL_ENV'] = $this->env;
       $this->writeEnv([]);
       // connessione di test al db (solo server, senza schema)
       $this->connectDb(true);
       // crea schema
-      $sql = "CREATE DATABASE IF NOT EXISTS ".$_POST['install']['db_name']." CHARACTER SET utf8;";
+      $sql = "CREATE DATABASE IF NOT EXISTS `".$dbName."` CHARACTER SET utf8;";
       $this->pdo->exec($sql);
       // imposta dati della pagina
       $page['success'] = 'Connessione al database riuscita.';
       $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 1);
     } else {
-      // legge configurazione
-      $db = parse_url((string) $this->env['DATABASE_URL']);
-      // imposta dati della pagina
+      $url = (string) ($this->env['DATABASE_URL'] ?? '');
+      $db = $url !== '' ? parse_url($url) : [];
+      if (!is_array($db)) {
+          $db = [];
+      }
+
+      // valori di default per il form
+      $db += [
+          'scheme' => 'mysql',
+          'host'   => 'localhost',
+          'port'   => '3306',
+          'user'   => '',
+          'pass'   => '',
+          'path'   => '/',
+      ];
+
       $page['postUrl'] = 'app.php?token='.$this->sys['token'].'&step='.$step;
       $page['database'] = $db;
     }
@@ -1151,7 +1208,11 @@ class Updater {
     // legge aggiornamenti
     $updates = $this->readUpdates();
     // carica substep
-    $subStep = $_GET['sub'] ?? 0;
+    $subStep = isset($_GET['sub']) ? (int) $_GET['sub'] : 0;
+    // controlla che il substep esista
+    if (!isset($updates['procedure'][$subStep]) || !is_string($updates['procedure'][$subStep])) {
+      throw new Exception('Procedura di aggiornamento non valida', $step);
+    }
     // esegue procedura di aggiornamento
     eval($updates['procedure'][$subStep]);
     // visualizza pagina
