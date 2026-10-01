@@ -57,7 +57,7 @@
           <td>
     {% for k1, v1 in v %}
       {% if v1.id in cattedre|keys %}
-            <button type="button" class="btn bbtntn-default btn-sm gs-mr-3 gs-modal-confirm-button" title="{{ v1 }} - {{ v1.corso.nome }}" data-toggle="modal" data-target="#gs-modal-confirm" data-text="Stai entrando nel registro come SOSTITUTO in una tua classe. Vuoi continuare?" data-href="{{ path('lezioni_registro_firme', {cattedra: 0, classe: v1.id}) }}"><strong>{{ v1 }}</strong></button>
+            <button type="button" class="btn bbtntn-default btn-sm gs-mr-3 gs-modal-confirm-button" title="{{ v1 }} - {{ v1.corso.nome }}" data-toggle="modal" data-target="#gs-modal-confirm" data-text="Stai entrando nel registro come SOSTITUTO in una tua classe. Vuoi continuare?" data-href="{{ path('lezioni_registro_firme', {cattedra: 0, classe: v1.id}) }}" data-csrf="{{ csrf_token('delete') }}"><strong>{{ v1 }}</strong></button>
       {% else %}
             <a class="btn btn-primary btn-sm gs-mr-3" href="{{ path('lezioni_registro_firme', {cattedra: 0, classe: v1.id}) }}" role="button" title="{{ v1 }} - {{ v1.corso.nome }}"><strong>{{ v1 }}</strong></a>
       {% endif %}
@@ -79,10 +79,12 @@ $(document).ready(function() {
   $('[data-toggle="popover"]').popover();
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
-    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var csrf = $(event.relatedTarget).data('csrf');
     var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
     $(this).find('#gs-modal-confirm-msg').text(text);
-  });
+});
 });
 </script>
 {% endblock %}

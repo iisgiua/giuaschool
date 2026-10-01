@@ -3,122 +3,176 @@
 {% block pagina_contenuto %}
 <div class="container-fluid">
   {% for label, messages in app.flashes %}
-    {% for msg in messages %}
+  {% for msg in messages %}
   <div class="alert alert-{{ label }}">{{ msg|trans }}</div>
-    {% endfor %}
+  {% endfor %}
   {% endfor %}
   <div class="panel panel-info gs-mb-5">
     <div class="panel-heading gs-pt-1 gs-pb-1">
       <div class="panel-title">
         <span>Utente: <strong>{{ app.user.username }} ({{ ('label.' ~ app.user.roles[0])|trans }})</strong></span>
-        <span class="gs-ml-5">Ultimo accesso: <strong>{{ app.session.get('/APP/UTENTE/ultimo_accesso') ? app.session.get('/APP/UTENTE/ultimo_accesso') : 'NESSUNO' }}</strong></span>
+        <span class="gs-ml-5">Ultimo accesso: <strong>{{ app.session.get('/APP/UTENTE/ultimo_accesso') ?
+            app.session.get('/APP/UTENTE/ultimo_accesso') : 'NESSUNO' }}</strong></span>
       </div>
     </div>
     <div class="panel-body">
-  {% if is_granted('ROLE_DOCENTE') %}
-    {% if dati.richieste > 0 %}
-      <div class="alert alert-danger gs-mb-2" role="alert"><strong class="gs-big">{{ dati.richieste == 1 ? 'È presente 1 richiesta' : 'Sono presenti ' ~ dati.richieste ~ ' richieste' }} di colloquio a cui rispondere: <a href="{{ path('colloqui_richieste') }}">vai alla gestione dei colloqui</a></strong></div>
-    {% endif %}
-    {% if dati.colloqui %}
+      {% if is_granted('ROLE_DOCENTE') %}
+      {% if dati.richieste > 0 %}
+      <div class="alert alert-danger gs-mb-2" role="alert"><strong class="gs-big">{{ dati.richieste == 1 ? 'È presente 1
+          richiesta' : 'Sono presenti ' ~ dati.richieste ~ ' richieste' }} di colloquio a cui rispondere: <a
+            href="{{ path('colloqui_richieste') }}">vai alla gestione dei colloqui</a></strong></div>
+      {% endif %}
+      {% if dati.colloqui %}
       {% for c in dati.colloqui %}
       <div class="alert alert-success gs-mb-2" role="alert">
-        <span class="gs-big">Colloquio con i genitori dell'alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{ c.nome }} ({{ c.dataNascita|date('d/m/Y') }}) - {{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-' ~ c.gruppo) }}</span><br>
+        <span class="gs-big">Colloquio con i genitori dell'alunn{{ c.sesso == 'M' ? 'o' : 'a' }} {{ c.cognome }} {{
+          c.nome }} ({{ c.dataNascita|date('d/m/Y') }}) - {{ c.anno }}ª {{ c.sezione }}{{ c.gruppo ? ('-' ~ c.gruppo)
+          }}</span><br>
         <strong>{{ c.data|format_date('full')|title }} alle {{ c.appuntamento|date('G:i') }}
-        - {{ ('label.tipo_colloquio_' ~ c.tipo)|trans }}: {% if c.tipo == 'D' %}<a href="{{ c.luogo }}">{{ c.luogo }}</a>{% else %}{{ c.luogo }}{% endif %}</strong>
+          - {{ ('label.tipo_colloquio_' ~ c.tipo)|trans }}: {% if c.tipo == 'D' and (c.luogo starts with 'http://' or
+          c.luogo starts with 'https://') %}<a href="{{ c.luogo }}">{{ c.luogo }}</a>{% else %}{{ c.luogo }}{% endif
+          %}</strong>
         {% if c.messaggio is not empty %}
         <br>Messaggio del docente: <em>{{ c.messaggio }}</em>
         {% endif %}
       </div>
       {% endfor %}
-    {% endif %}
-    {% if dati.avvisi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuovi_avvisi'|trans({num: dati.avvisi}) }}: <a href="{{ path('avvisi_bacheca') }}">vai alla Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
-    {% endif %}
-    {% if dati.circolari > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|trans({num: dati.circolari}) }}: <a href="{{ path('circolari_bacheca') }}">vai alla Bacheca per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
-    {% endif %}
-    {% if dati.verifiche.oggi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_oggi'|trans({num: dati.verifiche.oggi}) }}: <a href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e' }}</a></strong></div>
-    {% endif %}
-    {% if dati.verifiche.prossime > 0 %}
-      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_prossime'|trans({num: dati.verifiche.prossime}) }}: <a href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' : 'e' }}</a></strong></div>
-    {% endif %}
-    {% if dati.compiti.oggi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_oggi'|trans({num: dati.compiti.oggi}) }}: <a href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.compiti.oggi == 1 ? 'o' : 'i' }}</a></strong></div>
-    {% endif %}
-    {% if dati.compiti.domani > 0 %}
-      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_domani'|trans({num: dati.compiti.domani}) }}: <a href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i' }}</a></strong></div>
-    {% endif %}
-    {% if dati.moduli is defined and dati.moduli|length > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">Sono presenti nuove richieste da gestire ({% for m in dati.moduli %}{{ m.totale }} per {{ m.nomeBreve }}{{ not loop.last ? ', ' }}{% endfor %}): <a href="{{ path('richieste_gestione') }}">vai alla gestione richieste</a></strong></div>
-    {% endif %}
-  {% elseif is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') %}
-    {% if dati.colloqui is defined and dati.colloqui %}
+      {% endif %}
+      {% if dati.avvisi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_nuovi_avvisi'|trans({num: dati.avvisi}) }}: <a href="{{ path('avvisi_bacheca') }}">vai alla
+            Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
+      {% endif %}
+      {% if dati.circolari > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_nuove_circolari'|trans({num: dati.circolari}) }}: <a
+            href="{{ path('circolari_bacheca') }}">vai alla Bacheca per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e'
+            }}</a></strong></div>
+      {% endif %}
+      {% if dati.verifiche.oggi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_verifiche_oggi'|trans({num: dati.verifiche.oggi}) }}: <a
+            href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e'
+            }}</a></strong></div>
+      {% endif %}
+      {% if dati.verifiche.prossime > 0 %}
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_verifiche_prossime'|trans({num: dati.verifiche.prossime}) }}: <a
+            href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' :
+            'e' }}</a></strong></div>
+      {% endif %}
+      {% if dati.compiti.oggi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_compiti_oggi'|trans({num: dati.compiti.oggi}) }}: <a href="{{ path('avvisi_agenda') }}">vai
+            all'Agenda per visualizzarl{{ dati.compiti.oggi == 1 ? 'o' : 'i' }}</a></strong></div>
+      {% endif %}
+      {% if dati.compiti.domani > 0 %}
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_compiti_domani'|trans({num: dati.compiti.domani}) }}: <a
+            href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i'
+            }}</a></strong></div>
+      {% endif %}
+      {% if dati.moduli is defined and dati.moduli|length > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">Sono presenti nuove richieste da
+          gestire ({% for m in dati.moduli %}{{ m.totale }} per {{ m.nomeBreve }}{{ not loop.last ? ', ' }}{% endfor
+          %}): <a href="{{ path('richieste_gestione') }}">vai alla gestione richieste</a></strong></div>
+      {% endif %}
+      {% elseif is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO') %}
+      {% if dati.colloqui is defined and dati.colloqui %}
       {% for c in dati.colloqui %}
       <div class="alert alert-success gs-mb-2 gs-big" role="alert">
         Colloquio con {{ c.sesso == 'M' ? 'il prof.' : 'la prof.ssa' }} {{ c.cognome }} {{ c.nome }}:
         <strong>{{ c.data|format_date('full')|title }} alle {{ c.appuntamento|date('G:i') }}
-        - {{ ('label.tipo_colloquio_' ~ c.tipo)|trans }}: {% if c.tipo == 'D' %}<a href="{{ c.luogo }}">{{ c.luogo }}</a>{% else %}{{ c.luogo }}{% endif %}</strong>
+          - {{ ('label.tipo_colloquio_' ~ c.tipo)|trans }}: {% if c.tipo == 'D' and (c.luogo starts with 'http://' or
+          c.luogo starts with 'https://') %}<a href="{{ c.luogo }}">{{ c.luogo }}</a>{% else %}{{ c.luogo }}{% endif
+          %}</strong>
         {% if c.messaggio is not empty %}
         <br>Messaggio del docente: <em>{{ c.messaggio }}</em>
         {% endif %}
       </div>
       {% endfor %}
-    {% endif %}
-    {% if dati.avvisi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuovi_avvisi'|trans({num: dati.avvisi}) }}: <a href="{{ path('avvisi_bacheca') }}">vai alla Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
-    {% endif %}
-    {% if dati.circolari > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|trans({num: dati.circolari}) }}: <a href="{{ path('circolari_bacheca') }}">vai alla Bacheca per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
-    {% endif %}
-    {% if dati.giustificazioni > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_assenze_ingiustificate'|trans }}: <a href="{{ path('genitori_assenze') }}">vai alla Situazione Assenze per giustificare</a></strong></div>
-    {% endif %}
-    {% if dati.verifiche.oggi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_oggi'|trans({num: dati.verifiche.oggi}) }}: <a href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e' }}</a></strong></div>
-    {% endif %}
-    {% if dati.verifiche.prossime > 0 %}
-      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_verifiche_prossime'|trans({num: dati.verifiche.prossime}) }}: <a href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' : 'e' }}</a></strong></div>
-    {% endif %}
-    {% if dati.compiti.oggi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_oggi'|trans({num: dati.compiti.oggi}) }}: <a href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.compiti.oggi == 1 ? 'o' : 'i' }}</a></strong></div>
-    {% endif %}
-    {% if dati.compiti.domani > 0 %}
-      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_compiti_domani'|trans({num: dati.compiti.domani}) }}: <a href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i' }}</a></strong></div>
-    {% endif %}
-  {% elseif is_granted('ROLE_ATA') %}
-    {% if dati.avvisi > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuovi_avvisi'|trans({num: dati.avvisi}) }}: <a href="{{ path('avvisi_bacheca') }}">vai alla Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
-    {% endif %}
-    {% if dati.circolari > 0 %}
-      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{ 'message.presenti_nuove_circolari'|trans({num: dati.circolari}) }}: <a href="{{ path('circolari_bacheca') }}">vai alla pagina delle Circolari per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e' }}</a></strong></div>
-    {% endif %}
-  {% endif %}
+      {% endif %}
+      {% if dati.avvisi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_nuovi_avvisi'|trans({num: dati.avvisi}) }}: <a href="{{ path('avvisi_bacheca') }}">vai alla
+            Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
+      {% endif %}
+      {% if dati.circolari > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_nuove_circolari'|trans({num: dati.circolari}) }}: <a
+            href="{{ path('circolari_bacheca') }}">vai alla Bacheca per visualizzarl{{ dati.circolari == 1 ? 'a' : 'e'
+            }}</a></strong></div>
+      {% endif %}
+      {% if dati.giustificazioni > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_assenze_ingiustificate'|trans }}: <a href="{{ path('genitori_assenze') }}">vai alla
+            Situazione Assenze per giustificare</a></strong></div>
+      {% endif %}
+      {% if dati.verifiche.oggi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_verifiche_oggi'|trans({num: dati.verifiche.oggi}) }}: <a
+            href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.oggi == 1 ? 'a' : 'e'
+            }}</a></strong></div>
+      {% endif %}
+      {% if dati.verifiche.prossime > 0 %}
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_verifiche_prossime'|trans({num: dati.verifiche.prossime}) }}: <a
+            href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.verifiche.prossime == 1 ? 'a' :
+            'e' }}</a></strong></div>
+      {% endif %}
+      {% if dati.compiti.oggi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_compiti_oggi'|trans({num: dati.compiti.oggi}) }}: <a href="{{ path('avvisi_agenda') }}">vai
+            all'Agenda per visualizzarl{{ dati.compiti.oggi == 1 ? 'o' : 'i' }}</a></strong></div>
+      {% endif %}
+      {% if dati.compiti.domani > 0 %}
+      <div class="alert alert-success gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_compiti_domani'|trans({num: dati.compiti.domani}) }}: <a
+            href="{{ path('avvisi_agenda') }}">vai all'Agenda per visualizzarl{{ dati.compiti.domani == 1 ? 'o' : 'i'
+            }}</a></strong></div>
+      {% endif %}
+      {% elseif is_granted('ROLE_ATA') %}
+      {% if dati.avvisi > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_nuovi_avvisi'|trans({num: dati.avvisi}) }}: <a href="{{ path('avvisi_bacheca') }}">vai alla
+            Bacheca per visualizzarl{{ dati.avvisi == 1 ? 'o' : 'i' }}</a></strong></div>
+      {% endif %}
+      {% if dati.circolari > 0 %}
+      <div class="alert alert-warning gs-mb-2" role="alert"><strong class="gs-big">{{
+          'message.presenti_nuove_circolari'|trans({num: dati.circolari}) }}: <a
+            href="{{ path('circolari_bacheca') }}">vai alla pagina delle Circolari per visualizzarl{{ dati.circolari ==
+            1 ? 'a' : 'e' }}</a></strong></div>
+      {% endif %}
+      {% endif %}
     </div>
   </div>
   {% if is_granted('ROLE_DOCENTE') %}
   <p><em>{{ 'message.login_docente'|trans({url: path('utenti_profilo')})|raw }}</em></p>
   <p class="gs-mb-0"><strong>Si prega di prendere visione dei manuali:</strong></p>
   <ul class="gs-mb-0">
-    <li><a href="{{ asset('doc/giuaschool_manuale_docenti.pdf') }}">Manuale per i docenti (aggiornato al {{ filedate('doc/giuaschool_manuale_docenti.pdf')|date('d/m/Y') }})</a></li>
+    <li><a href="{{ asset('doc/giuaschool_manuale_docenti.pdf') }}">Manuale per i docenti (aggiornato al {{
+        filedate('doc/giuaschool_manuale_docenti.pdf')|date('d/m/Y') }})</a></li>
   </ul>
   {% elseif is_granted('ROLE_GENITORE') %}
   <p><em>{{ 'message.login_genitore'|trans({url: path('utenti_profilo')})|raw }}</em></p>
   <p class="gs-mb-0"><strong>Si prega di prendere visione del manuale d'uso:</strong></p>
   <ul class="gs-mb-0">
-    <li><a href="{{ asset('doc/giuaschool_manuale_genitori.pdf') }}">Manuale per i genitori (aggiornato al {{ filedate('doc/giuaschool_manuale_genitori.pdf')|date('d/m/Y') }})</a></li>
+    <li><a href="{{ asset('doc/giuaschool_manuale_genitori.pdf') }}">Manuale per i genitori (aggiornato al {{
+        filedate('doc/giuaschool_manuale_genitori.pdf')|date('d/m/Y') }})</a></li>
   </ul>
   {% elseif is_granted('ROLE_ALUNNO') %}
   <p><em>{{ 'message.login_alunno'|trans({url: path('utenti_profilo')})|raw }}</em></p>
   <p class="gs-mb-0"><strong>Si prega di prendere visione del manuale d'uso:</strong></p>
   <ul class="gs-mb-0">
-    <li><a href="{{ asset('doc/giuaschool_manuale_alunni.pdf') }}">Manuale per gli alunni (aggiornato al {{ filedate('doc/giuaschool_manuale_genitori.pdf')|date('d/m/Y') }})</a></li>
+    <li><a href="{{ asset('doc/giuaschool_manuale_alunni.pdf') }}">Manuale per gli alunni (aggiornato al {{
+        filedate('doc/giuaschool_manuale_genitori.pdf')|date('d/m/Y') }})</a></li>
   </ul>
   {% elseif is_granted('ROLE_ATA') %}
   <p><em>{{ 'message.login_ata'|trans({url: path('utenti_profilo')})|raw }}</em></p>
   <p class="gs-mb-0"><strong>Si prega di prendere visione del manuale d'uso:</strong></p>
   <ul class="gs-mb-0">
-    <li><a href="{{ asset('doc/giuaschool_manuale_ata.pdf') }}">Manuale per il personale ATA (aggiornato al {{ filedate('doc/giuaschool_manuale_ata.pdf')|date('d/m/Y') }})</a></li>
+    <li><a href="{{ asset('doc/giuaschool_manuale_ata.pdf') }}">Manuale per il personale ATA (aggiornato al {{
+        filedate('doc/giuaschool_manuale_ata.pdf')|date('d/m/Y') }})</a></li>
   </ul>
   {% endif %}
 </div>

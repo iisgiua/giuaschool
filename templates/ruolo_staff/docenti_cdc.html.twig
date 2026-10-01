@@ -1,9 +1,22 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
+<div class="container-fluid gs-docenti-cdc">
   <h1 class="text-center gs-h2 gs-mt-2">{{ titolo|trans }}</h1>
-  {{ include('include/form-inline.html.twig', {form: form[0], form_success: '', form_help: ''}) }}
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-docenti-cdc-filters gs-mb-3">
+    <div id="{{ form[0].vars.id }}">
+      <div class="gs-docenti-cdc-filters-row">
+        <div class="gs-docenti-cdc-filter-col">
+          {{ form_label(form[0].classe) }}
+          {{ form_widget(form[0].classe) }}
+        </div>
+        <div class="gs-docenti-cdc-filter-col gs-docenti-cdc-btn">
+          {{ form_widget(form[0].submit) }}
+        </div>
+      </div>
+      {{ form_widget(form[0]._token) }}
+    </div>
+  </form>
   {% if dati|length == 0 %}
   <div class="alert alert-info text-center gs-big">
     <strong>Non sono presenti dati</strong>
@@ -51,4 +64,8 @@
   </div>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ parent() }}
 {% endblock %}

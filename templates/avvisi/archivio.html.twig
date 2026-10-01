@@ -1,9 +1,35 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
+<div class="container-fluid gs-avvisi-archivio">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.staff_avvisi_archivio'|trans }}</h1>
-  {{ include(('include/form-inline.html.twig')) }}
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-avvisi-archivio-filters gs-mb-3">
+    <div id="{{ form.vars.id }}">
+      <div class="gs-avvisi-archivio-filters-row">
+        <div class="gs-avvisi-archivio-filter-col">
+          {{ form_label(form.anno) }}
+          {{ form_widget(form.anno) }}
+        </div>
+        <div class="gs-avvisi-archivio-filter-col">
+          {{ form_label(form.autore) }}
+          {{ form_widget(form.autore) }}
+        </div>
+        <div class="gs-avvisi-archivio-filter-col">
+          {{ form_label(form.tipo) }}
+          {{ form_widget(form.tipo) }}
+        </div>
+        <div class="gs-avvisi-archivio-filter-col">
+          {{ form_label(form.mese) }}
+          {{ form_widget(form.mese) }}
+        </div>
+      </div>
+      <div class="gs-avvisi-archivio-buttons">
+        <button type="button" class="btn btn-default" id="avviso_archivio_reset" title="Resetta i filtri">Reset</button>
+        {{ form_widget(form.submit) }}
+      </div>
+      {{ form_widget(form._token) }}
+    </div>
+  </form>
   <div class="row gs-mb-1">
     <div class="col-sm-6">
     </div>
@@ -93,6 +119,15 @@ $(document).ready(function() {
     $('#gs-modal-waiting').modal('show');
   });
   $('#avviso_filtro_mese').change(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#avviso_archivio_reset').click(function (e) {
+    e.preventDefault();
+    $('#avviso_filtro_anno').val('');
+    $('#avviso_filtro_autore').val('');
+    $('#avviso_filtro_tipo').val('');
+    $('#avviso_filtro_mese').val('');
     $('form[name="{{ form.vars.name }}"]').submit();
     $('#gs-modal-waiting').modal('show');
   });

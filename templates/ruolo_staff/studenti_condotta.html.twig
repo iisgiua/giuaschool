@@ -1,23 +1,34 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
+<div class="container-fluid gs-studenti-condotta">
   <h1 class="text-center gs-h2 gs-mt-2">{{ titolo|trans }}</h1>
-  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="form-inline gs-mb-2">
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-studenti-condotta-filters gs-mb-3">
     <div id="staff_studenti_condotta">
-      <div class="form-group">
-        <label class="sr-only control-label" for="{{ form[0].sede.vars.id }}">{{ form[0].sede.vars.label|trans }}</label>
-        {{ form_widget(form[0].sede) }}
+      <div class="gs-studenti-condotta-filters-row">
+        <div class="gs-studenti-condotta-filter-col">
+          {{ form_label(form[0].sede) }}
+          {{ form_widget(form[0].sede) }}
+        </div>
       </div>
-      <div class="input-group date">
-        {{ form_widget(form[0].inizio, {attr: {widget: false}}) }}
-        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+      <div class="gs-studenti-condotta-filters-row">
+        <div class="gs-studenti-condotta-filter-col">
+          {{ form_label(form[0].inizio) }}
+          <div class="input-group date">
+            {{ form_widget(form[0].inizio, {attr: {widget: false}}) }}
+            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+          </div>
+        </div>
+        <div class="gs-studenti-condotta-filter-col">
+          {{ form_label(form[0].fine) }}
+          <div class="input-group date">
+            {{ form_widget(form[0].fine, {attr: {widget: false}}) }}
+            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+          </div>
+        </div>
       </div>
-      <div class="input-group date">
-        {{ form_widget(form[0].fine, {attr: {widget: false}}) }}
-        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
-      </div>
-      <div class="form-group">
+      <div class="gs-studenti-condotta-buttons">
+        <button type="button" class="btn btn-default" id="studenti_condotta_reset" title="Resetta i filtri">Reset</button>
         {{ form_widget(form[0].submit) }}
       </div>
       {{ form_widget(form[0]._token) }}
@@ -77,6 +88,13 @@ $(document).ready(function() {
     todayHighlight: true,
     zIndexOffset: 1200
     });
+  $('#studenti_condotta_reset').click(function (e) {
+    e.preventDefault();
+    $('#staff_studenti_condotta_sede').val('');
+    $('#staff_studenti_condotta_inizio').val('');
+    $('#staff_studenti_condotta_fine').val('');
+    $('form[name="{{ form[0].vars.name }}"]').submit();
+  });
   $('#gs-modal-remote').on('show.bs.modal', function (event) {
     var url = $(event.relatedTarget).data('href');
     $('#gs-errori').hide();

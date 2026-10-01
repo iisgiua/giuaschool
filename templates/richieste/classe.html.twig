@@ -48,7 +48,7 @@
       </div>
         {% if dati.richieste[mk].nuove[0].delete %}
       <div class="text-right">
-        <button class="btn btn-danger gs-modal-confirm-button" title="Cancella il modulo inviato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_classe_delete', {classe: info.classe.id, id: dati.richieste[mk].nuove[0].id}) }}" data-text="{{ 'message.cancella_modulo'|trans }}"><strong>{{ 'label.delete'|trans }}</strong></button>
+        <button class="btn btn-danger gs-modal-confirm-button" title="Cancella il modulo inviato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_classe_delete', {classe: info.classe.id, id: dati.richieste[mk].nuove[0].id}) }}" data-text="{{ 'message.cancella_modulo'|trans }}" data-csrf="{{ csrf_token('delete') }}"><strong>{{ 'label.delete'|trans }}</strong></button>
       </div>
         {% endif %}
       {% else %}
@@ -99,7 +99,7 @@
           {% endfor %}
           {% if rv.stato == 'I' and rv.delete %}
           <div class="text-right">
-            <button class="btn btn-danger gs-modal-confirm-button" title="Cancella il modulo inviato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_classe_delete', {classe: info.classe.id, id: rv.id}) }}" data-text="{{ 'message.cancella_modulo'|trans }}"><strong>{{ 'label.delete'|trans }}</strong></button>
+            <button class="btn btn-danger gs-modal-confirm-button" title="Cancella il modulo inviato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_classe_delete', {classe: info.classe.id, id: rv.id}) }}" data-text="{{ 'message.cancella_modulo'|trans }}" data-csrf="{{ csrf_token('delete') }}"><strong>{{ 'label.delete'|trans }}</strong></button>
           </div>
           {% endif %}
       </li>
@@ -111,7 +111,7 @@
         <strong>{{ 'label.add'|trans }}</strong>
       </a>
       {% if dati.richieste[mk].vecchie is defined %}
-      <button class="btn btn-default gs-modal-confirm-button gs-ml-3" title="Visualizza moduli precedenti" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ mv.nome }}<br>Visualizza moduli precedenti" data-body="gs-richieste-scadute"><strong>Vecchi moduli</strong></button>
+      <button class="btn btn-default gs-modal-confirm-button gs-ml-3" title="Visualizza moduli precedenti" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ mv.nome }}<br data-csrf="{{ csrf_token('delete') }}">Visualizza moduli precedenti" data-body="gs-richieste-scadute"><strong>Vecchi moduli</strong></button>
       <ul id="gs-richieste-scadute" class="list-group" style="display:none">
         {% for rv in dati.richieste[mk].vecchie %}
         <li class="list-group-item">
@@ -151,10 +151,12 @@
 $(document).ready(function() {
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
-    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var csrf = $(event.relatedTarget).data('csrf');
     var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
     $(this).find('#gs-modal-confirm-msg').text(text);
-  });
+});
   $('#gs-modal-info').on('show.bs.modal', function (event) {
     var title = $(event.relatedTarget).data('title');
     var id = $(event.relatedTarget).data('body');

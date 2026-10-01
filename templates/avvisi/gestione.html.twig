@@ -1,44 +1,121 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
-  <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.avvisi_gestione'|trans }}</h1>
-  {{ include(('include/form-inline.html.twig')) }}
-  <div class="row gs-mb-1">
-    <div class="col-sm-6">
+<div class="container-fluid gs-avvisi-gestione">
+  <h1 class="h3 mb-3">{{ 'title.avvisi_gestione'|trans }}</h1>
+
+  <!-- Filtri unici -->
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-avvisi-filters-form">
+    <div class="gs-avvisi-filters-desktop">
+      <div class="gs-avvisi-filters-row">
+        <div class="gs-avvisi-filter-col">
+          {{ form_label(form.autore) }}
+          {{ form_widget(form.autore) }}
+        </div>
+        <div class="gs-avvisi-filter-col">
+          {{ form_label(form.tipo) }}
+          {{ form_widget(form.tipo) }}
+        </div>
+        <div class="gs-avvisi-filter-col">
+          {{ form_label(form.mese) }}
+          {{ form_widget(form.mese) }}
+        </div>
+        <div class="gs-avvisi-filter-col gs-avvisi-filter-expand">
+          {{ form_label(form.oggetto) }}
+          {{ form_widget(form.oggetto) }}
+        </div>
+        <div class="gs-avvisi-filter-col gs-avvisi-filter-btn">
+          {{ form_widget(form.submit) }}
+        </div>
+      </div>
     </div>
-    <div class="col-sm-6 text-right">
-  {% if dati.azioni.add is defined %}
-      <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('avvisi_edit') }}" role="button" title="Inserisci un nuovo avviso generico"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Generico</strong></a>
-      <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('avvisi_edit_classi', {tipo: 'E'}) }}" role="button" title="Aggiungi un nuovo avviso per l'ingresso posticipato"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Ingresso</strong></a>
-      <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('avvisi_edit_classi', {tipo: 'U'}) }}" role="button" title="Aggiungi un nuovo avviso per l'uscita anticipata"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Uscita</strong></a>
-      <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('avvisi_edit_classi', {tipo: 'A'}) }}" role="button" title="Aggiungi un nuovo avviso per lo svolgimento di attività"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Attività</strong></a>
-      <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('avvisi_edit_personali') }}" role="button" title="Aggiungi una nuova comunicazione personale per i genitori"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Personale</strong></a>
-  {% endif %}
+
+    <div class="gs-avvisi-filters-mobile">
+      <div class="gs-avvisi-filters-mobile-header">
+        <label for="avvisi-search-mobile" class="sr-only">Cerca oggetto</label>
+        <input type="text" id="avvisi-search-mobile" class="form-control" placeholder="Cerca oggetto...">
+        <button type="button" class="btn btn-default gs-avvisi-filters-toggle" id="avvisi-filters-toggle">
+          <span class="glyphicon glyphicon-filter gs-mr-2"></span>Filtri
+        </button>
+      </div>
+      <div class="gs-avvisi-filters-mobile-panel" id="avvisi-filters-panel">
+        <div class="gs-avvisi-filters-mobile-row">
+          <label for="avvisi-autore-mobile">Staff</label>
+          <select id="avvisi-autore-mobile" class="form-control"></select>
+        </div>
+        <div class="gs-avvisi-filters-mobile-row">
+          <label for="avvisi-tipo-mobile">Tipo avviso</label>
+          <select id="avvisi-tipo-mobile" class="form-control"></select>
+        </div>
+        <div class="gs-avvisi-filters-mobile-row">
+          <label for="avvisi-mese-mobile">Mese</label>
+          <select id="avvisi-mese-mobile" class="form-control"></select>
+        </div>
+        <div class="gs-avvisi-filters-mobile-buttons">
+          <button type="button" class="btn btn-default gs-avvisi-reset" id="avvisi_gestione_reset">Reset</button>
+          <button type="button" class="btn btn-primary gs-avvisi-submit-mobile" id="avvisi_gestione_submit_mobile">Filtra</button>
+        </div>
+      </div>
+    </div>
+    {{ form_widget(form._token) }}
+  </form>
+
+  <!-- Pulsanti azioni -->
+  <div class="gs-avvisi-actions-row">
+    <span class="gs-avvisi-actions-label">Nuovo avviso:</span>
+    {% if dati.azioni.add is defined %}
+    <div class="gs-avvisi-actions-buttons">
+      <a class="btn btn-default btn-sm" href="{{ path('avvisi_edit') }}" role="button" title="Inserisci un nuovo avviso generico">
+        <span class="glyphicon glyphicon-plus mr-1"></span>Generico
+      </a>
+      <a class="btn btn-default btn-sm" href="{{ path('avvisi_edit_classi', {tipo: 'E'}) }}" role="button" title="Aggiungi un nuovo avviso per l'ingresso posticipato">
+        <span class="glyphicon glyphicon-plus mr-1"></span>Ingresso
+      </a>
+      <a class="btn btn-default btn-sm" href="{{ path('avvisi_edit_classi', {tipo: 'U'}) }}" role="button" title="Aggiungi un nuovo avviso per l'uscita anticipata">
+        <span class="glyphicon glyphicon-plus mr-1"></span>Uscita
+      </a>
+      <a class="btn btn-default btn-sm" href="{{ path('avvisi_edit_classi', {tipo: 'A'}) }}" role="button" title="Aggiungi un nuovo avviso per lo svolgimento di attività">
+        <span class="glyphicon glyphicon-plus mr-1"></span>Attività
+      </a>
+      <a class="btn btn-default btn-sm" href="{{ path('avvisi_edit_personali') }}" role="button" title="Aggiungi una nuova comunicazione personale per i genitori">
+        <span class="glyphicon glyphicon-plus mr-1"></span>Personale
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Mobile nuovo avviso dropdown -->
+  <div class="gs-avvisi-mobile-actions">
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+        <span class="glyphicon glyphicon-plus gs-mr-2"></span>Nuovo avviso
+        <span class="caret gs-ml-2"></span>
+      </button>
+      <ul class="dropdown-menu">
+        {% if dati.azioni.add is defined %}
+        <li><a href="{{ path('avvisi_edit') }}">Generico</a></li>
+        <li><a href="{{ path('avvisi_edit_classi', {tipo: 'E'}) }}">Ingresso</a></li>
+        <li><a href="{{ path('avvisi_edit_classi', {tipo: 'U'}) }}">Uscita</a></li>
+        <li><a href="{{ path('avvisi_edit_classi', {tipo: 'A'}) }}">Attività</a></li>
+        <li><a href="{{ path('avvisi_edit_personali') }}">Personale</a></li>
+        {% endif %}
+      </ul>
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped gs-mb-0">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-1">{{ 'label.autore'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.tipo'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.data'|trans }}</th>
-        <th class="col-sm-4">{{ 'label.oggetto'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.sede'|trans }}</th>
-        <th class="col-sm-3">{{ 'label.destinatari'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-  <tbody>
+
+  {% set headers = [
+    {label: 'label.autore'|trans},
+    {label: 'label.tipo'|trans},
+    {label: 'label.data'|trans},
+    {label: 'label.oggetto'|trans},
+    {label: 'label.sede'|trans},
+    {label: 'label.destinatari'|trans},
+    {label: 'label.action'|trans}
+  ] %}
+  {% set rows = [] %}
   {% for k, a in dati.lista %}
-      <tr>
-        <td><small>{{ a.autore.nome }} {{ a.autore.cognome }}</small></td>
-        <td><small>{{ ('label.avvisi_tipo_' ~ a.tipo)|trans }}</small></td>
-        <td>{{ a.data|date('d/m/Y') }}</td>
-        <td>{{ a.titolo }}</td>
-        <td><small>{% for s in a.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
-        <td>
-          <small>{% set inizio = 1 %}
+    {% set destinatari %}
+      <small>{% set inizio = 1 %}
     {% if 'D' in a.speciali %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}DSGA{% endif -%}
     {% if 'S' in a.speciali %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}RSPP{% endif -%}
     {% if 'R' in a.speciali %}{% if inizio %}{% set inizio = 0 %}{% else %}, {% endif %}RSU{% endif -%}
@@ -62,20 +139,38 @@
           <br><strong>CLASSI: {% for c in dati.classi[a.id] %}{{ c }}{{ not loop.last ? ', ' }}{% endfor %}</strong>
     {% endif %}
           </small>
-        </td>
-        <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_gestione', {avviso: a.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span><span class="sr-only">Visualizza</span></button>
-      {% if dati.azioni[k].edit is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ a.tipo() in ['E', 'U', 'A'] ? path('avvisi_edit_classi', {tipo: a.tipo, avviso: a.id}) : (a.tipo() == 'I' ? path('avvisi_edit_personali', {avviso: a.id}) : path('avvisi_edit', {avviso: a.id})) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span><span class="sr-only">Modifica</span></a>
-      {% endif %}
-      {% if dati.azioni[k].delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {avviso: a.id}) }}" data-text="{{ 'message.cancella_avviso'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><span class="sr-only">Cancella</span></button>
-      {% endif %}
-        </td>
-      </tr>
+    {% endset %}
+    {% set sedi %}
+      <small>{% for s in a.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small>
+    {% endset %}
+    {% set buttons = [] %}
+    {% set buttons = buttons|merge(['<button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli dell\'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="' ~ path('avvisi_dettagli_gestione', {avviso: a.id}) ~ '"><span class="glyphicon glyphicon-zoom-in"></span><span class="sr-only">Visualizza</span></button>']) %}
+    {% if dati.azioni[k].edit is defined %}
+      {% set buttons = buttons|merge(['<a class="btn btn-primary btn-xs" href="' ~ (a.tipo() in ['E', 'U', 'A'] ? path('avvisi_edit_classi', {tipo: a.tipo, avviso: a.id}) : (a.tipo() == 'I' ? path('avvisi_edit_personali', {avviso: a.id}) : path('avvisi_edit', {avviso: a.id}))) ~ '" role="button" title="Modifica l\'avviso indicato"><span class="glyphicon glyphicon-edit"></span><span class="sr-only">Modifica</span></a>']) %}
+    {% endif %}
+    {% if dati.azioni[k].delete is defined %}
+      {% set buttons = buttons|merge(['<button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l\'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="' ~ path('avvisi_delete', {avviso: a.id}) ~ '" data-text="' ~ 'message.cancella_avviso'|trans ~ '" data-csrf="' ~ csrf_token('delete') ~ '"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><span class="sr-only">Cancella</span></button>']) %}
+    {% endif %}
+    {% set rows = rows|merge([{
+      cells: [
+        {content: '<small>' ~ a.autore.nome ~ ' ' ~ a.autore.cognome ~ '</small>'},
+        {content: '<small>' ~ ('label.avvisi_tipo_' ~ a.tipo)|trans ~ '</small>'},
+        {content: a.data|date('d/m/Y')},
+        {content: a.titolo},
+        {content: sedi},
+        {content: destinatari},
+        {content: buttons}
+      ]
+    }]) %}
   {% endfor %}
-    </tbody>
-  </table>
+  {{ include('include/table-responsive-bs3.html.twig', {
+    table_id: 'avvisi-table',
+    table_class: 'table table-bordered table-hover table-striped gs-mb-0',
+    thead_class: 'bg-success',
+    headers: headers,
+    rows: rows,
+    empty_message: 'Nessun avviso trovato'
+  }) }}
   {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'avvisi_gestione'}) }}
   {{ include('include/modal-remote.html.twig') }}
   {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_avviso'}) }}
@@ -99,6 +194,59 @@ $(document).ready(function() {
     $('form[name="{{ form.vars.name }}"]').submit();
     $('#gs-modal-waiting').modal('show');
   });
+  $('#avviso_filtro_oggetto').change(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#avviso_gestione_reset').click(function (e) {
+    e.preventDefault();
+    $('#avviso_filtro_autore').val('T');
+    $('#avviso_filtro_tipo').val('G');
+    $('#avviso_filtro_mese').val('0');
+    $('#avviso_filtro_oggetto').val('');
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#avvisi-filters-toggle').click(function (e) {
+    e.preventDefault();
+    $('#avvisi-filters-panel').toggleClass('is-open');
+  });
+  // Sincronizza opzioni select mobile con form desktop
+  $('#avviso_filtro_autore option').each(function() {
+    $('#avvisi-autore-mobile').append('<option value="' + $(this).val() + '">' + $(this).text() + '</option>');
+  });
+  $('#avviso_filtro_tipo option').each(function() {
+    $('#avvisi-tipo-mobile').append('<option value="' + $(this).val() + '">' + $(this).text() + '</option>');
+  });
+  $('#avviso_filtro_mese option').each(function() {
+    $('#avvisi-mese-mobile').append('<option value="' + $(this).val() + '">' + $(this).text() + '</option>');
+  });
+  $('#avvisi-search-mobile').on('keyup', function(e) {
+    if (e.which === 13) {
+      $('#avviso_filtro_oggetto').val($(this).val());
+      $('form[name="{{ form.vars.name }}"]').submit();
+      $('#gs-modal-waiting').modal('show');
+    }
+  });
+  $('#avvisi-autore-mobile').change(function() {
+    $('#avviso_filtro_autore').val($(this).val());
+  });
+  $('#avvisi-tipo-mobile').change(function() {
+    $('#avviso_filtro_tipo').val($(this).val());
+  });
+  $('#avvisi-mese-mobile').change(function() {
+    $('#avviso_filtro_mese').val($(this).val());
+  });
+  $('#avvisi_gestione_submit_mobile').click(function (e) {
+    e.preventDefault();
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#avviso_gestione_submit_mobile').click(function (e) {
+    e.preventDefault();
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
   $('#gs-modal-remote').on('show.bs.modal', function (event) {
     var url = $(event.relatedTarget).data('href');
     $(this).find('#gs-modal-remote-content').load(url);
@@ -109,10 +257,12 @@ $(document).ready(function() {
   });
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
-    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var csrf = $(event.relatedTarget).data('csrf');
     var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
     $(this).find('#gs-modal-confirm-msg').text(text);
-  });
+});
 });
 </script>
 {% endblock %}

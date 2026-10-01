@@ -41,7 +41,7 @@
       <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_agenda', {tipo: info.tipo == 'S' ? 'V' : info.tipo, avviso: e.id}) }}" role="button" title="{{ info.tipo == 'P' ? 'Modifica i compiti per casa' : 'Modifica la verifica' }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
       {% endif %}
       {% if dati.azioni[k].delete is defined %}
-      <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="{{ info.tipo == 'P' ? 'Cancella i compiti per casa' : 'Cancella la verifica' }}" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {avviso: e.id}) }}" data-text="{{ (info.tipo == 'P' ? 'message.cancella_compito' : 'message.cancella_verifica')|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
+      <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="{{ info.tipo == 'P' ? 'Cancella i compiti per casa' : 'Cancella la verifica' }}" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {avviso: e.id}) }}" data-text="{{ (info.tipo == 'P' ? 'message.cancella_compito' : 'message.cancella_verifica')|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
       {% endif %}
     </div>
     {% endif %}

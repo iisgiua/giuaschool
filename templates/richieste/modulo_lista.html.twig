@@ -1,34 +1,38 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
+<div class="container-fluid gs-richieste-modulo-lista">
   <h1 class="text-center gs-h2 gs-mt-2">{{ titolo|trans }}</h1>
-  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="form-inline gs-mb-2">
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-richieste-modulo-lista-filters gs-mb-3">
     <div id="filtro">
-      <div class="form-group">
-        <label class="sr-only control-label" for="filtro_tipo">{{ form[0].tipo.vars.label|trans }}</label>
-        {{ form_widget(form[0].tipo) }}
+      <div class="gs-richieste-modulo-lista-filters-row">
+        <div class="gs-richieste-modulo-lista-filter-col">
+          {{ form_label(form[0].tipo) }}
+          {{ form_widget(form[0].tipo) }}
+        </div>
+        <div class="gs-richieste-modulo-lista-filter-col">
+          {{ form_label(form[0].sede) }}
+          {{ form_widget(form[0].sede) }}
+        </div>
+        <div class="gs-richieste-modulo-lista-filter-col">
+          {{ form_label(form[0].classe) }}
+          {{ form_widget(form[0].classe) }}
+        </div>
       </div>
-      <div class="form-group">
-        <label class="sr-only control-label" for="filtro_sede">{{ form[0].sede.vars.label|trans }}</label>
-        {{ form_widget(form[0].sede) }}
+      <div class="gs-richieste-modulo-lista-filters-row">
+        <div class="gs-richieste-modulo-lista-filter-col">
+          {{ form_label(form[0].cognome) }}
+          {{ form_widget(form[0].cognome) }}
+        </div>
+        <div class="gs-richieste-modulo-lista-filter-col">
+          {{ form_label(form[0].nome) }}
+          {{ form_widget(form[0].nome) }}
+        </div>
+        <div class="gs-richieste-modulo-lista-filter-col gs-richieste-modulo-lista-btn">
+          {{ form_widget(form[0].submit) }}
+        </div>
       </div>
-      <div class="form-group">
-        <label class="sr-only control-label" for="filtro_classe">{{ form[0].classe.vars.label|trans }}</label>
-        {{ form_widget(form[0].classe) }}
-      </div>
-      <div class="form-group">
-        <label class="sr-only control-label" for="filtro_cognome">{{ form[0].cognome.vars.label|trans }}</label>
-        {{ form_widget(form[0].cognome) }}
-      </div>
-      <div class="form-group">
-        <label class="sr-only control-label" for="filtro_nome">{{ form[0].nome.vars.label|trans }}</label>
-        {{ form_widget(form[0].nome) }}
-      </div>
-      <div class="form-group">
-        {{ form_widget(form[0].submit) }}
-      </div>
-      <div class="form-group pull-right">
+      <div class="gs-richieste-modulo-lista-actions">
         <a class="btn btn-success btn-sm" href="{{ path('richieste_modulo_lista', {formato: 'C'}) }}" role="button" title="Esporta i dati in formato CSV"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>{{ 'label.esporta'|trans }}</strong></a>
       </div>
       {{ form_widget(form[0]._token) }}
@@ -159,6 +163,16 @@ $(document).ready(function() {
     }
     $(this).find('#gs-info-documenti').html(documenti);
   });
+  // Aggiungi opzione vuota alle select se sono vuote
+  if ($('#filtro_tipo option').length === 0) {
+    $('#filtro_tipo').prepend('<option value="">Tutti i tipi</option>');
+  }
+  if ($('#filtro_sede option').length === 0) {
+    $('#filtro_sede').prepend('<option value="">Tutte le sedi</option>');
+  }
+  if ($('#filtro_classe option').length === 0) {
+    $('#filtro_classe').prepend('<option value="">Tutte le classi</option>');
+  }
   // init
   var sedi = [];
   {% for s, n in info.sedi %}

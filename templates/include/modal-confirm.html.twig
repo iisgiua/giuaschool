@@ -12,8 +12,11 @@
         <p id="gs-modal-confirm-msg">{{ modal_confirm_msg|trans }}</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal" >{{ 'label.cancel'|trans }}</button>
-        <a class="btn btn-primary" id="gs-modal-confirm-yes" href="#" role="button">{{ 'label.continua'|trans }}</a>
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+        <form id="gs-modal-confirm-form" method="post" action="#" style="display:inline">
+          <input type="hidden" name="_csrf_token" id="gs-modal-confirm-csrf">
+          <button type="submit" class="btn btn-primary">{{ 'label.continua'|trans }}</button>
+        </form>
       </div>
     </div>
   </div>

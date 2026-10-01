@@ -35,7 +35,7 @@
           <a class="btn btn-primary btn-xs" href="{{ path('circolari_edit', {circolare: c.id}) }}" role="button" title="Modifica la circolare indicata"><span class="glyphicon glyphicon-edit"></span></a>
       {% endif %}
       {% if dati.azioni['unpublish-' ~ k].delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la circolare indicata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('circolari_delete', {circolare: c.id}) }}" data-text="{{ 'message.cancella_circolare'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la circolare indicata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('circolari_delete', {circolare: c.id}) }}" data-text="{{ 'message.cancella_circolare'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
       {% endif %}
       {% if dati.azioni['unpublish-' ~ k].publish is defined %}
           <a class="btn btn-success btn-xs" href="{{ path('circolari_publish', {circolare: c.id, pubblica: 1}) }}" role="button" title="Pubblica la circolare indicata"><span class="glyphicon glyphicon-book"></span></a>
@@ -54,21 +54,30 @@
   </div>
   {% endif %}
   <div class="text-center text-success gs-pb-0"><strong class="gs-big">Circolari pubblicate</strong></div>
-  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="form-inline gs-mb-2">
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-circolari-gestione-filters gs-mb-3">
     <div id="{{ form.vars.id }}">
-      <div class="input-group date" title="Data iniziale per il filtro">
-        {{ form_widget(form.inizio, {attr: {widget: false}}) }}
-        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+      <div class="gs-circolari-gestione-filters-row">
+        <div class="gs-circolari-gestione-filter-col">
+          {{ form_label(form.inizio) }}
+          <div class="input-group date">
+            {{ form_widget(form.inizio, {attr: {widget: false}}) }}
+            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+          </div>
+        </div>
+        <div class="gs-circolari-gestione-filter-col">
+          {{ form_label(form.fine) }}
+          <div class="input-group date">
+            {{ form_widget(form.fine, {attr: {widget: false}}) }}
+            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+          </div>
+        </div>
       </div>
-      <div class="input-group date" title="Data finale per il filtro">
-        {{ form_widget(form.fine, {attr: {widget: false}}) }}
-        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+      <div class="form-group">
+        {{ form_label(form.oggetto) }}
+        {{ form_widget(form.oggetto) }}
       </div>
-      <div class="form-group" title="Filtro sul contenuto dell'oggetto della circolare">
-        <label class="sr-only control-label" for="circolare_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
-        {{ form_widget(form.oggetto, {attr: {style: 'width:30em'}}) }}
-      </div>
-      <div class="form-group _col-sm-2">
+      <div class="gs-circolari-gestione-buttons">
+        <button type="button" class="btn btn-default" id="circolare_gestione_reset" title="Resetta i filtri">Reset</button>
         {{ form_widget(form.submit) }}
       </div>
       {{ form_widget(form._token) }}
@@ -128,12 +137,21 @@ $(document).ready(function() {
     todayHighlight: true,
     zIndexOffset: 1200
     });
+  $('#circolare_gestione_reset').click(function (e) {
+    e.preventDefault();
+    $('#circolare_filtro_inizio').val('');
+    $('#circolare_filtro_fine').val('');
+    $('#circolare_filtro_oggetto').val('');
+    $('form[name="{{ form.vars.name }}"]').submit();
+  });
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
-    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var csrf = $(event.relatedTarget).data('csrf');
     var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
     $(this).find('#gs-modal-confirm-msg').text(text);
-  });
+});
   $('#gs-modal-remote').on('show.bs.modal', function (event) {
     var url = $(event.relatedTarget).data('href');
     $(this).find('#gs-modal-remote-content').load(url);

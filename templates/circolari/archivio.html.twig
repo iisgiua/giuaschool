@@ -1,23 +1,26 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
+<div class="container-fluid gs-circolari-archivio">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.circolari_archivio'|trans }}</h1>
-  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="form-inline gs-mb-2">
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-circolari-archivio-filters gs-mb-3">
     <div id="{{ form.vars.id }}">
-      <div class="form-group" title="{{ form.anno.vars.label|trans }}">
-        <label class="sr-only control-label" for="circolare_filtro_anno">{{ form.anno.vars.label|trans }}</label>
-        {{ form_widget(form.anno) }}
+      <div class="gs-circolari-archivio-filters-row">
+        <div class="gs-circolari-archivio-filter-col">
+          {{ form_label(form.anno) }}
+          {{ form_widget(form.anno) }}
+        </div>
+        <div class="gs-circolari-archivio-filter-col">
+          {{ form_label(form.mese) }}
+          {{ form_widget(form.mese) }}
+        </div>
       </div>
-      <div class="form-group" title="{{ form.mese.vars.label|trans }}">
-        <label class="sr-only control-label" for="circolare_filtro_mese">{{ form.mese.vars.label|trans }}</label>
-        {{ form_widget(form.mese) }}
+      <div class="form-group">
+        {{ form_label(form.oggetto) }}
+        {{ form_widget(form.oggetto) }}
       </div>
-      <div class="form-group" title="{{ form.oggetto.vars.label|trans }}">
-        <label class="sr-only control-label" for="circolare_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
-        {{ form_widget(form.oggetto, {attr: {style: 'width:30em'}}) }}
-      </div>
-      <div class="form-group _col-sm-2">
+      <div class="gs-circolari-archivio-buttons">
+        <button type="button" class="btn btn-default" id="circolare_archivio_reset" title="Resetta i filtri">Reset</button>
         {{ form_widget(form.submit) }}
       </div>
       {{ form_widget(form._token) }}
@@ -66,6 +69,14 @@ $(document).ready(function() {
     $('#gs-modal-waiting').modal('show');
   });
   $('#circolari_mese').change(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#circolare_archivio_reset').click(function (e) {
+    e.preventDefault();
+    $('#circolare_filtro_anno').val('');
+    $('#circolare_filtro_mese').val('');
+    $('#circolare_filtro_oggetto').val('');
     $('form[name="{{ form.vars.name }}"]').submit();
     $('#gs-modal-waiting').modal('show');
   });

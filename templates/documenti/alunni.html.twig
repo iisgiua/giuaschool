@@ -1,9 +1,28 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
+<div class="container-fluid gs-documenti-alunni">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_alunni'|trans }}</h1>
-  {{ include(('include/form-inline.html.twig')) }}
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-documenti-alunni-filters gs-mb-3">
+    <div id="{{ form.vars.id }}">
+      <div class="gs-documenti-alunni-filters-row">
+        <div class="gs-documenti-alunni-filter-col">
+          {{ form_label(form.classe) }}
+          {{ form_widget(form.classe) }}
+        </div>
+        {% if form.cognome is defined %}
+        <div class="gs-documenti-alunni-filter-col">
+          {{ form_label(form.cognome) }}
+          {{ form_widget(form.cognome) }}
+        </div>
+        {% endif %}
+        <div class="gs-documenti-alunni-filter-col gs-documenti-alunni-btn">
+          {{ form_widget(form.submit) }}
+        </div>
+      </div>
+      {{ form_widget(form._token) }}
+    </div>
+  </form>
   {% if dati.lista.count > 0 %}
   <table class="table table-bordered table-hover table-striped gs-mb-0">
     <thead class="bg-success">
@@ -80,6 +99,13 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
+  // Aggiungi opzione vuota alle select se sono vuote
+  if ($('#documenti_alunni_classe option').length === 0) {
+    $('#documenti_alunni_classe').prepend('<option value="">Tutte le classi</option>');
+  }
+  if ($('#documenti_alunni_cognome option').length === 0) {
+    $('#documenti_alunni_cognome').prepend('<option value="">Tutti gli alunni</option>');
+  }
   $('[data-toggle="popover"]').popover();
 });
 </script>

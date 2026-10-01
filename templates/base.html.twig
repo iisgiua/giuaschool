@@ -8,13 +8,14 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
     <title>{{ pagina_titolo|trans }}</title>
     <meta name="keywords" content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0..(app.session.get('/CONFIG/ISTITUTO/num_sedi') - 1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_citta')|lower }}{% endfor %}">
     <meta name="description" content="giua@school: il registro elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}">
     <meta name="author" content="Antonello Dessì">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/bootstrap/css/bootstrap-theme.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('vendor/fontawesome/css/all.min.css') }}" rel="stylesheet">
     <!--[if IE 10]>
     <link href="{{ asset('vendor/bootstrap/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
     <![endif]-->
@@ -122,44 +123,12 @@
 {% endblock %}
             </div>
           </div><!-- fine contenuto -->
+
+          <!-- piè di pagina -->
+          {{ include('footer.html.twig') }}
         </div>
 
       </div><!-- fine gs-app-shell -->
-
-      <!-- piè di pagina -->
-      <div class="gs-footer-container clearfix">
-        <footer class="footer" id="gs-footer" tabindex="-1" style="outline:none;">
-          <div class="container-fluid">
-            <div class="row">
-              <div class="col-sm-12 text-center small">
-                <div class="row">
-                  <strong>{{ app.session.get('/CONFIG/ISTITUTO/tipo') }}<br><em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em></strong>
-                </div>
-                <div class="row">
-                  <div class="col-sm-6">
-                    <address class="text-center">
-                      <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_nome') }}</strong><br>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_0_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_0_telefono') }}
-                    </address>
-                  </div>
-                  <div class="col-sm-6">
-                    <address class="text-center">
-                      <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_nome') }}</strong><br>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_indirizzo1') }}<br>{{ app.session.get('/CONFIG/ISTITUTO/sede_1_indirizzo2') }}<br>Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_1_telefono') }}
-                    </address>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="container-fluid text-center gs-mt-2">
-            <p class="small">
-              <a href="{{ path('info_noteLegali') }}">Note legali</a> |
-              <a href="{{ path('info_privacy') }}">Privacy</a> |
-              <a href="{{ path('info_cookie') }}">Cookie</a> |
-              <a href="{{ path('info_credits') }}">Credits</a>
-            </p>
-          </div>
-        </footer>
-      </div><!-- fine piè di pagina -->
 
     </div><!-- fine pagina -->
 
@@ -210,6 +179,22 @@
       }
       if (desktop.addEventListener) { desktop.addEventListener('change', onResize); }
       else if (desktop.addListener) { desktop.addListener(onResize); }
+    })();
+
+    /* Dropdown toggle per menu sidebar */
+    (function () {
+      var dropdownToggles = document.querySelectorAll('.gs-hdr-menu .dropdown-toggle');
+      dropdownToggles.forEach(function(toggle) {
+        toggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var parentLi = this.parentElement;
+          var dropdownMenu = parentLi.querySelector('.dropdown-menu');
+          if (dropdownMenu) {
+            parentLi.classList.toggle('open');
+          }
+        });
+      });
     })();
     </script>
 {% block pagina_js_fine %}

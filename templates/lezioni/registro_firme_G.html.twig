@@ -115,9 +115,9 @@
             <br><strong>{{ v.provvedimento|raw|nl2br }}<br><small><em>({{ v.docente_provvedimento }})</em></small></strong>
         {% endif %}
         {% if v.delete is defined %}
-            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella la nota disciplinare" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_nota'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella la nota disciplinare" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_nota'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
         {% elseif v.cancel is defined %}
-            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Annulla la nota disciplinare" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.cancel }}" data-text="{{ 'message.annulla_nota'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Annulla la nota disciplinare" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.cancel }}" data-text="{{ 'message.annulla_nota'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
         {% endif %}
         {% if v.edit is defined %}
             <a class="btn btn-primary btn-xs pull-right gs-ml-3" href="{{ v.edit }}" role="button" title="Modifica la nota disciplinare"><span class="glyphicon glyphicon-edit"></span></a>
@@ -158,7 +158,7 @@
             {{ v.testo|raw|nl2br }}<br>
             <small><em>({{ v.docente }}, inserita in data {{ (v.avviso ? v.avviso.modificato : v.modificato)|date('d/m/Y') }})</em></small>
         {% if v.delete is defined and (not v.avviso or v.visibile) %}
-            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella l'annotazione sul registro" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_annotazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+            <button class="btn btn-danger btn-xs pull-right gs-ml-3 gs-modal-confirm-button" title="Cancella l'annotazione sul registro" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_annotazione'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
         {% endif %}
         {% if v.edit is defined and (not v.avviso or v.visibile) %}
             <a class="btn btn-primary btn-xs pull-right" href="{{ v.edit }}" role="button" title="Modifica l'annotazione sul registro"><span class="glyphicon glyphicon-edit"></span></a>
@@ -213,7 +213,7 @@
           <a class="btn btn-primary btn-xs" href="{{ v.edit }}" role="button" title="Modifica la lezione"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
         {% endif %}
         {% if v.delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la lezione" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_lezione'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
+          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la lezione" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ v.delete }}" data-text="{{ 'message.cancella_lezione'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
         {% endif %}
         </td>
       </tr>
@@ -353,10 +353,12 @@ $(document).ready(function() {
   $('[data-toggle="popover"]').popover();
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
-    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var csrf = $(event.relatedTarget).data('csrf');
     var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
     $(this).find('#gs-modal-confirm-msg').text(text);
-  });
+});
   $('#gs-modal-remote').on('show.bs.modal', function (e) {
     var url = $(e.relatedTarget).data('href');
     $(this).find('#gs-modal-remote-content').load(url);

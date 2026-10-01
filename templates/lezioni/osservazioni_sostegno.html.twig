@@ -66,7 +66,7 @@
               <div>
                 <strong>{{ e.data }}</strong> <em>({{ e.materia }})</em>
               {% if e.delete %}
-                <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella l'osservazione sull'alunno" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ e.delete }}" data-text="{{ 'message.cancella_osservazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella l'osservazione sull'alunno" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ e.delete }}" data-text="{{ 'message.cancella_osservazione'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
               {% endif %}
               {% if e.edit %}
                 <a class="btn btn-primary btn-xs pull-right gs-mr-2" href="{{ e.edit }}" role="button" title="Modifica l'osservazione sull'alunno"><span class="glyphicon glyphicon-edit"></span></a>
@@ -120,7 +120,7 @@
               <div>
                 <strong>{{ e.data }}</strong>
               {% if e.delete %}
-                <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella l'osservazione sull'alunno" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ e.delete }}" data-text="{{ 'message.cancella_osservazione'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella l'osservazione sull'alunno" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ e.delete }}" data-text="{{ 'message.cancella_osservazione'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
               {% endif %}
               {% if e.edit %}
                 <a class="btn btn-primary btn-xs pull-right gs-mr-2" href="{{ e.edit }}" role="button" title="Modifica l'osservazione sull'alunno"><span class="glyphicon glyphicon-edit"></span></a>
@@ -188,10 +188,12 @@ $(document).ready(function() {
   $('[data-toggle="popover"]').popover();
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
-    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var csrf = $(event.relatedTarget).data('csrf');
     var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
     $(this).find('#gs-modal-confirm-msg').text(text);
-  });
+});
   $('td button.gs-show-hide').on('click', function (event) {
     var el = $(this).siblings('div');
     if (el.is(':visible')) {

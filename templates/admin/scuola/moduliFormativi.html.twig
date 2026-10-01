@@ -1,4 +1,4 @@
-{% extends 'admin/layout-base.html.twig' %}
+{% extends 'admin/layout-sidebar.html.twig' %}
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
@@ -21,9 +21,9 @@
           <td>{{ ('label.modulo_formativo_tipo_' ~ m.tipo)|trans }}</td>
           <td><small>{% for c in m.classi %}{{ ('label.classi_' ~ c)|trans }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
           <td class="pb-0">
-            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" title="Mostra i dettagli del modulo formativo" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ m.nome }}" data-cont-id="info-moduloFormativo-{{ m.id }}">{{ 'label.show'|trans }}</button>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_moduliFormativi_edit', {id: m.id}) }}" role="button" title="Modifica i dati del modulo formativo">{{ 'label.edit'|trans }}</a>
-            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella il modulo formativo" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ m.nome }}" data-contenuto="{{ 'message.cancella_moduloFormativo'|trans }}" data-href="{{ path('scuola_moduliFormativi_delete', {id: m.id}) }}">{{ 'label.delete'|trans }}</button>
+            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" title="Mostra i dettagli del modulo formativo" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ m.nome }}" data-cont-id="info-moduloFormativo-{{ m.id }}"><i class="fas fa-info-circle"></i></button>
+            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_moduliFormativi_edit', {id: m.id}) }}" role="button" title="Modifica i dati del modulo formativo"><i class="fas fa-edit"></i></a>
+            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella il modulo formativo" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ m.nome }}" data-contenuto="{{ 'message.cancella_moduloFormativo'|trans }}" data-href="{{ path('scuola_moduliFormativi_delete', {id: m.id}) }}" data-csrf="{{ csrf_token('delete') }}"><i class="fas fa-trash"></i></button>
             <div class="d-none" id="info-moduloFormativo-{{ m.id }}">
               <dl class="row">
                 <dt class="col-sm-3 text-right">{{ 'label.nome'|trans }}</dt>
@@ -65,12 +65,14 @@ $(document).ready(function() {
     $(this).find('#gs-modal-info-contenuto').html(contenuto);
   });
   $('#gs-modal-confirm').on('show.bs.modal', function (e) {
+    var href = $(e.relatedTarget).data('href');
+    var csrf = $(e.relatedTarget).data('csrf');
     var titolo = $(e.relatedTarget).data('titolo');
     var contenuto = $(e.relatedTarget).data('contenuto');
-    var href = $(e.relatedTarget).data('href');
     $(this).find('#gs-modal-confirm-titolo').html(titolo);
     $(this).find('#gs-modal-confirm-contenuto').html(contenuto);
-    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
   });
 });
 </script>

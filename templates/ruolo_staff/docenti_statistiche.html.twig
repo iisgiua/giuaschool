@@ -1,27 +1,38 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
+<div class="container-fluid gs-docenti-statistiche">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.statistiche_lezioni'|trans }}</h1>
-  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="form-inline gs-mb-2">
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-docenti-statistiche-filters gs-mb-3">
     <div id="staff_docenti_statistiche">
-      <div class="form-group">
-        <label class="sr-only control-label" for="staff_docenti_statistiche_docente">{{ form.docente.vars.label|trans }}</label>
-        {{ form_widget(form.docente) }}
+      <div class="gs-docenti-statistiche-filters-row">
+        <div class="gs-docenti-statistiche-filter-col">
+          {{ form_label(form.docente) }}
+          {{ form_widget(form.docente) }}
+        </div>
       </div>
-      <div class="input-group date">
-        {{ form_widget(form.inizio, {attr: {widget: false}}) }}
-        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+      <div class="gs-docenti-statistiche-filters-row">
+        <div class="gs-docenti-statistiche-filter-col">
+          {{ form_label(form.inizio) }}
+          <div class="input-group date">
+            {{ form_widget(form.inizio, {attr: {widget: false}}) }}
+            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+          </div>
+        </div>
+        <div class="gs-docenti-statistiche-filter-col">
+          {{ form_label(form.fine) }}
+          <div class="input-group date">
+            {{ form_widget(form.fine, {attr: {widget: false}}) }}
+            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+          </div>
+        </div>
       </div>
-      <div class="input-group date">
-        {{ form_widget(form.fine, {attr: {widget: false}}) }}
-        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
-      </div>
-      <div class="form-group">
+      <div class="gs-docenti-statistiche-buttons">
+        <button type="button" class="btn btn-default" id="docenti_statistiche_reset" title="Resetta i filtri">Reset</button>
         {{ form_widget(form.submit) }}
-      </div>
-      <div class="form-group pull-right">
-        <button type="submit" id="staff_docenti_statistiche_print" name="staff_docenti_statistiche[print]" class="btn btn-success btn-sm" title="Crea e scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-2"></span><strong>{{ 'label.stampa'|trans }}</strong></button>
+        <div class="form-group pull-right">
+          <button type="submit" id="staff_docenti_statistiche_print" name="staff_docenti_statistiche[print]" class="btn btn-success btn-sm" title="Crea e scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-2"></span><strong>{{ 'label.stampa'|trans }}</strong></button>
+        </div>
       </div>
       {{ form_widget(form._token) }}
     </div>
@@ -87,6 +98,13 @@ $(document).ready(function() {
     todayHighlight: true,
     zIndexOffset: 1200
     });
+  $('#docenti_statistiche_reset').click(function (e) {
+    e.preventDefault();
+    $('#staff_docenti_statistiche_docente').val('');
+    $('#staff_docenti_statistiche_inizio').val('');
+    $('#staff_docenti_statistiche_fine').val('');
+    $('form[name="{{ form.vars.name }}"]').submit();
+  });
 });
 </script>
 {% endblock %}

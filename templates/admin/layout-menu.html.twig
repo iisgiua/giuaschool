@@ -144,22 +144,5 @@
       </div>
     </div>
   </div>
-  <nav class="breadcrumb-container" aria-label="breadcrumb">
-    <ol class="breadcrumb dark pl-4">
-      <li class="breadcrumb-item d-none d-md-block"><span class="d-none d-lg-inline">Posizione:</span></li>
-  {% if is_granted('IS_AUTHENTICATED_FULLY') and page_route != 'login_home' %}
-      <li class="breadcrumb-item d-none d-md-block"><a class="ml-3" href="{{ path('login_home') }}" title="Pagina principale">Home</a><span class="separator"></span></li>
-  {% else %}
-      <li class="breadcrumb-item d-none d-md-block"><span class="ml-3"></span></li>
-  {% endif %}
-  {% if breadcrumb.nome3 is not null %}
-      <li class="breadcrumb-item d-none d-md-block"><a href="{{ breadcrumb.url3 ? path(breadcrumb.url3) : '#' }}" title="{{ breadcrumb.descrizione3|raw }}">{{ breadcrumb.nome3|raw }}</a><span class="separator"></span></li>
-  {% endif %}
-  {% if breadcrumb.nome2 is not null %}
-      <li class="breadcrumb-item d-none d-md-block"><a href="{{ breadcrumb.url2 ? path(breadcrumb.url2) : '#' }}" title="{{ breadcrumb.descrizione2|raw }}">{{ breadcrumb.nome2|raw }}</a><span class="separator"></span></li>
-  {% endif %}
-      <li class="breadcrumb-item active"><span class="d-inline d-md-none mr-4"></span><a href="{{ path(breadcrumb.url) }}" title="{{ breadcrumb.descrizione|raw }}" aria-current="page">{{ breadcrumb.nome|raw }}</a></li>
-    </ol>
-  </nav>
 </div>
 {## # FINE menu # ##}

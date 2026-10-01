@@ -4,14 +4,17 @@
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header border-bottom">
-        <h5 class="modal-title" id="gs-modal-confirm-titolo"></h5>
+        <h5 class="modal-title" id="gs-modal-confirm-titolo">{{ 'label.confirm'|trans }}</h5>
         <button type="button" class="close p-0" data-dismiss="modal" aria-label="{{ 'label.close'|trans }}">
           <svg class="icon" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#times') }}"></use></svg>
         </button>
       </div>
       <div class="modal-body" id="gs-modal-confirm-contenuto"></div>
       <div class="modal-footer mx-auto">
-        <a class="btn btn-primary btn-xs" id="gs-modal-confirm-yes" href="#" role="button">{{ 'label.continua'|trans }}</a>
+        <form id="gs-modal-confirm-form" method="post" action="#" style="display:inline">
+          <input type="hidden" name="_csrf_token" id="gs-modal-confirm-csrf">
+          <button type="submit" class="btn btn-primary btn-xs">{{ 'label.continua'|trans }}</button>
+        </form>
         <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
       </div>
     </div>
