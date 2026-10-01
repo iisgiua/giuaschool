@@ -151,6 +151,7 @@ class DatabaseTestCase extends KernelTestCase {
     $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
     // carica fixtures
     $fixtures = is_array($this->fixtures) ? $this->fixtures : [$this->fixtures];
+    // Non usato in contesto sensibile – md5/sha1 accettabile
     $fixturesName = md5(implode('-', $fixtures));
     $sqlPath = __DIR__.'/temp/'.$fixturesName.'.sql';
     $mapPath = __DIR__.'/temp/'.$fixturesName.'.map';

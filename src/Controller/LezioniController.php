@@ -349,6 +349,7 @@ class LezioniController extends BaseController {
     $info = null;
     $dati = null;
     $dir = $this->getParameter('dir_tmp').'/';
+    // Non usato in contesto sensibile – md5/sha1 accettabile
     $nomefile = md5(uniqid()).'-'.random_int(1, 1000).'.docx';
     // controlla cattedra
     $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
