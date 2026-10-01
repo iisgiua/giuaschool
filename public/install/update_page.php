@@ -264,7 +264,7 @@
     <!-- FINE finestra di attesa -->
 
     <!-- link TornaSu  -->
-    <a class="back-to-top back-to-top-small shadow" href="#" aria-hidden="true" data-attribute="back-to-top" title="Vai a inizio pagina">
+    <a class="back-to-top back-to-top-small shadow" href="#" data-attribute="back-to-top" title="Vai a inizio pagina" aria-label="Vai a inizio pagina">
       <svg class="icon icon-light" aria-hidden="true">
         <use xlink:href="../vendor/fontawesome/sprites/solid.svg#arrow-up"></use>
       </svg>
