@@ -1,0 +1,64 @@
+{# templates/footer.html.twig #}
+<footer class="gs-footer" id="gs-footer" tabindex="-1">
+  <div class="gs-footer-inner">
+
+    {# Intestazione istituto #}
+    <div class="gs-footer-head">
+      <strong>{{ app.session.get('/CONFIG/ISTITUTO/tipo') }}</strong><br>
+      <em>{{ app.session.get('/CONFIG/ISTITUTO/nome') }}</em>
+    </div>
+
+    {# Due colonne #}
+    <div class="gs-footer-cols">
+
+      {# Colonna sinistra: sedi #}
+      <div class="gs-footer-col">
+        {% for ks in 0..(app.session.get('/CONFIG/ISTITUTO/num_sedi') - 1) %}
+        <address>
+          <strong>{{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_nome') }}</strong><br>
+          {{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_indirizzo1') }}<br>
+          {{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_indirizzo2') }}<br>
+          Telefono: {{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_telefono') }}
+        </address>
+        {% endfor %}
+      </div>
+
+      {# Colonna destra #}
+      <div class="gs-footer-col">
+        <address>
+          <strong>Contatti</strong><br>
+          <a href="mailto:{{ app.session.get('/CONFIG/ISTITUTO/email') }}">{{ app.session.get('/CONFIG/ISTITUTO/email') }}</a><br>
+          <a href="mailto:{{ app.session.get('/CONFIG/ISTITUTO/pec') }}">{{ app.session.get('/CONFIG/ISTITUTO/pec') }}</a>
+        </address>
+        <address>
+          <strong>Sito web</strong><br>
+          <a href="{{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}" target="_blank">
+            {{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}
+          </a>
+        </address>
+        <address>
+          <strong>Progetto</strong><br>
+          <a href="https://iisgiua.github.io/giuaschool-docs/" target="_blank">
+            <em>Documentazione</em>
+          </a><br>
+          <a href="https://github.com/iisgiua/giuaschool/" target="_blank">
+            GitHub
+          </a> — v{{ app.session.get('/CONFIG/SISTEMA/versione') }}
+        </address>
+      </div>
+
+    </div>
+
+    {# Link legali #}
+    <div class="gs-footer-legal">
+      <a href="{{ path('info_noteLegali') }}">Note legali</a>
+      <span class="gs-footer-sep">|</span>
+      <a href="{{ path('info_privacy') }}">Privacy</a>
+      <span class="gs-footer-sep">|</span>
+      <a href="{{ path('info_cookie') }}">Cookie</a>
+      <span class="gs-footer-sep">|</span>
+      <a href="{{ path('info_credits') }}">Credits</a>
+    </div>
+
+  </div>
+</footer>

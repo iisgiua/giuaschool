@@ -1,0 +1,67 @@
+{## # menu sidebar per admin - usa dati dal database # ##}
+{% set page_route = app.request.attributes.get('_route') %}
+
+{% macro opzione_sidebar(opt, route) %}
+  {% if opt.nome == '__SEPARATORE__' %}
+    <li role="none"><span class="divider"></span></li>
+  {% else %}
+    <li{{ route == opt.url ? ' class="active"' }} role="presentation">
+    <a href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
+    {% if opt.icona %}
+        <span class="glyphicon glyphicon-{{ opt.icona }} gs-mr-2" aria-hidden="true"></span>
+    {% endif %}
+        <span>{{ opt.nome|raw }}</span>{% if not opt.abilitato %} (disabilitato){% endif %}
+    </a>
+    </li>
+  {% endif %}
+{% endmacro %}
+
+{% macro sottomenu_sidebar(opt, route) %}
+  {% if opt.nome == '__SEPARATORE__' %}
+    <li role="none"><span class="divider"></span></li>
+  {% else %}
+    <li{{ route == opt.url ? ' class="active"' }} role="presentation">
+    <a href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
+        <span>{{ opt.nome|raw }}</span>{% if not opt.abilitato %} (disabilitato){% endif %}
+    </a>
+    </li>
+  {% endif %}
+{% endmacro %}
+
+{% macro menu_sidebar(opt, route) %}
+  {% set submenu_active = false %}
+  {% for subopt in opt.sottomenu %}
+    {% if subopt.url == route %}
+      {% set submenu_active = true %}
+    {% endif %}
+  {% endfor %}
+  <li class="dropdown{{ submenu_active ? ' active open' }}" role="presentation">
+    <a href="#" title="{{ opt.descrizione|raw }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"{{ submenu_active ? ' aria-expanded="true"' : ' aria-expanded="false"' }}>
+  {% if opt.icona %}
+      <span class="glyphicon glyphicon-{{ opt.icona }} gs-mr-2" aria-hidden="true"></span>
+  {% endif %}
+      <span>{{ opt.nome|raw }}</span>
+      <span class="caret"></span>
+    </a>
+    <ul role="menu" class="dropdown-menu gs-dropdown-menu{{ submenu_active ? ' show' }}">
+  {% for subopt in opt.sottomenu %}
+    {% if subopt.sottomenu %}
+      {{ _self.menu_sidebar(subopt, route) }}
+    {% else %}
+      {{ _self.sottomenu_sidebar(subopt, route) }}
+    {% endif %}
+  {% endfor %}
+    </ul>
+  </li>
+{% endmacro %}
+
+<ul class="nav navbar-nav gs-navbar-nav">
+  {% for opt in app.session.get('/CONFIG/MENU/main').opzioni %}
+    {% if opt.sottomenu %}
+      {{ _self.menu_sidebar(opt, page_route) }}
+    {% else %}
+      {{ _self.opzione_sidebar(opt, page_route) }}
+    {% endif %}
+  {% endfor %}
+</ul>
+{## # FINE menu sidebar # ##}

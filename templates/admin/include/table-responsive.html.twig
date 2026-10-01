@@ -1,0 +1,71 @@
+{## # Componente tabella responsive riutilizzabile # ##}
+{% set table_id = table_id|default('gs-table') %}
+{% set table_class = table_class|default('table table-bordered table-hover table-striped table-sm gs-sticky-header') %}
+{% set headers = headers|default([]) %}
+{% set rows = rows|default([]) %}
+{% set empty_message = empty_message|default('Nessun dato trovato') %}
+{% set add_url = add_url|default(null) %}
+{% set add_label = add_label|default('label.add'|trans) %}
+{% set add_title = add_title|default('Aggiungi') %}
+{% set modal_info = modal_info|default(false) %}
+{% set modal_confirm = modal_confirm|default(false) %}
+
+<div class="table-responsive" style="margin-top: 1rem;">
+  {% if rows is not empty %}
+    <table id="{{ table_id }}" class="{{ table_class }}">
+      <thead class="thead-light">
+        <tr class="sticky-top">
+          {% for header in headers %}
+            <th class="col-auto {{ header.hidden_class|default('') }}" scope="col">{{ header.label }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr{{ row.row_class ? ' class="' ~ row.row_class ~ '"' }}>
+            {% for cell in row.cells %}
+              <td class="{{ cell.class|default('') }}">
+                {% if cell.content is iterable %}
+                  {% for item in cell.content %}
+                    {{ item|raw }}
+                  {% endfor %}
+                {% else %}
+                  {{ cell.content|raw }}
+                {% endif %}
+                {% if cell.modal_content is defined %}
+                  <div class="d-none" id="{{ cell.modal_id }}">
+                    {{ cell.modal_content|raw }}
+                  </div>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+      {% if add_url %}
+      <tfoot>
+        <tr>
+          <td colspan="{{ headers|length }}">
+            <a class="btn btn-primary btn-sm" href="{{ add_url }}" role="button" title="{{ add_title }}">{{ add_label }}</a>
+          </td>
+        </tr>
+      </tfoot>
+      {% endif %}
+    </table>
+  {% else %}
+    <div class="alert alert-info" role="alert">
+      {{ empty_message }}
+    </div>
+  {% endif %}
+</div>
+{% if add_url %}
+<div class="text-center mt-3">
+  <a class="btn btn-primary btn-sm" href="{{ add_url }}" role="button" title="{{ add_title }}">{{ add_label }}</a>
+</div>
+{% endif %}
+{% if modal_info %}
+  {{ include('admin/include/modal-info.html.twig') }}
+{% endif %}
+{% if modal_confirm %}
+  {{ include('admin/include/modal-confirm.html.twig') }}
+{% endif %}
