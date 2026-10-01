@@ -63,7 +63,7 @@ class MenuRepository extends EntityRepository {
         'icona' => $o['icona'],
         'sottomenu' => null,
         'megamenu' => false,
-        'listaurl' => null];
+        'listaurl' => $o['url'] ? [$o['url']] : []];
       if ($o['sottomenu'] && $o['abilitato']) {
         // legge sottomenu
         $dati['opzioni'][$k]['sottomenu'] = $this->sottomenu($o['sottomenu'], $ruolo, $funzione);
@@ -83,7 +83,7 @@ class MenuRepository extends EntityRepository {
               'icona' => $o1['icona'],
               'sottomenu' => null,
               'megamenu' => false,
-              'listaurl' => null];
+              'listaurl' => [$o1['url']]];
             if ($o1['sottomenu'] && $o1['abilitato']) {
               // imposta megamenu
               $dati['opzioni'][$k]['sottomenu'][$k1]['megamenu'] = $o1['megamenu'];
@@ -107,8 +107,8 @@ class MenuRepository extends EntityRepository {
                     'icona' => $o2['icona'],
                     'sottomenu' => null,
                     'megamenu' => false,
-                    'listaurl' => null];
-                  // imposta lista url
+                    'listaurl' => [$o2['url']]];
+                  // imposta lista url per sottomenu padre
                   $dati['opzioni'][$k]['sottomenu'][$k1]['listaurl'][] = $o2['url'];
                 }
                 // imposta lista url
@@ -117,7 +117,7 @@ class MenuRepository extends EntityRepository {
                   $dati['opzioni'][$k]['sottomenu'][$k1]['listaurl']);
               }
             } else {
-              // imposta lista url
+              // imposta lista url per menu padre
               $dati['opzioni'][$k]['listaurl'] = array_merge(
                 ($dati['opzioni'][$k]['listaurl'] ?: []),
                 [$o1['url']]);
