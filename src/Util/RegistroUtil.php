@@ -2922,6 +2922,7 @@ class RegistroUtil {
         // riga vuota
         continue;
       }
+      // Non usato in contesto sensibile – md5/sha1 accettabile
       $key = sha1((string) preg_replace('/[\W_]+/', '', mb_strtolower($argomento)));
       if (!isset($dati['argomenti'][$key])) {
         // memorizza argomento
@@ -3178,30 +3179,9 @@ class RegistroUtil {
       ->getResult();
     $dati['convalida_uscite'] = $convalida_uscite;
     // numero totale di giustificazioni
-    $dati['tot_giustificazioni'] = count($assenze) + count($ritardi) + count($uscite);
-    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']) +
-      count($dati['convalida_uscite']);    // uscite da giustificare
-    $uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('u.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['uscite'] = $uscite;
-    // uscite da convalidare
-    $convalida_uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('u.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['convalida_uscite'] = $convalida_uscite;
-    // numero totale di giustificazioni
     $dati['tot_giustificazioni'] = count($dati['assenze']) + count($dati['ritardi']) + count($dati['uscite']);
     $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']) +
-      count($dati['convalida_uscite']);
+      count($dati['convalida_uscite']);    // uscite da giustificare
     // restituisce dati
     return $dati;
   }
