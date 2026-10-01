@@ -117,6 +117,7 @@
         "nelmio/alice": "^3.9",
         "phpmyadmin/sql-parser": "^5.4",
         "phpunit/phpunit": "^11.4",
+        "psalm/plugin-symfony": "^5.3",
         "rector/rector": "^1.2",
         "symfony/browser-kit": "6.4.*",
         "symfony/css-selector": "6.4.*",
@@ -127,6 +128,7 @@
         "symfony/var-dumper": "6.4.*",
         "symfony/web-profiler-bundle": "6.4.*",
         "theofidry/alice-data-fixtures": "^1.5",
+        "vimeo/psalm": "^6.19",
         "vincentlanglet/twig-cs-fixer": "^4.1"
     }
 }

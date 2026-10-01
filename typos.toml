@@ -1,0 +1,20 @@
+[default]
+
+[default.extend-words]
+classe = "classe"
+coordinatore = "coordinatore"
+indicato = "indicato"
+proposte = "proposte"
+compilato = "compilato"
+vai = "vai"
+successivo = "successivo"
+disciplinare = "disciplinare"
+alle = "alle"
+stati = "stati"
+falso = "falso"
+verificato = "verificato"
+continuare = "continuare"
+possibile = "possibile"
+comando = "comando"
+converte = "converte"
+accessibile = "accessibile"
