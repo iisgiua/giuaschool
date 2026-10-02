@@ -347,6 +347,7 @@ class DocentiController extends BaseController {
   /**
    * Reset della funzione OTP per i docenti
    *
+   * @param Request $request Pagina di richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id ID dell'utente
    *
@@ -354,7 +355,11 @@ class DocentiController extends BaseController {
    */
   #[Route(path: '/docenti/otp/{id}', name: 'docenti_reset', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function reset(LogHandler $dblogger, int $id): Response {
+  public function reset(Request $request, LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla docente
     $docente = $this->em->getRepository(Docente::class)->find($id);
     if (!$docente) {
