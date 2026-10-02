@@ -137,7 +137,7 @@
   <div class="modal fade" id="gs-scelta-genitore" tabindex="-1" role="dialog" aria-labelledby="gs-scelta-genitore-titolo">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
-        <div class="modal-header border-bottom">
+        <div class="modal-header">
           <h5 class="modal-title" id="gs-scelta-genitore-titolo"></h5>
           <button type="button" class="close p-0" data-dismiss="modal" aria-label="{{ 'label.close'|trans }}">
             {{ include('admin/include/icona.html.twig', {nome: 'x'}) }}
@@ -151,7 +151,7 @@
             <div class="col-sm-2"><a id="gs-scelta-genitore-2-href" class="btn btn-primary btn-xs gs-post" href="" role="button" data-csrf="{{ csrf_token('password') }}"><strong></strong></a></div>
           </div>
         </div>
-        <div class="modal-footer mx-auto">
+        <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-xs mx-auto" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
         </div>
       </div>

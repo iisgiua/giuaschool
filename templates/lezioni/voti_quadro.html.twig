@@ -156,7 +156,7 @@
                 {% if v.docente_id == app.user.id and edit %}
                 <div class="list-group-item-text text-right">
                   <a class="btn btn-primary btn-sm" href="{{ path('lezioni_voti_alunno', {cattedra: cattedra.id, alunno: a.id, tipo: v.tipo, id: v.id}) }}" role="button" title="Modifica la valutazione">Modifica</a>
-                  <a class="btn btn-danger btn-sm gs-ml-2" href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" role="button" title="Elimina la valutazione">Cancella</a>
+                  <button type="button" class="btn btn-danger btn-sm gs-ml-2 gs-modal-confirm-button" title="Elimina la valutazione" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ v.alunno }}" data-contenuto="{{ 'message.cancella_voto'|trans }}" data-href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" data-csrf="{{ csrf_token('delete') }}">Cancella</button>
                 </div>
                 {% endif %}
               </div>
@@ -299,7 +299,7 @@
                 {% if v.docente_id == app.user.id and edit %}
                 <div class="list-group-item-text text-right">
                   <a class="btn btn-primary btn-sm" href="{{ path('lezioni_voti_alunno', {cattedra: cattedra.id, alunno: a.id, tipo: v.tipo, id: v.id}) }}" role="button" title="Modifica la valutazione">Modifica</a>
-                  <a class="btn btn-danger btn-sm gs-ml-2" href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" role="button" title="Elimina la valutazione">Cancella</a>
+                  <button type="button" class="btn btn-danger btn-sm gs-ml-2 gs-modal-confirm-button" title="Elimina la valutazione" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ v.alunno }}" data-contenuto="{{ 'message.cancella_voto'|trans }}" data-href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" data-csrf="{{ csrf_token('delete') }}">Cancella</button>
                 </div>
                 {% endif %}
               </div>
@@ -326,6 +326,7 @@
     {% endif %}
     {{ include('include/modal-info.html.twig') }}
   {% endif %}
+  {{ include('admin/include/modal-confirm.html.twig') }}
 </div>
 {% endblock %}
 
@@ -375,6 +376,16 @@ $(document).ready(function() {
         $(this).find('td').eq(index).removeClass('gs-hover');
       });
     }
+  });
+  $('#gs-modal-confirm').on('show.bs.modal', function(e) {
+    var href = $(e.relatedTarget).data('href');
+    var csrf = $(e.relatedTarget).data('csrf');
+    var titolo = $(e.relatedTarget).data('titolo');
+    var contenuto = $(e.relatedTarget).data('contenuto');
+    $(this).find('#gs-modal-confirm-titolo').html(titolo);
+    $(this).find('#gs-modal-confirm-contenuto').html(contenuto);
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
   });
 });
 </script>
