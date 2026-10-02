@@ -40,6 +40,7 @@ use App\Form\PresideType;
 use App\Form\ScansioneOrariaSettimanaleType;
 use App\Form\SedeType;
 use DateTime;
+use DateTimeInterface;
 use Exception;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -107,6 +108,11 @@ class ScuolaController extends BaseController {
         $this->em->persist($definizione);
       }
     }
+    // normalizza le date di pubblicazione esiti: la colonna e' di tipo ARRAY e
+    // puo' contenere stringhe (dati caricati da fixture o da versioni
+    // precedenti), mentre il form e il ciclo di aggiornamento qui sotto
+    // richiedono oggetti DateTime.
+    $this->normalizzaClassiVisibili($definizione);
     // form
     $form = $this->createForm(DefinizioneScrutinioType::class, $definizione,
       ['return_url' => $this->generateUrl('scuola_scrutini'),
@@ -1397,6 +1403,51 @@ class ScuolaController extends BaseController {
     $dati = $this->em->getRepository(DefinizioneConsultazione::class)->gestione();
     // mostra la pagina di risposta
     return $this->renderHtml('scuola', 'consultazioni', $dati, $info);
+  }
+
+
+  //==================== METODI PRIVATI PER LA GESTIONE SCRUTINI ====================
+
+  /**
+   * Converte in oggetti DateTime le date di pubblicazione esiti memorizzate
+   * nell'array classiVisibili, se sono valori non nulli memorizzati come
+   * stringhe.
+   *
+   * La colonna e' di tipo ARRAY, quindi Doctrine la serializza senza applicare
+   * conversioni: i dati provenienti da fixture o da versioni precedenti
+   * dell'applicazione possono contenere stringhe, che i campi DateType del
+   * form rifiutano.
+   *
+   * @param DefinizioneScrutinio $definizione Definizione dello scrutinio da normalizzare
+   */
+  private function normalizzaClassiVisibili(DefinizioneScrutinio $definizione): void {
+    $classiVisibili = $definizione->getClassiVisibili();
+    $modificato = false;
+    foreach ($classiVisibili as $chiave => $valore) {
+      // ignora valori vuoti e valori gia' corretti
+      if ($valore === null || $valore === '' || $valore instanceof DateTimeInterface) {
+        continue;
+      }
+      // converte la stringa in data
+      try {
+        $data = new DateTime($valore);
+      } catch (Exception) {
+        // data non interpretabile: la lascia nulla
+        $classiVisibili[$chiave] = null;
+        $modificato = true;
+        continue;
+      }
+      // conserva l'ora se gia' presente
+      if (is_string($valore) && preg_match('/(\d{1,2}:\d{2})/', $valore, $m)) {
+        $data->setTime((int) $m[1][0], (int) $m[1][1]);
+      }
+      $classiVisibili[$chiave] = $data;
+      $modificato = true;
+    }
+    // aggiorna solo se necessario
+    if ($modificato) {
+      $definizione->setClassiVisibili($classiVisibili);
+    }
   }
 
 }
