@@ -582,16 +582,12 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
 
       {%- block time_row -%}
       {%- if widget == 'single_text' -%}
-      {%- if attr.widget is defined and attr.widget == 'gs-row-start' -%}
+      {%- if attr.widget is defined and attr.widget in ['gs-row-start', 'gs-row-inline', 'gs-row-end'] -%}
       {%- set time_inline = true -%}
+      {%- endif -%}
+      {%- if attr.widget is defined and attr.widget == 'gs-row-start' -%}
       <div class="form-row">
-        {%- if attr.widget is defined and attr.widget == 'gs-row-start' -%}
-        {%- set time_inline = true -%}
-        <div class="form-row">
-          {%- elseif attr.widget is defined and attr.widget in ['gs-row-inline', 'gs-row-end'] -%}
-          {%- set time_inline = true -%}
-          {%- endif -%}
-          {%- endif -%}
+      {%- endif -%}
           <div class="it-timepicker-wrapper{% if time_inline is defined and time_inline %} col{% endif %}">
             <section class="time-spinner">
               <div class="error_container" role="alert" aria-atomic="true"></div>
