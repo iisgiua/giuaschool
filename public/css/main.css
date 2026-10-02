@@ -176,10 +176,18 @@ body {
 /***** LAYOUT: PAGE CONTAINER, APP SHELL, CONTENUTO *****/
 
 .gs-page-container {
+  /* l'intestazione e' fixed: il padding ne riserva l'altezza, altrimenti il
+     contenuto finirebbe sotto durante lo scorrimento */
+  padding-top: var(--gs-hdr-total);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden; 
+  /* "clip" e non "hidden": con hidden l'asse Y passerebbe a "auto" e il
+     contenitore diventerebbe un contenitore di scorrimento, contro cui
+     position: sticky della barra laterale si risolverebbe invece che
+     rispetto alla viewport. Con clip il ritaglio avviene senza creare
+     quel contenitore, e la barra laterale resta fissa. */
+  overflow-x: clip;
 }
 
 .gs-app-shell {
@@ -198,7 +206,12 @@ body {
 
 .gs-main-container {
   flex: 1 0 auto;
-  display: block;
+  /* colonna flex: il footer e' figlio diretto di questo contenitore, e
+     margin-top: auto spinge in basso solo se il genitore e' un contenitore
+     flex. Con display: block il margine automatico valeva zero e il footer
+     restava appiccicato al contenuto. */
+  display: flex;
+  flex-direction: column;
   width: 100%;
   min-width: 0;
 }
@@ -217,6 +230,7 @@ body {
 /***** HEADER CLASSICO (Bootstrap 3) *****/
 
 .gs-hdr {
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -754,8 +768,8 @@ html.gs-hdr-lock {
 .gs-footer {
   background-color: var(--gs-hdr-bg);
   color: var(--gs-hdr-text);
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   border-top: 1px solid var(--gs-hdr-border);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   width: 100%;
@@ -768,27 +782,27 @@ html.gs-hdr-lock {
 }
 
 .gs-footer-head {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   text-align: center;
 }
 
 .gs-footer-head strong {
   color: var(--gs-hdr-text);
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 600;
 }
 
 .gs-footer-head em {
   color: var(--gs-hdr-muted);
   font-style: italic;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .gs-footer-cols {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
-  margin-bottom: 1.5rem;
+  gap: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .gs-footer-col {
@@ -801,17 +815,17 @@ html.gs-hdr-lock {
 }
 
 .gs-footer-col address {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   color: var(--gs-hdr-muted);
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 0.875rem;
+  line-height: 1.4;
 }
 
 .gs-footer-col address strong {
   color: var(--gs-hdr-text);
   font-weight: 600;
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
 }
 
 .gs-footer-col address em {
@@ -832,17 +846,17 @@ html.gs-hdr-lock {
 }
 
 .gs-footer-legal {
-  margin-top: 1rem;
-  padding-top: 1rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
   border-top: 1px solid var(--gs-hdr-border);
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 .gs-footer-legal a {
   color: var(--gs-hdr-muted);
   text-decoration: underline;
-  margin: 0 0.5rem;
+  margin: 0 0.35rem;
 }
 
 .gs-footer-legal a:hover,
@@ -857,8 +871,8 @@ html.gs-hdr-lock {
 
 @media (max-width: 767.98px) {
   .gs-footer {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
   }
 
   .gs-footer-cols {
@@ -870,12 +884,12 @@ html.gs-hdr-lock {
   }
 
   .gs-footer-col address {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     line-height: 1.3;
   }
 
   .gs-footer-legal {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   .gs-footer-legal a {
@@ -1883,6 +1897,31 @@ input:-webkit-autofill:active {
 
 .it-datepicker-wrapper .datepicker-calendar.default .gs-datepicker-today:hover {
   background-color: #eee;
+}
+
+.calendar-input-container {
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+}
+
+/* I campi data e ora disegnano il bordo inferiore con una pseudo-elemento
+   (rispettivamente .it-datepicker-wrapper .input-group::after e
+   .it-timepicker-wrapper .calendar-input-container::after) che, avendo
+   position: absolute e width: 100%, si estende sotto l'intero contenitore:
+   sotto il pulsante calendario e sotto lo spinner-control, risultando una
+   riga piu' larga del campo. Stesso approccio gia' usato per
+   .bootstrap-select .filter-option::after: si spegne la pseudo-elemento.
+   Il vendor azzera border-bottom sull'input (l'input sarebbe rimasto senza
+   base), quindi va ripristinato il bordo reale.
+   Stesso raggio degli altri .form-control, cosi' i due campi tornano
+   identici a tutti gli altri input del form. */
+.it-datepicker-wrapper .input-group::after,
+.it-timepicker-wrapper .calendar-input-container::after {
+  content: none;
+  display: none;
+  border: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .it-timepicker-wrapper .calendar-input-container {
