@@ -37,7 +37,6 @@
 
 /***** BASE *****/
 
-/* Reset globale per responsive design */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -45,6 +44,11 @@
 html {
   min-height: 100%;
   scroll-padding-top: var(--gs-hdr-total);
+}
+
+html.gs-admin,
+html.gs-admin body {
+  font-size: 16px;
 }
 
 body {
@@ -56,8 +60,12 @@ body {
   line-height: 1.6;
 }
 
-/* Container principale responsive */
+.row {
+  margin: 0px;
+}
+
 .container-fluid {
+  height: 100%;
   width: 100%;
   max-width: 100%;
   padding: 1rem 1rem 0 1rem;
@@ -66,7 +74,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Container standard */
 .container {
   width: 100%;
   max-width: 1200px;
@@ -76,7 +83,6 @@ body {
   padding-right: 15px;
 }
 
-/* Griglie flessibili per elementi interni */
 .gs-flex-grid {
   display: flex;
   flex-wrap: wrap;
@@ -89,7 +95,14 @@ body {
   min-width: 250px;
 }
 
-/* Fix per tabelle responsive */
+.card-header{
+  border-radius: 7px 7px 0 0 !important;
+}
+
+.rounded{
+  border-radius: 8px !important;
+}
+
 .table-responsive {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -97,7 +110,19 @@ body {
   max-width: 100%;
   min-width: 0;
   contain: inline-size;
+  background-color: #fff;
+}
+
+/* La cornice (bordo esterno e angoli arrotondati) sta sulla <table>, non sul
+   contenitore .table-responsive: quando la tabella e' piu' larga del
+   contenitore e scorre, e' lei che deve portare il bordo con se', altrimenti
+   il bordo resterebbe fermo a meta' larghezza. Per questo qui non si tocca
+   border e border-radius della tabella figlia: annullarli le lasciava senza
+   bordo sotto e senza angoli, cioe' senza cornice. */
+.table-responsive:not(:has(> table)) {
   border: 0;
+  border-radius: 0;
+  background-color: transparent;
 }
 
 .table-responsive table {
@@ -106,31 +131,29 @@ body {
   table-layout: auto;
 }
 
-/* Form responsive */
 .form-group {
   width: 100%;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-control {
   width: 100%;
   max-width: 100%;
+  border: 1px solid #dfe6ee !important;
+  border-radius: 8px !important;
 }
 
-/* Bottoni responsive */
 .btn {
   white-space: normal;
   word-wrap: break-word;
 }
 
-/* Card responsive */
 .card {
   width: 100%;
   max-width: 100%;
-  margin-bottom: 1rem;
+  margin: 0 0 1rem 0 !important;
 }
 
-/* Modal responsive */
 .modal-dialog {
   max-width: 90%;
   margin: 1.75rem auto;
@@ -142,7 +165,6 @@ body {
   }
 }
 
-/* Focus states */
 *:focus {
   outline: 2px solid #0d6efd;
   outline-offset: 2px;
@@ -176,24 +198,17 @@ body {
 /***** LAYOUT: PAGE CONTAINER, APP SHELL, CONTENUTO *****/
 
 .gs-page-container {
-  /* l'intestazione e' fixed: il padding ne riserva l'altezza, altrimenti il
-     contenuto finirebbe sotto durante lo scorrimento */
   padding-top: var(--gs-hdr-total);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  /* "clip" e non "hidden": con hidden l'asse Y passerebbe a "auto" e il
-     contenitore diventerebbe un contenitore di scorrimento, contro cui
-     position: sticky della barra laterale si risolverebbe invece che
-     rispetto alla viewport. Con clip il ritaglio avviene senza creare
-     quel contenitore, e la barra laterale resta fissa. */
   overflow-x: clip;
 }
 
 .gs-app-shell {
   flex: 1 0 auto;
   display: flex;
-  align-items: stretch;   /* .gs-content si allunga in altezza */
+  align-items: stretch;
   min-width: 0;
 }
 
@@ -206,10 +221,6 @@ body {
 
 .gs-main-container {
   flex: 1 0 auto;
-  /* colonna flex: il footer e' figlio diretto di questo contenitore, e
-     margin-top: auto spinge in basso solo se il genitore e' un contenitore
-     flex. Con display: block il margine automatico valeva zero e il footer
-     restava appiccicato al contenuto. */
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -217,13 +228,9 @@ body {
 }
 
 #gs-main {
+  height: 100%;
   width: 100%;
   min-width: 0;
-}
-
-.gs-footer {
-  margin-top: auto;
-  flex-shrink: 0;
 }
 
 
@@ -252,9 +259,35 @@ body {
   padding: env(safe-area-inset-top, 0px) calc(1rem + env(safe-area-inset-right, 0px)) 0 calc(1rem + env(safe-area-inset-left, 0px));
 }
 
-.gs-hdr .glyphicon {
+.gs-hdr .glyphicon,
+.gs-hdr .icon {
   margin: 0;
   top: 0;
+}
+
+.gs-hdr .icon {
+  fill: currentColor;
+}
+
+/* Icone Tabler a tratti: i path non hanno fill, quindi senza fill:none e stroke
+   l'icona si disegna come un blocchetto pieno invece della sagoma.
+
+   Il selettore ha due classi per pareggiare .gs-hdr .icon { fill: currentColor }
+   (0,2,0 contro 0,1,0): se fosse .icon-outline, quella regola vincerebbe e
+   restituirebbe il blocchetto.
+
+   width/height in em replicano la vecchia .glyphicon, che essendo un font si
+   ridimensionava da sola. Senza dimensione esplicita l'<svg> cade sui 300x150 px
+   del browser e non segue il testo accanto. */
+.icon.icon-outline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  width: 1.2em;
+  height: 1.2em;
+  flex-shrink: 0;
 }
 
 .gs-hdr-brand {
@@ -379,7 +412,7 @@ html.gs-hdr-lock {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-left: env(safe-area-inset-left, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -408,7 +441,8 @@ html.gs-hdr-lock {
   text-decoration: none;
 }
 
-.gs-hdr-collapse .gs-hdr-profile .glyphicon {
+.gs-hdr-collapse .gs-hdr-profile .glyphicon,
+.gs-hdr-collapse .gs-hdr-profile .icon {
   flex: 0 0 auto;
   width: 2.25rem;
   height: 2.25rem;
@@ -418,6 +452,7 @@ html.gs-hdr-lock {
   align-items: center;
   justify-content: center;
   color: var(--gs-side-active-text);
+  fill: currentColor;
   background-color: var(--gs-side-active-bg);
   border-radius: 50%;
 }
@@ -474,15 +509,90 @@ html.gs-hdr-lock {
   border-left: 3px solid transparent;
 }
 
-.gs-hdr-collapse .gs-hdr-menu .dropdown-toggle .glyphicon {
+.nav .dropdown {
+  border: none !important;
+  border-radius: none !important;
+}
+
+.dropdown {
+  border: 1px solid #dfe6ee;
+  border-radius: 8px;
+}
+
+/* Il riquadro qui dentro sta per i menu il cui contenuto e' una lista. Quando
+   invece il pulsante e' trasparente e con testo nero, il contorno del
+   contenitore diventerebbe l'unico segno rimasto: si toglie, e la scelta si
+   legge dal testo e dalla freccia. */
+html:not(.gs-admin) .dropdown:has(> .btn.dropdown-toggle) {
+  border: none;
+  border-radius: 0;
+}
+
+.bootstrap-select.form-control {
+  border: 1px solid #dfe6ee;
+  border-radius: 8px;
+}
+
+.bootstrap-select-wrapper .dropdown.bootstrap-select>.dropdown-menu:not([x-placement]) {
+  top: calc(100% + 2px) !important;
+  bottom: auto !important;
+}
+
+.bootstrap-select-wrapper .dropdown.bootstrap-select>.dropdown-menu[x-placement] {
+  top: 0 !important;
+  margin-top: 2px;
+}
+
+.bootstrap-select-wrapper .dropdown.bootstrap-select>.dropdown-menu,
+.bootstrap-select-wrapper .dropdown.bootstrap-select>.dropdown-menu[x-placement] {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu.inner,
+.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu .inner>ul {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.bootstrap-select-wrapper .dropdown.bootstrap-select>.dropdown-menu,
+.bootstrap-select-wrapper .dropdown.bootstrap-select>.dropdown-menu>.inner {
+  min-height: 0 !important;
+}
+
+.gs-menu-select>.dropdown-menu {
+  padding-top: 0;
+  padding-bottom: 0;
+  box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+.gs-menu-select>.dropdown-menu .list-item {
+  padding: 8px 24px;
+  font-size: .88889rem;
+  font-weight: 400;
+  line-height: 1.3333rem;
+  color: #06c;
+}
+
+.gs-menu-select>.dropdown-menu .list-item:hover,
+.gs-menu-select>.dropdown-menu .list-item:focus {
+  background: transparent;
+  color: #06c;
+  text-decoration: underline;
+}
+
+.gs-hdr-collapse .gs-hdr-menu .dropdown-toggle .glyphicon,
+.gs-hdr-collapse .gs-hdr-menu .dropdown-toggle .icon {
   margin-right: 0.5rem;
   flex-shrink: 0;
 }
 
-.gs-hdr-collapse .gs-hdr-menu .glyphicon {
+.gs-hdr-collapse .gs-hdr-menu .glyphicon,
+.gs-hdr-collapse .gs-hdr-menu .icon {
   flex: 0 0 auto;
   width: 1.25em;
   text-align: center;
+  fill: currentColor;
 }
 
 .gs-hdr-collapse .gs-hdr-menu > ul > li > a:hover,
@@ -577,7 +687,6 @@ html.gs-hdr-lock {
   background-image: none;
 }
 
-/* Separazione bottone ESCI in basso */
 .gs-hdr-exit-wrapper {
   margin-top: auto;
   padding: 1rem 0 0;
@@ -763,13 +872,14 @@ html.gs-hdr-lock {
 }
 
 
-/***** PIÈ DI PAGINA (unico per tutte le pagine) *****/
+/***** PIÈ DI PAGINA *****/
 
 .gs-footer {
   background-color: var(--gs-hdr-bg);
   color: var(--gs-hdr-text);
   padding-top: 1rem;
   padding-bottom: 1rem;
+  margin-top: auto;
   border-top: 1px solid var(--gs-hdr-border);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   width: 100%;
@@ -782,8 +892,13 @@ html.gs-hdr-lock {
 }
 
 .gs-footer-head {
-  margin-bottom: 0.75rem;
-  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.5rem;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--gs-hdr-border);
 }
 
 .gs-footer-head strong {
@@ -799,33 +914,37 @@ html.gs-hdr-lock {
 }
 
 .gs-footer-cols {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  margin-bottom: 0.75rem;
+  columns: 3;
+  column-gap: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .gs-footer-col {
-  display: flex;
-  flex: 1;
-  min-width: 250px;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  display: contents;
 }
 
 .gs-footer-col address {
-  margin-bottom: 0.5rem;
+  margin: 0;
   color: var(--gs-hdr-muted);
   font-size: 0.875rem;
-  line-height: 1.4;
+  line-height: 1.45;
+  break-inside: avoid;
+  overflow-wrap: anywhere;
+  margin-bottom: 0.6rem;
 }
 
 .gs-footer-col address strong {
-  color: var(--gs-hdr-text);
-  font-weight: 600;
   display: block;
   margin-bottom: 0.15rem;
+  color: var(--gs-hdr-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gs-footer-col address strong + br {
+  display: none;
 }
 
 .gs-footer-col address em {
@@ -846,17 +965,16 @@ html.gs-hdr-lock {
 }
 
 .gs-footer-legal {
-  margin-top: 0.5rem;
+  margin-top: 0.35rem;
   padding-top: 0.5rem;
   border-top: 1px solid var(--gs-hdr-border);
-  text-align: center;
   font-size: 0.85rem;
 }
 
 .gs-footer-legal a {
   color: var(--gs-hdr-muted);
   text-decoration: underline;
-  margin: 0 0.35rem;
+  margin: 0 0.2rem;
 }
 
 .gs-footer-legal a:hover,
@@ -866,7 +984,7 @@ html.gs-hdr-lock {
 
 .gs-footer-sep {
   color: var(--gs-hdr-border);
-  margin: 0 0.5rem;
+  margin: 0 0.15rem;
 }
 
 @media (max-width: 767.98px) {
@@ -875,44 +993,202 @@ html.gs-hdr-lock {
     padding-bottom: 0.75rem;
   }
 
-  .gs-footer-cols {
-    gap: 0.5rem;
+  .gs-footer-head {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
   }
 
-  .gs-footer-col {
-    min-width: 120px;
+  .gs-footer-cols {
+    columns: 2;
+    column-gap: 0.75rem;
+    margin-bottom: 0.4rem;
   }
 
   .gs-footer-col address {
-    font-size: 0.8rem;
-    line-height: 1.3;
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .gs-footer-col address strong {
+    font-size: 0.7rem;
   }
 
   .gs-footer-legal {
-    font-size: 0.8rem;
-  }
-
-  .gs-footer-legal a {
-    margin: 0 0.15rem;
+    padding-top: 0.4rem;
+    font-size: 0.78rem;
   }
 }
 
-@media (max-width: 479.98px) {
-  .gs-footer-cols {
-    flex-direction: column;
-    gap: 0.5rem;
+html.gs-admin .gs-footer {
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+}
+
+html.gs-admin .gs-footer-inner {
+  padding: 0 0.75rem;
+}
+
+html.gs-admin .gs-footer-head {
+  margin-bottom: 0.45rem;
+  padding-bottom: 0.35rem;
+}
+
+html.gs-admin .gs-footer-head strong {
+  font-size: 0.9rem;
+}
+
+html.gs-admin .gs-footer-head em {
+  font-size: 0.78rem;
+}
+
+html.gs-admin .gs-footer-cols {
+  column-gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+html.gs-admin .gs-footer-col address {
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+html.gs-admin .gs-footer-col address strong {
+  font-size: 0.68rem;
+}
+
+html.gs-admin .gs-footer-legal {
+  margin-top: 0.2rem;
+  padding-top: 0.35rem;
+  font-size: 0.75rem;
+}
+
+html.gs-admin .gs-footer-legal a {
+  margin: 0 0.15rem;
+}
+
+@media (max-width: 767.98px) {
+  html.gs-admin .gs-footer-head strong {
+    font-size: 0.85rem;
   }
 
-  .gs-footer-col {
-    min-width: 100%;
-    text-align: center;
+  html.gs-admin .gs-footer-head em {
+    font-size: 0.75rem;
+  }
+
+  html.gs-admin .gs-footer-col address {
+    font-size: 0.72rem;
+  }
+
+  html.gs-admin .gs-footer-col address strong {
+    font-size: 0.65rem;
+  }
+
+  html.gs-admin .gs-footer-legal {
+    font-size: 0.72rem;
+  }
+}
+
+
+/***** NOTIFICHE FLASH *****/
+
+.gs-flash-region {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  z-index: 1040;
+  width: min(92vw, 30rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.gs-flash {
+  position: relative;
+  pointer-events: auto;
+  margin: 0;
+  padding: 0.7rem 2.25rem 0.7rem 0.9rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  animation: gs-flash-entra 0.3s ease-out;
+}
+
+.gs-flash .gs-flash-testo {
+  display: block;
+}
+
+.gs-flash-chiudi {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.65;
+}
+
+.gs-flash-chiudi:hover,
+.gs-flash-chiudi:focus {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.gs-flash-chiudi:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+@keyframes gs-flash-entra {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gs-flash-chiusura {
+  animation: gs-flash-esce 0.25s ease-in forwards;
+}
+
+@keyframes gs-flash-esce {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gs-flash,
+  .gs-flash-chiusura {
+    animation: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .gs-flash-region {
+    bottom: 0.75rem;
+    width: calc(100vw - 1.5rem);
   }
 }
 
 
 /***** CLASSI PERSONALIZZATE *****/
 
-/* Tabelle responsive e miglioramenti */
 .gs-sticky-header {
   position: relative;
 }
@@ -929,11 +1205,21 @@ html.gs-hdr-lock {
   margin: 0;
 }
 
+/* Cornice della tabella: il bordo sulle celle (.table td, .table th) disegna
+   le righe, quello qui chiude il riquadro. Le celle di bordo hanno il lato
+   esterno azzerato piu' in basso, cosi' il bordo della tabella non si somma a
+   quello della cella e la cornice resta di 1px. overflow: hidden ritaglia lo
+   sfondo delle celle sugli angoli arrotondati: senza, l'angolo della testata
+   coprirebbe il raggio e la tabella sembrerebbe tagliata a spigolo. */
 .table {
   width: 100%;
-  border-radius: 8px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #fff;
   border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0;
 }
 
 .table td,
@@ -943,26 +1229,27 @@ html.gs-hdr-lock {
   border: 1px solid #dee2e6;
 }
 
-.table thead tr:first-child th:first-child {
-  border-top-left-radius: 8px;
+.table > thead > tr > th:first-child,
+.table > tbody > tr > td:first-child,
+.table > tbody > tr:first-child > td:first-child,
+.table > tfoot > tr > td:first-child {
+  border-left: 0;
 }
 
-.table thead tr:first-child th:last-child {
-  border-top-right-radius: 8px;
+.table > thead > tr > th:last-child,
+.table > tbody > tr > td:last-child,
+.table > tbody > tr:first-child > td:last-child,
+.table > tfoot > tr > td:last-child {
+  border-right: 0;
 }
 
-.table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 8px;
+.table > thead > tr:first-child > th {
+  border-top: 0;
 }
 
-.table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 8px;
-}
-
-.table thead tr:first-child th,
-.table tbody tr:last-child td {
-  border-left: 1px solid #dee2e6;
-  border-right: 1px solid #dee2e6;
+.table > tbody > tr:last-child > td,
+.table > tfoot > tr:last-child > td {
+  border-bottom: 0;
 }
 
 .gs-footer-container .footer {
@@ -978,56 +1265,145 @@ html.gs-hdr-lock {
   font-size: 0.875rem;
 }
 
-/* Icone automatiche per i bottoni via CSS */
-.btn[value*="dettagli"]::before,
-.btn:has(a[href*="dettagli"])::before {
-  content: "\f05a";
-  font-family: "Font Awesome 6 Free", sans-serif;
-  font-weight: 900;
-  margin-right: 0.5rem;
+/* I pulsanti di azione stanno uno accanto all'altro, non sparsi a tutta
+   larghezza della cella: con space-between una riga con una sola azione
+   (per esempio solo "visualizza") buttava l'icona al centro della cella e
+   due righe diverse avevano le icone in punti diversi. Il gap fa da
+   separatore.
+
+   nowrap e non wrap: la colonma delle azioni e' stretta e, se i pulsanti
+   potessero andare a capo, la terza icona finiva sotto le prime due e le
+   righe diventavano alte il doppio. Le azioni di una riga sono sempre
+   sulla stessa riga: se lo spazio non basta si allarga la tabella dentro
+   .table-responsive, che e' scrollabile. */
+.gs-azioni {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.25rem;
+  white-space: nowrap;
 }
 
-.btn[value*="modifica"]::before,
-.btn:has(a[href*="modifica"])::before {
-  content: "\f044";
-  font-family: "Font Awesome 6 Free", sans-serif;
-  font-weight: 900;
-  margin-right: 0.5rem;
+/* Pulsanti azione delle tabelle: solo l'icona Tabler a tratti, colorata.
+   Il fondo del bottone sparisce e resta il colore del simbolo, cosi' la
+   colonna delle azioni non introduce un blocco di colore nella tabella.
+   .btn resta per il layout (dimensioni, allineamento) ma senza sfondo:
+   .gs-btn-icona e' dichiarata dopo .btn e ne azzera i colori. */
+.gs-azioni .btn.gs-btn-icona,
+.btn.gs-btn-icona {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  color: var(--gs-primary-strong);
+  line-height: 1;
+  text-decoration: none;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 
-.btn[value*="cancella"]::before,
-.btn:has(a[href*="cancella"])::before {
-  content: "\f00d";
-  font-family: "Font Awesome 6 Free", sans-serif;
-  font-weight: 900;
-  margin-right: 0.5rem;
+/* lo stato :hover/:focus mantiene il fondo neutro: si evidenzia solo l'icona */
+.gs-azioni .btn.gs-btn-icona:hover,
+.gs-azioni .btn.gs-btn-icona:focus,
+.btn.gs-btn-icona:hover,
+.btn.gs-btn-icona:focus,
+.btn.gs-btn-icona:active,
+.btn.gs-btn-icona:active:focus {
+  background-color: rgba(0, 102, 204, 0.08);
+  border-color: transparent;
+  color: #0a58ca;
+  text-decoration: none;
 }
 
-.btn[value*="elimina"]::before,
-.btn:has(a[href*="elimina"])::before {
-  content: "\f2ed";
-  font-family: "Font Awesome 6 Free", sans-serif;
-  font-weight: 900;
-  margin-right: 0.5rem;
+/* La dimensione dell'icona la si fissa qui, in pixel e non in rem: Bootstrap 3
+   mette html { font-size: 10px }, quindi lo stesso rem varrebbe 15px sulle
+   pagine utenti standard e 24px nel pannello admin (Bootstrap Italia).
+   In pixel il simbolo e' identico nei due mondi.
+   La regola generica sugli <svg> (.icon.icon-outline) usa 1.2em: dentro
+   .btn-xs erediterebbe la font-size piccola del bottone e resterebbe minuscolo.
+   Il tratto si ispessisce insieme alla sagoma, altrimenti ingrandendo l'<svg>
+   il contorno diventa una linea appena visibile. */
+.gs-btn-icona .icon.icon-outline {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.75;
 }
 
-.btn[value*="salva"]::before,
-.btn:has(a[href*="salva"])::before {
-  content: "\f0c7";
-  font-family: "Font Awesome 6 Free", sans-serif;
-  font-weight: 900;
-  margin-right: 0.5rem;
+/* Menu a tendina che non sembra un bottone pieno: resta un <button> (serve a
+   Bootstrap per aprire il menu) ma senza fondo e con i bordi, che alzano
+   solo quanto la riga di testo: si vede la scritta con la freccia dentro una
+   cornice sottile, non un bottone colorato.
+   Il nome richiama il contenuto, non l'aspetto: .gs-dropdown-testo.
+   Gli !important servono per vincere .dropdown.open > .dropdown-toggle di
+   Bootstrap 3, che ha la stessa specificita' e mette fondo e bordi propri
+   quando il menu e' aperto. */
+.gs-dropdown-testo.dropdown-toggle,
+.gs-dropdown-testo.dropdown-toggle:hover,
+.gs-dropdown-testo.dropdown-toggle:focus,
+.gs-dropdown-testo.dropdown-toggle:active,
+.dropdown.open > .gs-dropdown-testo.dropdown-toggle,
+.dropdown.open > .gs-dropdown-testo.dropdown-toggle:hover,
+.dropdown.open > .gs-dropdown-testo.dropdown-toggle:focus,
+.dropdown.open > .gs-dropdown-testo.dropdown-toggle:active {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--gs-border) !important;
+  border-radius: 6px;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none;
+  color: var(--gs-primary-strong);
+  text-decoration: none;
 }
 
-.btn[value*="conferma"]::before,
-.btn:has(a[href*="conferma"])::before {
-  content: "\f00c";
-  font-family: "Font Awesome 6 Free", sans-serif;
-  font-weight: 900;
-  margin-right: 0.5rem;
+/* il testo del bottone e' in <strong>, va reso normale per non pesare piu' */
+.gs-dropdown-testo strong {
+  font-weight: 500;
 }
 
-/* Fix per tabelle con header sticky */
+/* passaggio del mouse e menu aperto: si distinguono i bordi e la scritta,
+   il fondo resta trasparente */
+.gs-dropdown-testo.dropdown-toggle:hover,
+.gs-dropdown-testo.dropdown-toggle:focus,
+.dropdown.open > .gs-dropdown-testo.dropdown-toggle {
+  border-color: var(--gs-primary-strong) !important;
+  color: #0a58ca;
+}
+
+/* la freccia prende il colore del testo: Bootstrap 3 la forza a nero */
+.gs-dropdown-testo .caret {
+  border-top-color: currentColor !important;
+}
+
+/* il wrapper del menu non aggiunge un secondo riquadro: i bordi li ha gia'
+   il bottone */
+.dropdown.gs-dropdown {
+  border: 0;
+  background: transparent;
+}
+
+/* azioni distruttive: icona rossa, sempre senza fondo */
+.btn.gs-btn-icona.btn-danger,
+.btn.gs-btn-icona.gs-icona-danger {
+  color: #c8232c;
+}
+
+.btn.gs-btn-icona.btn-danger:hover,
+.btn.gs-btn-icona.btn-danger:focus,
+.btn.gs-btn-icona.btn-danger:active,
+.btn.gs-btn-icona.gs-icona-danger:hover,
+.btn.gs-btn-icona.gs-icona-danger:focus {
+  background-color: rgba(200, 35, 44, 0.08);
+  border-color: transparent;
+  color: #a71d24;
+}
+
 .gs-sticky-header thead th {
   white-space: nowrap;
 }
@@ -1054,44 +1430,6 @@ html.gs-hdr-lock {
   color: var(--gs-surface);
 }
 
-.gs-navbar-submenu {
-  position: sticky;
-  top: var(--gs-hdr-total);
-  z-index: 1025;
-  background-color: var(--gs-primary-soft);
-}
-
-.gs-navbar-submenu ul.nav {
-  margin: 0;
-  padding: 0 1.5rem;
-  background-color: var(--gs-primary-soft);
-}
-
-.gs-navbar-submenu li a {
-  color: var(--gs-primary-strong);
-  padding: 0.7rem 1.5rem;
-  font-weight: 500;
-}
-
-.gs-navbar-submenu li.active a {
-  color: var(--gs-primary-strong);
-  padding: 0.7rem 1.5rem;
-  font-weight: 600;
-  background-color: rgba(13, 110, 253, 0.08);
-  border-radius: 6px;
-}
-
-.gs-navbar-submenu li a:hover,
-.gs-navbar-submenu li.active a:hover {
-  color: #0a58ca;
-  text-decoration: none;
-  background-color: rgba(13, 110, 253, 0.12);
-}
-
-.gs-navbar-submenu .dropdown-menu li.active a {
-  color: var(--gs-surface);
-}
-
 .gs-checkbox-inline {
   padding-top: 7px;
   margin-top: 0;
@@ -1104,7 +1442,6 @@ html.gs-hdr-lock {
   cursor: pointer;
 }
 
-/* Password input con icona occhio */
 .form-group:has(.password-field) {
   position: relative;
 }
@@ -1159,7 +1496,6 @@ html.gs-hdr-lock {
   font-weight: bold;
 }
 
-/* Utility classi */
 .gs-ml-0 { margin-left: 0; }
 .gs-ml-1 { margin-left: 0.25rem; }
 .gs-ml-2 { margin-left: 0.5rem; }
@@ -1347,14 +1683,6 @@ html.gs-hdr-lock {
   cursor: not-allowed;
 }
 
-.table-striped > tbody > tr:nth-of-type(odd) {
-  background-color: #f0f0f0;
-}
-
-.table-hover > tbody > tr:hover {
-  background-color: #cccccc;
-}
-
 .table-striped > tbody > tr:nth-of-type(even) > td.gs-striped-hilited {
   background-color: #c8fdf7;
 }
@@ -1424,10 +1752,6 @@ form .alert {
   border-radius: 4px;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
 .radio-inline:hover {
   background-color: #cccccc;
 }
@@ -1486,9 +1810,16 @@ body.modal-open {
 }
 
 .modal-footer {
-  border-top: 1px solid #dee2e6;
   padding: 1rem 1.5rem;
   border-radius: 0 0 12px 12px;
+}
+
+.calendar-input-container input[type="text"] {
+  border: none !important;
+}
+
+.input-group input[type="text"] {
+  border: none !important;
 }
 
 a.btn.disabled,
@@ -1553,6 +1884,70 @@ label {
 
 .gs-color-5 {
   color: #000099;
+}
+
+/* Intestazione delle tabelle utenti che non hanno una classe propria
+   (componente include/tabella.html.twig): le testate descritte a dati quando
+   la pagina non specifica classe_intestazione, e quelle passate come markup
+   con intestazione_grezza. Stesso grigio delle tabelle del pannello admin,
+   che in Bootstrap Italia è .thead-light: su Bootstrap 3 quella classe non
+   esiste, quindi la si rifa qui con i valori presi da bootstrap-italia.min.css.
+
+   Il selettore è agganciato a .gs-table thead:not([class]) invece che a un th
+   generico: le testate con una classe esplicita (bg-success, bg-info,
+   bg-warning) prendono il colore dal thead e devono restare colorate come
+   sono, e i selettori di tabella delle pagine (gs-pobs-table, gs-calendar,
+   gs-grades-table, gs-lessons-table) restano liberi di imporre il proprio
+   stile senza !important. */
+.gs-table thead:not([class]) th {
+  color: #4c4c4d;
+  background-color: #cacacc;
+  border-color: #d6dce3;
+}
+/* Le voci dei menu a tendina sono <a class="dropdown-toggle"> e stanno su
+   fondo scuro: restano bianche e senza bordo. I <button> sono esclusi: quelli
+   delle pagine utente sono coperti dalla regola piu' in basso (nero e
+   trasparente), quelli del pannello admin restano col loro aspetto. Senza
+   questa distinzione il bottone admin diventava bianco su fondo chiaro, e la
+   sua freccia bianca spariva. */
+.dropdown-toggle:not(.btn) {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    color: #fff;
+}
+
+/* I pulsanti che aprono un menu a tendina (i selettori di materia e di
+   periodo) invece sono su fondo chiaro: nero e totalmente trasparenti.
+   Le pagine del pannello admin sono escluse: li' il bottone e' di Bootstrap
+   Italia, con fondo pieno e freccia bianca, e azzerare il fondo renderebbe
+   la freccia invisibile.
+
+   background-image serve perche' il tema di Bootstrap 3 dipinge .btn-primary
+   con un gradiente, non con il solo background-color: azzerare solo il
+   background-color lasciava il bottone blu. Gli stati aperti (.dropdown.open
+   > ...) sono esplicitati perche' Bootstrap li ridipinge con fondo e bordo
+   propri, e hanno la stessa specificita' di queste regole. */
+html:not(.gs-admin) .btn.dropdown-toggle,
+html:not(.gs-admin) .btn.dropdown-toggle:hover,
+html:not(.gs-admin) .btn.dropdown-toggle:focus,
+html:not(.gs-admin) .btn.dropdown-toggle:active,
+html:not(.gs-admin) .dropdown.open > .btn.dropdown-toggle,
+html:not(.gs-admin) .dropdown.open > .btn.dropdown-toggle:hover,
+html:not(.gs-admin) .dropdown.open > .btn.dropdown-toggle:focus,
+html:not(.gs-admin) .dropdown.open > .btn.dropdown-toggle:active {
+    background-color: transparent !important;
+    background-image: none !important;
+    border-color: transparent !important;
+    box-shadow: none;
+    color: #000;
+}
+
+/* il passaggio del mouse non deve far comparire il fondo del tema */
+html:not(.gs-admin) .btn.dropdown-toggle:hover,
+html:not(.gs-admin) .btn.dropdown-toggle:focus,
+html:not(.gs-admin) .dropdown.open > .btn.dropdown-toggle {
+    background-color: transparent !important;
+    background-image: none !important;
 }
 
 .gs-table-sticky-wrapper {
@@ -1718,8 +2113,8 @@ label {
 }
 
 .form-control {
-  border-radius: 12px;
-  border: 1px solid #ced4da;
+  border-radius: 8px;
+  border: 1px solid #dfe6ee;
   padding: 0.75rem 1rem;
   font-size: 1rem;
 }
@@ -1734,38 +2129,37 @@ label {
 }
 
 .input-group .form-control {
-  border-radius: 0 12px 12px 0;
+  border-radius: 0 8px 8px 0;
 }
 
 .input-group .form-control:first-child {
-  border-radius: 12px 0 0 12px;
+  border-radius: 8px 0 0 8px;
 }
 
 .input-group .form-control:last-child {
-  border-radius: 0 12px 12px 0;
+  border-radius: 0 8px 8px 0;
 }
 
-/* Unisce icona e input nel login */
 .input-group {
-  border: 1px solid #ced4da;
+  border: 1px solid #dfe6ee;
   border-radius: 8px;
   overflow: hidden;
   background-color: #ffffff;
 }
 
 .input-group .form-control {
-  border: none;
-  background: transparent;
+  border: none !important;
+  background: transparent !important;
   box-shadow: none;
 }
+
 
 .input-group .input-group-addon {
   background: transparent;
   border: none;
-  border-right: 1px solid #ced4da;
+  border-right: 1px solid #dfe6ee;
 }
 
-/* Rimuove il colore di autofill di Chrome */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -1904,17 +2298,6 @@ input:-webkit-autofill:active {
   border-radius: 8px;
 }
 
-/* I campi data e ora disegnano il bordo inferiore con una pseudo-elemento
-   (rispettivamente .it-datepicker-wrapper .input-group::after e
-   .it-timepicker-wrapper .calendar-input-container::after) che, avendo
-   position: absolute e width: 100%, si estende sotto l'intero contenitore:
-   sotto il pulsante calendario e sotto lo spinner-control, risultando una
-   riga piu' larga del campo. Stesso approccio gia' usato per
-   .bootstrap-select .filter-option::after: si spegne la pseudo-elemento.
-   Il vendor azzera border-bottom sull'input (l'input sarebbe rimasto senza
-   base), quindi va ripristinato il bordo reale.
-   Stesso raggio degli altri .form-control, cosi' i due campi tornano
-   identici a tutti gli altri input del form. */
 .it-datepicker-wrapper .input-group::after,
 .it-timepicker-wrapper .calendar-input-container::after {
   content: none;
@@ -2169,240 +2552,145 @@ fieldset .gs-add-item {
 }
 
 
-/***** CIRCOLARI - BACHECA *****/
+/***** FILTRI PAGINE (comune a tutte le sezioni di ricerca) *****/
 
-.gs-circolari-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
+/* Contenitore del pannello filtri */
+.gs-filters {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 1.5rem 0;
   padding: 1.5rem;
   background: #f8f9fa;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.gs-circolari-filters-row {
-  display: flex;
+/* Riga dei filtri; display ha !important perché Bootstrap 3 forza block. */
+.gs-filters-row {
+  display: flex !important;
   gap: 1rem;
+  align-items: flex-end;
   margin-bottom: 1rem;
 }
 
-.gs-circolari-filter-col {
+/* Colonna singolo filtro */
+.gs-filter-col {
   flex: 1;
   min-width: 0;
 }
 
-.gs-circolari-filters .form-group {
+/* Nei pannelli filtri le etichette restano visibili anche se il form le marca sr-only */
+.gs-filters label.sr-only {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 0 0.5rem !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  border: 0 !important;
+}
+
+.gs-filters label,
+.gs-filters label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.875rem;
+}
+
+/* Campi dei filtri a tutta larghezza */
+.gs-filters .form-control,
+.gs-filters select,
+.gs-filters select {
+  width: 100%;
+}
+
+/* Input-group.date a tutta larghezza dentro i filtri */
+.gs-filters .input-group.date,
+.gs-filters .input-group.date .form-control,
+.gs-filters .input-group.date .form-control {
+  width: 100%;
+}
+
+/* Regole speciali .form-group annidati */
+.gs-filters .form-group,
+.gs-filters .form-group {
   margin-bottom: 0;
 }
 
-.gs-circolari-filters .form-group:not(.gs-circolari-filter-col) {
+.gs-filters .form-group:not(.gs-filter-col),
+.gs-filters .form-group:not(.gs-filter-col) {
   margin-bottom: 1rem;
 }
 
-.gs-circolari-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
+/* Gruppo di pulsanti (classe "buttons") */
+.gs-filters-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
 }
 
-.gs-circolari-filters .form-control,
-.gs-circolari-filters select {
-  width: 100%;
+.gs-filters-buttons .btn {
+  white-space: nowrap;
 }
 
-.gs-circolari-buttons {
+/* Gruppo azioni (classe "actions") */
+.gs-richieste-modulo-evacuazione-actions,
+.gs-richieste-modulo-lista-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
 }
 
-.gs-circolari-buttons .btn {
+.gs-richieste-modulo-evacuazione-actions .btn,
+.gs-richieste-modulo-lista-actions .btn {
   white-space: nowrap;
 }
 
+/* Media query mobile per i filtri */
 @media (max-width: 599.98px) {
-  .gs-circolari-filters {
+  .gs-filters {
     max-width: 100%;
     padding: 1rem;
   }
 
-  .gs-circolari-filters-row {
+  .gs-filters-row {
     flex-direction: column;
     gap: 1rem;
   }
 
-  .gs-circolari-filters .form-group {
+  .gs-filters .form-group {
     margin-bottom: 1rem;
   }
 
-  .gs-circolari-buttons {
+  .gs-filters-buttons {
+    flex-direction: row;
+    width: auto;
+  }
+
+  .gs-filters-buttons .btn {
+    width: auto;
+  }
+
+  .gs-richieste-modulo-evacuazione-actions,
+  .gs-richieste-modulo-lista-actions {
     flex-direction: column;
     width: 100%;
   }
 
-  .gs-circolari-buttons .btn {
-    width: 100%;
-  }
-}
-
-
-/***** AVVISI - BACHECA *****/
-
-.gs-avvisi-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-avvisi-filters-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gs-avvisi-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-avvisi-filters .form-group {
-  margin-bottom: 0;
-}
-
-.gs-avvisi-filters .form-group:not(.gs-avvisi-filter-col) {
-  margin-bottom: 1rem;
-}
-
-.gs-avvisi-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-avvisi-filters .form-control,
-.gs-avvisi-filters select {
-  width: 100%;
-}
-
-.gs-avvisi-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-avvisi-buttons .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-avvisi-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-avvisi-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-avvisi-filters .form-group {
-    margin-bottom: 1rem;
-  }
-
-  .gs-avvisi-buttons {
-    flex-direction: column;
+  .gs-richieste-modulo-evacuazione-actions .btn,
+  .gs-richieste-modulo-lista-actions .btn {
     width: 100%;
   }
 
-  .gs-avvisi-buttons .btn {
-    width: 100%;
-  }
 }
 
 
-/***** DOCUMENTI - BACHECA *****/
-
-.gs-documenti-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-documenti-filters-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gs-documenti-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-documenti-filter-row {
-  margin-bottom: 1rem;
-}
-
-.gs-documenti-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-documenti-filters .form-control,
-.gs-documenti-filters select {
-  width: 100%;
-}
-
-.gs-documenti-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-documenti-buttons .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-documenti-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-documenti-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-documenti-filters label {
-    margin-bottom: 0.5rem;
-  }
-
-  .gs-documenti-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-documenti-buttons .btn {
-    width: 100%;
-  }
-}
-
-
-/***** AVVISI - GESTIONE *****/
+/***** AVVISI - GESTIONE (parti specifiche) *****/
 
 .gs-avvisi-gestione-header {
   margin-bottom: 1.5rem;
@@ -2417,17 +2705,6 @@ fieldset .gs-add-item {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.gs-avvisi-filters-row {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.gs-avvisi-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
 .gs-avvisi-filter-expand {
   flex: 2;
   min-width: 0;
@@ -2435,19 +2712,6 @@ fieldset .gs-add-item {
 
 .gs-avvisi-filter-btn {
   flex: 0 0 auto;
-}
-
-.gs-avvisi-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-avvisi-filters .form-control,
-.gs-avvisi-filters select {
-  width: 100%;
 }
 
 .gs-avvisi-filters-mobile {
@@ -2601,1291 +2865,6 @@ fieldset .gs-add-item {
 }
 
 
-/***** DOCENTI - STATISTICHE *****/
-
-.gs-docenti-statistiche-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-docenti-statistiche-filters-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gs-docenti-statistiche-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-docenti-statistiche-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-docenti-statistiche-filters .form-control,
-.gs-docenti-statistiche-filters select {
-  width: 100%;
-}
-
-.gs-docenti-statistiche-filters .input-group.date {
-  width: 100%;
-}
-
-.gs-docenti-statistiche-filters .input-group.date .form-control {
-  width: 100%;
-}
-
-.gs-docenti-statistiche-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.gs-docenti-statistiche-buttons .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-docenti-statistiche-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-docenti-statistiche-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-docenti-statistiche-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-docenti-statistiche-buttons .btn {
-    width: 100%;
-  }
-
-  .gs-docenti-statistiche-buttons .pull-right {
-    float: none !important;
-    width: 100%;
-  }
-}
-
-
-/***** STUDENTI - CONDOTTA *****/
-
-.gs-studenti-condotta-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-studenti-condotta-filters-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gs-studenti-condotta-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-studenti-condotta-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-studenti-condotta-filters .form-control,
-.gs-studenti-condotta-filters select {
-  width: 100%;
-}
-
-.gs-studenti-condotta-filters .input-group.date {
-  width: 100%;
-}
-
-.gs-studenti-condotta-filters .input-group.date .form-control {
-  width: 100%;
-}
-
-.gs-studenti-condotta-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-studenti-condotta-buttons .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-studenti-condotta-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-studenti-condotta-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-studenti-condotta-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-studenti-condotta-buttons .btn {
-    width: 100%;
-  }
-}
-
-
-/***** CIRCOLARI - GESTIONE *****/
-
-.gs-circolari-gestione-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-circolari-gestione-filters-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gs-circolari-gestione-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-circolari-gestione-filters .form-group {
-  margin-bottom: 0;
-}
-
-.gs-circolari-gestione-filters .form-group:not(.gs-circolari-gestione-filter-col) {
-  margin-bottom: 1rem;
-}
-
-.gs-circolari-gestione-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-circolari-gestione-filters .form-control,
-.gs-circolari-gestione-filters select {
-  width: 100%;
-}
-
-.gs-circolari-gestione-filters .input-group.date {
-  width: 100%;
-}
-
-.gs-circolari-gestione-filters .input-group.date .form-control {
-  width: 100%;
-}
-
-.gs-circolari-gestione-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-circolari-gestione-buttons .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-circolari-gestione-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-circolari-gestione-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-circolari-gestione-filters .form-group {
-    margin-bottom: 1rem;
-  }
-
-  .gs-circolari-gestione-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-circolari-gestione-buttons .btn {
-    width: 100%;
-  }
-}
-
-
-/***** STUDENTI - AUTORIZZA *****/
-
-.gs-studenti-autorizza-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-studenti-autorizza-filters-row {
-  display: flex !important;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.gs-studenti-autorizza-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-studenti-autorizza-filter-col.gs-studenti-autorizza-btn {
-  flex: 0 0 auto;
-}
-
-.gs-studenti-autorizza-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-studenti-autorizza-filters .form-control,
-.gs-studenti-autorizza-filters select {
-  width: 100%;
-}
-
-@media (max-width: 599.98px) {
-  .gs-studenti-autorizza-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-studenti-autorizza-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-studenti-autorizza-filter-col.gs-studenti-autorizza-btn {
-    width: 100%;
-  }
-}
-
-
-/***** STUDENTI - DEROGHE *****/
-
-.gs-studenti-deroghe-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-studenti-deroghe-filters-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gs-studenti-deroghe-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-studenti-deroghe-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-studenti-deroghe-filters .form-control,
-.gs-studenti-deroghe-filters select {
-  width: 100%;
-}
-
-.gs-studenti-deroghe-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-studenti-deroghe-buttons .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-studenti-deroghe-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-studenti-deroghe-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-studenti-deroghe-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-studenti-deroghe-buttons .btn {
-    width: 100%;
-  }
-}
-
-
-/***** DOCUMENTI - ALUNNI *****/
-
-.gs-documenti-alunni-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-documenti-alunni-filters-row {
-  display: flex !important;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.gs-documenti-alunni-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-documenti-alunni-filter-col.gs-documenti-alunni-btn {
-  flex: 0 0 auto;
-}
-
-.gs-documenti-alunni-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-documenti-alunni-filters .form-control,
-.gs-documenti-alunni-filters select {
-  width: 100%;
-}
-
-@media (max-width: 599.98px) {
-  .gs-documenti-alunni-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-documenti-alunni-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-documenti-alunni-filter-col.gs-documenti-alunni-btn {
-    width: 100%;
-  }
-}
-
-
-/***** STAFF - PASSWORD *****/
-
-.gs-staff-password-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-staff-password-filters-row {
-  display: flex !important;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.gs-staff-password-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-staff-password-filter-col.gs-staff-password-btn {
-  flex: 0 0 auto;
-}
-
-.gs-staff-password-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-staff-password-filters .form-control,
-.gs-staff-password-filters select {
-  width: 100%;
-}
-
-@media (max-width: 599.98px) {
-  .gs-staff-password-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-staff-password-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-staff-password-filter-col.gs-staff-password-btn {
-    width: 100%;
-  }
-}
-
-
-/***** DOCUMENTI - DOCENTI *****/
-
-.gs-documenti-docenti-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-documenti-docenti-filters-row {
-  display: flex !important;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.gs-documenti-docenti-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-documenti-docenti-filter-col.gs-documenti-docenti-btn {
-  flex: 0 0 auto;
-}
-
-.gs-documenti-docenti-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-documenti-docenti-filters .form-control,
-.gs-documenti-docenti-filters select {
-  width: 100%;
-}
-
-@media (max-width: 599.98px) {
-  .gs-documenti-docenti-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-documenti-docenti-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-documenti-docenti-filter-col.gs-documenti-docenti-btn {
-    width: 100%;
-  }
-}
-
-
-/***** DOCENTI - CDC *****/
-
-.gs-docenti-cdc-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-docenti-cdc-filters-row {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.gs-docenti-cdc-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-docenti-cdc-filter-col.gs-docenti-cdc-btn {
-  flex: 0 0 auto;
-}
-
-.gs-docenti-cdc-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-docenti-cdc-filters .form-control,
-.gs-docenti-cdc-filters select {
-  width: 100%;
-}
-
-@media (max-width: 599.98px) {
-  .gs-docenti-cdc-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-docenti-cdc-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-docenti-cdc-filter-col.gs-docenti-cdc-btn {
-    width: 100%;
-  }
-}
-
-
-/***** RICHIESTE - MODULO EVACUAZIONE *****/
-
-.gs-richieste-modulo-evacuazione-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-richieste-modulo-evacuazione-filters-row {
-  display: flex !important;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.gs-richieste-modulo-evacuazione-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-richieste-modulo-evacuazione-filter-col.gs-richieste-modulo-evacuazione-btn {
-  flex: 0 0 auto;
-}
-
-.gs-richieste-modulo-evacuazione-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-richieste-modulo-evacuazione-filters .form-control,
-.gs-richieste-modulo-evacuazione-filters select {
-  width: 100%;
-}
-
-.gs-richieste-modulo-evacuazione-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-richieste-modulo-evacuazione-actions .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-richieste-modulo-evacuazione-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-richieste-modulo-evacuazione-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-richieste-modulo-evacuazione-filter-col.gs-richieste-modulo-evacuazione-btn {
-    width: 100%;
-  }
-
-  .gs-richieste-modulo-evacuazione-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-richieste-modulo-evacuazione-actions .btn {
-    width: 100%;
-  }
-}
-
-
-/***** RICHIESTE - MODULO LISTA *****/
-
-.gs-richieste-modulo-lista-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-richieste-modulo-lista-filters-row {
-  display: flex !important;
-  gap: 1rem;
-  align-items: flex-end;
-  margin-bottom: 1rem;
-}
-
-.gs-richieste-modulo-lista-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-richieste-modulo-lista-filter-col.gs-richieste-modulo-lista-btn {
-  flex: 0 0 auto;
-}
-
-.gs-richieste-modulo-lista-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-richieste-modulo-lista-filters .form-control,
-.gs-richieste-modulo-lista-filters select {
-  width: 100%;
-}
-
-.gs-richieste-modulo-lista-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-richieste-modulo-lista-actions .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-richieste-modulo-lista-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-richieste-modulo-lista-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-richieste-modulo-lista-filter-col.gs-richieste-modulo-lista-btn {
-    width: 100%;
-  }
-
-  .gs-richieste-modulo-lista-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-richieste-modulo-lista-actions .btn {
-    width: 100%;
-  }
-}
-
-
-/***** AUTORIZZAZIONI - LISTA *****/
-
-.gs-autorizzazioni-lista-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-autorizzazioni-lista-filters-row {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.gs-autorizzazioni-lista-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-autorizzazioni-lista-filter-col.gs-autorizzazioni-lista-btn {
-  flex: 0 0 auto;
-}
-
-.gs-autorizzazioni-lista-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-autorizzazioni-lista-filters .form-control,
-.gs-autorizzazioni-lista-filters select {
-  width: 100%;
-}
-
-@media (max-width: 599.98px) {
-  .gs-autorizzazioni-lista-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-autorizzazioni-lista-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-autorizzazioni-lista-filter-col.gs-autorizzazioni-lista-btn {
-    width: 100%;
-  }
-}
-
-
-/***** RICHIESTE - MODULO EVACUAZIONE *****/
-
-.gs-richieste-modulo-evacuazione-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-richieste-modulo-evacuazione-filters-row {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-end;
-  margin-bottom: 1rem;
-}
-
-.gs-richieste-modulo-evacuazione-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-richieste-modulo-evacuazione-filter-col.gs-richieste-modulo-evacuazione-btn {
-  flex: 0 0 auto;
-}
-
-.gs-richieste-modulo-evacuazione-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-richieste-modulo-evacuazione-filters .form-control,
-.gs-richieste-modulo-evacuazione-filters select {
-  width: 100%;
-}
-
-.gs-richieste-modulo-evacuazione-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-richieste-modulo-evacuazione-actions .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-richieste-modulo-evacuazione-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-richieste-modulo-evacuazione-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-richieste-modulo-evacuazione-filter-col.gs-richieste-modulo-evacuazione-btn {
-    width: 100%;
-  }
-
-  .gs-richieste-modulo-evacuazione-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-richieste-modulo-evacuazione-actions .btn {
-    width: 100%;
-  }
-}
-
-
-/***** RICHIESTE - MODULO LISTA *****/
-
-.gs-richieste-modulo-lista-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-richieste-modulo-lista-filters-row {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-end;
-  margin-bottom: 1rem;
-}
-
-.gs-richieste-modulo-lista-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-richieste-modulo-lista-filter-col.gs-richieste-modulo-lista-btn {
-  flex: 0 0 auto;
-}
-
-.gs-richieste-modulo-lista-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-richieste-modulo-lista-filters .form-control,
-.gs-richieste-modulo-lista-filters select {
-  width: 100%;
-}
-
-.gs-richieste-modulo-lista-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-richieste-modulo-lista-actions .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-richieste-modulo-lista-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-richieste-modulo-lista-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-richieste-modulo-lista-filter-col.gs-richieste-modulo-lista-btn {
-    width: 100%;
-  }
-
-  .gs-richieste-modulo-lista-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-richieste-modulo-lista-actions .btn {
-    width: 100%;
-  }
-}
-
-
-/***** COLLOQUII - CERCA *****/
-
-.gs-colloqui-cerca-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-colloqui-cerca-filters-row {
-  display: flex !important;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.gs-colloqui-cerca-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-colloqui-cerca-filter-col.gs-colloqui-cerca-btn {
-  flex: 0 0 auto;
-}
-
-.gs-colloqui-cerca-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-colloqui-cerca-filters .form-control,
-.gs-colloqui-cerca-filters select {
-  width: 100%;
-}
-
-@media (max-width: 599.98px) {
-  .gs-colloqui-cerca-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-colloqui-cerca-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-colloqui-cerca-filter-col.gs-colloqui-cerca-btn {
-    width: 100%;
-  }
-}
-
-
-/***** RICHIESTE - GESTIONE *****/
-
-.gs-richieste-gestione-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-richieste-gestione-filters-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gs-richieste-gestione-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-richieste-gestione-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-richieste-gestione-filters .form-control,
-.gs-richieste-gestione-filters select {
-  width: 100%;
-}
-
-.gs-richieste-gestione-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-richieste-gestione-buttons .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-richieste-gestione-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-richieste-gestione-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-richieste-gestione-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-richieste-gestione-buttons .btn {
-    width: 100%;
-  }
-}
-
-
-/***** STUDENTI - SITUAZIONE *****/
-
-.gs-studenti-situazione-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-studenti-situazione-filters-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gs-studenti-situazione-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-studenti-situazione-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-studenti-situazione-filters .form-control,
-.gs-studenti-situazione-filters select {
-  width: 100%;
-}
-
-.gs-studenti-situazione-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-studenti-situazione-buttons .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-studenti-situazione-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-studenti-situazione-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-studenti-situazione-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-studenti-situazione-buttons .btn {
-    width: 100%;
-  }
-}
-
-
-/***** AVVISI - ARCHIVIO *****/
-
-.gs-avvisi-archivio-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-avvisi-archivio-filters-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gs-avvisi-archivio-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-avvisi-archivio-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-avvisi-archivio-filters .form-control,
-.gs-avvisi-archivio-filters select {
-  width: 100%;
-}
-
-.gs-avvisi-archivio-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-avvisi-archivio-buttons .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-avvisi-archivio-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-avvisi-archivio-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-avvisi-archivio-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-avvisi-archivio-buttons .btn {
-    width: 100%;
-  }
-}
-
-
-/***** CIRCOLARI - ARCHIVIO *****/
-
-.gs-circolari-archivio-filters {
-  max-width: 700px;
-  margin: 0 auto 1.5rem auto;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.gs-circolari-archivio-filters-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.gs-circolari-archivio-filter-col {
-  flex: 1;
-  min-width: 0;
-}
-
-.gs-circolari-archivio-filters .form-group {
-  margin-bottom: 0;
-}
-
-.gs-circolari-archivio-filters .form-group:not(.gs-circolari-archivio-filter-col) {
-  margin-bottom: 1rem;
-}
-
-.gs-circolari-archivio-filters label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.gs-circolari-archivio-filters .form-control,
-.gs-circolari-archivio-filters select {
-  width: 100%;
-}
-
-.gs-circolari-archivio-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.gs-circolari-archivio-buttons .btn {
-  white-space: nowrap;
-}
-
-@media (max-width: 599.98px) {
-  .gs-circolari-archivio-filters {
-    max-width: 100%;
-    padding: 1rem;
-  }
-
-  .gs-circolari-archivio-filters-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .gs-circolari-archivio-filters .form-group {
-    margin-bottom: 1rem;
-  }
-
-  .gs-circolari-archivio-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .gs-circolari-archivio-buttons .btn {
-    width: 100%;
-  }
-}
-
-
 /***** CALENDARIO AGENDA *****/
 
 .gs-calendar {
@@ -3900,6 +2879,7 @@ fieldset .gs-add-item {
 }
 
 .gs-calendar thead th {
+  width: 14.2857%;
   height: 46px;
   padding: 12px 10px;
   background: #f8fafc;
@@ -3913,7 +2893,7 @@ fieldset .gs-add-item {
 }
 
 .gs-calendar tbody td {
-  width: 16.666%;
+  width: 14.2857%;
   height: 125px;
   padding: 10px;
   vertical-align: top;
@@ -4207,8 +3187,6 @@ fieldset .gs-add-item {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-  margin-top: 2rem;
-  margin-bottom: 2rem;
 }
 
 .gs-grades-caption {
@@ -4436,7 +3414,8 @@ fieldset .gs-add-item {
 }
 
 
-/* Prova 1 */
+/* Fix: il select di Bootstrap-select non deve tracciare il bordo inferiore
+   con un ::after che sborda dal campo */
 .bootstrap-select .filter-option::after {
   content: none;
   display: none;
@@ -4448,7 +3427,6 @@ fieldset .gs-add-item {
 
 /***** MEDIA QUERIES GLOBALI PER RESPONSIVE DESIGN *****/
 
-/* Schermi sotto 1200px - Tablet grandi e desktop piccoli */
 @media (max-width: 1199.98px) {
   .container {
     max-width: 960px;
@@ -4460,7 +3438,6 @@ fieldset .gs-add-item {
   }
 }
 
-/* Schermi sotto 992px - Tablet */
 @media (max-width: 991.98px) {
   .container {
     max-width: 720px;
@@ -4483,7 +3460,6 @@ fieldset .gs-add-item {
   }
 }
 
-/* Schermi sotto 768px - Tablet piccoli e smartphone grandi */
 @media (max-width: 767.98px) {
   .container {
     max-width: 100%;
@@ -4517,14 +3493,6 @@ fieldset .gs-add-item {
     width: 100%;
   }
 
-  .table-responsive {
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    max-width: 100%;
-    min-width: 0;
-    contain: inline-size;
-  }
-
   .table-responsive table {
     min-width: 600px;
   }
@@ -4532,13 +3500,8 @@ fieldset .gs-add-item {
   .btn {
     width: auto;
   }
-
-  .gs-avvisi-actions .btn {
-    flex: 1 1 calc(50% - 0.2rem);
-  }
 }
 
-/* Schermi sotto 576px - Smartphone */
 @media (max-width: 575.98px) {
   .container {
     padding-left: 5px;
@@ -4563,12 +3526,6 @@ fieldset .gs-add-item {
     padding: 0.3rem 0.6rem;
   }
 
-  .gs-avvisi-actions .btn {
-    flex: 1 1 100%;
-    font-size: 0.75rem;
-    padding: 0.4rem 0.5rem;
-  }
-
   .modal-dialog {
     max-width: 95%;
     margin: 0.5rem auto;
@@ -4579,7 +3536,6 @@ fieldset .gs-add-item {
   }
 }
 
-/* Schermi sotto 480px - Smartphone molto piccoli */
 @media (max-width: 479.98px) {
   .container {
     padding-left: 3px;
@@ -4601,15 +3557,13 @@ fieldset .gs-add-item {
 }
 
 
-/***** AVVISI - Gestione: responsive per Bootstrap 3 *****/
+/***** AVVISI - GESTIONE: responsive per Bootstrap 3 *****/
 
-/* Container: padding reale */
 .gs-avvisi-page {
   padding: 1rem;
   max-width: 100%;
 }
 
-/* Pulsanti "nuovo avviso": vanno a capo e si adattano */
 .gs-avvisi-actions {
   display: flex;
   flex-wrap: wrap;
@@ -4622,11 +3576,9 @@ fieldset .gs-add-item {
   white-space: nowrap;
 }
 
-/* Tabella avvisi: layout responsivo */
 .gs-avvisi-page .table-responsive {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border: 0;
   max-width: 100%;
   min-width: 0;
   contain: inline-size;
@@ -4641,7 +3593,6 @@ fieldset .gs-add-item {
   overflow-wrap: break-word;
 }
 
-/* Larghezze delle colonne (percentuali del totale) */
 .gs-avvisi-page .gs-table th:nth-child(1),
 .gs-avvisi-page .gs-table td:nth-child(1) { width: 12%; }
 .gs-avvisi-page .gs-table th:nth-child(2),
@@ -4657,7 +3608,6 @@ fieldset .gs-add-item {
 .gs-avvisi-page .gs-table th:nth-child(7),
 .gs-avvisi-page .gs-table td:nth-child(7) { width: 9%; }
 
-/* Le celle con table-layout: fixed devono poter andare a capo */
 .gs-avvisi-page .gs-table th,
 .gs-avvisi-page .gs-table td {
   word-break: break-word;
@@ -4665,7 +3615,6 @@ fieldset .gs-add-item {
   vertical-align: top;
 }
 
-/* Pulsanti azione nella tabella: compatti, vanno a capo se serve */
 .gs-avvisi-page .gs-table td:nth-child(7) {
   white-space: normal;
   text-align: center;
@@ -4675,7 +3624,6 @@ fieldset .gs-add-item {
   margin: 2px 1px;
 }
 
-/* Form inline (filtri) responsive su BS3 */
 .gs-avvisi-page .form-inline {
   display: flex;
   flex-wrap: wrap;
@@ -4687,7 +3635,6 @@ fieldset .gs-add-item {
   margin-bottom: 0;
 }
 
-/* MEDIA QUERY: tablet e mobile per avvisi */
 @media (max-width: 991.98px) {
   .gs-avvisi-page {
     padding: 0.75rem;
@@ -4736,9 +3683,6 @@ fieldset .gs-add-item {
   }
 
   .gs-avvisi-page .table-responsive {
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    background: #fff;
     max-width: 100%;
     min-width: 0;
     contain: inline-size;
@@ -4773,5 +3717,82 @@ fieldset .gs-add-item {
   .gs-avvisi-page .gs-table th:nth-child(6),
   .gs-avvisi-page .gs-table td:nth-child(6) {
     display: none;
+  }
+}
+
+/***** SELETTORE CLASSE (docente) *****/
+
+/* Barra condivisa per la scelta sede/classe delle sostituzioni */
+.gs-selettore-classe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin: 0 0 1rem 0;
+  background: var(--gs-surface-soft);
+  border: 1px solid var(--gs-border);
+  border-radius: 8px;
+}
+
+.gs-selettore-classe-campo {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.gs-selettore-classe-gruppo {
+  flex: 1 1 12rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.gs-selettore-classe-label {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--gs-text-muted);
+  white-space: nowrap;
+}
+
+/* I select sono .form-control: portati a tutta la larghezza del gruppo */
+.gs-selettore-classe-gruppo select.form-control {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* elenco di fallback visualizzato senza JavaScript */
+.gs-selettore-classe-elenco {
+  margin: 0.25rem 0 0 0;
+  padding-left: 1.25rem;
+}
+
+/* stato attivo: la scelta già memorizzata resta selezionata e ben evidenziata */
+.gs-selettore-classe--attiva {
+  background: var(--gs-primary-soft);
+  border-color: var(--gs-primary-strong);
+  box-shadow: 0 0 0 1px var(--gs-primary-strong) inset;
+}
+
+.gs-selettore-classe--attiva .gs-selettore-classe-label {
+  color: var(--gs-primary);
+}
+
+@media (max-width: 767.98px) {
+  .gs-selettore-classe {
+    padding: 0.75rem;
+  }
+
+  .gs-selettore-classe-gruppo,
+  .gs-selettore-classe-label {
+    flex: 1 1 100%;
+    width: 100%;
+    white-space: normal;
   }
 }
