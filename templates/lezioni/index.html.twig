@@ -1,11 +1,10 @@
 {% extends 'base.html.twig' %}
 
 {% block pagina_menu %}
-  {{ include('ruolo_docente/menu.html.twig', {attivo: 'lezioni'}) }}
+  {{ include('ruolo_docente/menu.html.twig') }}
 {% endblock %}
 
 {% block pagina_submenu %}
-  {{ include('ruolo_docente/menu_lezioni.html.twig') }}
 {% endblock %}
 
 {% block pagina_contenuto %}

@@ -70,17 +70,17 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
 {% if is_granted('IS_IMPERSONATOR') %}
           <a class="gs-hdr-exit" href="{{ path('sistema_alias_exit') }}" title="Esci dall'alias" aria-label="Esci dall'alias">
-            <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+            {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
             <strong class="gs-hdr-exit-label">{{ 'label.alias'|trans|upper }}</strong>
           </a>
 {% elseif is_granted('ROLE_DOCENTE') and app.session.get('/APP/UTENTE/tipo_accesso') == 'Google' %}
           <a class="gs-hdr-exit" href="#" onClick="logoutGoogle()" title="Esci dal Registro Elettronico" aria-label="Esci dal Registro Elettronico">
-            <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+            {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
             <strong class="gs-hdr-exit-label">{{ 'label.logout'|trans|upper }}</strong>
           </a>
 {% else %}
           <a class="gs-hdr-exit" href="{{ path('logout') }}" title="Esci dal Registro Elettronico" aria-label="Esci dal Registro Elettronico">
-            <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+            {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
             <strong class="gs-hdr-exit-label">{{ 'label.logout'|trans|upper }}</strong>
           </a>
 {% endif %}
@@ -138,6 +138,7 @@
     <script src="{{ asset('vendor/bootstrap/js/ie10-viewport-bug-workaround.js') }}"></script>
     <![endif]-->
     <script src="{{ asset('js/script.js?v=' ~ (filedate('js/script.js')|date('U'))) }}"></script>
+  <script src="{{ asset('js/notifiche.js?v=' ~ (filedate('js/notifiche.js')|date('U'))) }}"></script>
     <script>
     /* pannello di navigazione mobile: apre/chiude la barra laterale sotto i 992px */
     (function () {
@@ -181,19 +182,28 @@
       else if (desktop.addListener) { desktop.addListener(onResize); }
     })();
 
-    /* Dropdown toggle per menu sidebar */
+    /* Dropdown toggle per menu sidebar
+       Le sezioni si aprono e chiudono con un solo commando: il <a> non porta
+       data-toggle="dropdown", cosi' il Bootstrap 3 non commuta la classe open
+       insieme a questo codice e la sezione non si richiude subito. */
     (function () {
-      var dropdownToggles = document.querySelectorAll('.gs-hdr-menu .dropdown-toggle');
-      dropdownToggles.forEach(function(toggle) {
-        toggle.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          var parentLi = this.parentElement;
-          var dropdownMenu = parentLi.querySelector('.dropdown-menu');
-          if (dropdownMenu) {
-            parentLi.classList.toggle('open');
-          }
+      var menu = document.querySelector('.gs-hdr-menu');
+      if (!menu) { return; }
+      menu.addEventListener('click', function (e) {
+        var toggle = e.target.closest ? e.target.closest('.dropdown-toggle') : null;
+        if (!toggle || !menu.contains(toggle)) { return; }
+        e.preventDefault();
+        var parentLi = toggle.parentElement;
+        var dropdownMenu = parentLi.querySelector('.dropdown-menu');
+        if (!dropdownMenu) { return; }
+        var aperta = !parentLi.classList.contains('open');
+        menu.querySelectorAll('li.dropdown.open').forEach(function (li) {
+          li.classList.remove('open');
+          var altroToggle = li.querySelector(':scope > .dropdown-toggle');
+          if (altroToggle) { altroToggle.setAttribute('aria-expanded', 'false'); }
         });
+        if (aperta) { parentLi.classList.add('open'); }
+        toggle.setAttribute('aria-expanded', aperta ? 'true' : 'false');
       });
     })();
     </script>

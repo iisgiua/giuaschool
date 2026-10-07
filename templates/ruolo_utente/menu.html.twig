@@ -1,4 +1,11 @@
 <ul class="nav navbar-nav gs-navbar-nav">
   <li{{ app.request.attributes.get('_route') == 'login_home' ? ' class="active"' }}><a href="{{ path('login_home') }}" title="Visualizza la pagina principale"><span class="glyphicon glyphicon-home gs-mr-2" aria-hidden="true"></span>Home</a></li>
-  <li{{ app.request.attributes.get('_route') in ['circolari_bacheca', 'avvisi_bacheca', 'documenti_bacheca'] ? ' class="active"' }}><a href="{{ path('circolari_bacheca') }}" title="Visualizza circolari, avvisi e documenti"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a></li>
+  <li class="dropdown{{ app.request.attributes.get('_route') == 'circolari_bacheca' or app.request.attributes.get('_route') == 'avvisi_bacheca' or app.request.attributes.get('_route') == 'documenti_bacheca' ? ' active open' }}">
+    <a href="#" title="Visualizza circolari, avvisi e documenti" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="{{ app.request.attributes.get('_route') == 'circolari_bacheca' or app.request.attributes.get('_route') == 'avvisi_bacheca' or app.request.attributes.get('_route') == 'documenti_bacheca' ? 'true' : 'false' }}"><span class="glyphicon glyphicon-bullhorn gs-mr-2" aria-hidden="true"></span>Bacheca</a>
+    <ul role="menu" class="dropdown-menu gs-dropdown-menu">
+      <li{{ app.request.attributes.get('_route') == 'circolari_bacheca' ? ' class="active"' }}><a href="{{ path('circolari_bacheca') }}" title="Visualizza le circolari indirizzate all'utente">Circolari</a></li>
+      <li{{ app.request.attributes.get('_route') == 'avvisi_bacheca' ? ' class="active"' }}><a href="{{ path('avvisi_bacheca') }}" title="Visualizza gli avvisi indirizzati all'utente">Avvisi</a></li>
+      <li role="presentation"{{ app.request.attributes.get('_route') == 'documenti_bacheca' ? ' class="active"' }}><a href="{{ path('documenti_bacheca') }}" title="Visualizza i documenti indirizzati all'utente">Documenti</a></li>
+    </ul>
+  </li>
 </ul>

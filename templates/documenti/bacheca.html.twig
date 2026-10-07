@@ -2,7 +2,7 @@
 
 {% block pagina_menu %}
   {% if is_granted('ROLE_DOCENTE') %}
-    {{ include('ruolo_docente/menu.html.twig', {attivo: 'bacheca'}) }}
+    {{ include('ruolo_docente/menu.html.twig') }}
   {% elseif is_granted('ROLE_GENITORE') %}
     {{ include('ruolo_genitore/menu_genitore.html.twig', {attivo: 'bacheca'}) }}
   {% elseif is_granted('ROLE_ALUNNO') %}
@@ -15,13 +15,6 @@
 {% endblock %}
 
 {% block pagina_submenu %}
-  {% if is_granted('ROLE_DOCENTE') %}
-    {{ include('ruolo_docente/menu_bacheca.html.twig') }}
-  {% elseif is_granted('ROLE_ATA') %}
-    {{ include('ruolo_ata/menu_bacheca.html.twig') }}
-  {% elseif is_granted('ROLE_UTENTE') and not is_granted('ROLE_GENITORE') and not is_granted('ROLE_ALUNNO') %}
-    {{ include('ruolo_utente/menu_bacheca.html.twig') }}
-  {% endif %}
 {% endblock %}
 
 {% form_theme form 'bootstrap_3_layout.html.twig' %}
@@ -31,56 +24,58 @@
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_bacheca'|trans({utente: is_granted('ROLE_DOCENTE') ? 'i docenti' : (is_granted('ROLE_ATA') ? 'il personale ATA' : (is_granted('ROLE_GENITORE') ? 'i genitori' : (is_granted('ROLE_ALUNNO') ? 'gli studenti' : 'gli utenti')))}) }}</h1>
   {% if form_success %}<div class="has-success"><span class="help-block"><strong><span class="glyphicon glyphicon-ok gs-mr-2" aria-hidden="true"></span>{{ form_success|trans }}</strong></span></div>{% endif %}
   {% if form_help %}<div class="help-block">{{ form_help|trans }}</div>{% endif %}
-  {{ form_start(form, {attr: {class: 'gs-documenti-filters gs-mb-3'}}) }}
-  <div class="gs-documenti-filters-row">
-    <div class="gs-documenti-filter-col">
-      {{ form_label(form.visualizza) }}
+  {{ form_start(form, {attr: {class: 'gs-filters gs-mb-3'}}) }}
+  <div class="gs-filters-row">
+    <div class="form-group gs-filter-col" title="{{ form.visualizza.vars.label|trans }}">
+      <label class="control-label" for="documento_filtro_visualizza">{{ form.visualizza.vars.label|trans }}</label>
       {{ form_widget(form.visualizza) }}
     </div>
-    {% if form.classe.vars.choices|length > 0 %}
-    <div class="gs-documenti-filter-col">
-      {{ form_label(form.classe) }}
-      {{ form_widget(form.classe) }}
+    {% if form.tipo.vars.choices|length > 0 %}
+    <div class="form-group gs-filter-col" title="{{ form.tipo.vars.label|trans }}">
+      <label class="control-label" for="documento_filtro_tipo">{{ form.tipo.vars.label|trans }}</label>
+      {{ form_widget(form.tipo) }}
     </div>
     {% endif %}
   </div>
-  {% if form.tipo.vars.choices|length > 0 %}
-  <div class="gs-documenti-filter-row">
-    {{ form_label(form.tipo) }}
-    {{ form_widget(form.tipo) }}
-  </div>
-  {% endif %}
-  <div class="gs-documenti-filter-row">
-    {{ form_label(form.titolo) }}
+  <div class="form-group" title="{{ form.titolo.vars.label|trans }}">
+    <label class="control-label" for="documento_filtro_titolo">{{ form.titolo.vars.label|trans }}</label>
     {{ form_widget(form.titolo) }}
   </div>
-  <div class="gs-documenti-buttons">
+  {% if form.classe.vars.choices|length > 0 %}
+  <div class="form-group" title="{{ form.classe.vars.label|trans }}">
+    <label class="control-label" for="documento_filtro_classe">{{ form.classe.vars.label|trans }}</label>
+    {{ form_widget(form.classe) }}
+  </div>
+  {% endif %}
+  <div class="gs-filters-buttons">
     <button type="button" class="btn btn-default" id="documento_reset" title="Resetta i filtri">Reset</button>
     {{ form_widget(form.submit) }}
   </div>
   {{ form_widget(form._token) }}
   {{ form_end(form, {render_rest: false}) }}
   {% if dati.lista.count > 0 %}
-  <table class="table table-bordered table-hover table-striped gs-mb-0">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-1">{{ 'label.stato'|trans }}</th>
-        <th class="col-sm-4">{{ 'label.riferimento'|trans }}</th>
-        <th class="col-sm-6">{{ 'label.documento'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'label.stato'|trans, classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'label.riferimento'|trans, classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'label.documento'|trans, classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'label.action'|trans, classi: 'col-sm-1', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for k, d in dati.lista %}
+    {# righe del documento: con nessun allegato resta una riga sola (#}
+    {# rowspan="0" farebbe span su tutto il corpo e rompe la tabella) #}
+    {% set sc_allegati = d.documento.allegati %}
+    {% set sc_num = sc_allegati|length %}
+    {% set sc_righe = sc_num > 0 ? sc_num : 1 %}
       <tr>
-        <td rowspan="{{ d.documento.allegati|length }}">
+        <td rowspan="{{ sc_righe }}">
       {% if d.letto %}
           <span class="label label-default">LETTO</span>
       {% else %}
           <span class="label label-warning">DA LEGGERE</span>
       {% endif %}
         </td>
-        <td rowspan="{{ d.documento.allegati|length }}">
+        <td rowspan="{{ sc_righe }}">
       {% if d.documento.alunno %}
           Classe: {{ d.documento.alunno.classe }} - {{ d.documento.alunno.classe.corso }} - {{ d.documento.alunno.classe.sede|upper }}<br>
       {% elseif d.documento.classe %}
@@ -90,11 +85,16 @@
           {% if d.documento.alunno %}Alunn{{ d.documento.alunno.sesso == 'M' ? 'o' : 'a' }}: {{ d.documento.alunno }}{% endif %}
         </td>
         <td>
-          <strong>{{ d.documento.allegati[0].titolo }}</strong><br>
+      {% if sc_num > 0 %}
+          <strong>{{ sc_allegati[0].titolo }}</strong><br>
       {% if d.documento.cifrato %}
           <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-content="{{ d.documento.cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ d.documento.cifrato }}</span></button>
       {% endif %}
-          <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1000)|number_format(0, ',', '.') }} kB</small>
+          <small>Dimensione: {{ (sc_allegati[0].dimensione / 1000)|number_format(0, ',', '.') }} kB</small>
+      {% else %}
+          {# documento senza file allegati: mostra il titolo del documento #}
+          <strong>{{ d.documento.titolo }}</strong>
+      {% endif %}
         </td>
         <td>
           <a class="btn btn-primary btn-xs" href="{{ path('documenti_download', {documento: d.documento.id}) }}" title="Scarica il documento indicato"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
@@ -115,8 +115,8 @@
       </tr>
       {% endfor %}
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
     {% if dati.maxPagine > 1 %}
     <nav aria-label="Navigazione tra le pagine" class="text-center">
       <ul class="pagination pagination-sm gs-mt-2">

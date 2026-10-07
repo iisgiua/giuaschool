@@ -2,7 +2,7 @@
 
 {% block pagina_menu %}
   {% if is_granted('ROLE_DOCENTE') %}
-    {{ include('ruolo_docente/menu.html.twig', {attivo: 'bacheca'}) }}
+    {{ include('ruolo_docente/menu.html.twig') }}
   {% elseif is_granted('ROLE_ATA') %}
     {{ include('ruolo_ata/menu.html.twig') }}
   {% elseif is_granted('ROLE_GENITORE') %}
@@ -15,26 +15,19 @@
 {% endblock %}
 
 {% block pagina_submenu %}
-  {% if is_granted('ROLE_DOCENTE') %}
-    {{ include('ruolo_docente/menu_bacheca.html.twig') }}
-  {% elseif is_granted('ROLE_ATA') %}
-    {{ include('ruolo_ata/menu_bacheca.html.twig') }}
-  {% elseif is_granted('ROLE_UTENTE') and not is_granted('ROLE_GENITORE') and not is_granted('ROLE_ALUNNO') %}
-    {{ include('ruolo_utente/menu_bacheca.html.twig') }}
-  {% endif %}
 {% endblock %}
 
 {% block pagina_contenuto %}
 <div class="container-fluid gs-circolari-bacheca">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.circolari_bacheca'|trans }}</h1>
-  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-circolari-filters gs-mb-3">
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-filters gs-mb-3">
     <div id="{{ form.vars.id }}">
-      <div class="gs-circolari-filters-row">
-        <div class="form-group gs-circolari-filter-col" title="{{ form.visualizza.vars.label|trans }}">
+      <div class="gs-filters-row">
+        <div class="form-group gs-filter-col" title="{{ form.visualizza.vars.label|trans }}">
           <label class="control-label" for="circolare_filtro_visualizza">{{ form.visualizza.vars.label|trans }}</label>
           {{ form_widget(form.visualizza) }}
         </div>
-        <div class="form-group gs-circolari-filter-col" title="{{ form.mese.vars.label|trans }}">
+        <div class="form-group gs-filter-col" title="{{ form.mese.vars.label|trans }}">
           <label class="control-label" for="circolare_filtro_mese">{{ form.mese.vars.label|trans }}</label>
           {{ form_widget(form.mese) }}
         </div>
@@ -43,7 +36,7 @@
         <label class="control-label" for="circolare_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
         {{ form_widget(form.oggetto) }}
       </div>
-      <div class="gs-circolari-buttons">
+      <div class="gs-filters-buttons">
         <button type="button" class="btn btn-default" id="circolare_reset" title="Resetta i filtri">Reset</button>
         {{ form_widget(form.submit) }}
       </div>
@@ -51,18 +44,15 @@
     </div>
   </form>
   {% if dati.lista|length > 0 %}
-  <table class="table table-bordered table-hover table-striped gs-mb-4">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-1">{{ 'label.stato'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.numero'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.data'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.sede'|trans }}</th>
-        <th class="col-sm-6">{{ 'label.oggetto'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'label.stato'|trans, classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'label.numero'|trans, classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'label.data'|trans, classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'label.sede'|trans, classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'label.oggetto'|trans, classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'label.action'|trans, classi: 'col-sm-1', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for c in dati.lista %}
       <tr>
         <td>
@@ -123,8 +113,8 @@
         </td>
       </tr>
     {% endfor %}
-  </tbody>
-</table>
+  {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mb-4'}) }}
   {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Nessuna circolare presente</strong>
@@ -154,8 +144,8 @@ $(document).ready(function() {
   });
   $('#circolare_reset').click(function (e) {
     e.preventDefault();
-    $('#circolare_filtro_visualizza').val('A');
-    $('#circolare_filtro_mese').val('0');
+    $('#circolare_filtro_visualizza').val('P');
+    $('#circolare_filtro_mese').val('');
     $('#circolare_filtro_oggetto').val('');
     $('form[name="{{ form.vars.name }}"]').submit();
     $('#gs-modal-waiting').modal('show');
