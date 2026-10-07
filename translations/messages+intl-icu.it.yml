@@ -996,7 +996,6 @@ page.circolari_gestione: Gestione Circolari
 page.colloqui_edit: Risposta Colloquio Richiesto
 page.coordinatore_assenze: Assenze della Classe
 page.coordinatore_avvisi: Gestione Avvisi
-page.coordinatore_classe: Classe
 page.coordinatore_note: Note della Classe
 page.coordinatore_scrutinio: Gestione Scrutinio
 page.coordinatore_situazione: Situazione Alunni
@@ -1109,7 +1108,6 @@ title.circolari_bacheca: Lista delle circolari
 title.circolari_gestione: Gestione delle circolari
 title.coordinatore_assenze: Assenze della classe
 title.coordinatore_avvisi: Gestione degli avvisi per la classe
-title.coordinatore_classe: Scegli la classe
 title.coordinatore_note: Note della classe
 title.coordinatore_scrutinio: Scrutinio della classe
 title.coordinatore_situazione_alunno: Situazione dell'alunn{sex}

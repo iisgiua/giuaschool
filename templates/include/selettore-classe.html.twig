@@ -28,22 +28,28 @@
  #   etichetta  chiave di traduzione del segnaposto delle classi
  #              - default: 'label.scegli_classe'
  #   gruppo     se vero mostra la conferma per le proprie classi - default: true
+ #   azione     nome della rotta a cui inviare la scelta del form
+ #              - default: 'lezioni_seleziona'
+ #   attiva     id della classe gia' scelta: se non indicato viene letta dalla
+ #              sessione delle lezioni (gs_scelta_selettore); le altre sezioni
+ #              lo passano esplicitamente con la loro scelta corrente
  #}
 {% set sc_classi = classi is defined ? classi : gs_classi_selettore() %}
 {% if sc_classi %}
 {% set sc_id = id is defined ? id : 'gs-selettore-classe' %}
 {% set sc_etichetta = etichetta is defined ? etichetta : 'label.scegli_classe' %}
 {% set sc_gruppo = gruppo is defined ? gruppo : true %}
+{% set sc_azione = azione is defined ? azione : 'lezioni_seleziona' %}
+{% set sc_attiva = attiva is defined ? attiva : gs_scelta_selettore().classe|default(0) %}
 {% set sc_sedi = [] %}
 {% for c in sc_classi %}
 {% set sc_sede = c.sede|default('') %}
 {% if sc_sede not in sc_sedi %}{% set sc_sedi = sc_sedi|merge([sc_sede]) %}{% endif %}
 {% endfor %}
 {# scelta corrente in sessione: sede e classe restano selezionate #}
-{% set sc_attiva = gs_scelta_selettore().classe|default(0) %}
 {% set sc_classe_attiva = sc_attiva > 0 ? (sc_classi|filter(c => c.id == sc_attiva)|first) : null %}
 {% set sc_sede_attiva = sc_classe_attiva ? sc_classe_attiva.sede|default('') : '' %}
-<form id="{{ sc_id }}-form" class="gs-selettore-classe{{ sc_attiva > 0 ? ' gs-selettore-classe--attiva' : '' }}" method="get" action="{{ path('lezioni_seleziona') }}">
+<form id="{{ sc_id }}-form" class="gs-selettore-classe{{ sc_attiva > 0 ? ' gs-selettore-classe--attiva' : '' }}" method="get" action="{{ path(sc_azione) }}">
   <div class="gs-selettore-classe-campo">
     <div class="gs-selettore-classe-gruppo">
       <label class="gs-selettore-classe-label" for="{{ sc_id }}-sede">{{ 'label.sede'|trans }}</label>

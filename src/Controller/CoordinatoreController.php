@@ -26,6 +26,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -61,61 +62,61 @@ class CoordinatoreController extends BaseController {
       // classe scelta, vai alle assenze
       return $this->redirectToRoute('coordinatore_assenze');
     } else {
-      // scelta classe
-      return $this->redirectToRoute('coordinatore_classe');
+      // nessuna classe scelta: la pagina delle assenze mostra il selettore
+      return $this->redirectToRoute('coordinatore_assenze');
     }
   }
 
   /**
-   * Gestione della scelta delle classi
+   * Memorizza la classe scelta nel selettore e torna alla pagina corrente
    *
+   * Usato dal componente selettore-classe: la classe viene validata e
+   * memorizzata in sessione, poi la pagina di provenienza viene ricaricata
+   * senza il parametro classe, cosi' lo rilegge dalla sessione.
+   *
+   * @param RouterInterface $router Gestore delle rotte
+   * @param Request $request Pagina richiesta
    *
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/coordinatore/classe/', name: 'coordinatore_classe', methods: ['GET'])]
+  #[Route(path: '/coordinatore/seleziona/', name: 'coordinatore_seleziona', methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classe(): Response {
-    // lista classi coordinatore
-    $classi = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
-      ->where('c.id IN (:lista)')
-      ->orderBy('c.sede,c.anno,c.sezione,c.gruppo', 'ASC')
-      ->setParameter('lista', explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore')))
-      ->getQuery()
-      ->getResult();
-    // lista tutte le classi
-    $tutte = [];
-    if ($this->getUser() instanceOf Staff) {
-      if ($this->getUser()->getSede()) {
-        // solo classi della sede
-        $lista = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
-          ->where('c.sede=:sede')
-          ->orderBy('c.sede,c.sezione,c.anno,c.gruppo', 'ASC')
-          ->setParameter('sede', $this->getUser()->getSede())
-          ->getQuery()
-          ->getResult();
-      } else {
-        // tutte le classi
-        $lista = $this->em->getRepository(Classe::class)->createQueryBuilder('c')
-          ->orderBy('c.sede,c.sezione,c.anno,c.gruppo', 'ASC')
-          ->getQuery()
-          ->getResult();
+  public function seleziona(RouterInterface $router, Request $request): Response {
+    // legge parametro
+    $classe = $request->query->getInt('classe');
+    // verifica e memorizza in sessione
+    if ($classe > 0) {
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
+      if (!$classe) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
       }
-      // raggruppa per sezione
-      foreach ($lista as $key => $classe) {
-        if (!empty($classe->getGruppo()) || !isset($lista[$key + 1]) ||
-            $classe->getAnno() != $lista[$key + 1]->getAnno() ||
-            $classe->getSezione() != $lista[$key + 1]->getSezione() ||
-            empty($lista[$key + 1]->getGruppo())) {
-          $tutte[$classe->getSezione()][] = $classe;
+      // controllo accesso alla funzione
+      $this->controllaAccessoClasse($classe);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe->getId());
+    } else {
+      // nessuna scelta
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', 0);
+    }
+    // torna alla pagina corrente, senza il parametro classe: lo rilegge dalla sessione
+    $referer = $request->headers->get('referer');
+    if ($referer) {
+      try {
+        $match = $router->match(Request::create($referer)->getPathInfo());
+        if (isset($match['_route'])) {
+          // variabili di sistema e classe rimossi: la pagina la rilegge dalla sessione
+          $param = array_filter($match, fn($k) => !str_starts_with((string) $k, '_') &&
+            !in_array($k, ['classe', 'alunno', 'cattedra']), ARRAY_FILTER_USE_KEY);
+          return $this->redirectToRoute($match['_route'], $param);
         }
+      } catch (\Exception) {
+        // rotta non riconosciuta: ricarica comunque la pagina di provenienza
+        return $this->redirect($referer);
       }
     }
-    // visualizza pagina
-    return $this->render('coordinatore/classe.html.twig', [
-      'pagina_titolo' => 'page.coordinatore_classe',
-      'classi' => $classi,
-      'tutte' => $tutte]);
+    // nessuna pagina precedente: vai alle assenze
+    return $this->redirectToRoute('coordinatore_assenze');
   }
 
   /**
