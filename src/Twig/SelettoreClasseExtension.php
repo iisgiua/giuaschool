@@ -12,8 +12,8 @@ use Twig\TwigFunction;
 use App\Util\ConfigLoader;
 
 /**
- * SelettoreClasseExtension - fornisce le funzioni Twig "gs_classi_selettore"
- * e "gs_scelta_selettore".
+ * SelettoreClasseExtension - fornisce le funzioni Twig "gs_classi_selettore",
+ * "gs_classi_coordinatore" e "gs_scelta_selettore".
  *
  * Restituisce l'elenco condiviso (in sessione) delle classi usato dal
  * componente "selettore-classe.html.twig". Il dato viene caricato una sola
@@ -42,6 +42,7 @@ class SelettoreClasseExtension extends AbstractExtension
     {
         return [
             new TwigFunction('gs_classi_selettore', [$this, 'classiSelettore']),
+            new TwigFunction('gs_classi_coordinatore', [$this, 'classiCoordinatore']),
             new TwigFunction('gs_scelta_selettore', [$this, 'sceltaSelettore']),
         ];
     }
@@ -54,6 +55,19 @@ class SelettoreClasseExtension extends AbstractExtension
     public function classiSelettore(): array
     {
         return $this->config->classiSelettore();
+    }
+
+    /**
+     * Elenco delle classi per il selettore della sezione coordinatore.
+     *
+     * Il coordinatore vede solo le sue classi, lo staff quelle della propria
+     * sede o tutte, il preside solo le classi coordinate.
+     *
+     * @return array Elenco delle classi [{id, anno, sezione, gruppo, sede, propria}]
+     */
+    public function classiCoordinatore(): array
+    {
+        return $this->config->classiCoordinatore();
     }
 
     /**

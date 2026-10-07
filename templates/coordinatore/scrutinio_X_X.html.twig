@@ -4,7 +4,7 @@
 <div class="container-fluid">
   {% if not classe %}
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context = false) }}
   {% else %}
   <div class="alert alert-warning gs-mt-4" role="alert">
     <strong class="gs-big">{{ 'message.scrutinio_non_presente'|trans }}</strong>

@@ -4,11 +4,11 @@
 <div class="container-fluid">
   {% if not info.classe %}
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {azione: 'coordinatore_seleziona', attiva: info.classe.id|default(0), gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: info.classe.id|default(0), gruppo: false}, with_context = false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_avvisi'|trans }} {{ info.classe }}</h1>
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {azione: 'coordinatore_seleziona', attiva: info.classe.id, gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: info.classe.id, gruppo: false}, with_context = false) }}
   <div class="row gs-mb-1">
     <div class="col-sm-6">
     </div>

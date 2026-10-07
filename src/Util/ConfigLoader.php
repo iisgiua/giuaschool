@@ -19,6 +19,7 @@ use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\Menu;
 use App\Entity\Sede;
+use App\Entity\Staff;
 
 
 /**
@@ -211,6 +212,35 @@ class ConfigLoader {
       $classi = $this->reqstack->getSession()->get('/APP/DOCENTE/classi');
     }
     return is_array($classi) ? $classi : [];
+  }
+
+  /**
+   * Elenco delle classi per il selettore della sezione coordinatore.
+   *
+   * Riprende l'elenco della vecchia pagina di scelta classe: il coordinatore
+   * vede solo le sue classi (variabile di sessione /APP/DOCENTE/coordinatore),
+   * lo staff vede le classi della propria sede o tutte se non ha sede assegnata,
+   * il preside solo le classi di cui è coordinatore. L'elenco è filtrato dal
+   * dato condiviso del selettore, che è già ordinato per sede e classe.
+   *
+   * @return array Elenco delle classi [{id, anno, sezione, gruppo, sede, propria}]
+   */
+  public function classiCoordinatore(): array {
+    $classi = $this->classiSelettore();
+    $utente = $this->security->getUser();
+    if ($utente instanceof Staff) {
+      if ($utente->getSede()) {
+        // solo classi della sede dello staff
+        $sede = $utente->getSede()->getCitta();
+        return array_values(array_filter($classi, fn($c) => $c['sede'] === $sede));
+      }
+      // tutte le classi
+      return $classi;
+    }
+    // coordinatore e preside: solo le classi coordinate
+    $ids = array_map('intval', explode(',',
+      (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore')));
+    return array_values(array_filter($classi, fn($c) => in_array((int) $c['id'], $ids, true)));
   }
 
   /**
