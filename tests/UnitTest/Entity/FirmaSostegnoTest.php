@@ -91,7 +91,6 @@ class FirmaSostegnoTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['argomento'] = $this->faker->text();
       $o[$i]->setArgomento($data[$i]['argomento']);
       $this->em->flush();

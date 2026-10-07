@@ -94,7 +94,6 @@ class NotaTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['testo'] = $this->faker->text();
       $o[$i]->setTesto($data[$i]['testo']);
       $this->em->flush();

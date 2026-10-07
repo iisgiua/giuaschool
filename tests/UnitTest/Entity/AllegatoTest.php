@@ -89,7 +89,6 @@ class AllegatoTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['titolo'] = $this->faker->passthrough(substr($this->faker->text(), 0, 255));
       $o[$i]->setTitolo($data[$i]['titolo']);
       $this->em->flush();

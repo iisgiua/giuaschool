@@ -93,7 +93,6 @@ class CattedraTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['materia'] = $this->getReference("materia_curricolare_2");
       $o[$i]->setMateria($data[$i]['materia']);
       $this->em->flush();

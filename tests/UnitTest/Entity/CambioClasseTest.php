@@ -91,7 +91,6 @@ class CambioClasseTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['alunno'] = $this->getReference("alunno_1A_2");
       $o[$i]->setAlunno($data[$i]['alunno']);
       $this->em->flush();

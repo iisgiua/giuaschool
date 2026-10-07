@@ -90,7 +90,6 @@ class AssenzaLezioneTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['ore'] = $data[$i]['ore'] + 1;
       $o[$i]->setOre($data[$i]['ore']);
       $this->em->flush();

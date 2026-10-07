@@ -116,7 +116,6 @@ class StaffTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['sede'] = $this->getReference("sede_2");
       $o[$i]->setSede($data[$i]['sede']);
       $this->em->flush();

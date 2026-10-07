@@ -98,7 +98,6 @@ class PropostaVotoTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['debito'] = $this->faker->text();
       $o[$i]->setDebito($data[$i]['debito']);
       $this->em->flush();

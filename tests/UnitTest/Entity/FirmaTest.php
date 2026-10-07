@@ -89,7 +89,6 @@ class FirmaTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['docente'] = $this->getReference("docente_sostegno_5");
       $o[$i]->setDocente($data[$i]['docente']);
       $this->em->flush();

@@ -90,7 +90,6 @@ class OrarioDocenteTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['orario'] = $this->getReference("orario_provvisorio_2");
       $o[$i]->setOrario($data[$i]['orario']);
       $this->em->flush();

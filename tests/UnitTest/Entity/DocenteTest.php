@@ -117,7 +117,6 @@ class DocenteTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['token'] = substr($this->faker->text(), 0, 255);
       $o[$i]->setToken($data[$i]['token']);
       $this->em->flush();

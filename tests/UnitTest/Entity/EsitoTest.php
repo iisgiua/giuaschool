@@ -93,7 +93,6 @@ class EsitoTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['credito'] = $data[$i]['credito'] + 1;
       $o[$i]->setCredito($data[$i]['credito']);
       $this->em->flush();

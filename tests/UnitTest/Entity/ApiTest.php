@@ -87,7 +87,6 @@ class ApiTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['nome'] = $this->faker->passthrough(substr($this->faker->text(), 0, 255));
       $o[$i]->setNome($data[$i]['nome']);
       $this->em->flush();

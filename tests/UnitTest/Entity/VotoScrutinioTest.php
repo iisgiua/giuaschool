@@ -98,7 +98,6 @@ class VotoScrutinioTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['orale'] = $this->faker->randomNumber(4, false);
       $o[$i]->setOrale($data[$i]['orale']);
       $this->em->flush();

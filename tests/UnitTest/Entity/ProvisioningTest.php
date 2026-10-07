@@ -87,7 +87,6 @@ class ProvisioningTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['utente'] = $this->getReference("utente_2");
       $o[$i]->setUtente($data[$i]['utente']);
       $this->em->flush();

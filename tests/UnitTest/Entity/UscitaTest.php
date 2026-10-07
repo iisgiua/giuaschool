@@ -95,7 +95,6 @@ class UscitaTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['data'] = $this->faker->dateTime();
       $o[$i]->setData($data[$i]['data']);
       $this->em->flush();

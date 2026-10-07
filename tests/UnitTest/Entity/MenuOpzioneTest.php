@@ -93,7 +93,6 @@ class MenuOpzioneTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['ruolo'] = $this->faker->passthrough(substr($this->faker->text(), 0, 32));
       $o[$i]->setRuolo($data[$i]['ruolo']);
       $this->em->flush();
@@ -180,10 +179,10 @@ class MenuOpzioneTest extends EntityTestCase {
     $existent->setUrl(str_repeat('*', 255));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Url - VALID MAX LENGTH');
     // icona
-    $existent->setIcona(str_repeat('*', 256));
+    $existent->setIcona(str_repeat('*', 65));
     $err = $this->val->validate($existent);
     $this->assertTrue(count($err) == 1 && $err[0]->getMessageTemplate() == 'field.maxlength', $this->entity.'::Icona - MAX LENGTH');
-    $existent->setIcona(str_repeat('*', 255));
+    $existent->setIcona(str_repeat('*', 64));
     $this->assertCount(0, $this->val->validate($existent), $this->entity.'::Icona - VALID MAX LENGTH');
     // menu
     $property = $this->getPrivateProperty(MenuOpzione::class, 'menu');

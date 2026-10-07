@@ -114,7 +114,6 @@ class CircolareTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['numero'] = 500 + $i;
       $o[$i]->setNumero($data[$i]['numero']);
       $this->em->flush();

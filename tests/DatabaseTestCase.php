@@ -12,6 +12,7 @@ use ReflectionProperty;
 use ReflectionClass;
 use ReflectionMethod;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Faker\Generator;
 use Fidry\AliceDataFixtures\Loader\PurgerLoader;
@@ -146,8 +147,10 @@ class DatabaseTestCase extends KernelTestCase {
     $this->objects = [];
     $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
     $purger = new ORMPurger($this->em);
-    $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
+    $purger->setPurgeMode(ORMPurger::PURGE_MODE_DELETE);
     $purger->purge();
+    // DELETE non azzera AUTO_INCREMENT come fa TRUNCATE: lo ripristina esplicitamente
+    self::resetAutoIncrement($connection);
     $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
     // carica fixtures
     $fixtures = is_array($this->fixtures) ? $this->fixtures : [$this->fixtures];
@@ -194,6 +197,23 @@ class DatabaseTestCase extends KernelTestCase {
       }
       // memorizza mappa dei riferimenti agli oggetti
       file_put_contents($mapPath, serialize($objectMap));
+    }
+  }
+
+  /**
+   * Ripristina il contatore AUTO_INCREMENT delle tabelle del database.
+   * La modalita' di purge DELETE non lo azzera, a differenza di TRUNCATE: senza questo
+   * ripristino i test che contano le righe o che assumono ID prevedibili divergerebbero.
+   *
+   * @param Connection $connection Connessione al database
+   */
+  public static function resetAutoIncrement(Connection $connection): void {
+    // tabelle con contatore AUTO_INCREMENT attivo
+    $tables = $connection->fetchFirstColumn('SELECT table_name FROM information_schema.tables'.
+      ' WHERE table_schema = DATABASE() AND auto_increment IS NOT NULL');
+    // ripristina il contatore di ogni tabella
+    foreach ($tables as $table) {
+      $connection->executeStatement('ALTER TABLE '.$table.' AUTO_INCREMENT = 1');
     }
   }
 

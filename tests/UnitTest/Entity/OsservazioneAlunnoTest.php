@@ -91,7 +91,6 @@ class OsservazioneAlunnoTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['cattedra'] = $this->getReference("cattedra_curricolare_3");
       $o[$i]->setCattedra($data[$i]['cattedra']);
       $this->em->flush();

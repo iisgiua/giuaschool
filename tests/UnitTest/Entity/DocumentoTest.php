@@ -113,7 +113,6 @@ class DocumentoTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['cifrato'] = substr($this->faker->text(), 0, 255);
       $o[$i]->setCifrato($data[$i]['cifrato']);
       $this->em->flush();

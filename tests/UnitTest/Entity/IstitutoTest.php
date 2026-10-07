@@ -94,7 +94,6 @@ class IstitutoTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['tipo'] = $this->faker->passthrough(substr($this->faker->text(), 0, 128));
       $o[$i]->setTipo($data[$i]['tipo']);
       $this->em->flush();

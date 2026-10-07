@@ -94,7 +94,6 @@ class RichiestaTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['inviata'] = $this->faker->dateTime();
       $o[$i]->setInviata($data[$i]['inviata']);
       $this->em->flush();

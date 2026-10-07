@@ -88,7 +88,6 @@ class ComunicazioneClasseTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['classe'] = $this->getReference("classe_3A");
       $o[$i]->setClasse($data[$i]['classe']);
       $this->em->flush();

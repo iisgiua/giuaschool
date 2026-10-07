@@ -90,7 +90,6 @@ class ScansioneOrariaTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['giorno'] = $this->faker->randomNumber(4, false);
       $o[$i]->setGiorno($data[$i]['giorno']);
       $this->em->flush();

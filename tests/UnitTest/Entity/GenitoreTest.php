@@ -115,7 +115,6 @@ class GenitoreTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['otp'] = substr($this->faker->text(), 0, 128);
       $o[$i]->setOtp($data[$i]['otp']);
       $this->em->flush();
