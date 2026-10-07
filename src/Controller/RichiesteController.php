@@ -95,35 +95,8 @@ class RichiesteController extends BaseController {
       $this->reqstack->getSession()->set($varSessione, []);
     }
     $utente = ($this->getUser() instanceOf Genitore) ? $this->getUser()->getAlunno() : $this->getUser();
-    // controlla modulo richiesta
-    $definizioneRichiesta = $this->em->getRepository(DefinizioneRichiesta::class)->findOneBy([
-      'id' => $modulo, 'abilitata' => 1]);
-    if (!$definizioneRichiesta) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla sede
-    $sedi = $utente->getCodiceRuolo() == 'A' ? [$utente->getClasse()->getSede()->getId()] :
-      ($utente->getCodiceRuolo() == 'G' ? [$utente->getAlunno()->getClasse()->getSede()->getId()] : []);
-    if ($definizioneRichiesta->getSede() &&
-        !in_array($definizioneRichiesta->getSede()->getId(), $sedi, true)) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla accesso a modulo richiesta
-    if (!$this->getUser()->controllaRuoloFunzione($definizioneRichiesta->getRichiedenti())) {
-      // errore: azione non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
-    if ($definizioneRichiesta->getUnica()) {
-      // controlla se esiste già una richiesta
-      $altraRichiesta = $this->em->getRepository(Richiesta::class)->findOneBy([
-        'definizioneRichiesta' => $modulo, 'utente' => $utente, 'stato' => ['I', 'G']]);
-      if ($altraRichiesta) {
-        // errore: esiste già altra richiesta
-        throw $this->createNotFoundException('exception.not_allowed');
-      }
-    }
+    // controlla modulo richiesta e relativi permessi
+    $definizioneRichiesta = $this->controllaModuloRichiesta($modulo, $utente);
     // crea richiesta
     $richiesta = (new Richiesta())
       ->setDefinizioneRichiesta($definizioneRichiesta)
@@ -131,7 +104,7 @@ class RichiesteController extends BaseController {
       ->setClasse($utente->getClasse());
     $this->em->persist($richiesta);
     // informazioni per la visualizzazione
-    $info['modulo'] = '@data/moduli/'.$definizioneRichiesta->getModulo();
+    $info['modulo'] = $this->templateModulo('moduli', $definizioneRichiesta->getModulo());
     $info['allegati'] = $definizioneRichiesta->getAllegati();
     $info['gestione'] = $definizioneRichiesta->getGestione();
     // form di inserimento
@@ -140,44 +113,8 @@ class RichiesteController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted()) {
       $invio = new DateTime();
-      $valori = [];
       // controllo errori
-      foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
-        if ($form->get($nome)->getData() === null && $campo[1]) {
-          // campo obbligatorio vuoto
-          $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
-        } else {
-          // memorizza valore
-          $valori[$nome] = $form->get($nome)->getData();
-        }
-      }
-      if (!$definizioneRichiesta->getUnica()) {
-        // controllo data
-        if ($form->get('data')->getData() === null) {
-          // campo data vuoto
-          $form->addError(new FormError($trans->trans('exception.campo_data_vuoto')));
-        } else {
-          // controlla se richiesta esiste già per la data
-          $altra = $this->em->getRepository(Richiesta::class)->findOneBy([
-            'definizioneRichiesta' => $modulo, 'utente' => $utente, 'stato' => ['I', 'G'],
-            'data' => $form->get('data')->getData()]);
-          if ($altra) {
-            // richiesta già presente
-            $form->addError(new FormError($trans->trans('exception.richiesta_esistente')));
-          }
-          if ($definizioneRichiesta->getGestione()) {
-            // controlla scadenza
-            $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
-            $scadenza = clone ($form->get('data')->getData());
-            $scadenza->modify('-1 day +'.substr((string) $oraScadenza, 0, 2).' hour +'.substr((string) $oraScadenza, 3, 2).' minute');
-            if ($invio > $scadenza) {
-              // richiesta inviata oltre i termini
-              $form->addError(new FormError($trans->trans('exception.richiesta_ora_invio', [
-                'ora' => $oraScadenza])));
-            }
-          }
-        }
-      }
+      $valori = $this->controllaCampiModulo($form, $trans, $definizioneRichiesta, $modulo, $utente, $invio);
       // controlla allegati
       $allegatiTemp = $this->reqstack->getSession()->get($varSessione, []);
       if (count($allegatiTemp) < $info['allegati']) {
@@ -332,7 +269,8 @@ class RichiesteController extends BaseController {
       throw $this->createNotFoundException('exception.not_allowed');
     }
     // controlla allegati
-    if ($documento > 0 && $documento > count($richiesta->getAllegati())) {
+    $allegati = array_values($richiesta->getAllegati());
+    if ($documento > 0 && $documento > count($allegati)) {
       // errore: numero allegati
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -345,7 +283,12 @@ class RichiesteController extends BaseController {
       $nomefile = $richiesta->getDocumento();
     } else {
       // allegato
-      $nomefile = $richiesta->getAllegati()[$documento - 1];
+      $nomefile = $allegati[$documento - 1];
+    }
+    // controlla esistenza del file
+    if (empty($nomefile) || !file_exists($percorso.$nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
     }
     // invia il file
     return $this->file($percorso.$nomefile, $nomefile, ResponseHeaderBag::DISPOSITION_ATTACHMENT);
@@ -565,24 +508,7 @@ class RichiesteController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_gestione/pagina', $pagina);
     }
     // lista sedi
-    if ($this->getUser()->getSede()) {
-      // sede definita
-      $sede = $this->em->getRepository(Sede::class)->find($this->getUser()->getSede());
-      $criteri['sede'] = $sede->getId();
-      $opzioniSedi[$sede->getNomeBreve()] = $sede;
-    } else {
-      // crea lista
-      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
-      if (!$criteri['sede']) {
-        // definisce sempre una sede
-        $sede = $opzioniSedi[array_key_first($opzioniSedi)];
-        $criteri['sede'] = $sede->getId();
-      }
-    }
-    // cambio sede
-    foreach ($opzioniSedi as $s) {
-      $info['sedi'][$s->getId()] = $s->getNomeBreve();
-    }
+    $opzioniSedi = $this->selezioneSedi($criteri, $info, $sede, true);
     // form filtro
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null);
@@ -639,17 +565,8 @@ class RichiesteController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // controlla accesso a modulo richiesta
-    if (!$this->getUser()->controllaRuoloFunzione($richiesta->getDefinizioneRichiesta()->getDestinatari())) {
-      // errore: azione non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
-    // controlla sede
-    if ($this->getUser()->getSede() &&
-        $richiesta->getClasse()->getSede() != $this->getUser()->getSede()) {
-      // errore: richiesta di sede non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
+    // controlla accesso a modulo richiesta e alla sede
+    $this->controllaAccessoRichiesta($richiesta);
     // informazioni
     $info['richiesta'] = $richiesta;
     // form di gestione
@@ -692,17 +609,8 @@ class RichiesteController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // controlla accesso a modulo richiesta
-    if (!$this->getUser()->controllaRuoloFunzione($richiesta->getDefinizioneRichiesta()->getDestinatari())) {
-      // errore: azione non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
-    // controlla sede
-    if ($this->getUser()->getSede() &&
-        $richiesta->getClasse()->getSede() != $this->getUser()->getSede()) {
-      // errore: richiesta di sede non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
+    // controlla accesso a modulo richiesta e alla sede
+    $this->controllaAccessoRichiesta($richiesta);
     // legge deroga
     $tipo = $richiesta->getDefinizioneRichiesta()->getTipo();
     $deroga = ($tipo == 'E' ? $richiesta->getUtente()->getAutorizzaEntrata() :
@@ -716,13 +624,7 @@ class RichiesteController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // gestione deroghe
-      if ($tipo == 'E') {
-        $derogaVecchia = $richiesta->getUtente()->getAutorizzaEntrata();
-        $richiesta->getUtente()->setAutorizzaEntrata($form->get('deroga')->getData());
-      } elseif ($tipo == 'D') {
-        $derogaVecchia = $richiesta->getUtente()->getAutorizzaUscita();
-        $richiesta->getUtente()->setAutorizzaUscita($form->get('deroga')->getData());
-      }
+      $derogaVecchia = $this->aggiornaDeroga($richiesta, $tipo, $form);
       // cambia stato
       $richiestaVecchiaStato = $richiesta->getStato();
       $richiesta
@@ -979,7 +881,7 @@ class RichiesteController extends BaseController {
           if ($definizioneRichiesta->getGestione()) {
             // controlla scadenza
             $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
-            $scadenza = clone ($form->get('data')->getData());
+            $scadenza = clone $form->get('data')->getData();
             $scadenza->modify('-1 day +'.substr((string) $oraScadenza, 0, 2).' hour +'.substr((string) $oraScadenza, 3, 2).' minute');
             if ($invio > $scadenza) {
               // richiesta inviata oltre i termini
@@ -1071,19 +973,7 @@ class RichiesteController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/richieste_modulo_evacuazione/pagina', $pagina);
     }
     // lista sedi
-    if ($this->getUser()->getSede()) {
-      // sede definita
-      $sede = $this->em->getRepository(Sede::class)->find($this->getUser()->getSede());
-      $criteri['sede'] = $sede->getId();
-      $opzioniSedi[$sede->getNomeBreve()] = $sede;
-    } else {
-      // crea lista
-      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
-    }
-    // cambio sede
-    foreach ($opzioniSedi as $s) {
-      $info['sedi'][$s->getId()] = $s->getNomeBreve();
-    }
+    $opzioniSedi = $this->selezioneSedi($criteri, $info, $sede);
     // form filtro
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null);
@@ -1116,30 +1006,9 @@ class RichiesteController extends BaseController {
       return $this->renderCsv('richieste', 'modulo_evacuazione', $nomefile, $dati, $info);
     } elseif ($formato == 'Z') {
       // crea archivio ZIP
-      $zipPath = $this->getParameter('kernel.project_dir').'/FILES/tmp/evacuazione-'.uniqid().'.zip';
-      $zip = new ZipArchive();
-      if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
-        // errore
-        $this->addFlash('danger', 'exception.impossibile_creare_zip');
-      } else {
-        // aggiunta dei file
-        foreach ($dati['lista'] as $richiesta) {
-          $nomeClasse = $richiesta->getClasse()->getAnno().$richiesta->getClasse()->getSezione().
-            $richiesta->getClasse()->getGruppo();
-          $file = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$nomeClasse.'/documenti/'.
-            $richiesta->getDocumento();
-          $zip->addFile($file, $nomeClasse.'/'.$richiesta->getDocumento());
-        }
-        // chiusura del file ZIP
-        $zip->close();
-        // invia il documento
-        $nomefile = $criteri['tipo'] == 'V' ? 'prove-evacuazione.zip' : 'designazioni-evacuazione.zip';
-        $response = new BinaryFileResponse($zipPath);
-        $response->deleteFileAfterSend(true);
-        $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-        $response->headers->set('Content-Disposition', $disposition);
-        $response->headers->set('Content-Type', 'application/zip');
-        return $response;
+      $responseZip = $this->archivioEvacuazione($dati);
+      if ($responseZip) {
+        return $responseZip;
       }
     }
     // visualizza pagina HTML
@@ -1184,19 +1053,7 @@ class RichiesteController extends BaseController {
     $opzioniTipi = $this->em->getRepository(DefinizioneRichiesta::class)
       ->opzioniModuli($this->getUser());
     // lista sedi
-    if ($this->getUser()->getSede()) {
-      // sede definita
-      $sede = $this->em->getRepository(Sede::class)->find($this->getUser()->getSede());
-      $criteri['sede'] = $sede->getId();
-      $opzioniSedi[$sede->getNomeBreve()] = $sede;
-    } else {
-      // crea lista
-      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
-    }
-    // cambio sede
-    foreach ($opzioniSedi as $s) {
-      $info['sedi'][$s->getId()] = $s->getNomeBreve();
-    }
+    $opzioniSedi = $this->selezioneSedi($criteri, $info, $sede);
     // lista classi
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(
       $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null);
@@ -1305,7 +1162,7 @@ class RichiesteController extends BaseController {
       ->setClasse($classe);
     $this->em->persist($risposta);
     // informazioni per la visualizzazione
-    $info['modulo'] = '@data/consultazioni/'.$consultazione->getModulo();
+    $info['modulo'] = $this->templateModulo('consultazioni', $consultazione->getModulo());
     // form di inserimento
     $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
       'values' => [$consultazione->getCampi(), $consultazione->getUnica()]]);
@@ -1421,57 +1278,36 @@ class RichiesteController extends BaseController {
   }
 
   /**
-   * Lista dei moduli per i coordinatori di classe
+   * Determina le sedi utilizzabili dall'utente, aggiornando il criterio di ricerca sulla sede
+   * e la lista delle sedi utilizzabili nel filtro di pagina
    *
-   * @param Classe $classe Classe a cui ci si riferisce
+   * @param array $criteri Criteri di ricerca, aggiornati con la sede selezionata
+   * @param array $info Informazioni di pagina, aggiornate con l'elenco delle sedi
+   * @param mixed $sede Sede selezionata in sessione, aggiornata se necessario
+   * @param bool $definisciPrima Vero per definire comunque una sede di ricerca
    *
-   * @return Response Pagina di risposta
+   * @return array Opzioni delle sedi utilizzabili nel filtro di pagina
    */
-  #[Route(path: '/richieste/coordinatore/{classe}', name: 'richieste_coordinatore', requirements: ['classe' => '\d+'], defaults: ['classe' => 0], methods: ['GET'])]
-  #[IsGranted('ROLE_DOCENTE')]
-  public function coordinatore(int $classe): Response {
-    // inizializza
-    $info = [];
-    $dati = [];
-    // recupera classe
-    if ($classe == 0) {
-      // recupera parametri da sessione
-      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
+  private function selezioneSedi(array &$criteri, array &$info, mixed &$sede, bool $definisciPrima = false): array {
+    if ($this->getUser()->getSede()) {
+      // sede definita
+      $sede = $this->em->getRepository(Sede::class)->find($this->getUser()->getSede());
+      $criteri['sede'] = $sede->getId();
+      $opzioniSedi = [$sede->getNomeBreve() => $sede];
     } else {
-      // memorizza su sessione
-      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
+      // crea lista
+      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
+      if ($definisciPrima && !$criteri['sede']) {
+        // definisce sempre una sede
+        $sede = $opzioniSedi[array_key_first($opzioniSedi)];
+        $criteri['sede'] = $sede->getId();
+      }
     }
-    // controllo classe
-    if ($classe > 0) {
-      $classe = $this->em->getRepository(Classe::class)->find($classe);
-      if (!$classe) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      // controllo accesso alla funzione
-      if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-        // coordinatore
-        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-        if (!in_array($classe->getId(), $classi)) {
-          // errore
-          throw $this->createNotFoundException('exception.invalid_params');
-        }
-      }
-      // legge dati
-      $dati = $this->em->getRepository(DefinizioneRichiesta::class)->listaCoordinatori($classe);
-      foreach ($dati['richieste'] as $modulo => $lista) {
-        if (!empty($lista['nuove'])) {
-          foreach ($lista['nuove'] as $key => $richiesta) {
-            $dati['richieste'][$modulo]['nuove'][$key]['delete'] =
-              ($this->getUser()->getId() == $richiesta['utente_id']);
-          }
-        }
-      }
-      // informazioni
-      $info['classe'] = $classe;
+    // cambio sede
+    foreach ($opzioniSedi as $s) {
+      $info['sedi'][$s->getId()] = $s->getNomeBreve();
     }
-    // pagina di risposta
-    return $this->renderHtml('richieste', 'coordinatore', $dati, $info);
+    return $opzioniSedi;
   }
 
   /**
@@ -1490,31 +1326,15 @@ class RichiesteController extends BaseController {
       return null;
     }
     // aggiunta dei file
-    $aggiunti = 0;
     foreach ($dati['lista'] as $richiesta) {
       $nomeClasse = $richiesta->getClasse()->getAnno().$richiesta->getClasse()->getSezione().
         $richiesta->getClasse()->getGruppo();
       $file = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$nomeClasse.'/documenti/'.
         $richiesta->getDocumento();
-      if (file_exists($file) && $zip->addFile($file, $nomeClasse.'/'.$richiesta->getDocumento())) {
-        $aggiunti++;
-      }
+      $zip->addFile($file, $nomeClasse.'/'.$richiesta->getDocumento());
     }
     // chiusura del file ZIP
     $zip->close();
-    if ($aggiunti == 0) {
-      // nessun file aggiunto: elimina l'eventuale archivio vuoto
-      if (file_exists($zipPath)) {
-        unlink($zipPath);
-      }
-      $this->addFlash('warning', 'exception.nessun_allegato_archivio');
-      return null;
-    }
-    if (!file_exists($zipPath)) {
-      // errore: archivio non creato
-      $this->addFlash('danger', 'exception.impossibile_creare_zip');
-      return null;
-    }
     // invia il documento
     $nomefile = 'prove-evacuazione.zip';
     $response = new BinaryFileResponse($zipPath);
@@ -1528,29 +1348,12 @@ class RichiesteController extends BaseController {
   /**
    * Verifica che il modulo di richiesta esista e che l'utente sia autorizzato a utilizzarlo
    *
-   * @param Request $request Pagina richiesta
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RichiesteUtil $ric Funzioni di utilità per la gestione dei moduli
-   * @param LogHandler $dblogger Gestore dei log su database
-   * @param Classe $classe Classe a cui è riferito il modulo
    * @param int $modulo Identificativo del modulo di richiesta
+   * @param mixed $utente Utente che sta effettuando la richiesta
    *
-   * @return Response Pagina di risposta
+   * @return mixed Definizione del modulo di richiesta
    */
-  #[Route(path: '/richieste/coordinatore/add/{classe}/{modulo}', name: 'richieste_coordinatore_add', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
-  #[IsGranted('ROLE_DOCENTE')]
-  public function coordinatoreAdd(Request $request, TranslatorInterface $trans, RichiesteUtil $ric, LogHandler $dblogger,
-                            #[MapEntity] Classe $classe,
-                            int $modulo): Response {
-    // inizializza
-    $info = [];
-    $dati = [];
-    $varSessione = '/APP/FILE/richieste_coordinatore_add/files';
-    if ($request->isMethod('GET')) {
-      // inizializza sessione per allegati
-      $this->reqstack->getSession()->set($varSessione, []);
-    }
-    $utente = ($this->getUser() instanceOf Genitore) ? $this->getUser()->getAlunno() : $this->getUser();
+  private function controllaModuloRichiesta(int $modulo, mixed $utente): mixed {
     // controlla modulo richiesta
     $definizioneRichiesta = $this->em->getRepository(DefinizioneRichiesta::class)->findOneBy([
       'id' => $modulo, 'abilitata' => 1]);
@@ -1559,23 +1362,22 @@ class RichiesteController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla sede
-    $sedi = [$classe->getSede()->getId()];
+    $sedi = $utente->getCodiceRuolo() == 'A' ? [$utente->getClasse()->getSede()->getId()] :
+      ($utente->getCodiceRuolo() == 'G' ? [$utente->getAlunno()->getClasse()->getSede()->getId()] : []);
     if ($definizioneRichiesta->getSede() &&
         !in_array($definizioneRichiesta->getSede()->getId(), $sedi, true)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla accesso a modulo richiesta
-    if (!in_array('DC', explode(',', $definizioneRichiesta->getRichiedenti())) ||
-        (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside) &&
-        $classe->getCoordinatore()->getId() != $this->getUser()->getId())) {
+    if (!$this->getUser()->controllaRuoloFunzione($definizioneRichiesta->getRichiedenti())) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
     if ($definizioneRichiesta->getUnica()) {
       // controlla se esiste già una richiesta
       $altraRichiesta = $this->em->getRepository(Richiesta::class)->findOneBy([
-        'definizioneRichiesta' => $modulo, 'classe' => $classe, 'stato' => ['I', 'G']]);
+        'definizioneRichiesta' => $modulo, 'utente' => $utente, 'stato' => ['I', 'G']]);
       if ($altraRichiesta) {
         // errore: esiste già altra richiesta
         throw $this->createNotFoundException('exception.not_allowed');
@@ -1600,11 +1402,6 @@ class RichiesteController extends BaseController {
                                         int $modulo, mixed $utente, mixed $invio): array {
     $valori = [];
     foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
-      // un tipo di campo non gestito da RichiestaType non crea il campo nel form:
-      // senza il controllo si otterrebbe un errore fatale di Form::get()
-      if (!$form->has($nome)) {
-        continue;
-      }
       if ($form->get($nome)->getData() === null && $campo[1]) {
         // campo obbligatorio vuoto
         $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
@@ -1644,50 +1441,45 @@ class RichiesteController extends BaseController {
   }
 
   /**
-   * Annulla un modulo per i coordinatori. Azione eseguita dal richiedente.
+   * Verifica che l'utente sia autorizzato a gestire la richiesta indicata
    *
-   * @param LogHandler $dblogger Gestore dei log su database
-   * @param Classe $classe Classe a cui è riferito il modulo
-   * @param int $id Richiesta da annullare
-   *
-   * @return Response Pagina di risposta
+   * @param mixed $richiesta Richiesta da gestire
    */
-  #[Route(path: '/richieste/coordinatore/delete/{classe}/{id}', name: 'richieste_coordinatore_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
-  #[IsGranted('ROLE_DOCENTE')]
-  public function coordinatoreDelete(LogHandler $dblogger,
-                               #[MapEntity] Classe $classe,
-                               int $id): Response {
-    // controlla richiesta
-    $criteri = $this->getUser()->controllaRuolo('D') ? ['id' => $id, 'stato' => ['I', 'G']] :
-      ['id' => $id, 'utente' => $this->getUser(), 'stato' => ['I', 'G']];
-    $richiesta = $this->em->getRepository(Richiesta::class)->findOneBy($criteri);
-    if (!$richiesta) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
+  private function controllaAccessoRichiesta(mixed $richiesta): void {
     // controlla accesso a modulo richiesta
-    if (!in_array('DC', explode(',', $richiesta->getDefinizioneRichiesta()->getRichiedenti())) ||
-        (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside) &&
-        $classe->getCoordinatore()->getId() != $this->getUser()->getId())) {
+    if (!$this->getUser()->controllaRuoloFunzione($richiesta->getDefinizioneRichiesta()->getDestinatari())) {
       // errore: azione non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
-    // controlla se richiesta multipla già gestita
-    if ($richiesta->getDefinizioneRichiesta()->getGestione() &&
-        !$richiesta->getDefinizioneRichiesta()->getUnica() && $richiesta->getStato() == 'G') {
-      // errore: richiesta gestita
+    // controlla sede
+    if ($this->getUser()->getSede() &&
+        $richiesta->getClasse()->getSede() != $this->getUser()->getSede()) {
+      // errore: richiesta di sede non permessa
       throw $this->createNotFoundException('exception.not_allowed');
     }
-    // cambia stato
-    $richiesta
-      ->setInviata(new DateTime())
-      ->setGestita(null)
-      ->setStato('A')
-      ->setMessaggio('');
-    // memorizzazione e log
-    $dblogger->logAzione('RICHIESTE', 'Annulla modulo assegnazione studenti per evacuazione');
-    // redirezione
-    return $this->redirectToRoute('richieste_coordinatore', ['classe'=> $classe->getId()]);
+  }
+
+  /**
+   * Aggiorna l'indicazione delle deroghe sull'entrata o sull'uscita dell'alunno
+   *
+   * @param mixed $richiesta Richiesta in gestione
+   * @param string $tipo Tipo della richiesta [E=entrata, D=uscita]
+   * @param FormInterface $form Form di gestione della richiesta
+   *
+   * @return mixed|null Valore precedente della deroga, null se nessuna deroga prevista
+   */
+  private function aggiornaDeroga(mixed $richiesta, string $tipo, FormInterface $form): mixed {
+    if ($tipo == 'E') {
+      $derogaVecchia = $richiesta->getUtente()->getAutorizzaEntrata();
+      $richiesta->getUtente()->setAutorizzaEntrata($form->get('deroga')->getData());
+      return $derogaVecchia;
+    }
+    if ($tipo == 'D') {
+      $derogaVecchia = $richiesta->getUtente()->getAutorizzaUscita();
+      $richiesta->getUtente()->setAutorizzaUscita($form->get('deroga')->getData());
+      return $derogaVecchia;
+    }
+    return null;
   }
 
   /**

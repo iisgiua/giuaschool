@@ -14,6 +14,7 @@ use App\Entity\Cattedra;
 use App\Entity\Configurazione;
 use App\Entity\Docente;
 use App\Entity\Utente;
+use App\Exception\AutenticazioneDispositivoException;
 use App\Util\LogHandler;
 use DateTimeImmutable;
 use Exception;
@@ -317,7 +318,7 @@ class ApiController extends BaseController {
         // errore: richiesta di autenticazione non valida
         $logger->error('Validazione richiesta di autenticazione non riuscita: richiesta non valida.',
           ['idPubblico' => $id]);
-        throw new Exception();
+        throw new AutenticazioneDispositivoException();
       }
       if ($autenticazione->getScadenzaRichiesta() < new DateTimeImmutable() || $autenticazione->getRichiestaUsata()) {
         // errore: richiesta di autenticazione scaduta o già usata
@@ -325,7 +326,7 @@ class ApiController extends BaseController {
           ['utente' => $autenticazione->getUtente() ? $autenticazione->getUtente()->getUserIdentifier() : '---',
           'scadenza' => $autenticazione->getScadenzaRichiesta()->format('d/m/Y H:i:s'),
           'usata' => (int) $autenticazione->getRichiestaUsata(), 'richiesta' => $autenticazione->getid()]);
-        throw new Exception();
+        throw new AutenticazioneDispositivoException();
       }
       // richiesta valida: la segna subito come usata
       $autenticazione->setRichiestaUsata(true);

@@ -269,6 +269,7 @@ class AlunniController extends BaseController {
         $this->em->persist($alunno);
       }
       $classe_old = null;
+      $alunno_old = [];
       // aggiunge genitori
       $genitore1 = (new Genitore())
         ->setAbilitato(true)
@@ -294,65 +295,11 @@ class AlunniController extends BaseController {
       'values' => [$alunno, $opzioniClassi, $genitore1, $genitore2]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // controlla numeri di telefono genitore1
-      $telefono = [];
-      foreach ($genitore1->getNumeriTelefono() as $tel) {
-        $tel = preg_replace('/[^+\d]/', '', (string) $tel);
-        $tel = (str_starts_with((string) $tel, '+39')) ? substr((string) $tel, 3) : $tel;
-        if ($tel != '' && $tel != str_repeat('0', strlen((string) $tel))) {
-          $telefono[] = $tel;
-        }
-      }
-      $genitore1->setNumeriTelefono($telefono);
-      // controlla numeri di telefono genitore2
-      $telefono = [];
-      foreach ($genitore2->getNumeriTelefono() as $tel) {
-        $tel = preg_replace('/[^+\d]/', '', (string) $tel);
-        $tel = (str_starts_with((string) $tel, '+39')) ? substr((string) $tel, 3) : $tel;
-        if ($tel != '' && $tel != str_repeat('0', strlen((string) $tel))) {
-          $telefono[] = $tel;
-        }
-      }
-      $genitore2->setNumeriTelefono($telefono);
+      // controlla numeri di telefono dei genitori
+      $this->impostaNumeriTelefono($genitore1);
+      $this->impostaNumeriTelefono($genitore2);
       // provisioning
-      if (!$id) {
-        // crea alunno
-        $provisioning = (new Provisioning())
-          ->setUtente($alunno)
-          ->setFunzione('creaUtente')
-          ->setDati(['password' => 'NOPASSWORD']);
-        $this->em->persist($provisioning);
-      } elseif ($alunno->getCognome() != $alunno_old['cognome'] || $alunno->getNome() != $alunno_old['nome'] ||
-                $alunno->getSesso() != $alunno_old['sesso']) {
-        // modifica dati alunno
-        $provisioning = (new Provisioning())
-          ->setUtente($alunno)
-          ->setFunzione('modificaUtente')
-          ->setDati([]);
-        $this->em->persist($provisioning);
-      }
-      if (!$classe_old && $alunno->getClasse()) {
-        // aggiunge alunno a classe
-        $provisioning = (new Provisioning())
-          ->setUtente($alunno)
-          ->setFunzione('aggiungeAlunnoClasse')
-          ->setDati(['classe' => $alunno->getClasse()->getId()]);
-        $this->em->persist($provisioning);
-      } elseif ($classe_old && !$alunno->getClasse()) {
-        // toglie alunno da classe
-        $provisioning = (new Provisioning())
-          ->setUtente($alunno)
-          ->setFunzione('rimuoveAlunnoClasse')
-          ->setDati(['classe' => $classe_old]);
-        $this->em->persist($provisioning);
-      } elseif ($alunno->getClasse() && $classe_old != $alunno->getClasse()->getId()) {
-        // cambia classe ad alunno
-        $provisioning = (new Provisioning())
-          ->setUtente($alunno)
-          ->setFunzione('modificaAlunnoClasse')
-          ->setDati(['classe_origine' => $classe_old, 'classe_destinazione' => $alunno->getClasse()->getId()]);
-        $this->em->persist($provisioning);
-      }
+      $this->aggiornaProvisioning($alunno, $id, $alunno_old, $classe_old);
       // memorizza modifiche
       $this->em->flush();
       // messaggio
@@ -590,8 +537,9 @@ class AlunniController extends BaseController {
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
       // validazione
-      $anno_inizio = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
-      $anno_fine = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'));
+      $anni = $this->anniScolastici();
+      $anno_inizio = $anni['inizio'];
+      $anno_fine = $anni['fine'];
       if ($id == 0) {
         // solo nuovi dati
         $altro = $this->em->getRepository(CambioClasse::class)->findByAlunno($cambio->getAlunno());
@@ -601,67 +549,19 @@ class AlunniController extends BaseController {
         }
         if ($tipo == 'I') {
           // inserimento alunno
-          $data = $cambio->getInizio();
-          $inizio = (clone $anno_inizio)->modify('first day of this month');
-          $fine = (clone $data)->modify('-1 day');
-          $note = $trans->trans('message.note_classe_alunno_inserito', ['date' => $data->format('d/m/Y')]);
-          if ($cambio->getInizio() < $anno_inizio) {
-            // errore sulla data
-            $form->get('inizio')->addError(new FormError($trans->trans('exception.classe_inizio_invalido')));
-          }
-          if ($this->em->getRepository(Valutazione::class)->numeroValutazioni($cambio->getAlunno(), $inizio, $fine) > 0) {
-            // errore valutazioni presenti
-            $form->addError(new FormError($trans->trans('exception.classe_valutazioni_presenti')));
-          }
-          if ($this->em->getRepository(Nota::class)->numeroNoteIndividuali($cambio->getAlunno(), $inizio, $fine) > 0) {
-            // errore note presenti
-            $form->addError(new FormError($trans->trans('exception.classe_note_presenti')));
-          }
-        }
-        if ($tipo == 'T') {
+          $cambioDati = $this->validaInserimentoClasse($form, $trans, $cambio);
+        } elseif ($tipo == 'T') {
           // trasferimento alunno
-          $data = $cambio->getFine();
-          $classe = $cambio->getAlunno()->getClasse();
-          $inizio = $anno_inizio;
-          $fine = (clone $data)->modify('-1 day');
-          $note = $trans->trans('message.note_classe_alunno_trasferito', ['date' => $data->format('d/m/Y')]);
-          if ($cambio->getFine() > $anno_fine) {
-            // errore sulla data
-            $form->get('fine')->addError(new FormError($trans->trans('exception.classe_fine_invalido')));
-          }
-          if ($this->em->getRepository(Valutazione::class)->numeroValutazioni($cambio->getAlunno(), $data, $anno_fine) > 0) {
-            // errore valutazioni presenti
-            $form->addError(new FormError($trans->trans('exception.classe_valutazioni_presenti')));
-          }
-          if ($this->em->getRepository(Nota::class)->numeroNoteIndividuali($cambio->getAlunno(), $data, $anno_fine) > 0) {
-            // errore note presenti
-            $form->addError(new FormError($trans->trans('exception.classe_note_presenti')));
-          }
-        }
-        if ($tipo == 'S') {
+          $cambioDati = $this->validaTrasferimentoClasse($form, $trans, $cambio, $anno_inizio, $anno_fine);
+        } elseif ($tipo == 'S') {
           // cambio sezione alunno
-          $data = $cambio->getFine();
-          $classe = $cambio->getAlunno()->getClasse();
-          $inizio = $anno_inizio;
-          $fine = (clone $data)->modify('-1 day');
-          $note = $trans->trans('message.note_classe_alunno_sezione', ['date' => $data->format('d/m/Y')]);
-          if ($cambio->getFine() > $anno_fine) {
-            // errore sulla data
-            $form->get('fine')->addError(new FormError($trans->trans('exception.classe_fine_invalido')));
-          }
-          if ($cambio->getClasse() == $cambio->getAlunno()->getClasse()) {
-            // errore sulla classe
-            $form->get('classe')->addError(new FormError($trans->trans('exception.classe_non_diversa')));
-          }
-          if ($this->em->getRepository(Valutazione::class)->numeroValutazioni($cambio->getAlunno(), $data, $anno_fine, $classe) > 0) {
-            // errore valutazioni presenti
-            $form->addError(new FormError($trans->trans('exception.classe_valutazioni_presenti')));
-          }
-          if ($this->em->getRepository(Nota::class)->numeroNoteIndividuali($cambio->getAlunno(), $data, $anno_fine, $classe) > 0) {
-            // errore note presenti
-            $form->addError(new FormError($trans->trans('exception.classe_note_presenti')));
-          }
+          $cambioDati = $this->validaSezioneClasse($form, $trans, $cambio, $anno_inizio, $anno_fine);
         }
+        $data = $cambioDati['data'];
+        $inizio = $cambioDati['inizio'];
+        $fine = $cambioDati['fine'];
+        $note = $cambioDati['note'];
+        $classe = $cambioDati['classe'];
       }
       if ($tipo == 'A' && $cambio->getInizio() > $cambio->getFine()) {
         // errore sulla data
@@ -807,54 +707,8 @@ class AlunniController extends BaseController {
     // crea documento PDF
     $pdf->configure($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione'),
       'Credenziali di accesso al Registro Elettronico');
-    // legge alunni
-    foreach ($dati['lista'] as $alu) {
-      if ($genitore) {
-        // password genitore
-        $utenti = $this->em->getRepository(Genitore::class)->findBy(['alunno' => $alu]);
-      } else {
-        // password alunno
-        $utenti = [$alu];
-      }
-      foreach ($utenti as $utente) {
-        // crea password
-        $password = $staff->creaPassword(8);
-        $utente->setPasswordNonCifrata($password);
-        $pswd = $hasher->hashPassword($utente, $utente->getPasswordNonCifrata());
-        $utente->setPassword($pswd);
-        // provisioning
-        if (!$genitore) {
-          $provisioning = (new Provisioning())
-            ->setUtente($utente)
-            ->setFunzione('passwordUtente')
-            ->setDati(['password' => $utente->getPasswordNonCifrata()]);
-          $this->em->persist($provisioning);
-        }
-        // memorizza su db
-        $this->em->flush();
-        // log azione
-        $dblogger->logAzione('SICUREZZA', 'Generazione Password', [
-          'Username' => $utente->getUsername(),
-          'Ruolo' => $utente->getRoles()[0],
-          'ID' => $utente->getId()]);
-        // contenuto in formato HTML
-        if ($genitore) {
-          $html = $this->renderView('pdf/credenziali_profilo_genitori.html.twig', [
-            'alunno' => $utente->getAlunno(),
-            'genitore' => $utente,
-            'sesso' => ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a'),
-            'username' => $utente->getUsername(),
-            'password' => $password]);
-        } else {
-          $html = $this->renderView('pdf/credenziali_profilo_alunni.html.twig', [
-            'alunno' => $utente,
-            'sesso' => ($utente->getSesso() == 'M' ? 'o' : 'a'),
-            'username' => $utente->getUsername(),
-            'password' => $password]);
-        }
-        $pdf->createFromHtml($html);
-      }
-    }
+    // legge alunni e genera le credenziali
+    $this->generaCredenziali($dati['lista'], $genitore, $hasher, $staff, $dblogger, $pdf);
     // scarica PDF
     $nomefile = 'credenziali-registro-'.($genitore ? 'genitori' : 'alunni').'.pdf';
     return $pdf->send($nomefile);
@@ -979,9 +833,7 @@ class AlunniController extends BaseController {
     // controlla azione
     if ($id > 0) {
       // azione edit
-      $utente = ($ruolo == 'A') ?
-        $this->em->getRepository(Alunno::class)->find($id) :
-        $this->em->getRepository(Genitore::class)->find($id);
+      $utente = $this->trovaRappresentante($ruolo, $id);
       if (!$utente) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -992,17 +844,10 @@ class AlunniController extends BaseController {
       // azione add
       $utente = null;
       $tipi = [];
-      $listaUtenti = ($ruolo == 'A') ?
-        $this->em->getRepository(Alunno::class)->findBy(['abilitato' => 1], ['cognome' => 'ASC', 'nome' => 'ASC']) :
-        $this->em->getRepository(Genitore::class)->findBy(['abilitato' => 1], ['cognome' => 'ASC', 'nome' => 'ASC']);
+      $listaUtenti = $this->listaRappresentanti($ruolo);
     }
     // form
-    $listaTipi = ['label.rappresentante_C' => 'C', 'label.rappresentante_I' => 'I'];
-    if ($ruolo == 'A') {
-      // solo per gli alunni
-      $listaTipi = ['label.rappresentante_C' => 'C', 'label.rappresentante_I' => 'I',
-        'label.rappresentante_P' => 'P'];
-    }
+    $listaTipi = $this->listaTipiRappresentante($ruolo);
     $form = $this->createForm(ModuloType::class, null, ['form_mode' => 'rappresentanti',
       'return_url' => $this->generateUrl('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : '')),
       'values' => [$utente, $listaUtenti, $tipi, $listaTipi]]);
@@ -1080,10 +925,6 @@ class AlunniController extends BaseController {
    * @param mixed $genitore Genitore di cui impostare i numeri di telefono
    */
   private function impostaNumeriTelefono(mixed $genitore): void {
-    if (!$genitore) {
-      // genitore non presente: niente da fare
-      return;
-    }
     $telefono = [];
     foreach ($genitore->getNumeriTelefono() as $tel) {
       $tel = preg_replace('/[^+\d]/', '', (string) $tel);

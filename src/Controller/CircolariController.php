@@ -92,54 +92,9 @@ class CircolariController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // legge file
-    $documento = [];
-    $allegati = [];
-    if ($request->isMethod('POST')) {
-      // pagina inviata
-      foreach ($this->reqstack->getSession()->get($var_sessione.'documento', []) as $f) {
-        if ($f['type'] != 'removed') {
-          // aggiunge allegato
-          $documento[] = $f;
-        }
-      }
-      foreach ($this->reqstack->getSession()->get($var_sessione.'allegati', []) as $f) {
-        if ($f['type'] != 'removed') {
-          // aggiunge allegato
-          $allegati[] = $f;
-        }
-      }
-    } else {
-      // pagina iniziale
-      $cnt = 0;
-      foreach ($circolare->getAllegati() as $file) {
-        if ($cnt == 0) {
-          $documento[0]['type'] = 'existent';
-          $documento[0]['name'] = $file->getTitolo();
-          $documento[0]['temp'] = $file->getFile();
-          $documento[0]['ext'] = $file->getEstensione();
-          $documento[0]['size'] = $file->getDimensione();
-        } else {
-          $allegati[$cnt - 1]['type'] = 'existent';
-          $allegati[$cnt - 1]['name'] = $file->getTitolo();
-          $allegati[$cnt - 1]['temp'] = $file->getFile();
-          $allegati[$cnt - 1]['ext'] = $file->getEstensione();
-          $allegati[$cnt - 1]['size'] = $file->getDimensione();
-        }
-        $cnt++;
-      }
-      // modifica dati sessione
-      $this->reqstack->getSession()->remove($var_sessione.'documento');
-      $this->reqstack->getSession()->remove($var_sessione.'allegati');
-      $this->reqstack->getSession()->set($var_sessione.'documento', $documento);
-      $this->reqstack->getSession()->set($var_sessione.'allegati', $allegati);
-      // elimina file temporanei
-      $fs = new Filesystem();
-      $finder = new Finder();
-      $finder->files()->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
-      foreach ($finder as $f) {
-        $fs->remove($f);
-      }
-    }
+    $file = $this->leggiFile($request, $circolare, $var_sessione);
+    $documento = $file['documento'];
+    $allegati = $file['allegati'];
     // informazioni da visualizzare sui destinatari
     $dati = $com->infoDestinatari($circolare);
     // form di inserimento
@@ -169,22 +124,7 @@ class CircolariController extends BaseController {
           $this->reqstack->getSession()->get($var_sessione.'documento', []),
           $this->reqstack->getSession()->get($var_sessione.'allegati', [])));
         // imposta nomi file
-        $primo = true;
-        foreach ($circolare->getAllegati() as $allegato) {
-          if ($primo) {
-            // nome documento principale
-            $allegato->setTitolo('Circolare n. '.$circolare->getNumero());
-            $allegato->setNome($com->normalizzaNome('Circolare-'.$circolare->getNumero()));
-            $primo = false;
-          } else {
-            // nome allegati
-            $prefisso = 'Circolare n. '.$circolare->getNumero().' - Allegato ';
-            $nomefile = str_starts_with($allegato->getTitolo(), $prefisso) ?
-              trim(substr($allegato->getTitolo(), strlen($prefisso))) : $allegato->getTitolo();
-            $allegato->setTitolo($prefisso.$nomefile);
-            $allegato->setNome($com->normalizzaNome('Circolare-'.$circolare->getNumero().'-Allegato-'.$nomefile));
-          }
-        }
+        $this->impostaNomiAllegati($circolare, $com);
         // ok: memorizzazione e log
         $dblogger->logAzione('CIRCOLARI', $edit ? 'Modifica circolare' : 'Crea circolare');
         // redirezione
@@ -199,6 +139,99 @@ class CircolariController extends BaseController {
       'documento' => $documento,
       'allegati' => $allegati,
       'dati' => $dati]);
+  }
+
+  /**
+   * Determina il documento principale e gli allegati associati alla circolare.
+   * I dati sono letti dalla sessione se la pagina è stata inviata, altrimenti
+   * sono ricostruiti a partire dagli allegati già presenti nella circolare.
+   *
+   * @param Request $request Pagina richiesta
+   * @param Circolare $circolare Circolare da modificare
+   * @param string $var_sessione Prefisso delle variabili di sessione utilizzate
+   *
+   * @return array Lista del documento principale e lista degli allegati
+   */
+  private function leggiFile(Request $request, Circolare $circolare, string $var_sessione): array {
+    $documento = [];
+    $allegati = [];
+    if ($request->isMethod('POST')) {
+      // pagina inviata
+      $this->filtraAllegatiSessione($var_sessione.'documento', $documento);
+      $this->filtraAllegatiSessione($var_sessione.'allegati', $allegati);
+      return ['documento' => $documento, 'allegati' => $allegati];
+    }
+    // pagina iniziale
+    $cnt = 0;
+    foreach ($circolare->getAllegati() as $file) {
+      if ($cnt == 0) {
+        $documento[0]['type'] = 'existent';
+        $documento[0]['name'] = $file->getTitolo();
+        $documento[0]['temp'] = $file->getFile();
+        $documento[0]['ext'] = $file->getEstensione();
+        $documento[0]['size'] = $file->getDimensione();
+      } else {
+        $allegati[$cnt - 1]['type'] = 'existent';
+        $allegati[$cnt - 1]['name'] = $file->getTitolo();
+        $allegati[$cnt - 1]['temp'] = $file->getFile();
+        $allegati[$cnt - 1]['ext'] = $file->getEstensione();
+        $allegati[$cnt - 1]['size'] = $file->getDimensione();
+      }
+      $cnt++;
+    }
+    // modifica dati sessione
+    $this->reqstack->getSession()->remove($var_sessione.'documento');
+    $this->reqstack->getSession()->remove($var_sessione.'allegati');
+    $this->reqstack->getSession()->set($var_sessione.'documento', $documento);
+    $this->reqstack->getSession()->set($var_sessione.'allegati', $allegati);
+    // elimina file temporanei
+    $fs = new Filesystem();
+    $finder = new Finder();
+    $finder->files()->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
+    foreach ($finder as $f) {
+      $fs->remove($f);
+    }
+    return ['documento' => $documento, 'allegati' => $allegati];
+  }
+
+  /**
+   * Copia nella lista indicata gli allegati di sessione non ancora rimossi
+   *
+   * @param string $chiave Chiave di sessione degli allegati
+   * @param array $lista Lista nella quale copiare gli allegati
+   */
+  private function filtraAllegatiSessione(string $chiave, array &$lista): void {
+    foreach ($this->reqstack->getSession()->get($chiave, []) as $f) {
+      if ($f['type'] != 'removed') {
+        // aggiunge allegato
+        $lista[] = $f;
+      }
+    }
+  }
+
+  /**
+   * Imposta il titolo e il nome dei file allegati alla circolare
+   *
+   * @param Circolare $circolare Circolare con gli allegati
+   * @param ComunicazioniUtil $com Funzioni di utilità per le comunicazioni
+   */
+  private function impostaNomiAllegati(Circolare $circolare, ComunicazioniUtil $com): void {
+    $primo = true;
+    foreach ($circolare->getAllegati() as $allegato) {
+      if ($primo) {
+        // nome documento principale
+        $allegato->setTitolo('Circolare n. '.$circolare->getNumero());
+        $allegato->setNome($com->normalizzaNome('Circolare-'.$circolare->getNumero()));
+        $primo = false;
+      } else {
+        // nome allegati
+        $prefisso = 'Circolare n. '.$circolare->getNumero().' - Allegato ';
+        $nomefile = str_starts_with($allegato->getTitolo(), $prefisso) ?
+          trim(substr($allegato->getTitolo(), strlen($prefisso))) : $allegato->getTitolo();
+        $allegato->setTitolo($prefisso.$nomefile);
+        $allegato->setNome($com->normalizzaNome('Circolare-'.$circolare->getNumero().'-Allegato-'.$nomefile));
+      }
+    }
   }
 
   /**
@@ -423,9 +456,6 @@ class CircolariController extends BaseController {
       // errore: file non trovato
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db solo dopo aver verificato il file
-    $com->leggeUtente($this->getUser(), $circolare);
-    $this->em->flush();
     return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
       ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
   }

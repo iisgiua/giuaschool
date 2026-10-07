@@ -335,29 +335,8 @@ class AutorizzazioniController extends BaseController {
     $info = [];
     $dati = [];
     $utente = $this->getUser();
-    // controlla modulo
-    if (!$modulo->getAbilitata() || (new DateTime('today')) > $modulo->getInizio()) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla sede
-    $classe = $utente->getCodiceRuolo() == 'A' ? $utente->getClasse() :
-      ($utente->getCodiceRuolo() == 'G' ? $utente->getAlunno()->getClasse() : null);
-    $sedi = $classe ? [$classe->getSede()->getId()] : [];
-    if ($modulo->getSede() && !in_array($modulo->getSede()->getId(), $sedi, true)) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla classe
-    if (!empty($modulo->getClassi()) && (!$classe || !in_array($classe->getId(), $modulo->getClassi()))) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla accesso a modulo richiesta
-    if (!$this->getUser()->controllaRuoloFunzione($modulo->getRichiedenti())) {
-      // errore: azione non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
+    // controlla modulo, sede, classe e permessi di accesso
+    $classe = $this->controllaModuloAutorizzazione($modulo, $utente);
     // trova autorizzazioni firmate
     $esistenti = $this->em->getRepository(Richiesta::class)->autorizzazioni($modulo,
       $utente->getCodiceRuolo() == 'G' ? $utente->getAlunno() : $utente);
@@ -484,6 +463,42 @@ class AutorizzazioniController extends BaseController {
       return $pdf->send($nomefile);
     }
     return $this->renderHtml('autorizzazioni', 'dettagli', $dati, $info);
+  }
+
+  /**
+   * Verifica che il modulo di autorizzazione sia utilizzabile dall'utente e restituisce
+   * la classe di riferimento dell'utente
+   *
+   * @param mixed $modulo Definizione del modulo di autorizzazione
+   * @param mixed $utente Utente che sta effettuando l'autorizzazione
+   *
+   * @return mixed Classe di riferimento dell'utente, null se non applicabile
+   */
+  private function controllaModuloAutorizzazione(mixed $modulo, mixed $utente): mixed {
+    // controlla modulo
+    if (!$modulo->getAbilitata() || (new DateTime('today')) > $modulo->getInizio()) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla sede
+    $classe = $utente->getCodiceRuolo() == 'A' ? $utente->getClasse() :
+      ($utente->getCodiceRuolo() == 'G' ? $utente->getAlunno()->getClasse() : null);
+    $sedi = $classe ? [$classe->getSede()->getId()] : [];
+    if ($modulo->getSede() && !in_array($modulo->getSede()->getId(), $sedi, true)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla classe
+    if (!empty($modulo->getClassi()) && (!$classe || !in_array($classe->getId(), $modulo->getClassi()))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla accesso a modulo richiesta
+    if (!$this->getUser()->controllaRuoloFunzione($modulo->getRichiedenti())) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    return $classe;
   }
 
 }

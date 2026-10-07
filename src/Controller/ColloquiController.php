@@ -26,6 +26,7 @@ use App\Form\RichiestaColloquioType;
 use App\Util\ColloquiUtil;
 use App\Util\LogHandler;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -321,37 +322,13 @@ class ColloquiController extends BaseController {
         // errore: data non valida
         $form->addError(new FormError($trans->trans('exception.colloquio_data_invalida')));
       }
-      // controlla orari
-      if ($colloquio->getInizio() >= $colloquio->getFine()) {
-        // errore: orario inizio non valido
-        $form->addError(new FormError($trans->trans('exception.colloquio_ora_incongruente')));
-      }
-      $orari = $this->em->getRepository(ScansioneOraria::class)->inizioFineLezioni($colloquio->getData(),
-          array_map(fn($s) => $s->getId(), array_values($listaSedi)));
-      if ($colloquio->getInizio()->format('H:i:00') < $orari['inizio']) {
-        // errore: orario inizio non valido
-        $form->addError(new FormError($trans->trans('exception.colloquio_ora_inizio_invalida')));
-      }
-      if ($colloquio->getFine()->format('H:i:00') > $orari['fine']) {
-        // errore: orario fine non valido
-        $form->addError(new FormError($trans->trans('exception.colloquio_ora_fine_invalida')));
-      }
+      // controlla orari e link
+      $this->controllaOrariLink($form, $trans, $colloquio, $listaSedi);
       // controlla se esite già
       if ($this->em->getRepository(Colloquio::class)->sovrapposizione($this->getUser(), $colloquio->getData(),
           $colloquio->getInizio(), $colloquio->getFine(), $id)) {
         // errore: sovrapposizione
         $form->addError(new FormError($trans->trans('exception.colloquio_duplicato')));
-      }
-      // controlla link
-      if ($colloquio->getTipo() == 'D') {
-        $link = $colloquio->getLuogo();
-        if (str_ends_with((string) $link, 'meet.google.com/') || str_ends_with((string) $link, 'meet.google.com')) {
-          // errore: link non valido
-          $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
-        }
-        if (!str_starts_with((string) $link, 'https://') && !str_starts_with((string) $link, 'http://')) {
-          $colloquio->setLuogo('https://'.$link);
-        }
       }
       if ($form->isValid()) {
         // clcola numero colloqui
@@ -365,6 +342,43 @@ class ColloquiController extends BaseController {
     // pagina di risposta
     return $this->renderHtml('colloqui', 'edit', $dati, $info, [$form->createView(),
       'message.edit_ricevimento_singolo']);
+  }
+
+  /**
+   * Controlla la congruenza degli orari del colloquio e, se previsto, il link alla riunione
+   *
+   * @param FormInterface $form Form di inserimento del colloquio
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param Colloquio $colloquio Colloquio da controllare
+   * @param array $listaSedi Lista delle sedi del docente
+   */
+  private function controllaOrariLink(FormInterface $form, TranslatorInterface $trans, Colloquio $colloquio,
+                                      array $listaSedi): void {
+    if ($colloquio->getInizio() >= $colloquio->getFine()) {
+      // errore: orario inizio non valido
+      $form->addError(new FormError($trans->trans('exception.colloquio_ora_incongruente')));
+    }
+    $orari = $this->em->getRepository(ScansioneOraria::class)->inizioFineLezioni($colloquio->getData(),
+        array_map(fn($s) => $s->getId(), array_values($listaSedi)));
+    if ($colloquio->getInizio()->format('H:i:00') < $orari['inizio']) {
+      // errore: orario inizio non valido
+      $form->addError(new FormError($trans->trans('exception.colloquio_ora_inizio_invalida')));
+    }
+    if ($colloquio->getFine()->format('H:i:00') > $orari['fine']) {
+      // errore: orario fine non valido
+      $form->addError(new FormError($trans->trans('exception.colloquio_ora_fine_invalida')));
+    }
+    // controlla link
+    if ($colloquio->getTipo() == 'D') {
+      $link = $colloquio->getLuogo();
+      if (str_ends_with((string) $link, 'meet.google.com/') || str_ends_with((string) $link, 'meet.google.com')) {
+        // errore: link non valido
+        $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
+      }
+      if (!str_starts_with((string) $link, 'https://') && !str_starts_with((string) $link, 'http://')) {
+        $colloquio->setLuogo('https://'.$link);
+      }
+    }
   }
 
   /**
@@ -450,32 +464,8 @@ class ColloquiController extends BaseController {
       // legge dati
       $frequenza = $form->get('frequenza')->getData();
       $giorno = $form->get('giorno')->getData();
-      // controlla orari
-      if ($colloquio->getInizio() >= $colloquio->getFine()) {
-        // errore: orario inizio non valido
-        $form->addError(new FormError($trans->trans('exception.colloquio_ora_incongruente')));
-      }
-      $orari = $this->em->getRepository(ScansioneOraria::class)->inizioFineLezioni($colloquio->getData(),
-          array_map(fn($s) => $s->getId(), array_values($listaSedi)));
-      if ($colloquio->getInizio()->format('H:i:00') < $orari['inizio']) {
-        // errore: orario inizio non valido
-        $form->addError(new FormError($trans->trans('exception.colloquio_ora_inizio_invalida')));
-      }
-      if ($colloquio->getFine()->format('H:i:00') > $orari['fine']) {
-        // errore: orario fine non valido
-        $form->addError(new FormError($trans->trans('exception.colloquio_ora_fine_invalida')));
-      }
-      // controlla link
-      if ($colloquio->getTipo() == 'D') {
-        $link = $colloquio->getLuogo();
-        if (str_ends_with((string) $link, 'meet.google.com/') || str_ends_with((string) $link, 'meet.google.com')) {
-          // errore: link non valido
-          $form->addError(new FormError($trans->trans('exception.colloquio_link_invalido')));
-        }
-        if (!str_starts_with((string) $link, 'https://') && !str_starts_with((string) $link, 'http://')) {
-          $colloquio->setLuogo('https://'.$link);
-        }
-      }
+      // controlla orari e link
+      $this->controllaOrariLink($form, $trans, $colloquio, $listaSedi);
       if ($form->isValid()) {
         // genera date
         $avviso = $col->generaDate($this->getUser(), $colloquio->getTipo(), $frequenza, $colloquio->getDurata(),

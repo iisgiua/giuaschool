@@ -266,6 +266,16 @@ class GenitoriController extends BaseController {
     if ($classe) {
       // lista materie
       $materie = $gen->materie($classe, false);
+      // anche le materie con voti visibili: la tabella mostra questi voti anche
+      // se la cattedra non e' piu' attiva, quindi senza questo il filtro non
+      // riuscirebbe a raggiungere le righe che ci sono effettivamente
+      $ids_materie = array_map('intval', array_column($materie, 'id'));
+      foreach ($gen->materieConVoti($alunno) as $materia_con_voti) {
+        if (!in_array((int) $materia_con_voti['id'], $ids_materie, true)) {
+          $ids_materie[] = (int) $materia_con_voti['id'];
+          $materie[] = $materia_con_voti;
+        }
+      }
       $materie = array_merge(
         [['id' => 0, 'nomeBreve' => $trans->trans('label.ogni_materia')]],
         $materie);

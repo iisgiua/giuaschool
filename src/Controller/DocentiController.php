@@ -36,6 +36,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -927,33 +928,8 @@ class DocentiController extends BaseController {
       'return_url' => $this->generateUrl('docenti_cattedre')]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      if ($cattedra->getMateria()->getTipo() == 'S') {
-        // sostegno
-        if ($cattedra->getAlunno() && $cattedra->getAlunno()->getClasse() != $cattedra->getClasse()) {
-          // classe diversa da quella di alunno
-          $form->get('classe')->addError(new FormError($trans->trans('exception.classe_errata')));
-        }
-      } else {
-        // materia non è sostegno, nessun alunno deve essere presente
-        $cattedra->setAlunno(null);
-      }
-      if ($id == 0) {
-        // controlla esistenza di cattedra
-        $lista = $this->em->getRepository(Cattedra::class)->findBy([
-          'docente' => $cattedra->getDocente(),
-          'classe' => $cattedra->getClasse(),
-          'materia' => $cattedra->getMateria(),
-          'alunno' => $cattedra->getAlunno()]);
-        if (count($lista) > 0) {
-          // cattedra esiste già
-          $form->addError(new FormError($trans->trans('exception.cattedra_esiste')));
-        }
-      }
-      if ($cattedra->getDocenteSupplenza() &&
-          $cattedra->getDocente()->getId() == $cattedra->getDocenteSupplenza()->getId()) {
-        // errore: docente è lo stesso di quello da sostituire
-        $form->get('docenteSupplenza')->addError(new FormError($trans->trans('exception.docente_supplenza_errato')));
-      }
+      // controlli sul form
+      $this->validaCattedra($form, $trans, $cattedra, $id);
       if ($form->isValid()) {
         // imposta supplenza
         $cattedra->setSupplenza($cattedra->getDocenteSupplenza() !== null);
@@ -1020,35 +996,7 @@ class DocentiController extends BaseController {
       }
       if ($form->isValid()) {
         // crea nuove cattedre
-        $avviso = false;
-        foreach ($lista as $supplenza) {
-          // controlla esistenza di cattedra
-          $esistenti = $this->em->getRepository(Cattedra::class)->findBy([
-            'docente' => $docente,
-            'classe' => $supplenza->getClasse(),
-            'materia' => $supplenza->getMateria(),
-            'alunno' => $supplenza->getAlunno()]);
-          if (count($esistenti) > 0) {
-            // cattedra esiste già
-            $avviso = true;
-          } else {
-            // crea nuova cattedra di supplenza
-            $cattedra = clone $supplenza;
-            $cattedra
-              ->setDocente($docente)
-              ->setSupplenza(true)
-              ->setDocenteSupplenza($docenteSupplenza);
-            $this->em->persist($cattedra);
-            $this->em->flush();
-            // provisioning
-            $provisioning = (new Provisioning())
-              ->setUtente($docente)
-              ->setFunzione('aggiungeCattedra')
-              ->setDati(['cattedra' => $cattedra->getId()]);
-            $this->em->persist($provisioning);
-            $this->em->flush();
-          }
-        }
+        $avviso = $this->creaCattedreSupplenza($lista, $docente, $docenteSupplenza);
         // messaggio
         if ($avviso) {
           $this->addFlash('warning', 'message.cattedra_esistente_non_creata');
@@ -1061,6 +1009,86 @@ class DocentiController extends BaseController {
     }
     // mostra la pagina di risposta
     return $this->renderHtml('docenti', 'cattedre_supplenza', [], [], [$form->createView(), 'message.required_fields']);
+  }
+
+  /**
+   * Controlla i dati della cattedra inseriti nel form e aggiunge gli eventuali errori
+   *
+   * @param FormInterface $form Form di inserimento della cattedra
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param Cattedra $cattedra Cattedra da controllare
+   * @param int $id ID della cattedra da modificare, zero se nuova
+   */
+  private function validaCattedra(FormInterface $form, TranslatorInterface $trans, Cattedra $cattedra, int $id): void {
+    if ($cattedra->getMateria()->getTipo() == 'S') {
+      // sostegno
+      if ($cattedra->getAlunno() && $cattedra->getAlunno()->getClasse() != $cattedra->getClasse()) {
+        // classe diversa da quella di alunno
+        $form->get('classe')->addError(new FormError($trans->trans('exception.classe_errata')));
+      }
+    } else {
+      // materia non è sostegno, nessun alunno deve essere presente
+      $cattedra->setAlunno(null);
+    }
+    if ($id == 0) {
+      // controlla esistenza di cattedra
+      $lista = $this->em->getRepository(Cattedra::class)->findBy([
+        'docente' => $cattedra->getDocente(),
+        'classe' => $cattedra->getClasse(),
+        'materia' => $cattedra->getMateria(),
+        'alunno' => $cattedra->getAlunno()]);
+      if (count($lista) > 0) {
+        // cattedra esiste già
+        $form->addError(new FormError($trans->trans('exception.cattedra_esiste')));
+      }
+    }
+    if ($cattedra->getDocenteSupplenza() &&
+        $cattedra->getDocente()->getId() == $cattedra->getDocenteSupplenza()->getId()) {
+      // errore: docente è lo stesso di quello da sostituire
+      $form->get('docenteSupplenza')->addError(new FormError($trans->trans('exception.docente_supplenza_errato')));
+    }
+  }
+
+  /**
+   * Crea le cattedre di supplenza indicate, saltando quelle già esistenti
+   *
+   * @param array $lista Lista delle cattedre da creare come supplenza
+   * @param mixed $docente Docente che svolge la supplenza
+   * @param mixed $docenteSupplenza Docente da sostituire
+   *
+   * @return bool Vero se almeno una delle cattedre indicati esiste già
+   */
+  private function creaCattedreSupplenza(array $lista, mixed $docente, mixed $docenteSupplenza): bool {
+    $avviso = false;
+    foreach ($lista as $supplenza) {
+      // controlla esistenza di cattedra
+      $esistenti = $this->em->getRepository(Cattedra::class)->findBy([
+        'docente' => $docente,
+        'classe' => $supplenza->getClasse(),
+        'materia' => $supplenza->getMateria(),
+        'alunno' => $supplenza->getAlunno()]);
+      if (count($esistenti) > 0) {
+        // cattedra esiste già
+        $avviso = true;
+      } else {
+        // crea nuova cattedra di supplenza
+        $cattedra = clone $supplenza;
+        $cattedra
+          ->setDocente($docente)
+          ->setSupplenza(true)
+          ->setDocenteSupplenza($docenteSupplenza);
+        $this->em->persist($cattedra);
+        $this->em->flush();
+        // provisioning
+        $provisioning = (new Provisioning())
+          ->setUtente($docente)
+          ->setFunzione('aggiungeCattedra')
+          ->setDati(['cattedra' => $cattedra->getId()]);
+        $this->em->persist($provisioning);
+        $this->em->flush();
+      }
+    }
+    return $avviso;
   }
 
   /**

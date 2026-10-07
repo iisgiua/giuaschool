@@ -37,6 +37,9 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 class OsservazioniController extends BaseController {
 
+  /** Pattern per la data estesa delle lezioni */
+  private const FORMATO_DATA_LEZIONE = 'EEEE d MMMM yyyy';
+
   /**
    * Gestione delle osservazioni sugli alunni
    *
@@ -65,57 +68,17 @@ class OsservazioniController extends BaseController {
     $data_succ = null;
     $data_prec = null;
     // parametri cattedra/classe
-    if ($cattedra == 0 && $classe == 0) {
-      // recupera parametri da sessione
-      $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
-    } else {
-      // memorizza su sessione
-      $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
-    }
+    $parametri = $this->recuperaParametriSessione($cattedra, $classe);
+    $cattedra = $parametri['cattedra'];
+    $classe = $parametri['classe'];
     // parametro data
-    if ($data == '0000-00-00') {
-      // data non specificata
-      if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
-        // recupera data da sessione
-        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
-      } else {
-        // imposta data odierna
-        $data_obj = new DateTime();
-      }
-    } else {
-      // imposta data indicata e la memorizza in sessione
-      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
-      $this->reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
-    }
+    $data_obj = $this->recuperaDataSessione($data);
     // data in formato stringa
-    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
-    $info['data_label'] =  $formatter->format($data_obj);
+    $info['data_label'] = $this->labelData($data_obj);
     // controllo cattedra/sostituzione
-    if ($cattedra > 0) {
-      // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
-        'docente' => $this->getUser(), 'attiva' => 1]);
-      if (!$cattedra) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      // informazioni necessarie
-      $classe = $cattedra->getClasse();
-      $info['materia'] = $cattedra->getMateria()->getNomeBreve();
-      $info['alunno'] = $cattedra->getAlunno();
-    } elseif ($classe > 0) {
-      // sostituzione
-      $classe = $this->em->getRepository(Classe::class)->find($classe);
-      if (!$classe) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      // informazioni necessarie
-      $cattedra = null;
-    }
+    $datiCattedra = $this->controllaCattedra($cattedra, $classe, $info);
+    $cattedra = $datiCattedra['cattedra'];
+    $classe = $datiCattedra['classe'];
     if ($cattedra) {
       // recupera dati
       if ($cattedra->getMateria()->getTipo() == 'S') {
@@ -177,20 +140,10 @@ class OsservazioniController extends BaseController {
                                    int $id): Response {
     // inizializza
     $label = [];
-    // controlla cattedra
-    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
-      'docente' => $this->getUser(), 'attiva' => 1]);
-    if (!$cattedra) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla data
-    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
-    $errore = $reg->controlloData($data_obj, $cattedra->getClasse()->getSede());
-    if ($errore) {
-      // errore: festivo
-      throw $this->createNotFoundException('exception.invalid_params');
-    }
+    // controlla cattedra e data
+    $datiCattedra = $this->controllaCattedraData($reg, $cattedra, $data, $id > 0);
+    $cattedra = $datiCattedra['cattedra'];
+    $data_obj = $datiCattedra['data'];
     if ($id > 0) {
       // azione edit, controlla ossservazione
       $osservazione = $this->em->getRepository(OsservazioneAlunno::class)->findOneBy(['id' => $id,
@@ -217,15 +170,9 @@ class OsservazioniController extends BaseController {
       }
     }
     // controlla permessi
-    if (!$reg->azioneOsservazione(($id > 0 ? 'edit' : 'add'), $data_obj, $this->getUser(),
-                                   $cattedra->getClasse(), ($id > 0 ? $osservazione : null))) {
-      // errore: azione non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
+    $this->controllaAzioneOsservazione($reg, $id, $data_obj, $cattedra, $osservazione);
     // dati in formato stringa
-    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
-    $label['data'] =  $formatter->format($data_obj);
+    $label['data'] = $this->labelData($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$cattedra->getClasse();
     // lista alunni della classe
@@ -350,57 +297,17 @@ class OsservazioniController extends BaseController {
     $data_succ = null;
     $data_prec = null;
     // parametri cattedra/classe
-    if ($cattedra == 0 && $classe == 0) {
-      // recupera parametri da sessione
-      $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
-      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione');
-    } else {
-      // memorizza su sessione
-      $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
-      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
-    }
+    $parametri = $this->recuperaParametriSessione($cattedra, $classe);
+    $cattedra = $parametri['cattedra'];
+    $classe = $parametri['classe'];
     // parametro data
-    if ($data == '0000-00-00') {
-      // data non specificata
-      if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
-        // recupera data da sessione
-        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
-      } else {
-        // imposta data odierna
-        $data_obj = new DateTime();
-      }
-    } else {
-      // imposta data indicata e la memorizza in sessione
-      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
-      $this->reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
-    }
+    $data_obj = $this->recuperaDataSessione($data);
     // data in formato stringa
-    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
-    $info['data_label'] =  $formatter->format($data_obj);
+    $info['data_label'] = $this->labelData($data_obj);
     // controllo cattedra/sostituzione
-    if ($cattedra > 0) {
-      // lezione in propria cattedra: controlla esistenza
-      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
-        'docente' => $this->getUser(), 'attiva' => 1]);
-      if (!$cattedra) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      // informazioni necessarie
-      $classe = $cattedra->getClasse();
-      $info['materia'] = $cattedra->getMateria()->getNomeBreve();
-      $info['alunno'] = $cattedra->getAlunno();
-    } elseif ($classe > 0) {
-      // sostituzione
-      $classe = $this->em->getRepository(Classe::class)->find($classe);
-      if (!$classe) {
-        // errore
-        throw $this->createNotFoundException('exception.id_notfound');
-      }
-      // informazioni necessarie
-      $cattedra = null;
-    }
+    $datiCattedra = $this->controllaCattedra($cattedra, $classe, $info);
+    $cattedra = $datiCattedra['cattedra'];
+    $classe = $datiCattedra['classe'];
     if ($cattedra) {
       // data prec/succ
       $data_succ = (clone $data_obj);
@@ -455,20 +362,10 @@ class OsservazioniController extends BaseController {
                                             int $id): Response {
     // inizializza
     $label = [];
-    // controlla cattedra
-    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
-      'docente' => $this->getUser(), 'attiva' => 1]);
-    if (!$cattedra) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla data
-    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
-    $errore = $reg->controlloData($data_obj, $cattedra->getClasse()->getSede());
-    if ($errore) {
-      // errore: festivo
-      throw $this->createNotFoundException('exception.invalid_params');
-    }
+    // controlla cattedra e data
+    $datiCattedra = $this->controllaCattedraData($reg, $cattedra, $data, $id > 0);
+    $cattedra = $datiCattedra['cattedra'];
+    $data_obj = $datiCattedra['data'];
     if ($id > 0) {
       // azione edit, controlla ossservazione
       $osservazione = $this->em->getRepository(OsservazioneClasse::class)->findOneBy(['id' => $id,
@@ -485,15 +382,9 @@ class OsservazioniController extends BaseController {
         ->setCattedra($cattedra);
     }
     // controlla permessi
-    if (!$reg->azioneOsservazione(($id > 0 ? 'edit' : 'add'), $data_obj, $this->getUser(),
-                                   $cattedra->getClasse(), ($id > 0 ? $osservazione : null))) {
-      // errore: azione non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
+    $this->controllaAzioneOsservazione($reg, $id, $data_obj, $cattedra, $osservazione);
     // dati in formato stringa
-    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
-    $label['data'] =  $formatter->format($data_obj);
+    $label['data'] = $this->labelData($data_obj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$cattedra->getClasse();
     // form di inserimento
@@ -574,6 +465,146 @@ class OsservazioniController extends BaseController {
     $dblogger->logAzione('REGISTRO', 'Cancella osservazione personale');
     // redirezione
     return $this->redirectToRoute('lezioni_osservazioni_personali');
+  }
+
+  /**
+   * Recupera dalla sessione i parametri di cattedra e classe, se non indicati nella pagina
+   *
+   * @param int $cattedra Identificativo della cattedra indicato nella pagina
+   * @param int $classe Identificativo della classe indicato nella pagina
+   *
+   * @return array Identificativi di cattedra e classe di lavoro
+   */
+  private function recuperaParametriSessione(int $cattedra, int $classe): array {
+    if ($cattedra == 0 && $classe == 0) {
+      // recupera parametri da sessione
+      return ['cattedra' => (int) $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione', 0),
+        'classe' => (int) $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione', 0)];
+    }
+    // memorizza su sessione
+    $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra);
+    $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe);
+    return ['cattedra' => $cattedra, 'classe' => $classe];
+  }
+
+  /**
+   * Determina la data delle osservazioni da visualizzare, recuperandola dalla sessione
+   * se non è stata indicata nella pagina
+   *
+   * @param string $data Data indicata nella pagina (AAAA-MM-GG)
+   *
+   * @return mixed Data delle osservazioni
+   */
+  private function recuperaDataSessione(string $data): mixed {
+    if ($data != '0000-00-00') {
+      // imposta data indicata e la memorizza in sessione
+      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
+      $this->reqstack->getSession()->set('/APP/DOCENTE/data_lezione', $data);
+      return $data_obj;
+    }
+    // data non specificata
+    if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
+      // recupera data da sessione
+      return DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+    }
+    // imposta data odierna
+    return new DateTime();
+  }
+
+  /**
+   * Restituisce la data indicata nel formato abbreviato previsto dall'interfaccia
+   *
+   * @param mixed $data_obj Data da formattare
+   *
+   * @return string Data in formato stringa
+   */
+  private function labelData(mixed $data_obj): string {
+    $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
+    $formatter->setPattern(self::FORMATO_DATA_LEZIONE);
+    return $formatter->format($data_obj);
+  }
+
+  /**
+   * Controlla la cattedra di lavoro: lezione nella propria cattedra oppure sostituzione
+   * in una classe, e restituisce i dati necessari alla visualizzazione
+   *
+   * @param int $cattedra Identificativo della cattedra indicato nella pagina
+   * @param int $classe Identificativo della classe indicato nella pagina
+   * @param array $info Informazioni da integrare con i dati della cattedra
+   *
+   * @return array Oggetti cattedra e classe di lavoro
+   */
+  private function controllaCattedra(int $cattedra, int $classe, array &$info): array {
+    if ($cattedra > 0) {
+      // lezione in propria cattedra: controlla esistenza
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+        'docente' => $this->getUser(), 'attiva' => 1]);
+      if (!$cattedra) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      // informazioni necessarie
+      $info['materia'] = $cattedra->getMateria()->getNomeBreve();
+      $info['alunno'] = $cattedra->getAlunno();
+      return ['cattedra' => $cattedra, 'classe' => $cattedra->getClasse()];
+    }
+    if ($classe > 0) {
+      // sostituzione
+      $classe = $this->em->getRepository(Classe::class)->find($classe);
+      if (!$classe) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      // informazioni necessarie
+      return ['cattedra' => null, 'classe' => $classe];
+    }
+    return ['cattedra' => $cattedra, 'classe' => $classe];
+  }
+
+  /**
+   * Controlla l'esistenza della cattedra indicata e che la data non sia festiva
+   *
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param int $cattedra Identificativo della cattedra indicata nella pagina
+   * @param string $data Data del giorno (AAAA-MM-GG)
+   * @param bool $modifica Indica se si sta modificando un'osservazione esistente
+   *
+   * @return array Oggetto cattedra e data del giorno
+   */
+  private function controllaCattedraData(RegistroUtil $reg, int $cattedra, string $data,
+                                          bool $modifica = false): array {
+    // controlla cattedra
+    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+      'docente' => $this->getUser(), 'attiva' => 1]);
+    if (!$cattedra) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla data
+    $data_obj = DateTime::createFromFormat('Y-m-d', $data);
+    if ($reg->controlloData($data_obj, $cattedra->getClasse()->getSede(), !$modifica)) {
+      // errore: festivo
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    return ['cattedra' => $cattedra, 'data' => $data_obj];
+  }
+
+  /**
+   * Controlla che l'utente sia autorizzato all'azione sull'osservazione indicata
+   *
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param int $id Identificativo dell'osservazione (se nullo aggiunge)
+   * @param mixed $data_obj Data dell'osservazione
+   * @param mixed $cattedra Cattedra della lezione
+   * @param mixed $osservazione Osservazione da modificare, se esiste
+   */
+  private function controllaAzioneOsservazione(RegistroUtil $reg, int $id, mixed $data_obj, mixed $cattedra,
+                                               mixed $osservazione): void {
+    if (!$reg->azioneOsservazione(($id > 0 ? 'edit' : 'add'), $data_obj, $this->getUser(),
+                                   $cattedra->getClasse(), ($id > 0 ? $osservazione : null))) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
   }
 
 }

@@ -170,45 +170,12 @@ class AvvisiController extends BaseController {
     // imposta autore dell'avviso
     $avviso->setAutore($this->getUser());
     // legge file
-    $allegati = [];
-    if ($request->isMethod('POST')) {
-      // pagina inviata
-      foreach ($this->reqstack->getSession()->get($var_sessione, []) as $f) {
-        if ($f['type'] != 'removed') {
-          // aggiunge allegato
-          $allegati[] = $f;
-        }
-      }
-    } else {
-      // pagina iniziale
-      foreach ($avviso->getAllegati() as $k=>$file) {
-        $allegati[$k]['type'] = 'existent';
-        $allegati[$k]['name'] = $file->getTitolo();
-        $allegati[$k]['temp'] = $file->getFile();
-        $allegati[$k]['ext'] = $file->getEstensione();
-        $allegati[$k]['size'] = $file->getDimensione();
-      }
-      // modifica dati sessione
-      $this->reqstack->getSession()->remove($var_sessione);
-      $this->reqstack->getSession()->set($var_sessione, $allegati);
-      // elimina file temporanei
-      $fs = new Filesystem();
-      $finder = new Finder();
-      $finder->files()->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
-      foreach ($finder as $f) {
-        $fs->remove($f);
-      }
-    }
+    $allegati = $this->leggiAllegati($request, $avviso, $var_sessione);
     // informazioni da visualizzare sui destinatari
     $dati = $com->infoDestinatari($avviso);
     // form di inserimento
     $setSede = $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null;
-    if ($setSede) {
-      $sede = $this->getUser()->getSede();
-      $opzioniSedi[$sede->getNomeBreve()] = $sede;
-    } else {
-      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
-    }
+    $opzioniSedi = $this->opzioniSedi();
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni($setSede, true, false, true);
     $opzioniMaterie = $this->em->getRepository(Materia::class)->opzioni(true, false);
     $opzioniClassi2 = $this->em->getRepository(Classe::class)->opzioni($setSede, false, true, true);
@@ -238,11 +205,7 @@ class AvvisiController extends BaseController {
         // ok: memorizzazione e log
         $dblogger->logAzione('AVVISI', $edit ? 'Modifica avviso generico' : 'Crea avviso generico');
         // notifica con attesa di mezzora
-        $notifica = new AvvisoMessage($avviso->getId());
-        if (!$edit || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
-          // inserisce avviso (nuovo o modificato) in coda notifiche
-          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
-        }
+        $this->notificaAvviso($msg, $avviso, $edit);
         // redirezione
         return $this->redirectToRoute('avvisi_gestione');
       }
@@ -443,12 +406,7 @@ class AvvisiController extends BaseController {
     $avviso->setAutore($this->getUser());
     // form di inserimento
     $setSede = $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null;
-    if ($setSede) {
-      $sede = $this->getUser()->getSede();
-      $opzioniSedi[$sede->getNomeBreve()] = $sede;
-    } else {
-      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
-    }
+    $opzioniSedi = $this->opzioniSedi();
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni($setSede, true, false, true);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => $tipo == 'A' ? 'attivita' : 'orario',
       'return_url' => $this->generateUrl('avvisi_gestione'),
@@ -498,11 +456,7 @@ class AvvisiController extends BaseController {
           ($tipo == 'A' ? 'attività' : ($tipo == 'E' ? 'entrata' : 'uscita'));
         $dblogger->logAzione('AVVISI', $messaggio);
         // notifica con attesa di mezzora
-        $notifica = new AvvisoMessage($avviso->getId());
-        if (!$edit || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
-          // inserisce avviso (nuovo o modificato) in coda notifiche
-          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
-        }
+        $this->notificaAvviso($msg, $avviso, $edit);
         // redirezione
         return $this->redirectToRoute('avvisi_gestione');
       }
@@ -580,12 +534,7 @@ class AvvisiController extends BaseController {
     $dati = $com->infoDestinatari($avviso);
     // form di inserimento
     $setSede = $this->getUser()->getSede() ? $this->getUser()->getSede()->getId() : null;
-    if ($setSede) {
-      $sede = $this->getUser()->getSede();
-      $opzioniSedi[$sede->getNomeBreve()] = $sede;
-    } else {
-      $opzioniSedi = $this->em->getRepository(Sede::class)->opzioni();
-    }
+    $opzioniSedi = $this->opzioniSedi();
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni($setSede, false, true, true);
     $form = $this->createForm(AvvisoType::class, $avviso, ['form_mode' => 'personale',
       'return_url' => $this->generateUrl('avvisi_gestione'),
@@ -608,11 +557,7 @@ class AvvisiController extends BaseController {
         // ok: memorizzazione e log
         $dblogger->logAzione('AVVISI', $edit ? 'Modifica comunicazione personale' : 'Crea comunicazione personale');
         // notifica con attesa di mezzora
-        $notifica = new AvvisoMessage($avviso->getId());
-        if (!$edit || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
-          // inserisce avviso (nuovo o modificato) in coda notifiche
-          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
-        }
+        $this->notificaAvviso($msg, $avviso, $edit);
         // redirezione
         return $this->redirectToRoute('avvisi_gestione');
       }
@@ -781,7 +726,7 @@ class AvvisiController extends BaseController {
     // visualizza pagina
     return $this->render('avvisi/scheda_classe.html.twig', [
       'dati' => $dati,
-	    'info' => $info]);
+      'info' => $info]);
   }
 
   /**
@@ -860,9 +805,6 @@ class AvvisiController extends BaseController {
       // errore: file non trovato
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db solo dopo aver verificato il file
-    $com->leggeUtente($this->getUser(), $avviso);
-    $this->em->flush();
     return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
       ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
   }
@@ -880,11 +822,6 @@ class AvvisiController extends BaseController {
   public function legge(Request $request,
                         #[MapEntity] ?Avviso $avviso=null
                         ): JsonResponse {
-    // controllo CSRF
-    if (!$this->isCsrfTokenValid('avvisi_legge', $request->request->get('_csrf_token'))) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
     // controlla avviso
     if (!$avviso) {
       // errore: avviso non trovato
@@ -1066,11 +1003,7 @@ class AvvisiController extends BaseController {
         // ok: memorizzazione e log
         $dblogger->logAzione('AVVISI', $edit ? 'Modifica avviso coordinatore' : 'Crea avviso coordinatore');
         // notifica con attesa di mezzora
-        $notifica = new AvvisoMessage($avviso->getId());
-        if (!$edit || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
-          // inserisce avviso (nuovo o modificato) in coda notifiche
-          $msg->dispatch($notifica, [new DelayStamp(1800000)]);
-        }
+        $this->notificaAvviso($msg, $avviso, $edit);
         // redirezione
         return $this->redirectToRoute('avvisi_coordinatore');
       }
@@ -1164,28 +1097,14 @@ class AvvisiController extends BaseController {
       // imposta dati
       $avviso->setAlunni($avviso->getGenitori());
       if ($avviso->getGenitori() == 'C') {
-        if ($avviso->getCattedra()) {
-          // gestisce classi articolate
-          $filtroClassi = [$avviso->getCattedra()->getClasse()->getId()];
-          $articolate = $this->em->getRepository(Classe::class)->classiArticolate($filtroClassi);
-          foreach ($articolate as $articolata) {
-            if (empty($articolata['comune'])) {
-              // se classe comune aggiunge tutti i gruppi
-              $filtroClassi = array_merge($filtroClassi, $articolata['gruppi']);
-            }
-          }
-          $avviso->setFiltroGenitori($filtroClassi);
-        } else {
-          // nessuna classe (non dovrebbe succedere)
-          $avviso->setFiltroGenitori([]);
-        }
+        // imposta il filtro delle classi, considerando le classi articolate
+        $avviso->setFiltroGenitori($this->classiArticolateAvviso($avviso));
       }
       $avviso->setFiltroAlunni($avviso->getFiltroGenitori());
       $avviso->setSedi(new ArrayCollection($avviso->getCattedra() ?
         [$avviso->getCattedra()->getClasse()->getSede()] : []));
       $avviso->setTitolo($trans->trans($tipo == 'V' ? 'message.verifica_oggetto' : 'message.compito_oggetto',
-        ['materia' => $avviso->getMateria() ? $avviso->getMateria()->getNomeBreve() :
-        ($avviso->getCattedra() ? $avviso->getCattedra()->getMateria()->getNomeBreve() : '')]));
+        ['materia' => $this->materiaAvviso($avviso)]));
       // controllo errori
       $errore = $com->validaAvvisoAgenda($avviso, $this->getUser(), $reg);
       if ($errore) {
@@ -1217,11 +1136,7 @@ class AvvisiController extends BaseController {
           $messaggio = ($edit ? 'Modifica' : 'Crea').' '.($tipo == 'V' ? 'verifica' : 'compito');
           $dblogger->logAzione('AVVISI', $messaggio);
           // notifica con attesa di mezzora
-          $notifica = new AvvisoMessage($avviso->getId());
-          if (!$edit || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
-            // inserisce avviso (nuovo o modificato) in coda notifiche
-            $msg->dispatch($notifica, [new DelayStamp(1800000)]);
-          }
+          $this->notificaAvviso($msg, $avviso, $edit);
           // redirezione
           return $this->redirectToRoute('avvisi_agenda');
         }
@@ -1257,21 +1172,7 @@ class AvvisiController extends BaseController {
     $dati = [];
     $info = [];
     // parametro data
-    if ($mese == '0000-00') {
-      // mese non specificato
-      if ($this->reqstack->getSession()->get('/APP/ROUTE/avvisi_agenda/mese')) {
-        // recupera data da sessione
-        $mese = DateTime::createFromFormat('Y-m-d',
-          $this->reqstack->getSession()->get('/APP/ROUTE/avvisi_agenda/mese').'-01');
-      } else {
-        // imposta data odierna
-        $mese = (new DateTime())->modify('first day of this month');
-      }
-    } else {
-      // imposta data indicata e la memorizza in sessione
-      $mese = DateTime::createFromFormat('Y-m-d', $mese.'-01');
-      $this->reqstack->getSession()->set('/APP/ROUTE/avvisi_agenda/mese', $mese->format('Y-m'));
-    }
+    $mese = $this->meseAgenda($mese);
     // parametro classe
     if (!$classe) {
       // recupera classe da sessione
@@ -1302,7 +1203,10 @@ class AvvisiController extends BaseController {
     $info['inizio'] = (int) $mese->format('w') - 1;
     $m = clone $mese;
     $info['ultimo_giorno'] = $m->modify('last day of this month')->format('j');
-    $info['fine'] = (int) $m->format('w') == 0 ? 0 : 6 - (int) $m->format('w');
+    // il calendario ha 7 colonne (lunedi'..domenica): le celle vuote in fondo
+    // al mese servono a completare l'ultima riga, quindi 7 - giorno della
+    // settimana, con la domenica (w = 0) che chiude la riga da sola
+    $info['fine'] = (int) $m->format('w') == 0 ? 0 : 7 - (int) $m->format('w');
     // info di visualizzazione
     $info['visualizzazione'] = $visualizzazione;
     if ($visualizzazione == 'V') {
@@ -1320,18 +1224,7 @@ class AvvisiController extends BaseController {
     $dati['festivi'] = $this->em->getRepository(Festivita::class)->listaMese($mese);
     // funzionalità per docenti
     if ($this->getUser() instanceOf Docente) {
-      // filtro classi
-      $dati['filtro'] = [];
-      $classi = $this->em->getRepository(Cattedra::class)->cattedreDocente($this->getUser(), 'Q');
-      foreach ($classi as $c) {
-        $dati['filtro'][$c->getClasse()->getId()] = ''.$c->getClasse();
-      }
-      // azione add
-      $fineAnno = $this->em->getRepository(Configurazione::class)->getParametro('anno_fine', '2000-01-01');
-      if ($com->azioneAvviso('add', DateTime::createFromFormat('Y-m-d', $fineAnno), $this->getUser(), null)) {
-        // pulsante add
-        $dati['azioni']['add'] = 1;
-      }
+      $dati = $this->datiAgendaDocente($dati, $com);
     }
     // mostra la pagina di risposta
     return $this->render('avvisi/agenda.html.twig', [
@@ -1556,14 +1449,7 @@ class AvvisiController extends BaseController {
     }
     // azione add
     $fineAnno = $this->em->getRepository(Configurazione::class)->getParametro('anno_fine', '2000-01-01');
-    $dtFineAnno = DateTime::createFromFormat('Y-m-d', $fineAnno);
-    if (!$dtFineAnno) {
-      // dato di configurazione invalido: degrada stagione add senza interrompere la pagina
-      $this->addFlash('warning', 'config.anno_fine_non_valido');
-      $dati['azioni']['add'] = 0;
-      return $dati;
-    }
-    if ($com->azioneAvviso('add', $dtFineAnno, $this->getUser(), null)) {
+    if ($com->azioneAvviso('add', DateTime::createFromFormat('Y-m-d', $fineAnno), $this->getUser(), null)) {
       // pulsante add
       $dati['azioni']['add'] = 1;
     }

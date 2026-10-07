@@ -21,6 +21,7 @@ use DateTime;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -718,20 +719,7 @@ class DocumentiController extends BaseController {
     // controlla azione
     $listaTipi = ['H', 'D', 'B', 'C'];
     if ($alunno) {
-      $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunno,
-        'stato' => 'P']);
-      $tipiEsistenti = [];
-      foreach ($documentiEsistenti as $des) {
-        if ($des->getTipo() == 'H' || $des->getTipo() == 'D') {
-          // PEI o PDP
-          $tipiEsistenti[] = 'H';
-          $tipiEsistenti[] = 'D';
-        } else {
-          // altro tipo
-          $tipiEsistenti[] = $des->getTipo();
-        }
-      }
-      $listaTipi = array_diff($listaTipi, $tipiEsistenti);
+      $listaTipi = $this->tipiDisponibili($alunno, $listaTipi);
       if (empty($listaTipi)) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -771,50 +759,17 @@ class DocumentiController extends BaseController {
       'values' => [$opzioniClassi, $opzioniTipi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // controllo errori
+      // dati del documento
       $allegati = $this->reqstack->getSession()->get($varSessione, []);
       $tipo = $form->get('tipo')->getData();
       $alunnoIndividuale = $alunno ? null :
         $this->em->getRepository(Alunno::class)->findOneBy(['abilitato' => 1,
         'id' => $form->get('alunno')->getData()]);
       if (!$alunno) {
-        $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunnoIndividuale,
-          'stato' => 'P']);
-        $tipiEsistenti = [];
-        foreach ($documentiEsistenti as $des) {
-          if ($des->getTipo() == 'H' || $des->getTipo() == 'D') {
-            // PEI o PDP
-            $tipiEsistenti[] = 'H';
-            $tipiEsistenti[] = 'D';
-          } else {
-            // altro tipo
-            $tipiEsistenti[] = $des->getTipo();
-          }
-        }
-        $listaTipi = array_diff($listaTipi, $tipiEsistenti);
+        $listaTipi = $this->tipiDisponibili($alunnoIndividuale, $listaTipi);
       }
-      if (count($allegati) < 1) {
-        // errore: numero allegati
-        $form->addError(new FormError($trans->trans('exception.file_mancante')));
-      }
-      if (empty($tipo)) {
-        // errore: tipo mancante
-        $form->addError(new FormError($trans->trans('exception.documento_tipo_mancante')));
-      }
-      if (!$alunno && (empty($alunnoIndividuale) || empty($alunnoIndividuale->getClasse()))) {
-        // errore: alunno mancante o non abilitato e iscritto
-        $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
-      }
-      if (!$alunno && $alunnoIndividuale && $alunnoIndividuale->getClasse() &&
-          $this->getUser()->getResponsabileBesSede() &&
-          $alunnoIndividuale->getClasse()->getSede() != $this->getUser()->getResponsabileBesSede()) {
-        // errore: alunno di sede non ammessa
-        $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
-      }
-      if (!$alunno && $tipo && $alunnoIndividuale && !in_array($tipo, $listaTipi)) {
-        // errore: documento già presente
-        $form->addError(new FormError($trans->trans('exception.documento_esistente')));
-      }
+      // controllo errori
+      $this->aggiungiErrori($form, $trans, $allegati, $tipo, $alunno, $alunnoIndividuale, $listaTipi);
       if ($form->isValid()) {
         // imposta documento
         $documento->setTipo($tipo);
@@ -850,6 +805,72 @@ class DocumentiController extends BaseController {
       'form' => $form,
       'form_title' => 'title.nuovo_documento_bes',
       'info' => $info]);
+  }
+
+  /**
+   * Determina i tipi di documento BES che non sono gi\u00e0 presenti per l'alunno indicato
+   *
+   * @param Alunno|null $alunno Alunno di cui controllare i documenti
+   * @param array $listaTipi Lista dei tipi di documento previsti
+   *
+   * @return array Lista dei tipi di documento non ancora presenti
+   */
+  private function tipiDisponibili(?Alunno $alunno, array $listaTipi): array {
+    if (!$alunno) {
+      return $listaTipi;
+    }
+    // legge i documenti già inseriti
+    $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunno,
+      'stato' => 'P']);
+    $tipiEsistenti = [];
+    foreach ($documentiEsistenti as $des) {
+      if ($des->getTipo() == 'H' || $des->getTipo() == 'D') {
+        // PEI o PDP
+        $tipiEsistenti[] = 'H';
+        $tipiEsistenti[] = 'D';
+      } else {
+        // altro tipo
+        $tipiEsistenti[] = $des->getTipo();
+      }
+    }
+    return array_diff($listaTipi, $tipiEsistenti);
+  }
+
+  /**
+   * Aggiunge al form gli errori relativi ai dati inseriti per il documento
+   *
+   * @param FormInterface $form Form di inserimento del documento
+   * @param TranslatorInterface $trans Traduttore dei messaggi di errore
+   * @param array $allegati Allegati caricati nella pagina
+   * @param mixed $tipo Tipo di documento indicato nel form
+   * @param Alunno|null $alunno Alunno indicato nella pagina, se presente
+   * @param mixed $alunnoIndividuale Alunno indicato nel form, se non \u00e8 indicato nella pagina
+   * @param array $listaTipi Lista dei tipi di documento non ancora presenti
+   */
+  private function aggiungiErrori(FormInterface $form, TranslatorInterface $trans, array $allegati, mixed $tipo,
+                                 ?Alunno $alunno, mixed $alunnoIndividuale, array $listaTipi): void {
+    if (count($allegati) < 1) {
+      // errore: numero allegati
+      $form->addError(new FormError($trans->trans('exception.file_mancante')));
+    }
+    if (empty($tipo)) {
+      // errore: tipo mancante
+      $form->addError(new FormError($trans->trans('exception.documento_tipo_mancante')));
+    }
+    if (!$alunno && (empty($alunnoIndividuale) || empty($alunnoIndividuale->getClasse()))) {
+      // errore: alunno mancante o non abilitato e iscritto
+      $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
+    }
+    if (!$alunno && $alunnoIndividuale && $alunnoIndividuale->getClasse() &&
+        $this->getUser()->getResponsabileBesSede() &&
+        $alunnoIndividuale->getClasse()->getSede() != $this->getUser()->getResponsabileBesSede()) {
+      // errore: alunno di sede non ammessa
+      $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
+    }
+    if (!$alunno && $tipo && $alunnoIndividuale && !in_array($tipo, $listaTipi)) {
+      // errore: documento già presente
+      $form->addError(new FormError($trans->trans('exception.documento_esistente')));
+    }
   }
 
   /**

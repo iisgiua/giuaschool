@@ -219,42 +219,12 @@ class LoginController extends BaseController {
         $successo = 'message.recovery_ok';
       } else {
         // effettua il recupero password
-        if ($utente instanceOf Amministratore) {
-          // amministratore
-          $num_pwdchars = 12;
-          $template_html = 'email/credenziali_recupero_ata.html.twig';
-          $template_txt = 'email/credenziali_recupero_ata.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceOf Docente) {
-          // docenti/staff/preside
-          $num_pwdchars = 10;
-          $template_html = 'email/credenziali_recupero_docenti.html.twig';
-          $template_txt = 'email/credenziali_recupero_docenti.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'Prof.' : 'Prof.ssa');
-        } elseif ($utente instanceOf Ata) {
-          // ATA
-          $num_pwdchars = 8;
-          $template_html = 'email/credenziali_recupero_ata.html.twig';
-          $template_txt = 'email/credenziali_recupero_ata.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceOf Genitore) {
-          // genitori
-          $num_pwdchars = 8;
-          $template_html = 'email/credenziali_alunni.html.twig';
-          $template_txt = 'email/credenziali_alunni.txt.twig';
-          $utente_mail = $utente->getAlunno();
-          $sesso = ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceOf Alunno) {
-          // alunni
-          $num_pwdchars = 8;
-          $template_html = 'email/credenziali_alunni.html.twig';
-          $template_txt = 'email/credenziali_alunni.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        }
+        $datiUtente = $this->datiTemplateRecupero($utente);
+        $num_pwdchars = $datiUtente['num_pwdchars'];
+        $template_html = $datiUtente['template_html'];
+        $template_txt = $datiUtente['template_txt'];
+        $utente_mail = $datiUtente['utente_mail'];
+        $sesso = $datiUtente['sesso'];
         // ok: genera password
         $password = $staff->creaPassword($num_pwdchars);
         $utente->setPasswordNonCifrata($password);
@@ -307,6 +277,55 @@ class LoginController extends BaseController {
       'errore' => $errore,
       'successo' => $successo,
       'manutenzione' => $manutenzione]);
+  }
+
+  /**
+   * Determina i dati necessari per generare i template di recupero delle credenziali
+   * in funzione del tipo di utente che ha richiesto il recupero
+   *
+   * @param Utente $utente Utente che ha richiesto il recupero delle credenziali
+   *
+   * @return array Numero di caratteri della password, template, utente da indicare nel messaggio e sesso
+   */
+  private function datiTemplateRecupero(Utente $utente): array {
+    $dati = [];
+    if ($utente instanceof Amministratore) {
+      // amministratore
+      $dati['num_pwdchars'] = 12;
+      $dati['template_html'] = 'email/credenziali_recupero_ata.html.twig';
+      $dati['template_txt'] = 'email/credenziali_recupero_ata.txt.twig';
+      $dati['utente_mail'] = $utente;
+      $dati['sesso'] = ($utente->getSesso() == 'M' ? 'o' : 'a');
+    } elseif ($utente instanceof Docente) {
+      // docenti/staff/preside
+      $dati['num_pwdchars'] = 10;
+      $dati['template_html'] = 'email/credenziali_recupero_docenti.html.twig';
+      $dati['template_txt'] = 'email/credenziali_recupero_docenti.txt.twig';
+      $dati['utente_mail'] = $utente;
+      $dati['sesso'] = ($utente->getSesso() == 'M' ? 'Prof.' : 'Prof.ssa');
+    } elseif ($utente instanceof Ata) {
+      // ATA
+      $dati['num_pwdchars'] = 8;
+      $dati['template_html'] = 'email/credenziali_recupero_ata.html.twig';
+      $dati['template_txt'] = 'email/credenziali_recupero_ata.txt.twig';
+      $dati['utente_mail'] = $utente;
+      $dati['sesso'] = ($utente->getSesso() == 'M' ? 'o' : 'a');
+    } elseif ($utente instanceof Genitore) {
+      // genitori
+      $dati['num_pwdchars'] = 8;
+      $dati['template_html'] = 'email/credenziali_alunni.html.twig';
+      $dati['template_txt'] = 'email/credenziali_alunni.txt.twig';
+      $dati['utente_mail'] = $utente->getAlunno();
+      $dati['sesso'] = ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a');
+    } else {
+      // alunni
+      $dati['num_pwdchars'] = 8;
+      $dati['template_html'] = 'email/credenziali_alunni.html.twig';
+      $dati['template_txt'] = 'email/credenziali_alunni.txt.twig';
+      $dati['utente_mail'] = $utente;
+      $dati['sesso'] = ($utente->getSesso() == 'M' ? 'o' : 'a');
+    }
+    return $dati;
   }
 
   /**

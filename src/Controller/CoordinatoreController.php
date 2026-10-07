@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Exception;
 use App\Entity\Alunno;
 use App\Entity\CambioClasse;
 use App\Entity\Classe;
@@ -23,6 +24,7 @@ use App\Util\RegistroUtil;
 use App\Util\StaffUtil;
 use DateTime;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -50,7 +52,9 @@ class CoordinatoreController extends BaseController {
   public function coordinatore(): Response {
     if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
       // coordinatore
-      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      $classi = array_values(array_filter(explode(',',
+        (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore')),
+        fn ($classe) => $classe !== ''));
       if (count($classi) == 1) {
         // coordinatore di una sola classe: vai
         $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classi[0]);
@@ -110,7 +114,7 @@ class CoordinatoreController extends BaseController {
             !in_array($k, ['classe', 'alunno', 'cattedra']), ARRAY_FILTER_USE_KEY);
           return $this->redirectToRoute($match['_route'], $param);
         }
-      } catch (\Exception) {
+      } catch (Exception) {
         // rotta non riconosciuta: ricarica comunque la pagina di provenienza
         return $this->redirect($referer);
       }
@@ -267,13 +271,7 @@ class CoordinatoreController extends BaseController {
     $listaPeriodi = null;
     $datiPeriodo = null;
     // parametro classe
-    if ($classe == 0) {
-      // recupera parametri da sessione
-      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
-    } else {
-      // memorizza su sessione
-      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
-    }
+    $classe = $this->recuperaClasseSessione($classe);
     // controllo classe
     if ($classe > 0) {
       $classe = $this->em->getRepository(Classe::class)->find($classe);
@@ -281,15 +279,7 @@ class CoordinatoreController extends BaseController {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
       }
-      // controllo accesso alla funzione
-      if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-        // coordinatore
-        $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-        if (!in_array($classe->getId(), $classi)) {
-          // errore
-          throw $this->createNotFoundException('exception.invalid_params');
-        }
-      }
+      $this->controllaAccessoClasse($classe);
     }
     if ($classe) {
       // periodo
@@ -476,13 +466,7 @@ class CoordinatoreController extends BaseController {
     $info['annoFine'] = null;
     $info['configErrore'] = false;
     // parametro classe
-    if ($classe == 0) {
-      // recupera parametri da sessione
-      $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
-    } else {
-      // memorizza su sessione
-      $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
-    }
+    $classe = $this->recuperaClasseSessione($classe);
     // recupera criteri dalla sessione
     $criteri = [];
     $criteri['alunno'] = $this->reqstack->getSession()->get('/APP/ROUTE/coordinatore_presenze/alunno', 0);
@@ -626,15 +610,7 @@ class CoordinatoreController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // controllo accesso alla funzione
-    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-      // coordinatore
-      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-      if (!in_array($classe->getId(), $classi)) {
-        // errore
-        throw $this->createNotFoundException('exception.invalid_params');
-      }
-    }
+    $this->controllaAccessoClasse($classe);
     // imposta informazioni
     $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     if ($dataYMD && strlen((string) $dataYMD) >= 10) {
@@ -655,21 +631,7 @@ class CoordinatoreController extends BaseController {
         // errore data non è futura
         $form->addError(new FormError($trans->trans('exception.presenze_data_non_futura')));
       }
-      if (($form->get('oraTipo')->getData() == 'G' && (!empty($form->get('oraInizio')->getData()) ||
-          !empty($form->get('oraFine')->getData()))) ||
-          ($form->get('oraTipo')->getData() == 'F' && !empty($form->get('oraFine')->getData()))) {
-        // errore tipo con dati errati
-        $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_errato')));
-      } elseif (($form->get('oraTipo')->getData() == 'F' && empty($form->get('oraInizio')->getData())) ||
-          ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraInizio')->getData())) ||
-          ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraFine')->getData()))) {
-        // errore tipo con dati mancanti
-        $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_mancante')));
-      } elseif ($form->get('oraTipo')->getData() == 'I' &&
-          $form->get('oraInizio')->getData() > $form->get('oraFine')->getData()) {
-        // errore tipo con dati mancanti
-        $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_errato')));
-      }
+      $this->controllaTipoOra($form, $trans);
       // controlla permessi
       if (!$reg->azionePresenze($form->get('data')->getData(), $this->getUser(),
           $form->get('alunno')->getData(), $classe)) {
@@ -776,15 +738,7 @@ class CoordinatoreController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // controllo accesso alla funzione
-    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
-      // coordinatore
-      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-      if (!in_array($classe->getId(), $classi)) {
-        // errore
-        throw $this->createNotFoundException('exception.invalid_params');
-      }
-    }
+    $this->controllaAccessoClasse($classe);
     // imposta informazioni
     $dataYMD = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     if ($dataYMD && strlen((string) $dataYMD) >= 10) {
@@ -822,32 +776,9 @@ class CoordinatoreController extends BaseController {
         // errore periodicità settimanale
         $form->addError(new FormError($trans->trans('exception.presenze_periodicita')));
       }
-      if (($form->get('oraTipo')->getData() == 'G' && (!empty($form->get('oraInizio')->getData()) ||
-          !empty($form->get('oraFine')->getData()))) ||
-          ($form->get('oraTipo')->getData() == 'F' && !empty($form->get('oraFine')->getData()))) {
-        // errore tipo con dati errati
-        $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_errato')));
-      } elseif (($form->get('oraTipo')->getData() == 'F' && empty($form->get('oraInizio')->getData())) ||
-          ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraInizio')->getData())) ||
-          ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraFine')->getData()))) {
-        // errore tipo con dati mancanti
-        $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_mancante')));
-      } elseif ($form->get('oraTipo')->getData() == 'I' &&
-          $form->get('oraInizio')->getData() > $form->get('oraFine')->getData()) {
-        // errore tipo con dati mancanti
-        $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_errato')));
-      }
+      $this->controllaTipoOra($form, $trans);
       // genera date
-      $listaDate = [];
-      while ($dataInizio <= $dataFine) {
-        $giorno = $dataInizio->format('w');
-        if (in_array($giorno, $settimana, true) && !$reg->controlloData($dataInizio, $classe->getSede())) {
-          // data presente in settimana
-          $listaDate[] = clone $dataInizio;
-        }
-        // data successiva
-        $dataInizio->modify('+1 day');
-      }
+      $listaDate = $this->generaDatePresenze($reg, $dataInizio, $dataFine, $settimana, $classe);
       if (count($listaDate) == 0) {
         // errore nessuna data
         $form->addError(new FormError($trans->trans('exception.presenze_data_mancante')));
@@ -862,24 +793,7 @@ class CoordinatoreController extends BaseController {
       }
       if ($form->isValid()) {
         // ok: memorizzazione e log
-        foreach ($alunni as $alunno) {
-          foreach ($listaDate as $data) {
-            if ($this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
-                'data' => $data])) {
-              // salta fuori classe esistente
-              continue;
-            }
-            $presenza = (new Presenza())
-              ->setData($data)
-              ->setOraInizio($form->get('oraInizio')->getData())
-              ->setOraFine($form->get('oraFine')->getData())
-              ->setTipo($form->get('tipo')->getData())
-              ->setDescrizione($form->get('descrizione')->getData())
-              ->setAlunno($alunno);
-            $this->em->persist($presenza);
-            $dblogger->logAzione('PRESENZE', 'Aggiunge presenza');
-          }
-        }
+        $this->creaPresenze($alunni, $listaDate, $form, $dblogger);
         // messaggio
         $this->addFlash('success', 'message.update_ok');
         // redirect
@@ -962,7 +876,6 @@ class CoordinatoreController extends BaseController {
   /**
    * Controllo moduli formativi svolti: situazione degli alunni
    *
-   * @param Request $request Pagina richiesta
    * @param int $classe Identificativo della classe
    *
    * @return Response Pagina di risposta
@@ -1008,6 +921,25 @@ class CoordinatoreController extends BaseController {
   }
 
   /**
+   * Recupera dalla sessione la classe di lavoro del coordinatore, se non indicata
+   *
+   * @param int $classe Identificativo della classe indicato nella pagina
+   *
+   * @return int Identificativo della classe di lavoro
+   */
+  private function recuperaClasseSessione(int $classe): int {
+    if ($classe == 0) {
+      // recupera parametri da sessione: 0 se non e' mai stata scelta, cosi'
+      // chi non ha ancora scelto una classe atterra sulla pagina con il solo
+      // selettore invece di prendere un TypeError
+      return (int) $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore', 0);
+    }
+    // memorizza su sessione
+    $this->reqstack->getSession()->set('/APP/DOCENTE/classe_coordinatore', $classe);
+    return $classe;
+  }
+
+  /**
    * Controlla che l'utente sia autorizzato ad accedere ai dati della classe indicata
    *
    * @param Classe $classe Classe di cui controllare l'accesso
@@ -1019,6 +951,85 @@ class CoordinatoreController extends BaseController {
       if (!in_array($classe->getId(), $classi)) {
         // errore
         throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+  }
+
+  /**
+   * Controlla la coerenza tra il tipo di ora indicato e gli orari inseriti nel form
+   *
+   * @param FormInterface $form Form di inserimento della presenza fuori classe
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   */
+  private function controllaTipoOra(FormInterface $form, TranslatorInterface $trans): void {
+    if (($form->get('oraTipo')->getData() == 'G' && (!empty($form->get('oraInizio')->getData()) ||
+        !empty($form->get('oraFine')->getData()))) ||
+        ($form->get('oraTipo')->getData() == 'F' && !empty($form->get('oraFine')->getData()))) {
+      // errore tipo con dati errati
+      $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_errato')));
+    } elseif (($form->get('oraTipo')->getData() == 'F' && empty($form->get('oraInizio')->getData())) ||
+        ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraInizio')->getData())) ||
+        ($form->get('oraTipo')->getData() == 'I' && empty($form->get('oraFine')->getData()))) {
+      // errore tipo con dati mancanti
+      $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_mancante')));
+    } elseif ($form->get('oraTipo')->getData() == 'I' &&
+        $form->get('oraInizio')->getData() > $form->get('oraFine')->getData()) {
+      // errore tipo con dati mancanti
+      $form->addError(new FormError($trans->trans('exception.presenze_tipo_ora_errato')));
+    }
+  }
+
+  /**
+   * Genera l'elenco delle date delle presenze fuori classe indicate nell'intervallo
+   *
+   * @param RegistroUtil $reg Funzioni di utilità per il registro
+   * @param mixed $dataInizio Data iniziale dell'intervallo
+   * @param mixed $dataFine Data finale dell'intervallo
+   * @param array $settimana Giorni della settimana selezionati
+   * @param Classe $classe Classe di riferimento
+   *
+   * @return array Lista delle date delle presenze da creare
+   */
+  private function generaDatePresenze(RegistroUtil $reg, mixed $dataInizio, mixed $dataFine, array $settimana,
+                                      Classe $classe): array {
+    $listaDate = [];
+    while ($dataInizio <= $dataFine) {
+      $giorno = $dataInizio->format('w');
+      if (in_array($giorno, $settimana, true) && !$reg->controlloData($dataInizio, $classe->getSede())) {
+        // data presente in settimana
+        $listaDate[] = clone $dataInizio;
+      }
+      // data successiva
+      $dataInizio->modify('+1 day');
+    }
+    return $listaDate;
+  }
+
+  /**
+   * Crea le presenze fuori classe indicate, saltando quelle già esistenti
+   *
+   * @param array $alunni Lista degli alunni interessati
+   * @param array $listaDate Lista delle date delle presenze
+   * @param FormInterface $form Form di inserimento della presenza fuori classe
+   * @param LogHandler $dblogger Gestore dei log su database
+   */
+  private function creaPresenze(array $alunni, array $listaDate, FormInterface $form, LogHandler $dblogger): void {
+    foreach ($alunni as $alunno) {
+      foreach ($listaDate as $data) {
+        if ($this->em->getRepository(Presenza::class)->findOneBy(['alunno' => $alunno,
+            'data' => $data])) {
+          // salta fuori classe esistente
+          continue;
+        }
+        $presenza = (new Presenza())
+          ->setData($data)
+          ->setOraInizio($form->get('oraInizio')->getData())
+          ->setOraFine($form->get('oraFine')->getData())
+          ->setTipo($form->get('tipo')->getData())
+          ->setDescrizione($form->get('descrizione')->getData())
+          ->setAlunno($alunno);
+        $this->em->persist($presenza);
+        $dblogger->logAzione('PRESENZE', 'Aggiunge presenza');
       }
     }
   }

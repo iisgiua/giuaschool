@@ -329,7 +329,7 @@ class VotiController extends BaseController {
           $data_voto = $form->get('data')->getData()->format(self::FORMATO_DATA_ISO).'.'.$ordine;
           // controllo verifiche su valutazionu con stessa materia/alunno/tipo/data
           $altroDocente = $this->em->getRepository(Valutazione::class)
-            ->altroDocente($this->getUser(), $cattedra->getMateria(), $classe, $tipo, $data_voto);
+            ->altroDocente($this->getUser(), $cattedra->getMateria(), $classe, $tipo, $data);
           if (substr($data, 0, 10) != $form->get('data')->getData()->format(self::FORMATO_DATA_ISO) || $altroDocente) {
             $ordine = $this->em->getRepository(Valutazione::class)
               ->numeroOrdineClasse($cattedra->getMateria(), $classe, $tipo, $form->get('data')->getData());
