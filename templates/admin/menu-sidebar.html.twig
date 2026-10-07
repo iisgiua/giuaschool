@@ -36,7 +36,10 @@
     {% endif %}
   {% endfor %}
   <li class="dropdown{{ submenu_active ? ' active open' }}" role="presentation">
-    <a href="#" title="{{ opt.descrizione|raw }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"{{ submenu_active ? ' aria-expanded="true"' : ' aria-expanded="false"' }}>
+    {# NOSONAR Web:S6819 - role="button" su <a data-toggle="dropdown">: sostituire l'elemento #}
+    {# con un <button> altererebbe lo stile del menu e il funzionamento del dropdown. #}
+    <a href="#" title="{{ opt.descrizione|raw }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"{{ submenu_active ? ' aria-expanded="true"' : ' aria-expanded="false"' }}
+      onkeydown="if (event.key === ' ' || event.key === 'Spacebar') { event.preventDefault(); this.click(); }">
   {% if opt.icona %}
       <span class="glyphicon glyphicon-{{ opt.icona }} gs-mr-2" aria-hidden="true"></span>
   {% endif %}

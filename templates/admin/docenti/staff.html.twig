@@ -1,65 +1,43 @@
 {% extends 'admin/layout-sidebar.html.twig' %}
 
+{% import 'admin/include/tabella.html.twig' as t %}
+
 {% block pagina_contenuto %}
 <div class="container-fluid" style="padding-top: 1rem;">
-  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {# pulsanti di pagina sotto il titolo, non in fondo alla tabella #}
+  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('docenti_staff_edit', {id: 0}), etichetta: 'label.add'|trans, titolo: 'Aggiungi un nuovo docente allo staff'}]}) }}
   {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
-  <div class="table-responsive" style="margin-top: 1rem;">
-  {% if dati.lista is not empty %}
-    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header">
-      <thead class="thead-light">
-        <tr class="sticky-top">
-          <th class="col-auto" scope="col">{{ 'label.cognome'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.nome'|trans }}</th>
-          <th class="col-auto d-none d-md-table-cell" scope="col">{{ 'label.username'|trans }}</th>
-          <th class="col-auto d-none d-lg-table-cell" scope="col">{{ 'label.sede'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
-        </tr>
-      </thead>
-      <tbody>
+  {% set colonne = [
+    {titolo: 'label.cognome'|trans, chiave: 'cognome'},
+    {titolo: 'label.nome'|trans, chiave: 'nome'},
+    {titolo: 'label.username'|trans, chiave: 'username', classe: 'd-none d-md-table-cell', classe_cella: 'd-none d-md-table-cell'},
+    {titolo: 'label.sede'|trans, chiave: 'sede', classe: 'd-none d-lg-table-cell', classe_cella: 'd-none d-lg-table-cell'},
+  ] %}
+  {% set righe = [] %}
+  {% set azioni = [] %}
   {% for u in dati.lista %}
-        <tr>
-          <td><small>{{ u.cognome }}</small></td>
-          <td><small>{{ u.nome }}</small></td>
-          <td class="d-none d-md-table-cell"><small>{{ u.username }}</small></td>
-          <td class="d-none d-lg-table-cell"><small>{{ u.sede ? u.sede.citta : 'Tutte' }}</small></td>
-          <td class="pb-0">
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_staff_edit', {id: u.id}) }}" role="button" title="Modifica i dati del componente dello staff"><i class="fas fa-edit"></i></a>
-            <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('docenti_staff_delete', {id: u.id}) }}" role="button" title="Elimina il componenete dello staff"><i class="fas fa-trash"></i></a>
-          </td>
-        </tr>
+    {% set righe = righe|merge([{
+      cognome: u.cognome,
+      nome: u.nome,
+      username: u.username,
+      sede: u.sede ? u.sede.citta : 'Tutte',
+    }]) %}
+    {% set azioni = azioni|merge([{voci: [
+      {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del componente dello staff',
+        url: path('docenti_staff_edit', {id: u.id})},
+      {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Elimina il componente dello staff',
+        titolo_modale: u.cognome ~ ' ' ~ u.nome, contenuto: 'message.cancella_staff'|trans,
+        url: path('docenti_staff_delete', {id: u.id})},
+    ]}]) %}
   {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="5">
-            <a class="btn btn-primary btn-sm" href="{{ path('docenti_staff_edit', {id: 0}) }}" role="button" title="Aggiungi un nuovo docente allo staff">{{ 'label.add'|trans }}</a>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  {% else %}
-    <div class="alert alert-info" role="alert">
-      Nessun componente dello staff trovato
-    </div>
-  {% endif %}
-  </div>
-  <div class="text-center mt-3">
-    <a class="btn btn-primary btn-sm" href="{{ path('docenti_staff_edit', {id: 0}) }}" role="button" title="Aggiungi un nuovo docente allo staff">{{ 'label.add'|trans }}</a>
-  </div>
-  {{ include('admin/include/paginazione.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_staff'}) }}
+  {{ t.tabella(colonne, righe, {
+    vuoto: 'Nessun componente dello staff trovato',
+    azioni: azioni,
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_staff'},
+  }) }}
 </div>
 {% endblock %}
 
 {% block pagina_js_fine %}
-{{ include('admin/include/thfloat.html.twig') }}
-<script>
-$(document).ready(function() {
-  $("#gs-paginazione").on("submit", function() {
-    var p = $("#jumpToPage").val();
-    window.location.href = "{{ path('docenti_staff') }}/"+p;
-    return false;
-  });
-});
-</script>
+{{ include('admin/include/tabella-js.html.twig', {url_paginazione: 'docenti_staff'}) }}
 {% endblock %}

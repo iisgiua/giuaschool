@@ -1,0 +1,153 @@
+{##
+  # tabella: componente riutilizzabile per le tabelle del pannello admin
+  #
+  # Uso:
+  #   {% import 'admin/include/tabella.html.twig' as t %}
+  #   {{ t.tabella(colonne, righe, opzioni) }}
+  #
+  # I pulsanti di azione si rendono come icone Tabler a tratti senza fondo: il
+  # colore lo porta solo il simbolo (voce.icona), quindi la colonna delle
+  # azioni non aggiunge colore alla tabella. Il testo della voce resta come
+  # title e come sr-only per chi non vede il simbolo.
+  #
+  # colonne: elenco di {titolo, chiave, classe, tipo, formato, vuoto}
+  #   - tipo 'testo' (default): valore della chiave, escape automatico
+  #   - tipo 'data'          : valore della chiave formattato con 'formato'
+  #   - tipo 'stato'          : stato in testo (titolo_vero / titolo_falso, colore_vero / colore_falso)
+  #   - tipo 'html'          : valore già pronto, renderizzato senza escape
+  # opzioni: {id, classi, vuoto, chiave_riga, mappa, classi_riga, azioni, paginazione}
+  #   - mappa: {chiave, valori}       colora la riga in base al valore di una proprietà
+  #   - azioni: {titolo, voci: [...]} oppure elenco di configurazioni, una per riga
+  #     i pulsanti della cella sono resi in .gs-azioni: flex con justify-content
+  #     flex-start, quindi stanno affiancati a sinistra separati dal gap
+  #     voci: {tipo: link|conferma|info|personalizzato, etichetta, titolo, url, contenuto, condizione, icona}
+  #       - 'personalizzato' accetta attributi: {data-target: '#id', ...} da stampare sul <button>
+  #       - icona: nome del simbolo Tabler (eye, pencil, trash, ...). Con icona il
+  #         pulsante esce come .gs-btn-icona: sfondo neutro, icona colorata
+  #       - classi: classi extra da aggiungere al <button>/<a>
+#   i pulsanti di aggiunta non si passano qui: vanno in testata, con
+#     admin/include/titolo-bottoni.html.twig, che li stampa a destra del titolo
+  #   - paginazione: {maxPagine, pagina, url}
+  # ##}
+
+{## Elenco etichetta/valore per il contenuto delle modali informative #}
+{% macro info(campi, classi_elenco = 'row', classi_etichetta = 'col-sm-2 text-right', classi_valore = 'col-sm-4') %}
+  <dl class="{{ classi_elenco }}">
+  {% for campo in campi %}
+    <dt class="{{ campo.classi_etichetta|default(classi_etichetta) }}">{{ campo.etichetta }}</dt>
+    <dd class="{{ campo.classi_valore|default(classi_valore) }}">{{ campo.valore is empty ? campo.vuoto|default('-') : campo.valore }}</dd>
+  {% endfor %}
+  </dl>
+{%- endmacro %}
+
+{% macro tabella(colonne, righe, opzioni = {}) %}
+  {% set vuoto = opzioni.vuoto|default('Nessun dato trovato') %}
+  {% set id_tabella = opzioni.id|default('gs-table') %}
+  {% set classi_tabella = opzioni.classi|default('table table-bordered table-hover table-striped table-sm gs-sticky-header') %}
+  {% set chiave_riga = opzioni.chiave_riga|default('id') %}
+  {% set azioni = opzioni.azioni|default(null) %}
+  {% set paginazione = opzioni.paginazione|default(null) %}
+  {# determinazione delle modali necessarie #}
+  {% set tutte_voci = azioni is null ? [] : (azioni.voci is defined ? azioni.voci : azioni|reduce((acc, conf) => acc|merge(conf.voci|default([])), [])) %}
+  {% set usa_modale_info = tutte_voci|filter(v => v.tipo|default('link') == 'info')|length > 0 %}
+  {% set usa_modale_conferma = tutte_voci|filter(v => v.tipo|default('link') == 'conferma')|length > 0 %}
+  <div class="table-responsive">
+  {% if righe is not empty %}
+    <table id="{{ id_tabella }}" class="{{ classi_tabella }}">
+      {# .thead-light e' una classe di Bootstrap 4: questa macro e' del pannello admin, #}
+    {# le pagine utenti standard usano include/tabella.html.twig, che e' agnostica #}
+    <thead class="thead-light">
+        <tr>
+  {% for colonna in colonne %}
+          <th class="col-auto {{ colonna.classe|default('') }}" scope="col">{{ colonna.titolo }}</th>
+  {% endfor %}
+    {% if azioni is not null %}
+          <th class="col-auto {{ azioni.classe|default('') }}" scope="col">{{ azioni.titolo|default('label.action'|trans) }}</th>
+    {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+  {% for riga in righe %}
+        {%- set conf_azioni = azioni.voci is defined ? azioni : (azioni[loop.index0]|default(none)) -%}
+        {%- set classi_riga = opzioni.classi_riga[loop.index0]|default('') -%}
+        {%- if opzioni.mappa is defined and opzioni.mappa.chiave is defined -%}
+          {%- set valore_mappa = attribute(riga, opzioni.mappa.chiave) -%}
+          {%- if opzioni.mappa.valori[valore_mappa|default(0)] is defined -%}
+            {%- set classi_riga = opzioni.mappa.valori[valore_mappa] -%}
+          {%- endif -%}
+        {%- endif -%}
+        <tr{% if classi_riga is not empty %} class="{{ classi_riga }}"{% endif %}>
+  {% for colonna in colonne %}
+    {%- set valore = colonna.chiave is defined ? attribute(riga, colonna.chiave) : null -%}
+          <td class="{{ colonna.classe_cella|default('') }}">
+    {% if colonna.tipo|default('testo') == 'stato' %}
+      {%- set testo_stato = valore ? (colonna.titolo_vero|default('label.si'|trans)) : (colonna.titolo_falso|default('label.no'|trans)) -%}
+      {%- set classe_stato = 'text-' ~ (valore ? (colonna.colore_vero|default('success')) : (colonna.colore_falso|default('danger'))) -%}
+      <small class="{{ classe_stato }}">{{ testo_stato }}</small>
+    {% elseif colonna.tipo|default('testo') == 'data' %}
+      <small>{{ valore ? valore|date(colonna.formato|default('d/m/Y')) : (colonna.vuoto|default('-')) }}</small>
+    {% elseif colonna.tipo|default('testo') == 'html' %}
+      {# contenuto già pronto dal template chiamante: nessun escape applicato #}
+      {{ valore|raw }}
+    {% else %}
+      <small>{{ valore is empty ? (colonna.vuoto|default('')) : valore }}</small>
+    {% endif %}
+          </td>
+  {% endfor %}
+    {% if conf_azioni is not null %}
+          {# niente pb-0: i pulsanti non hanno piu' il margin-bottom, quindi la #}
+          {# cella puo' tenere il padding normale della tabella anche in basso #}
+          <td class="{{ conf_azioni.classe_cella|default('') }}">
+            {# i pulsanti sono affiancati a sinistra: lo spazio fra uno e #}
+            {# l'altro lo mette il gap di .gs-azioni #}
+            <div class="gs-azioni">
+      {% for voce in conf_azioni.voci|default([]) %}
+        {%- if voce.condizione is not defined or voce.condizione -%}
+          {%- set titolo_bottone = voce.titolo|default(voce.titolo_modale|default('')) -%}
+          {%- set etichetta = voce.etichetta|default('') -%}
+          {#- con icona il pulsante non ha testo visibile: resta solo il simbolo -#}
+          {%- set extra_classi = '' -%}
+          {%- if voce.classi is defined -%}{%- set extra_classi = ' ' ~ voce.classi -%}{%- endif -%}
+          {%- if voce.icona is defined -%}
+            {%- set classe_bottone = 'btn btn-' ~ voce.stile|default('primary') ~ ' btn-xs gs-btn-icona' ~ extra_classi -%}
+            {%- set etichetta = '<span class="sr-only">' ~ etichetta ~ '</span>' ~ include('admin/include/icona.html.twig', {nome: voce.icona, stile: 'outline'}) -%}
+          {%- else -%}
+            {%- set classe_bottone = 'btn btn-' ~ voce.stile|default('primary') ~ ' btn-xs' ~ extra_classi -%}
+          {%- endif -%}
+          {%- if voce.tipo == 'conferma' -%}
+            <button type="button" class="{{ classe_bottone }} gs-modal-confirm-button" title="{{ titolo_bottone }}"
+              data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ voce.titolo_modale|default('') }}"
+              data-contenuto="{{ voce.contenuto }}" data-href="{{ voce.url }}"
+              data-csrf="{{ csrf_token(voce.csrf|default('delete')) }}">{{ etichetta|raw }}</button>
+          {%- elseif voce.tipo == 'info' -%}
+            <button type="button" class="{{ classe_bottone }}" title="{{ titolo_bottone }}"
+              data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ voce.titolo_modale }}"
+              data-cont-id="{{ id_tabella }}-info-{{ attribute(riga, chiave_riga) }}">{{ etichetta|raw }}</button>
+            <div class="d-none" id="{{ id_tabella }}-info-{{ attribute(riga, chiave_riga) }}">{{ voce.contenuto|raw }}</div>
+          {%- elseif voce.tipo == 'personalizzato' -%}
+            <button type="button" class="{{ classe_bottone }}" title="{{ titolo_bottone }}"{% for nome, valore in voce.attributi|default({}) %} {{ nome }}="{{ valore }}"{% endfor %}>{{ etichetta|raw }}</button>
+          {%- else -%}
+            {# NOSONAR Web:S6819 - role="button" richiesto dall'a11y su un <a> con classe .btn #}
+            <a class="{{ classe_bottone }}" href="{{ voce.url }}" role="button" title="{{ titolo_bottone }}">{{ etichetta|raw }}</a>
+          {%- endif -%}
+        {%- endif -%}
+      {% endfor %}
+            </div>
+          </td>
+    {% endif %}
+        </tr>
+  {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info" role="alert">
+      {{ vuoto }}
+    </div>
+  {% endif %}
+  </div>
+  {% if paginazione is not null %}
+    {{ include('admin/include/paginazione.html.twig', paginazione) }}
+  {% endif %}
+  {% if usa_modale_info %}{{ include('admin/include/modal-info.html.twig') }}{% endif %}
+  {% if usa_modale_conferma %}{{ include('admin/include/modal-confirm.html.twig') }}{% endif %}
+{% endmacro %}

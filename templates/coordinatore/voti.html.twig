@@ -26,8 +26,7 @@
       <a class="btn btn-success btn-sm" href="{{ path('coordinatore_voti', {classe: info.classe.id, periodo: info.periodo, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped">
-    <thead class="bg-success">
+  {% set intestazione_grezza_0 %}    <thead>
       <tr>
         <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
     {% for materia, m in dati.materie %}
@@ -37,8 +36,9 @@
     {% endfor %}
         <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Media complessiva">Media</span></small></th>
       </tr>
-    </thead>
-    <tbody>
+    </thead>{% endset %}
+
+{% set corpo_grezzo_0 %}
     {% for alunno, a in dati.alunni %}
       <tr>
         <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
@@ -64,8 +64,8 @@
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {intestazione_grezza: intestazione_grezza_0, corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
     {{ include('include/modal-info.html.twig') }}
   {% endif %}
 </div>

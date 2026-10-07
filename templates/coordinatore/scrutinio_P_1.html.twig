@@ -21,16 +21,12 @@
       {{ form_widget(form.inizio) }}
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-center text-info"><strong class="gs-big">Presenze dei docenti</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-3">Docente</th>
-        <th class="col-sm-4">Materia</th>
-        <th class="col-sm-5">Presenza</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Docente', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Materia', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'Presenza', classi: 'col-sm-5', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for docente, d in form.lista %}
       <tr>
         <td><strong>{{ dati.docenti[docente][0].cognome }} {{ dati.docenti[docente][0].nome }}</strong></td>
@@ -63,8 +59,8 @@
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   <div class="form-group gs-mt-5">
     <label class="col-sm-4 control-label gs-big">Presiede lo scrutinio</label>
     <div class="col-sm-8">

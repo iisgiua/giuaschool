@@ -7,17 +7,13 @@
 </div>
 <div class="modal-body">
   {% for periodo, v in dati %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-1">Data</th>
-        <th class="col-sm-3">Destinatari</th>
-        <th class="col-sm-5">Nota</th>
-        <th class="col-sm-3">Provvedimento</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Data', classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'Destinatari', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Nota', classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'Provvedimento', classi: 'col-sm-3', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for data, v1 in v %}
         {% for tipo, v2 in v1 %}
           {% for k, e in v2 %}
@@ -39,7 +35,7 @@
           {% endfor %}
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   {% endfor %}
 </div>

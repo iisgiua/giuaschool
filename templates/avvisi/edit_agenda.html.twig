@@ -2,7 +2,7 @@
 
 {% block pagina_menu %}
   {% if is_granted('ROLE_DOCENTE') %}
-    {{ include('ruolo_docente/menu.html.twig', {attivo: 'agenda'}) }}
+    {{ include('ruolo_docente/menu.html.twig') }}
   {% elseif is_granted('ROLE_ATA') %}
     {{ include('ruolo_ata/menu.html.twig') }}
   {% elseif is_granted('ROLE_GENITORE') %}
@@ -127,7 +127,7 @@ $(document).ready(function() {
     maxViewMode: 1,
     daysOfWeekDisabled: "0",
     startDate: "{{ date()|date('d/m/Y') }}",
-    datesDisabled: {{ info.festivi|raw }},
+    {% if info.festivi %}datesDisabled: {{ info.festivi|raw }},{% endif %}
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,

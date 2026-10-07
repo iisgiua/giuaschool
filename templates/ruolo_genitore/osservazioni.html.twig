@@ -11,18 +11,12 @@
     {% for periodo, v in dati %}
       {% if v is not empty %}
   <div class="gs-pobs-wrapper">
-  <table class="gs-pobs-table">
-    {% if periodo %}
-      <caption class="gs-pobs-caption"><strong>{{ periodo }}</strong></caption>
-    {% endif %}
-    <thead>
-      <tr>
-        <th class="col-sm-2">Data</th>
-        <th class="col-sm-3">Materia</th>
-        <th class="col-sm-7">Osservazioni</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Data', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Materia', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Osservazioni', classi: 'col-sm-7', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for data, v1 in v %}
         {% for k, e in v1 %}
       <tr>
@@ -35,8 +29,8 @@
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, intestazione: [intestazione], classi: 'gs-pobs-table'}) }}
   </div>
       {% endif %}
     {% else %}

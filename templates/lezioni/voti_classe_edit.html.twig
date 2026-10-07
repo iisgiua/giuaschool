@@ -74,7 +74,7 @@ $(document).ready(function() {
     daysOfWeekDisabled: "0",
     startDate: "{{ label.inizio }}",
     endDate: "{{ date()|date('d/m/Y') }}",
-    datesDisabled: {{ label.festivi|raw }},
+    {% if label.festivi %}datesDisabled: {{ label.festivi|raw }},{% endif %}
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,

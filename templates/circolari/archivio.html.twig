@@ -3,23 +3,23 @@
 {% block pagina_contenuto %}
 <div class="container-fluid gs-circolari-archivio">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.circolari_archivio'|trans }}</h1>
-  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-circolari-archivio-filters gs-mb-3">
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-filters gs-mb-3">
     <div id="{{ form.vars.id }}">
-      <div class="gs-circolari-archivio-filters-row">
-        <div class="gs-circolari-archivio-filter-col">
-          {{ form_label(form.anno) }}
+      <div class="gs-filters-row">
+        <div class="form-group gs-filter-col" title="{{ form.anno.vars.label|trans }}">
+          <label class="control-label" for="circolare_filtro_anno">{{ form.anno.vars.label|trans }}</label>
           {{ form_widget(form.anno) }}
         </div>
-        <div class="gs-circolari-archivio-filter-col">
-          {{ form_label(form.mese) }}
+        <div class="form-group gs-filter-col" title="{{ form.mese.vars.label|trans }}">
+          <label class="control-label" for="circolare_filtro_mese">{{ form.mese.vars.label|trans }}</label>
           {{ form_widget(form.mese) }}
         </div>
       </div>
-      <div class="form-group">
-        {{ form_label(form.oggetto) }}
+      <div class="form-group" title="{{ form.oggetto.vars.label|trans }}">
+        <label class="control-label" for="circolare_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
         {{ form_widget(form.oggetto) }}
       </div>
-      <div class="gs-circolari-archivio-buttons">
+      <div class="gs-filters-buttons">
         <button type="button" class="btn btn-default" id="circolare_archivio_reset" title="Resetta i filtri">Reset</button>
         {{ form_widget(form.submit) }}
       </div>
@@ -27,28 +27,31 @@
     </div>
   </form>
   {% if dati.lista|length > 0 %}
-  <table class="table table-bordered table-hover table-striped gs-mb-4">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-2">{{ 'label.numero'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.data'|trans }}</th>
-        <th class="col-sm-6">{{ 'label.oggetto'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for c in dati.lista %}
-      <tr>
-        <td>{{ c.circolare.numero }}</td>
-        <td>{{ c.circolare.data|date('d/m/Y') }}</td>
-        <td><small>{{ c.circolare.titolo }}</small></td>
-        <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {circolare: c.circolare.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
-        </td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  {% set intestazione = [
+    {contenuto: 'label.numero'|trans, classi: 'col-sm-2', scope: 'col'},
+    {contenuto: 'label.data'|trans, classi: 'col-sm-2', scope: 'col'},
+    {contenuto: 'label.oggetto'|trans, classi: 'col-sm-6', scope: 'col'},
+    {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'}
+  ] %}
+  {% set righe = [] %}
+  {% for c in dati.lista %}
+    {% set pulsanti = [] %}
+    {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+      nome: 'eye', etichetta: 'Visualizza', titolo: 'Visualizza i dettagli della circolare',
+      classi: 'gs-button-remote',
+      attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote',
+                  'data-href': path('circolari_dettagli_gestione', {circolare: c.circolare.id})}})]) %}
+    {% set righe = righe|merge([{celle: [
+      {contenuto: c.circolare.numero},
+      {contenuto: c.circolare.data|date('d/m/Y')},
+      {contenuto: '<small>' ~ c.circolare.titolo ~ '</small>'},
+      {contenuto: pulsanti}
+    ]}]) %}
+  {% endfor %}
+  {{ include('include/tabella.html.twig', {
+    intestazione: [intestazione], corpo: righe,
+    classi: 'table table-bordered table-hover table-striped gs-mb-4'
+  }) }}
   {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Nessuna circolare presente</strong>

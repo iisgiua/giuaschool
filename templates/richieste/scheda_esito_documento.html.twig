@@ -50,6 +50,6 @@
     <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['utenti']|number_format(2, ',') }}% ({{ dati.lista[nome][1]['utenti'] }} su {{ dati.totale.utenti }})</strong></td>
     <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['utenti']|number_format(2, ',') }}% ({{ dati.lista[nome][0]['utenti'] }} su {{ dati.totale.utenti }})</strong></td>
   </tr>
+</table>
   {% endif %}
 {% endfor %}
-</table>

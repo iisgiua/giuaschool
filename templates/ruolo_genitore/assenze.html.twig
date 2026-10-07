@@ -13,16 +13,12 @@
       ((dati.evidenza.assenza is defined and dati.evidenza.assenza|length > 0) or
       (dati.evidenza.ritardo is defined and dati.evidenza.ritardo|length > 0) or
       (dati.evidenza.uscita is defined and dati.evidenza.uscita|length > 0)) %}
-  <table class="table table-bordered table-hover table-striped table-condensed gs-mb-5">
-    <caption class="text-danger text-center gs-big"><strong>Da giustificare</strong></caption>
-    <thead class="bg-warning">
-      <tr>
-        <th>Data</th>
-        <th>Tipo</th>
-        <th>Giustificazione</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Data', scope: 'col'},
+      {contenuto: 'Tipo', scope: 'col'},
+      {contenuto: 'Giustificazione', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for tipo, e in dati.evidenza %}
         {% for v in e %}
       <tr>
@@ -48,8 +44,8 @@
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped table-condensed gs-mb-5'}) }}
     {% endif %}
   <table class="table table-bordered table-hover table-striped">
     <caption class="text-info text-center gs-big"><strong>Situazione globale</strong></caption>
@@ -76,17 +72,13 @@
   </table>
   <div id="gs-giustificazioni"></div>
     {% for periodo, v in dati.lista %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th>Data</th>
-        <th>Tipo</th>
-        <th>Annotazioni</th>
-        <th>Giustificazione</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Data', scope: 'col'},
+      {contenuto: 'Tipo', scope: 'col'},
+      {contenuto: 'Annotazioni', scope: 'col'},
+      {contenuto: 'Giustificazione', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_1 %}
       {% for data, v1 in v %}
         {% for tipo, e in v1 %}
       <tr>
@@ -150,8 +142,8 @@
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_1, classi: 'table table-bordered table-hover table-striped'}) }}
       {{ include('include/modal-remote.html.twig') }}
     {% else %}
   <div class="alert alert-info" role="alert">

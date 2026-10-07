@@ -6,59 +6,72 @@
   {% if dati|length == 0 %}
   <div class="alert alert-warning text-center gs-big"><strong>Non hai inserito i ricevimenti dei genitori</strong></div>
   {% else %}
-    {% for messaggio in app.flashes('avviso') %}
-  <div class="alert alert-warning gs-big gs-mb-3" role="alert">
-    <strong>{{ messaggio|trans }}</strong>
-  </div>
-    {% endfor %}
-  <table class="table table-bordered table-hover table-striped gs-mb-0">
-    <thead class="bg-success">
-      <tr>
-        <th>{{ 'label.colloquio_ricevimento'|trans }}</th>
-        <th>{{ 'label.sede'|trans }}</th>
-        <th>{{ 'label.tipo'|trans }}</th>
-        <th>{{ 'label.colloquio_luogo'|trans }}</th>
-        <th>{{ 'label.colloquio_durata'|trans }}</th>
-        <th>{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for d in dati %}
-      <tr{% if not d.ricevimento.abilitato %} class="danger"{% endif %}>
-        <td>
-      {% if d.ricevimento.data < date('today') %}
-          <span class="glyphicon glyphicon-ban-circle text-danger gs-mr-2" aria-hidden="true"></span>
-          <em>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i') }} alle {{ d.ricevimento.fine|date('G:i') }}</em>
-      {% elseif d.ricevimento.abilitato %}
-          <span class="glyphicon glyphicon-ok text-success gs-mr-2" aria-hidden="true"></span>
-          <strong>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i') }} alle {{ d.ricevimento.fine|date('G:i') }}</strong>
+    {{ include('admin/include/flash.html.twig') }}
+  {% set intestazione = [
+    {contenuto: 'label.colloquio_ricevimento'|trans, scope: 'col'},
+    {contenuto: 'label.sede'|trans, scope: 'col'},
+    {contenuto: 'label.tipo'|trans, scope: 'col'},
+    {contenuto: 'label.colloquio_luogo'|trans, scope: 'col'},
+    {contenuto: 'label.colloquio_durata'|trans, scope: 'col'},
+    {contenuto: 'label.action'|trans, scope: 'col'}
+  ] %}
+  {% set righe = [] %}
+  {% for d in dati %}
+    {% set scaduto = d.ricevimento.data < date('today') %}
+    {# prima cella: simbolo di stato + data, con lo stesso testo di prima #}
+    {% set prima %}
+      {%- if scaduto -%}
+        {{ include('admin/include/icona.html.twig', {nome: 'circle-x', stile: 'outline', classe: 'gs-mr-2 text-danger'}) }}
+        <em>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i') }} alle {{ d.ricevimento.fine|date('G:i') }}</em>
+      {%- elseif d.ricevimento.abilitato -%}
+        {{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2 text-success'}) }}
+        <strong>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i') }} alle {{ d.ricevimento.fine|date('G:i') }}</strong>
+      {%- else -%}
+        {{ include('admin/include/icona.html.twig', {nome: 'circle-x', stile: 'outline', classe: 'gs-mr-2 text-danger'}) }}
+        <strong>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i') }} alle {{ d.ricevimento.fine|date('G:i') }}</strong>
+      {%- endif -%}
+    {% endset %}
+    {# pulsanti di riga: solo icona #}
+    {% set pulsanti = [] %}
+    {% if not scaduto %}
+      {% if d.ricevimento.abilitato and d.richieste > 0 %}
+        {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+          nome: 'pencil', etichetta: 'label.edit'|trans, titolo: 'Modifica le impostazioni del ricevimento indicato',
+          stile: 'warning', classi: 'gs-modal-confirm-button',
+          attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm',
+                      'data-href': path('colloqui_edit', {id: d.ricevimento.id}),
+                      'data-text': 'message.colloquio_modifica_con_richieste'|trans,
+                      'data-csrf': csrf_token('delete')}})]) %}
       {% else %}
-          <span class="glyphicon glyphicon-remove text-danger gs-mr-2" aria-hidden="true"></span>
-          <strong>{{ d.ricevimento.data|format_date('full')|title }} dalle {{ d.ricevimento.inizio|date('G:i') }} alle {{ d.ricevimento.fine|date('G:i') }}</strong>
+        {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+          nome: 'pencil', etichetta: 'label.edit'|trans, titolo: 'Modifica le impostazioni del ricevimento indicato',
+          url: path('colloqui_edit', {id: d.ricevimento.id})})]) %}
       {% endif %}
-        </td>
-        <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}{{ d.ricevimento.sede.nomeBreve }}{% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
-        <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}{{ ('label.tipo_colloquio_' ~ d.ricevimento.tipo)|trans }}{% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
-        <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}<small>{{ d.ricevimento.luogo }}</small>{% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
-        <td>{% if d.ricevimento.data < date('today') %}<em>{% endif %}{{ d.ricevimento.durata }} minuti ({{ d.ricevimento.numero }} colloqui){% if d.ricevimento.data < date('today') %}</em>{% endif %}</td>
-        <td>
-      {% if d.ricevimento.data >= date('today') %}
-        {% if d.ricevimento.abilitato and d.richieste > 0 %}
-          <button class="btn btn-warning btn-xs gs-modal-confirm-button gs-mr-1 gs-mb-1" title="Modifica le impostazioni del ricevimento indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_edit', {id: d.ricevimento.id}) }}" data-text="{{ 'message.colloquio_modifica_con_richieste'|trans }}" data-csrf="{{ csrf_token('delete') }}"><strong>{{ 'label.edit'|trans }}</strong></button>
-        {% else %}
-          <a class="btn btn-primary btn-xs gs-mr-1 gs-mb-1" href="{{ path('colloqui_edit', {id: d.ricevimento.id}) }}" role="button" title="Modifica le impostazioni del ricevimento indicato"><strong>{{ 'label.edit'|trans }}</strong></a>
-        {% endif %}
-        {% if d.ricevimento.abilitato and d.richieste == 0 %}
-          <a class="btn btn-danger btn-xs gs-mr-1 gs-mb-1" href="{{ path('colloqui_enable', {id: d.ricevimento.id, stato: 0}) }}" role="button" title="Disabilita il ricevimento indicato"><strong>Disabilita</strong></a>
-        {% elseif not d.ricevimento.abilitato %}
-          <a class="btn btn-success btn-xs gs-mr-1 gs-mb-1" href="{{ path('colloqui_enable', {id: d.ricevimento.id, stato: 1}) }}" role="button" title="Abilita il ricevimento indicato"><strong>Abilita</strong></a>
-        {% endif %}
+      {% if d.ricevimento.abilitato and d.richieste == 0 %}
+        {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+          nome: 'circle-x', etichetta: 'Disabilita', titolo: 'Disabilita il ricevimento indicato', stile: 'danger',
+          url: path('colloqui_enable', {id: d.ricevimento.id, stato: 0})})]) %}
+      {% elseif not d.ricevimento.abilitato %}
+        {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+          nome: 'check', etichetta: 'Abilita', titolo: 'Abilita il ricevimento indicato', stile: 'success',
+          url: path('colloqui_enable', {id: d.ricevimento.id, stato: 1})})]) %}
       {% endif %}
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+    {% endif %}
+    {# le celle scadute restano in corsivo: era cosi' prima #}
+    {% set apri = scaduto ? '<em>' : '' %}
+    {% set chiudi = scaduto ? '</em>' : '' %}
+    {% set righe = righe|merge([{
+      classi: d.ricevimento.abilitato ? '' : 'danger',
+      celle: [
+        {contenuto: prima},
+        {contenuto: apri ~ d.ricevimento.sede.nomeBreve ~ chiudi},
+        {contenuto: apri ~ ('label.tipo_colloquio_' ~ d.ricevimento.tipo)|trans ~ chiudi},
+        {contenuto: apri ~ '<small>' ~ d.ricevimento.luogo ~ '</small>' ~ chiudi},
+        {contenuto: apri ~ d.ricevimento.durata ~ ' minuti (' ~ d.ricevimento.numero ~ ' colloqui)' ~ chiudi},
+        {contenuto: pulsanti}
+      ]}]) %}
+  {% endfor %}
+  {{ include('include/tabella.html.twig', {intestazione: [intestazione], corpo: righe}) }}
   {% endif %}
   <div class="text-right gs-mt-4">
     <a class="btn btn-primary gs-mr-3 gs-mb-1" href="{{ path('colloqui_edit') }}" role="button" title="Aggiungi un singolo ricevimento indicando data e ora"><strong>Aggiungi ricevimento singolo</strong></a>

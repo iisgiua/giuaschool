@@ -14,20 +14,12 @@
   <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-3"><em>Clicca sul pulsante di modifica per inserire le comunicazioni, o su una comunicazione compilata per modificarla.</em></h2>
     {% if dati.debiti|length > 0 %}
   <div>
-    <table class="table table-bordered table-hover table-striped">
-      <caption class="gs-text-normal text-center gs-big gs-pb-0"><strong>Debiti formativi</strong></caption>
-      <thead class="bg-success">
-        <tr>
-          <th class="col-sm-3 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
-          <th class="col-sm-7 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Materie con debito formativo">Materie</span></small>
-          </th>
-          <th class="col-sm-2 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-            <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Comunicazione dei debiti formativi">Comunicazione</span></small>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
+    {% set intestazione = [
+      {contenuto: '<small>Alunno</small>', classi: 'col-sm-3 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
+      {contenuto: '<small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Materie con debito formativo">Materie</span></small>', classi: 'col-sm-7 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
+      {contenuto: '<small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Comunicazione dei debiti formativi">Comunicazione</span></small>', classi: 'col-sm-2 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
         {% for alunno, a in dati.debiti %}
         <tr>
           {% for materia, m in a %}
@@ -54,8 +46,8 @@
           {% endfor %}
         </tr>
         {% endfor %}
-      </tbody>
-    </table>
+      {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   </div>
     {% else %}
   <div class="alert alert-success gs-mb-3" role="alert">
@@ -97,16 +89,6 @@ $(document).ready(function() {
   $('a.gs-wait-page').click(function (event) {
     $('#gs-modal-waiting').modal('show');
     return true;
-  });
-  $('#gs-fixed-header table').on("floatThead", function(e, isFloated, floatContainer) {
-    var c=floatContainer.find('thead');
-    if(isFloated){
-      c.hide();
-      c.removeClass("bg-success").addClass("bg-info");
-      c.fadeIn();
-    } else {
-      c.removeClass("bg-info").addClass("bg-success");
-    }
   });
   // init
   $('#gs-fixed-header table').floatThead({top: 60});

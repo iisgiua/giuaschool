@@ -1,11 +1,10 @@
 {% extends 'ruolo_ata/index.html.twig' %}
 
-{% block pagina_submenu %}
-  {{ include('ruolo_ata/menu_segreteria.html.twig') }}
-{% endblock %}
-
 {% block pagina_contenuto %}
 <div class="container-fluid gs-mt-2">
+  <div class="gs-mb-2">
+    <a class="btn btn-primary gs-mr-3" href="{{ path('segreteria_scrutini') }}" role="button" title="Torna alla pagina di scelta degli alunni"><span class="glyphicon glyphicon-backward gs-mr-3" aria-hidden="true"></span><strong>{{ 'label.indietro'|trans }}</strong></a>
+  </div>
   <h1 class="text-center gs-h2 gs-mt-0">{{ ((periodo == 'P' or periodo == 'S') ? 'Scrutinio ') ~ ('label.periodo_' ~ periodo)|trans }} di {{ alunno.cognome }} {{ alunno.nome }} ({{ alunno.dataNascita|date('d/m/Y') }})</h1>
   {% if periodo == 'A' %}
   <h2 class="text-center gs-h2 gs-mt-0">Classe {{ scrutinio.classe[0:1] }}ª {{ scrutinio.classe[1:] }}</h2>
@@ -39,14 +38,11 @@
   <strong class="gs-big">SCRUTINIO RINVIATO</strong>
   </div>
       {% endif %}
-  <table class="table table-bordered table-hover table-striped gs-mt-4">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Documento</th>
-        <th class="col-sm-6">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for d in dati.documenti %}
       <tr>
         {% if d[0:1] == 'V' %}
@@ -69,18 +65,14 @@
         </td>
       </tr>
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
     {% elseif periodo == 'P' or periodo == 'S' %}
-  <table class="table table-bordered table-hover table-striped gs-mt-4">
-    <caption class="text-center text-info"><strong class="gs-big">Scrutinio svolto in data {{ scrutinio.data|date('d/m/Y') }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Documento</th>
-        <th class="col-sm-6">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_1 %}
       <tr>
         <td><strong>Verbale dello scrutinio</strong></td>
         <td>
@@ -109,19 +101,15 @@
         </td>
       </tr>
       {% endif %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_1, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
     {% elseif periodo == 'F' %}
   <div class="text-center text-info"><strong class="gs-big">Scrutinio finale del {{ scrutinio.data|date('d/m/Y') }}</strong></div>
-  <table class="table table-bordered table-hover table-striped gs-mt-4">
-    <caption class="text-center text-info"><strong class="gs-big">Documenti della classe</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Documento</th>
-        <th class="col-sm-6">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_2 %}
       <tr>
         <td><strong>Verbale dello scrutinio</strong></td>
         <td>
@@ -150,17 +138,13 @@
         </td>
       </tr>
       {% endif %}
-    </tbody>
-  </table>
-  <table class="table table-bordered table-hover table-striped gs-mt-4">
-    <caption class="text-center text-info"><strong class="gs-big">Documenti dello studente</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Documento</th>
-        <th class="col-sm-6">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_2, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
+  {% set intestazione = [
+      {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_3 %}
       {% if periodo == 'F' and dati.cittadinanza is defined and dati.cittadinanza %}
       <tr>
         <td><strong>Elaborato di cittadinanza attiva</strong></td>
@@ -226,22 +210,18 @@
       </tr>
         {% endif %}
       {% endif %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_3, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
     {% elseif periodo == 'G' %}
   <div class="text-center text-info"><strong class="gs-big">Scrutinio svolto in data {{ scrutinio.data|date('d/m/Y') }}</strong></div>
       {% if dati.rinviato.scrutinio is defined %}
   <div class="text-center text-info"><strong class="gs-big">Scrutinio rinviato svolto in data {{ dati.rinviato.scrutinio.data|date('d/m/Y') }}</strong></div>
       {% endif %}
-  <table class="table table-bordered table-hover table-striped gs-mt-4">
-    <caption class="text-center text-info"><strong class="gs-big">Documenti della classe</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Documento</th>
-        <th class="col-sm-6">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_4 %}
       <tr>
         <td><strong>Verbale dello scrutinio</strong></td>
         <td>
@@ -304,17 +284,13 @@
       </tr>
         {% endif %}
       {% endif %}
-    </tbody>
-  </table>
-  <table class="table table-bordered table-hover table-striped gs-mt-4">
-    <caption class="text-center text-info"><strong class="gs-big">Documenti dello studente</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Documento</th>
-        <th class="col-sm-6">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_4, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
+  {% set intestazione = [
+      {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_5 %}
       {% if dati.esito.esito == 'A' or (dati.esito.esito == 'X' and dati.rinviato.esito is defined and dati.rinviato.esito.esito == 'A') %}
       <tr>
         <td><strong>Comunicazione dei voti</strong></td>
@@ -342,12 +318,9 @@
         </td>
       </tr>
       {% endif %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_5, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
     {% endif %}
   {% endif %}
-  <div class="gs-mt-5">
-    <a class="btn btn-primary gs-mr-3" href="{{ path('segreteria_scrutini') }}" role="button" title="Torna alla pagina di scelta degli alunni"><span class="glyphicon glyphicon-backward gs-mr-3" aria-hidden="true"></span><strong>{{ 'label.indietro'|trans }}</strong></a>
-  </div>
 </div>
 {% endblock %}

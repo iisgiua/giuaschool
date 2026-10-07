@@ -7,6 +7,8 @@
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   {% elseif not cattedra %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_voti'|trans }}</h1>
   <div class="alert alert-warning" role="alert">
@@ -15,6 +17,8 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_voti'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4"><em>{{ info.materia }}</em></h2>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   <div class="row text-center gs-big gs-mb-2"><em>Clicca su un voto per modificarlo o eliminarlo.</em></div>
   <div class="row gs-mb-1">
     <div class="col-sm-4">
@@ -43,8 +47,7 @@
   </div>
     {% if info.pagina.compatta %}
   <div class="gs-table-sticky-wrapper">
-    <table class="gs-table-sticky">
-      <thead>
+  {% set intestazione_grezza_0 %}      <thead>
         <tr>
           <th rowspan="2" class="gs-col-sticky gs-color-1">Alunno</th>
       {% if info.pagina.scritto %}
@@ -87,8 +90,9 @@
         {% endif %}
       {% endif %}
         </tr>
-      </thead>
-      <tbody>
+      </thead>{% endset %}
+
+{% set corpo_grezzo_0 %}
       {% for k, a in dati.alunni %}
         {% if (cattedra.materia.tipo != 'R' or a.religione == info.religioneTipo) and dati.trasferiti[a.id] is not defined %}
         <tr>
@@ -157,13 +161,12 @@
         </tr>
         {% endif %}
       {% endfor %}
-      </tbody>
-    </table>
+      {% endset %}
+    {{ include('include/tabella.html.twig', {intestazione_grezza: intestazione_grezza_0, corpo_grezzo: corpo_grezzo_0, classi: 'gs-table-sticky'}) }}
   </div>
     {% else %}
   <div class="gs-table-sticky-wrapper">
-    <table class="gs-table-sticky">
-      <thead>
+    {% set intestazione_grezza_1 %}      <thead>
         <tr>
           <th rowspan="2" class="gs-col-sticky gs-color-1">Alunno</th>
       {% if info.pagina.scritto %}
@@ -230,8 +233,9 @@
         {% endif %}
       {% endif %}
         </tr>
-      </thead>
-      <tbody>
+      </thead>{% endset %}
+
+    {% set corpo_grezzo_1 %}
       {% for k, a in dati.alunni %}
         {% if (cattedra.materia.tipo != 'R' or a.religione == info.religioneTipo) and dati.trasferiti[a.id] is not defined %}
         <tr>
@@ -302,8 +306,8 @@
         </tr>
         {% endif %}
       {% endfor %}
-      </tbody>
-    </table>
+      {% endset %}
+    {{ include('include/tabella.html.twig', {intestazione_grezza: intestazione_grezza_1, corpo_grezzo: corpo_grezzo_1, classi: 'gs-table-sticky'}) }}
   </div>
     {% endif %}
     {{ include('include/modal-info.html.twig') }}

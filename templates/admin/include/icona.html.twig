@@ -1,0 +1,40 @@
+{##
+  # icona: icona SVG dallo sprite Tabler Icons
+  #    parametri:
+  #      nome   (obbligatorio) nome del simbolo, es. home, settings, book
+  #      classe (opzionale)    classi aggiuntive, es. 'icon-sm gs-mr-2'
+  #      titolo (opzionale)    se valorizzato racchiude l'icona in uno <span title="...">
+  #      stile  (opzionale)    'filled' (default) oppure 'outline'
+  #
+  #    Le icone sono usate solo nella barra laterale e nell'intestazione: nelle
+  #    tabelle pulsanti e stati sono resi in testo.
+  #
+  #    L'URL dello sprite sta qui e in nessun altro posto: se cambiano i nomi
+  #    dei file non va toccato alcun template.
+  #    I nomi dei simboli sono in public/vendor/tabler-icons/tabler-sprite-filled.svg
+  #    e tabler-sprite.svg
+  #
+  #    NB: stile='outline' serve per le poche icone che Tabler non fornisce in
+  #    versione filled, come 'logout', 'printer' e 'paperclip': usare il filled
+  #    resterebbe senza simbolo e l'icona non si vedrebbe.
+  #    Elenco aggiornato: python3 tools/tabler_icons.py --check
+  #    I pulsanti delle tabelle usano sempre outline (include/bottone-azione).
+  #
+  #    NB: non usabile dentro stringhe JavaScript (serve markup, non testo):
+  #    li' va usata una variabile Twig con l'URL dello sprite.
+  # ##}
+{%- set stile = stile|default('filled') -%}
+{# le icone a tratti hanno bisogno della classe .icon-outline: senza, il path
+   senza fill si disegna come un blocchetto pieno invece della sagoma #}
+{# filter() con un arrow ripulisce i pezzi vuoti: senza, una classe assente
+   lascia un doppio spazio in class="" #}
+{%- set classi = ['icon', stile == 'outline' ? 'icon-outline' : '', classe|default('')]|join(' ')|split(' ')|filter(v => v)|join(' ') -%}
+{%- if titolo|default('')|length > 0 -%}
+<span title="{{ titolo }}">
+{%- endif -%}
+<svg class="{{ classi }}" aria-hidden="true">
+  <use xlink:href="{{ asset('vendor/tabler-icons/tabler-sprite' ~ (stile == 'outline' ? '' : '-filled') ~ '.svg') }}#{{ nome }}"></use>
+</svg>
+{%- if titolo|default('')|length > 0 -%}
+</span>
+{%- endif -%}

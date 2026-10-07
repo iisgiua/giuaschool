@@ -1,73 +1,57 @@
 {% extends 'admin/layout-sidebar.html.twig' %}
 
+{% import 'admin/include/tabella.html.twig' as t %}
+
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {# pulsanti dei cambiamenti di classe: servono al titolo, quindi definiti qui #}
+  {% set pulsanti = [
+    {url: path('alunni_classe_edit'), etichetta: 'label.add'|trans, titolo: 'Nuovo cambio classe di un alunno',
+      classe: 'btn btn-primary btn-sm mr-1 mb-1'},
+    {url: path('alunni_classe_edit', {id: 0, tipo: 'I'}), etichetta: 'label.alunno_inserito'|trans,
+      titolo: 'Nuovo inserimento di un alunno', classe: 'btn btn-primary btn-sm mr-1 mb-1'},
+    {url: path('alunni_classe_edit', {id: 0, tipo: 'T'}), etichetta: 'label.alunno_trasferito'|trans,
+      titolo: 'Nuovo trasferimento di un alunno', classe: 'btn btn-primary btn-sm mr-1 mb-1'},
+    {url: path('alunni_classe_edit', {id: 0, tipo: 'S'}), etichetta: 'label.alunno_cambio_sezione'|trans,
+      titolo: 'Nuovo cambio di sezione di un alunno', classe: 'btn btn-primary btn-sm mr-1 mb-1'}
+  ] %}
+  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
+  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: pulsanti}) }}
   {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
-  <div class="table-responsive">
-  {% if dati.lista is not empty %}
-    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="margin-top:-2.5rem">
-      <thead class="thead-light">
-        <tr class="sticky-top">
-          <th class="col-auto" scope="col">{{ 'label.alunno'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.classe'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.data_inizio'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.data_fine'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.note'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
-        </tr>
-      </thead>
-      <tbody>
+  {% set colonne = [
+    {titolo: 'label.alunno'|trans, chiave: 'alunno'},
+    {titolo: 'label.classe'|trans, chiave: 'classe'},
+    {titolo: 'label.data_inizio'|trans, chiave: 'data_inizio'},
+    {titolo: 'label.data_fine'|trans, chiave: 'data_fine'},
+    {titolo: 'label.note'|trans, chiave: 'note'}
+  ] %}
+  {% set righe = [] %}
+  {% set azioni = [] %}
   {% for c in dati.lista %}
-        <tr>
-          <td><small>{{ c.cognome }} {{ c.nome }} ({{ c.dataNascita|date('d/m/Y') }})</small></td>
-          <td><small>{{ c.anno ? c.anno ~ 'ª ' ~ c.sezione ~ (c.gruppo ? ('-' ~ c.gruppo)) }}</small></td>
-          <td><small>{{ c.cambio.inizio|date('d/m/Y') }}</small></td>
-          <td><small>{{ c.cambio.fine|date('d/m/Y') }}</small></td>
-          <td><small>{{ c.cambio.note }}</small></td>
-          <td class="pb-0">
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_classe_edit', {id: c.cambio.id}) }}" role="button" title="Modifica i dati del cambio classe"><i class="fas fa-edit"></i></a>
-            <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('alunni_classe_delete', {id: c.cambio.id}) }}" role="button" title="Cancella i dati del cambio classe"><i class="fas fa-trash"></i></a>
-          </td>
-        </tr>
+    {% set righe = righe|merge([{
+      alunno: c.cognome ~ ' ' ~ c.nome ~ ' (' ~ c.dataNascita|date('d/m/Y') ~ ')',
+      classe: c.anno ? c.anno ~ 'ª ' ~ c.sezione ~ (c.gruppo ? ('-' ~ c.gruppo) : ''),
+      data_inizio: c.cambio.inizio|date('d/m/Y'),
+      data_fine: c.cambio.fine|date('d/m/Y'),
+      note: c.cambio.note
+    }]) %}
+    {% set azioni = azioni|merge([{voci: [
+      {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del cambio classe',
+        url: path('alunni_classe_edit', {id: c.cambio.id})},
+      {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Cancella i dati del cambio classe',
+        titolo_modale: c.cognome ~ ' ' ~ c.nome, contenuto: 'message.cancella_cambio_classe'|trans,
+        url: path('alunni_classe_delete', {id: c.cambio.id})}
+    ]}]) %}
   {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="6">
-            <a class="btn btn-primary btn-sm mr-1 mb-1" href="{{ path('alunni_classe_edit') }}" role="button" title="Nuovo cambio classe di un alunno">{{ 'label.add'|trans }}</a>
-            <a class="btn btn-primary btn-sm mr-1 mb-1" href="{{ path('alunni_classe_edit', {id: 0, tipo: 'I'}) }}" role="button" title="Nuovo inserimento di un alunno">{{ 'label.alunno_inserito'|trans }}</a>
-            <a class="btn btn-primary btn-sm mr-1 mb-1" href="{{ path('alunni_classe_edit', {id: 0, tipo: 'T'}) }}" role="button" title="Nuovo trasferimento di un alunno">{{ 'label.alunno_trasferito'|trans }}</a>
-            <a class="btn btn-primary btn-sm mr-1 mb-1" href="{{ path('alunni_classe_edit', {id: 0, tipo: 'S'}) }}" role="button" title="Nuovo cambio di sezione di un alunno">{{ 'label.alunno_cambio_sezione'|trans }}</a>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  {% else %}
-    <div class="alert alert-info" role="alert">
-      Nessun cambio classe trovato
-    </div>
-  {% endif %}
-  </div>
-  <div class="text-center mt-3">
-    <a class="btn btn-primary btn-sm mr-1 mb-1" href="{{ path('alunni_classe_edit') }}" role="button" title="Nuovo cambio classe di un alunno">{{ 'label.add'|trans }}</a>
-    <a class="btn btn-primary btn-sm mr-1 mb-1" href="{{ path('alunni_classe_edit', {id: 0, tipo: 'I'}) }}" role="button" title="Nuovo inserimento di un alunno">{{ 'label.alunno_inserito'|trans }}</a>
-    <a class="btn btn-primary btn-sm mr-1 mb-1" href="{{ path('alunni_classe_edit', {id: 0, tipo: 'T'}) }}" role="button" title="Nuovo trasferimento di un alunno">{{ 'label.alunno_trasferito'|trans }}</a>
-    <a class="btn btn-primary btn-sm mr-1 mb-1" href="{{ path('alunni_classe_edit', {id: 0, tipo: 'S'}) }}" role="button" title="Nuovo cambio di sezione di un alunno">{{ 'label.alunno_cambio_sezione'|trans }}</a>
-  </div>
-  {{ include('admin/include/paginazione.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_classe'}) }}
+  {{ t.tabella(colonne, righe, {
+    vuoto: 'Nessun cambio classe trovato',
+    azioni: azioni,
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_classe'}
+  }) }}
 </div>
 {% endblock %}
 
 {% block pagina_js_fine %}
 {{ include('admin/include/thfloat.html.twig') }}
-<script>
-$(document).ready(function() {
-  $("#gs-paginazione").on("submit", function() {
-    var p = $("#jumpToPage").val();
-    window.location.href = "{{ path('alunni_classe') }}/"+p;
-    return false;
-  });
-});
-</script>
+{{ include('admin/include/tabella-js.html.twig', {url_paginazione: 'alunni_classe'}) }}
 {% endblock %}

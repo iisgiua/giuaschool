@@ -24,18 +24,14 @@
   {% if dati.voti is defined %}
     {% for materia, v in dati.voti %}
       {% for periodo, v1 in v %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>Valutazioni: {{ materia }} - {{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-2">Data</th>
-        <th class="col-sm-1">Tipo</th>
-        <th class="col-sm-3">Argomenti o descrizione della prova</th>
-        <th class="col-sm-1">Voto</th>
-        <th class="col-sm-5">Giudizio</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Data', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Tipo', classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'Argomenti o descrizione della prova', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Voto', classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'Giudizio', classi: 'col-sm-5', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
         {% for data, v2 in v1 %}
           {% for e in v2 %}
       <tr>
@@ -47,8 +43,8 @@
       </tr>
           {% endfor %}
         {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
       {% endfor %}
     {% else %}
   <div class="alert alert-info gs-mt-4" role="alert">
@@ -59,19 +55,12 @@
   {% if dati.scrutini is defined %}
     {% for periodo, v in dati.scrutini %}
       {% if (periodo == 'P' or periodo == 'S') and not alunno.frequenzaEstero %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0">
-      <strong>Scrutinio del {{ ('label.periodo_' ~ periodo)|trans }}</strong><br>
-      <em><small>Presa visione: {{ v.visto }}</small></em>
-    </caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-4">Materia</th>
-        <th class="col-sm-6">Voto</th>
-        <th class="col-sm-2">Ore di assenza</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'Voto', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Ore di assenza', classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_1 %}
         {% for materia, m in v.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
@@ -92,8 +81,8 @@
           {% endif %}
       </tr>
         {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_1, classi: 'table table-bordered table-hover table-striped'}) }}
       {% elseif periodo == 'F' %}
         {% if v.esito.esito == 'L' %}
   <div class="alert alert-warning gs-mt-4 text-center" role="alert">
@@ -120,19 +109,12 @@
     </div>
  </div>
         {% else %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0">
-      <strong>{{ ('label.periodo_' ~ periodo)|trans }} - Esito: {{ ('label.esito_' ~ v.esito.esito)|trans }}</strong><br>
-      <em><small>Presa visione: {{ v.visto }}</small></em>
-    </caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-4">Materia</th>
-        <th class="col-sm-4">Voto</th>
-        <th class="col-sm-2">Ore di assenza</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'Voto', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'Ore di assenza', classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_2 %}
           {% for materia, m in v.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
@@ -153,8 +135,8 @@
             {% endif %}
       </tr>
           {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_2, classi: 'table table-bordered table-hover table-striped'}) }}
         {% endif %}
       {% elseif periodo == 'G' %}
         {% if v.esito.esito == 'X' %}
@@ -166,19 +148,12 @@
     </div>
   </div>
         {% else %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0">
-      <strong>{{ ('label.periodo_' ~ periodo)|trans }} - Esito: {{ ('label.esito_' ~ v.esito.esito)|trans }}</strong><br>
-      <em><small>Presa visione: {{ v.visto }}</small></em>
-    </caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-4">Materia</th>
-        <th class="col-sm-6">Voto</th>
-        <th class="col-sm-2">Ore di assenza</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'Voto', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Ore di assenza', classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_3 %}
           {% for materia, m in v.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
@@ -195,8 +170,8 @@
             {% endif %}
       </tr>
           {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_3, classi: 'table table-bordered table-hover table-striped'}) }}
         {% endif %}
       {% endif %}
     {% else %}
@@ -235,17 +210,13 @@
     </tbody>
   </table>
     {% for periodo, v in dati.assenze.lista %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>Assenze {{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th>Data</th>
-        <th>Tipo</th>
-        <th>Annotazioni</th>
-        <th>Giustificazione</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Data', scope: 'col'},
+      {contenuto: 'Tipo', scope: 'col'},
+      {contenuto: 'Annotazioni', scope: 'col'},
+      {contenuto: 'Giustificazione', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_4 %}
       {% for data, v1 in v %}
         {% for tipo, e in v1 %}
       <tr>
@@ -275,8 +246,8 @@
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_4, classi: 'table table-bordered table-hover table-striped'}) }}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti assenze</strong>
@@ -285,17 +256,13 @@
   {% endif %}
   {% if dati.note is defined %}
     {% for periodo, v in dati.note %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>Note disciplinari {{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-2">Data</th>
-        <th class="col-sm-2">Tipo</th>
-        <th class="col-sm-5">Nota</th>
-        <th class="col-sm-3">Provvedimento</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Data', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Tipo', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Nota', classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'Provvedimento', classi: 'col-sm-3', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_5 %}
       {% for data, v1 in v %}
         {% for tipo, v2 in v1 %}
           {% for k, e in v2 %}
@@ -315,8 +282,8 @@
           {% endfor %}
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_5, classi: 'table table-bordered table-hover table-striped'}) }}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti note disciplinari</strong>
@@ -325,16 +292,12 @@
   {% endif %}
   {% if dati.osservazioni is defined %}
     {% for periodo, v in dati.osservazioni %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>Osservazioni {{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-2">Data</th>
-        <th class="col-sm-3">Materia</th>
-        <th class="col-sm-7">Osservazioni</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Data', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Materia', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Osservazioni', classi: 'col-sm-7', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_6 %}
       {% for data, v1 in v %}
         {% for k, e in v1 %}
       <tr>
@@ -344,8 +307,8 @@
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_6, classi: 'table table-bordered table-hover table-striped'}) }}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti osservazioni</strong>

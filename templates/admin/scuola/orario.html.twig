@@ -1,89 +1,46 @@
 {% extends 'admin/layout-sidebar.html.twig' %}
 
+{% import 'admin/include/tabella.html.twig' as t %}
+
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
+  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('scuola_orario_edit'), etichetta: 'label.add'|trans, titolo: 'Nuovo orario'}]}) }}
   {{ include('admin/include/flash.html.twig') }}
-  <div class="table-responsive">
-  {% if dati is not empty %}
-    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="_margin-top:-2.5rem">
-      <thead class="thead-light">
-        <tr class="sticky-top">
-          <th class="col-auto" scope="col">{{ 'label.nome_orario'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.data_inizio'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.sede'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
-        </tr>
-      </thead>
-      <tbody>
+  {% set colonne = [
+    {titolo: 'label.nome_orario'|trans, chiave: 'nome'},
+    {titolo: 'label.data_inizio'|trans, chiave: 'inizio'},
+    {titolo: 'label.sede'|trans, chiave: 'sede'}
+  ] %}
+  {% set righe = [] %}
+  {% set azioni = [] %}
   {% for o in dati %}
-        <tr>
-          <td>{{ o.nome }}</td>
-          <td><small>{{ o.inizio|date('d/m/Y') }}</small></td>
-          <td><small>{{ o.sede.nomeBreve }}</small></td>
-          <td class="pb-0">
-            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" title="Mostra i dettagli dell'orario" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ o.nome }}" data-cont-id="info-orario-{{ o.id }}"><i class="fas fa-info-circle"></i></button>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_orario_edit', {id: o.id}) }}" role="button" title="Modifica i dati dell'orario"><i class="fas fa-edit"></i></a>
-            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella l'orario" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ o.nome }}" data-contenuto="{{ 'message.cancella_orario'|trans }}" data-href="{{ path('scuola_orario_delete', {id: o.id}) }}" data-csrf="{{ csrf_token('delete') }}"><i class="fas fa-trash"></i></button>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_orario_scansione', {id: o.id}) }}" role="button" title="Modifica la scansione oraria"><i class="fas fa-clock"></i></a>
-            <div class="d-none" id="info-orario-{{ o.id }}">
-              <dl class="row">
-                <dt class="col-sm-2 text-right">{{ 'label.nome_orario'|trans }}</dt>
-                <dd class="col-sm-10">{{ o.nome }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.data_inizio'|trans }}</dt>
-                <dd class="col-sm-4">{{ o.inizio|date('d/m/Y') }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.data_fine'|trans }}</dt>
-                <dd class="col-sm-4">{{ o.fine|date('d/m/Y') }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.sede'|trans }}</dt>
-                <dd class="col-sm-10">{{ o.sede.nome }}</dd>
-              </dl>
-            </div>
-          </td>
-        </tr>
+    {% set righe = righe|merge([{nome: o.nome, inizio: o.inizio|date('d/m/Y'), sede: o.sede.nomeBreve}]) %}
+    {% set voci = [
+      {tipo: 'info', etichetta: 'label.show'|trans, titolo: "Mostra i dettagli dell'orario", titolo_modale: o.nome,
+        contenuto: t.info([
+          {etichetta: 'label.nome_orario'|trans, valore: o.nome, classi_valore: 'col-sm-10'},
+          {etichetta: 'label.data_inizio'|trans, valore: o.inizio|date('d/m/Y'), classi_valore: 'col-sm-4'},
+          {etichetta: 'label.data_fine'|trans, valore: o.fine|date('d/m/Y'), classi_valore: 'col-sm-4'},
+          {etichetta: 'label.sede'|trans, valore: o.sede.nome, classi_valore: 'col-sm-10'}
+        ])},
+      {tipo: 'link', etichetta: 'label.edit'|trans, titolo: "Modifica i dati dell'orario",
+        url: path('scuola_orario_edit', {id: o.id})},
+      {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: "Cancella l'orario", titolo_modale: o.nome,
+        contenuto: 'message.cancella_orario'|trans, url: path('scuola_orario_delete', {id: o.id})},
+      {tipo: 'link', etichetta: 'label.scansione_oraria'|trans, titolo: 'Modifica la scansione oraria',
+        url: path('scuola_orario_scansione', {id: o.id})}
+    ] %}
+    {% set azioni = azioni|merge([{voci: voci}]) %}
   {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="4">
-            <a class="btn btn-primary btn-sm" href="{{ path('scuola_orario_edit') }}" role="button" title="Nuovo orario">{{ 'label.add'|trans }}</a>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  {% else %}
-    <div class="alert alert-info" role="alert">
-      Nessun orario trovato
-    </div>
-  {% endif %}
-  </div>
-  <div class="text-center mt-3">
-    <a class="btn btn-primary btn-sm" href="{{ path('scuola_orario_edit') }}" role="button" title="Nuovo orario">{{ 'label.add'|trans }}</a>
-  </div>
-  {{ include('admin/include/modal-info.html.twig') }}
-  {{ include('admin/include/modal-confirm.html.twig') }}
+  {{ t.tabella(colonne, righe, {
+    vuoto: 'Nessun orario trovato',
+    azioni: azioni
+      }) }}
 </div>
 {% endblock %}
 
 {% block pagina_js_fine %}
 {{ include('admin/include/thfloat.html.twig') }}
-<script>
-$(document).ready(function() {
-  $('#gs-modal-info').on('show.bs.modal', function (e) {
-    var titolo = $(e.relatedTarget).data('titolo');
-    var contenuto = $('#'+$(e.relatedTarget).data('cont-id')).html();
-    $(this).find('#gs-modal-info-titolo').html(titolo);
-    $(this).find('#gs-modal-info-contenuto').html(contenuto);
-  });
-  $('#gs-modal-confirm').on('show.bs.modal', function (e) {
-    var href = $(e.relatedTarget).data('href');
-    var csrf = $(e.relatedTarget).data('csrf');
-    var titolo = $(e.relatedTarget).data('titolo');
-    var contenuto = $(e.relatedTarget).data('contenuto');
-    $(this).find('#gs-modal-confirm-titolo').html(titolo);
-    $(this).find('#gs-modal-confirm-contenuto').html(contenuto);
-    $(this).find('#gs-modal-confirm-form').attr('action', href);
-    $(this).find('#gs-modal-confirm-csrf').val(csrf);
-  });
-});
-</script>
+{{ include('admin/include/tabella-js.html.twig') }}
 {% endblock %}

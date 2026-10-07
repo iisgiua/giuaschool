@@ -9,15 +9,12 @@
   </div>
   {% else %}
   <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_programmi'|trans|raw }}</em></div>
-  <table class="table table-bordered table-hover table-striped gs-mt-5">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-5">{{ 'label.cattedra'|trans }}</th>
-        <th class="col-sm-5">{{ 'label.documento'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'label.cattedra'|trans, classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'label.documento'|trans, classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for d in dati %}
       <tr>
         <td>
@@ -44,8 +41,8 @@
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mt-5'}) }}
   {% endif %}
   {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_programma'}) }}
 </div>

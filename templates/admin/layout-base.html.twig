@@ -1,5 +1,6 @@
 <!doctype html>
-<html dir="ltr" lang="it">
+{# gs-admin: imposta in main.css una dimensione base del font più compatta per l'area admin #}
+<html dir="ltr" lang="it" class="gs-admin">
 
 <head>
   <meta charset="utf-8">
@@ -59,8 +60,11 @@
                 app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</span>
               {% if is_granted('IS_AUTHENTICATED_FULLY') %} {# mostrato quando un utente è connesso #}
               <div class="nav-item dropdown mx-3">
+                {# NOSONAR Web:S6819 - role="button" su <a data-toggle="dropdown">: sostituire l'elemento #}
+                {# con un <button> altererebbe lo stile .nav-link/.btn e il funzionamento del menu dropdown. #}
                 <a id="gs-helpmenu-button" class="nav-link dropdown-toggle btn btn-xs btn-secondary py-1 px-2"
                   role="button" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                  onkeydown="if (event.key === ' ' || event.key === 'Spacebar') { event.preventDefault(); this.click(); }"
                   title="{{ app.session.get('/CONFIG/MENU/help').descrizione }}">
                   <span class="font-weight-bold">{{ app.session.get('/CONFIG/MENU/help').nome }}</span>
                   <svg class="icon icon-xs d-none d-xl-block ml-0" aria-hidden="true">
@@ -100,9 +104,7 @@
                 <a class="btn btn-default btn-icon rounded-0" href="{{ path('sistema_alias_exit') }}"
                   title="{{ 'title.alias_exit'|trans }}">
                   <span class="rounded-icon">
-                    <svg class="icon icon-secondary" aria-hidden="true">
-                      <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#sign-out-alt"></use>
-                    </svg>
+                    {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
                   </span>
                   <span class="d-none d-lg-block">{{ 'label.alias'|trans|upper }}</span>
                 </a>
@@ -110,9 +112,7 @@
                 <a class="btn btn-default btn-icon rounded-0" href="{{ path('logout') }}"
                   title="{{ 'title.logout'|trans }}">
                   <span class="rounded-icon">
-                    <svg class="icon icon-secondary" aria-hidden="true">
-                      <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#sign-out-alt"></use>
-                    </svg>
+                    {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
                   </span>
                   <span class="d-none d-lg-block">{{ 'label.logout'|trans|upper }}</span>
                 </a>
@@ -154,6 +154,7 @@
   <script>window.__PUBLIC_PATH__ = "{{ asset('vendor/bootstrap-italia/fonts') }}"</script>
   <script src="{{ asset('vendor/bootstrap-italia/js/bootstrap-italia.bundle.min.js') }}"></script>
   <script src="{{ asset('js/main.js?v=' ~ (filedate('js/main.js')|date('U'))) }}"></script>
+  <script src="{{ asset('js/notifiche.js?v=' ~ (filedate('js/notifiche.js')|date('U'))) }}"></script>
   {% block pagina_js_fine %}
   {% endblock %}
   {## # FINE caricamento javascript # ##}

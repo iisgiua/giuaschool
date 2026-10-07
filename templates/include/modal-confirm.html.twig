@@ -1,3 +1,5 @@
+{# NOSONAR Web:S6819 - role="dialog"/"document" sono richiesti dal markup Bootstrap 4 della modale: #}
+{# rimuoverli romperebbe lo stile .modal/.modal-dialog e la gestione della finestra da parte del JS. #}
 <div class="modal fade" id="gs-modal-confirm" tabindex="-1" role="dialog" aria-labelledby="gs-modal-confirm-label">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

@@ -1,118 +1,67 @@
 {% extends 'admin/layout-sidebar.html.twig' %}
 
+{% import 'admin/include/tabella.html.twig' as t %}
+
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
+  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('docenti_modifica_edit'), etichetta: 'label.add'|trans, titolo: 'Nuovo utente'}]}) }}
   {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
-  <div class="table-responsive">
-  {% if dati.lista is not empty %}
-    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="margin-top:-2.5rem">
-      <thead class="thead-light">
-        <tr class="sticky-top">
-          <th class="col-auto" scope="col">{{ 'label.stato'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.cognome'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.nome'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.username'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
-        </tr>
-      </thead>
-      <tbody>
+  {% set colonne = [
+    {titolo: 'label.stato'|trans, chiave: 'abilitato', tipo: 'stato',
+      titolo_vero: 'label.utente_attivo'|trans, titolo_falso: 'label.utente_disabilitato'|trans},
+    {titolo: 'label.cognome'|trans, chiave: 'cognome'},
+    {titolo: 'label.nome'|trans, chiave: 'nome'},
+    {titolo: 'label.username'|trans, chiave: 'username'}
+  ] %}
+  {% set azioni = [] %}
   {% for u in dati.lista %}
-        <tr{% if not u.abilitato %} class="table-danger"{% endif %}>
-          <td>
-    {% if u.abilitato %}
-            <span title="{{ 'label.utente_attivo'|trans }}">
-              <svg class="icon icon-xs icon-success" aria-hidden="true">
-                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#check"></use>
-              </svg>
-            </span>
-    {% else %}
-            <span title="{{ 'label.utente_disabilitato'|trans }}">
-              <svg class="icon icon-sm icon-danger" aria-hidden="true">
-                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#ban"></use>
-              </svg>
-            </span>
-    {% endif %}
-          </td>
-          <td><small>{{ u.cognome }}</small></td>
-          <td><small>{{ u.nome }}</small></td>
-          <td><small>{{ u.username }}</small></td>
-          <td class="pb-0">
-            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ u.cognome }} {{ u.nome }}" data-cont-id="info-utente-{{ u.id }}">{{ 'label.show'|trans }}</button>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_modifica_edit', {docente: u.id}) }}" role="button" title="Modifica i dati dell'utente">{{ 'label.edit'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_password', {id: u.id, tipo: 'E'}) }}" role="button" title="Genera una nuova password e la invia all'utente tramite email">{{ 'label.email_password'|trans }}</a>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('docenti_password', {id: u.id, tipo: 'P'}) }}" role="button" title="Genera una nuova password e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
+    {% set voci = [
+      {tipo: 'info', etichetta: 'label.show'|trans, titolo_modale: u.cognome ~ ' ' ~ u.nome,
+        contenuto: t.info([
+          {etichetta: 'label.nome'|trans, valore: u.nome},
+          {etichetta: 'label.cognome'|trans, valore: u.cognome},
+          {etichetta: 'label.sesso'|trans, valore: (u.sesso == 'M' ? 'label.maschile' : 'label.femminile')|trans},
+          {etichetta: 'label.codice_fiscale'|trans, valore: u.codiceFiscale},
+          {etichetta: 'label.ruolo'|trans, valore: ('label.' ~ u.roles[0])|trans},
+          {etichetta: 'label.spid'|trans, valore: (u.spid ? 'label.si' : 'label.no')|trans},
+          {etichetta: 'label.username'|trans, valore: u.username},
+          {etichetta: 'label.email'|trans, valore: u.email},
+          {etichetta: 'label.ultimo_accesso'|trans, valore: u.ultimoAccesso ? u.ultimoAccesso|date('d/m/Y H:i:s') : '', vuoto: 'NESSUNO'}
+        ])},
+      {tipo: 'link', etichetta: 'label.edit'|trans, titolo: "Modifica i dati dell'utente",
+        url: path('docenti_modifica_edit', {docente: u.id})},
+      {tipo: 'link', etichetta: 'label.email_password'|trans, titolo: "Genera una nuova password e la invia all'utente tramite email",
+        url: path('docenti_password', {id: u.id, tipo: 'E'})},
+      {tipo: 'link', etichetta: 'label.pdf_password'|trans, titolo: 'Genera una nuova password e la scarica come documento PDF',
+        url: path('docenti_password', {id: u.id, tipo: 'P'})}
+    ] %}
     {% if app.session.get('/CONFIG/ACCESSO/id_provider') is empty and u.otp %}
-            <a class="btn btn-danger btn-xs mr-1 mb-1" href="{{ path('docenti_reset', {id: u.id}) }}" role="button" title="Reset codice OTP">{{ 'label.reset_otp'|trans }}</a>
+      {% set voci = voci|merge([{tipo: 'conferma', stile: 'danger', etichetta: 'label.reset_otp'|trans,
+        titolo: 'Reset codice OTP', titolo_modale: u.cognome ~ ' ' ~ u.nome,
+        contenuto: 'message.reset_otp'|trans, url: path('docenti_reset', {id: u.id})}]) %}
     {% endif %}
     {% if u.abilitato %}
-            <a class="btn btn-danger btn-xs mb-1" href="{{ path('docenti_abilita', {id: u.id, abilita: 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
+      {% set voci = voci|merge([{tipo: 'conferma', stile: 'danger', etichetta: 'label.disable'|trans,
+        titolo: "Disabilita l'utente", titolo_modale: u.cognome ~ ' ' ~ u.nome,
+        contenuto: 'message.disabilita_docente'|trans, url: path('docenti_abilita', {id: u.id, abilita: 0})}]) %}
     {% else %}
-            <a class="btn btn-success btn-xs mb-1" href="{{ path('docenti_abilita', {id: u.id, abilita: 1}) }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
+      {% set voci = voci|merge([{tipo: 'conferma', stile: 'success', etichetta: 'label.enable'|trans,
+        titolo: "Abilita l'utente", titolo_modale: u.cognome ~ ' ' ~ u.nome,
+        contenuto: 'message.abilita_docente'|trans, url: path('docenti_abilita', {id: u.id, abilita: 1})}]) %}
     {% endif %}
-            <div class="d-none" id="info-utente-{{ u.id }}">
-              <dl class="row">
-                <dt class="col-sm-2 text-right">{{ 'label.nome'|trans }}</dt>
-                <dd class="col-sm-4">{{ u.nome }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.cognome'|trans }}</dt>
-                <dd class="col-sm-4">{{ u.cognome }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.sesso'|trans }}</dt>
-                <dd class="col-sm-4">{{ (u.sesso == 'M' ? 'label.maschile' : 'label.femminile')|trans }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.codice_fiscale'|trans }}</dt>
-                <dd class="col-sm-4">{{ u.codiceFiscale }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.ruolo'|trans }}</dt>
-                <dd class="col-sm-4">{{ ('label.' ~ u.roles[0])|trans }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.spid'|trans }}</dt>
-                <dd class="col-sm-4">{{ u.spid ? 'Si' : 'No' }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.username'|trans }}</dt>
-                <dd class="col-sm-4">{{ u.username }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.email'|trans }}</dt>
-                <dd class="col-sm-4">{{ u.email }}</dd>
-                <dt class="col-sm-2 text-right">{{ 'label.ultimo_accesso'|trans }}</dt>
-                <dd class="col-sm-4">{{ u.ultimoAccesso ? (u.ultimoAccesso|date('d/m/Y H:i:s')) : 'NESSUNO' }}</dd>
-              </dl>
-            </div>
-          </td>
-        </tr>
+    {% set azioni = azioni|merge([{voci: voci}]) %}
   {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="5">
-            <a class="btn btn-primary btn-sm" href="{{ path('docenti_modifica_edit') }}" role="button" title="Nuovo utente">{{ 'label.add'|trans }}</a>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  {% else %}
-    <div class="alert alert-info" role="alert">
-      Nessun docente trovato
-    </div>
-  {% endif %}
-  </div>
-  <div class="text-center mt-3">
-    <a class="btn btn-primary btn-sm" href="{{ path('docenti_modifica_edit') }}" role="button" title="Nuovo utente">{{ 'label.add'|trans }}</a>
-  </div>
-  {{ include('admin/include/paginazione.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_modifica'}) }}
-  {{ include('admin/include/modal-info.html.twig') }}
+  {{ t.tabella(colonne, dati.lista, {
+    vuoto: 'Nessun docente trovato',
+    mappa: {chiave: 'abilitato', valori: {1: '', 0: 'table-danger'}},
+    azioni: azioni,
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_modifica'}
+  }) }}
 </div>
 {% endblock %}
 
 {% block pagina_js_fine %}
 {{ include('admin/include/thfloat.html.twig') }}
-<script>
-$(document).ready(function() {
-  $("#gs-paginazione").on("submit", function() {
-    var p = $("#jumpToPage").val();
-    window.location.href = "{{ path('docenti_modifica') }}/"+p;
-    return false;
-  });
-  $('#gs-modal-info').on('show.bs.modal', function (e) {
-    var titolo = $(e.relatedTarget).data('titolo');
-    var contenuto = $('#'+$(e.relatedTarget).data('cont-id')).html();
-    $(this).find('#gs-modal-info-titolo').html(titolo);
-    $(this).find('#gs-modal-info-contenuto').html(contenuto);
-  });
-});
-</script>
+{{ include('admin/include/tabella-js.html.twig', {url_paginazione: 'docenti_modifica'}) }}
 {% endblock %}

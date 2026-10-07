@@ -37,9 +37,7 @@
   </div>
     {% endif %}
     {% for periodo, v in elenco_dati %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
-    <thead class="bg-success">
+  {% set intestazione_grezza_0 %}    <thead>
       <tr>
         <th>Data</th>
         <th>Argomenti</th>
@@ -48,8 +46,9 @@
         <th>Sostegno</th>
       {% endif %}
       </tr>
-    </thead>
-    <tbody>
+    </thead>{% endset %}
+
+{% set corpo_grezzo_0 %}
       {% for data, v1 in v %}
         {% for e in v1 %}
       <tr>
@@ -66,8 +65,8 @@
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {intestazione_grezza: intestazione_grezza_0, corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
     {% endfor %}
   {% endif %}
 </div>

@@ -17,8 +17,7 @@
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-  <table class="gs-lessons-table">
-    <thead>
+  {% set intestazione_grezza_0 %}    <thead>
       <tr>
         <th class="col-sm-2">Ora</th>
         <th class="col-sm-2">Materia</th>
@@ -26,8 +25,9 @@
         <th class="col-sm-{{ alunno.bes == 'H' ? 2 : 4 }}">Attività</th>
         {% if alunno.bes == 'H' %}<th class="col-sm-2">Sostegno</th>{% endif %}
       </tr>
-    </thead>
-    <tbody>
+    </thead>{% endset %}
+
+{% set corpo_grezzo_0 %}
       {% for k, v in dati['lezioni'] %}
       <tr>
         <td class="gs-lessons-ora"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}>{{ k }}ª: <span class="gs-lessons-orario">{{ v.inizio }} - {{ v.fine }}</span></td>
@@ -59,8 +59,8 @@
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {intestazione_grezza: intestazione_grezza_0, corpo_grezzo: corpo_grezzo_0, classi: 'gs-lessons-table'}) }}
   {% endif %}
 </div>
 {% endblock %}
@@ -84,7 +84,7 @@ $(document).ready(function() {
     defaultViewDate: "{{ data }}",
     startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
     endDate: "{{ date()|date('Y-m-d') }}",
-    datesDisabled: {{ lista_festivi|raw }},
+    {% if lista_festivi %}datesDisabled: {{ lista_festivi|raw }},{% endif %}
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,

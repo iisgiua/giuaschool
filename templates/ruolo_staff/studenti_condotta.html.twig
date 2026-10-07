@@ -3,23 +3,23 @@
 {% block pagina_contenuto %}
 <div class="container-fluid gs-studenti-condotta">
   <h1 class="text-center gs-h2 gs-mt-2">{{ titolo|trans }}</h1>
-  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-studenti-condotta-filters gs-mb-3">
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-filters gs-mb-3">
     <div id="staff_studenti_condotta">
-      <div class="gs-studenti-condotta-filters-row">
-        <div class="gs-studenti-condotta-filter-col">
+      <div class="gs-filters-row">
+        <div class="gs-filter-col">
           {{ form_label(form[0].sede) }}
           {{ form_widget(form[0].sede) }}
         </div>
       </div>
-      <div class="gs-studenti-condotta-filters-row">
-        <div class="gs-studenti-condotta-filter-col">
+      <div class="gs-filters-row">
+        <div class="gs-filter-col">
           {{ form_label(form[0].inizio) }}
           <div class="input-group date">
             {{ form_widget(form[0].inizio, {attr: {widget: false}}) }}
             <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
           </div>
         </div>
-        <div class="gs-studenti-condotta-filter-col">
+        <div class="gs-filter-col">
           {{ form_label(form[0].fine) }}
           <div class="input-group date">
             {{ form_widget(form[0].fine, {attr: {widget: false}}) }}
@@ -27,7 +27,7 @@
           </div>
         </div>
       </div>
-      <div class="gs-studenti-condotta-buttons">
+      <div class="gs-filters-buttons">
         <button type="button" class="btn btn-default" id="studenti_condotta_reset" title="Resetta i filtri">Reset</button>
         {{ form_widget(form[0].submit) }}
       </div>
@@ -39,16 +39,13 @@
     <strong>Non sono presenti dati</strong>
   </div>
   {% else %}
-  <table class="table table-bordered table-hover">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-2">Sede</th>
-        <th class="col-sm-2">Classe</th>
-        <th class="col-sm-6">Numero note</th>
-        <th class="col-sm-2">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Sede', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Classe', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Numero note', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for c in dati.lista %}
       <tr>
         <td><strong class="big">{{ c.classe.sede.nomeBreve }}</strong></td>
@@ -59,8 +56,8 @@
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover'}) }}
     {{ include('include/modal-remote.html.twig') }}
     {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'staff_studenti_condotta'}) }}
   {% endif %}

@@ -11,40 +11,54 @@
     </div>
   </div>
   {% if info.pagina == 1 and dati.bozza|length > 0 %}
-  <table class="table table-bordered table-hover table-striped gs-mb-0">
-    <caption class="text-center text-warning gs-pb-0"><strong class="gs-big">Circolari in stato di bozza</strong></caption>
-    <thead class="bg-warning">
-      <tr>
-        <th class="col-sm-1">{{ 'label.data'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.numero'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.sede'|trans }}</th>
-        <th class="col-sm-6">{{ 'label.oggetto'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for k, c in dati.bozza %}
-      <tr>
-        <td>{{ c.data|date('d/m/Y') }}</td>
-        <td>{{ c.numero }}</td>
-        <td><small>{% for s in c.sedi %}{{ s.citta|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
-        <td><small>{{ c.titolo }}</small></td>
-        <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {circolare: c.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
-      {% if dati.azioni['unpublish-' ~ k].edit is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('circolari_edit', {circolare: c.id}) }}" role="button" title="Modifica la circolare indicata"><span class="glyphicon glyphicon-edit"></span></a>
-      {% endif %}
-      {% if dati.azioni['unpublish-' ~ k].delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la circolare indicata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('circolari_delete', {circolare: c.id}) }}" data-text="{{ 'message.cancella_circolare'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-      {% endif %}
-      {% if dati.azioni['unpublish-' ~ k].publish is defined %}
-          <a class="btn btn-success btn-xs" href="{{ path('circolari_publish', {circolare: c.id, pubblica: 1}) }}" role="button" title="Pubblica la circolare indicata"><span class="glyphicon glyphicon-book"></span></a>
-      {% endif %}
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  {% set intestazione = [
+    {contenuto: 'label.data'|trans, classi: 'col-sm-1', scope: 'col'},
+    {contenuto: 'label.numero'|trans, classi: 'col-sm-1', scope: 'col'},
+    {contenuto: 'label.sede'|trans, classi: 'col-sm-2', scope: 'col'},
+    {contenuto: 'label.oggetto'|trans, classi: 'col-sm-6', scope: 'col'},
+    {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'}
+  ] %}
+  {% set righe = [] %}
+  {% for k, c in dati.bozza %}
+    {% set pulsanti = [] %}
+    {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+      nome: 'eye', etichetta: 'Visualizza', titolo: 'Visualizza i dettagli della circolare',
+      classi: 'gs-button-remote',
+      attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote',
+                  'data-href': path('circolari_dettagli_gestione', {circolare: c.id})}})]) %}
+    {% if dati.azioni['unpublish-' ~ k].edit is defined %}
+      {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+        nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica la circolare indicata',
+        url: path('circolari_edit', {circolare: c.id})})]) %}
+    {% endif %}
+    {% if dati.azioni['unpublish-' ~ k].publish is defined %}
+      {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+        nome: 'book', etichetta: 'Pubblica', titolo: 'Pubblica la circolare indicata', stile: 'success',
+        url: path('circolari_publish', {circolare: c.id, pubblica: 1})})]) %}
+    {% endif %}
+    {% if dati.azioni['unpublish-' ~ k].delete is defined %}
+      {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+        nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella la circolare indicata', stile: 'danger',
+        classi: 'gs-modal-confirm-button',
+        attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm',
+                    'data-href': path('circolari_delete', {circolare: c.id}),
+                    'data-text': 'message.cancella_circolare'|trans,
+                    'data-csrf': csrf_token('delete')}})]) %}
+    {% endif %}
+    {% set righe = righe|merge([{celle: [
+      {contenuto: c.data|date('d/m/Y')},
+      {contenuto: c.numero},
+      {contenuto: '<small>' ~ c.sedi|map(s => s.citta|upper)|join(', ') ~ '</small>'},
+      {contenuto: '<small>' ~ c.titolo ~ '</small>'},
+      {contenuto: pulsanti}
+    ]}]) %}
+  {% endfor %}
+  {{ include('include/tabella.html.twig', {
+    didascalia: 'Circolari in stato di bozza',
+    classi_didascalia: 'text-center text-warning gs-pb-0',
+    intestazione: [intestazione], corpo: righe,
+    classe_intestazione: 'bg-warning'
+  }) }}
   <div class="row gs-mt-2">
     <div class="col-sm-offset-6 col-sm-6 text-right">
     {% if dati.azioni.add is defined %}
@@ -54,17 +68,17 @@
   </div>
   {% endif %}
   <div class="text-center text-success gs-pb-0"><strong class="gs-big">Circolari pubblicate</strong></div>
-  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-circolari-gestione-filters gs-mb-3">
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-filters gs-mb-3">
     <div id="{{ form.vars.id }}">
-      <div class="gs-circolari-gestione-filters-row">
-        <div class="gs-circolari-gestione-filter-col">
+      <div class="gs-filters-row">
+        <div class="gs-filter-col">
           {{ form_label(form.inizio) }}
           <div class="input-group date">
             {{ form_widget(form.inizio, {attr: {widget: false}}) }}
             <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
           </div>
         </div>
-        <div class="gs-circolari-gestione-filter-col">
+        <div class="gs-filter-col">
           {{ form_label(form.fine) }}
           <div class="input-group date">
             {{ form_widget(form.fine, {attr: {widget: false}}) }}
@@ -76,40 +90,43 @@
         {{ form_label(form.oggetto) }}
         {{ form_widget(form.oggetto) }}
       </div>
-      <div class="gs-circolari-gestione-buttons">
+      <div class="gs-filters-buttons">
         <button type="button" class="btn btn-default" id="circolare_gestione_reset" title="Resetta i filtri">Reset</button>
         {{ form_widget(form.submit) }}
       </div>
       {{ form_widget(form._token) }}
     </div>
   </form>
-  <table class="table table-bordered table-hover table-striped gs-mb-0">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-1">{{ 'label.data'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.numero'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.sede'|trans }}</th>
-        <th class="col-sm-6">{{ 'label.oggetto'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for k, c in dati.pubblicate.lista %}
-      <tr>
-        <td>{{ c.data|date('d/m/Y') }}</td>
-        <td>{{ c.numero }}</td>
-        <td><small>{% for s in c.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
-        <td><small>{{ c.titolo }}</small></td>
-        <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {circolare: c.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
-      {% if dati.azioni['publish-' ~ k].unpublish is defined %}
-          <a class="btn btn-warning btn-xs" href="{{ path('circolari_publish', {circolare: c.id, pubblica: 0}) }}" role="button" title="Rimuove la pubblicazione della circolare indicata"><span class="glyphicon glyphicon-trash"></span></a>
-      {% endif %}
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  {% set intestazione = [
+    {contenuto: 'label.data'|trans, classi: 'col-sm-1', scope: 'col'},
+    {contenuto: 'label.numero'|trans, classi: 'col-sm-1', scope: 'col'},
+    {contenuto: 'label.sede'|trans, classi: 'col-sm-2', scope: 'col'},
+    {contenuto: 'label.oggetto'|trans, classi: 'col-sm-6', scope: 'col'},
+    {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'}
+  ] %}
+  {% set righe = [] %}
+  {% for k, c in dati.pubblicate.lista %}
+    {% set pulsanti = [] %}
+    {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+      nome: 'eye', etichetta: 'Visualizza', titolo: 'Visualizza i dettagli della circolare',
+      classi: 'gs-button-remote',
+      attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote',
+                  'data-href': path('circolari_dettagli_gestione', {circolare: c.id})}})]) %}
+    {% if dati.azioni['publish-' ~ k].unpublish is defined %}
+      {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
+        nome: 'square-x', etichetta: 'Annulla pubblicazione',
+        titolo: 'Rimuove la pubblicazione della circolare indicata', stile: 'warning',
+        url: path('circolari_publish', {circolare: c.id, pubblica: 0})})]) %}
+    {% endif %}
+    {% set righe = righe|merge([{celle: [
+      {contenuto: c.data|date('d/m/Y')},
+      {contenuto: c.numero},
+      {contenuto: '<small>' ~ c.sedi|map(s => s.nomeBreve|upper)|join(', ') ~ '</small>'},
+      {contenuto: '<small>' ~ c.titolo ~ '</small>'},
+      {contenuto: pulsanti}
+    ]}]) %}
+  {% endfor %}
+  {{ include('include/tabella.html.twig', {intestazione: [intestazione], corpo: righe}) }}
   {{ include('include/paginate.html.twig', {maxPagine: dati.pubblicate.maxPagine, pagina: info.pagina, url: 'circolari_gestione'}) }}
   {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_circolare'}) }}
   {{ include('include/modal-remote.html.twig') }}

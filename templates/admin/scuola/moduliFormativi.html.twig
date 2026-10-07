@@ -1,79 +1,52 @@
 {% extends 'admin/layout-sidebar.html.twig' %}
 
+{% import 'admin/include/tabella.html.twig' as t %}
+
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
+  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('scuola_moduliFormativi_edit'), etichetta: 'label.add'|trans, titolo: 'Nuovo modulo formativo'}]}) }}
   {{ include('admin/include/flash.html.twig') }}
-  <div class="table-responsive">
-    <table class="table table-bordered table-hover table-striped table-sm gs-sticky-header" style="_margin-top:-2.5rem">
-      <thead class="thead-light">
-        <tr class="sticky-top">
-          <th class="col-auto" scope="col">{{ 'label.nome'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.tipo'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.classi'|trans }}</th>
-          <th class="col-auto" scope="col">{{ 'label.action'|trans }}</th>
-        </tr>
-      </thead>
-      <tbody>
+  {% set colonne = [
+    {titolo: 'label.nome'|trans, chiave: 'nome_breve'},
+    {titolo: 'label.tipo'|trans, chiave: 'tipo'},
+    {titolo: 'label.classi'|trans, chiave: 'classi'}
+  ] %}
+  {% set righe = [] %}
+  {% set azioni = [] %}
   {% for m in dati %}
-        <tr>
-          <td>{{ m.nomeBreve }}</td>
-          <td>{{ ('label.modulo_formativo_tipo_' ~ m.tipo)|trans }}</td>
-          <td><small>{% for c in m.classi %}{{ ('label.classi_' ~ c)|trans }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
-          <td class="pb-0">
-            <button type="button" class="btn btn-primary btn-xs mr-1 mb-1" title="Mostra i dettagli del modulo formativo" data-toggle="modal" data-target="#gs-modal-info" data-titolo="{{ m.nome }}" data-cont-id="info-moduloFormativo-{{ m.id }}"><i class="fas fa-info-circle"></i></button>
-            <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('scuola_moduliFormativi_edit', {id: m.id}) }}" role="button" title="Modifica i dati del modulo formativo"><i class="fas fa-edit"></i></a>
-            <button type="button" class="btn btn-danger btn-xs mr-1 mb-1 gs-modal-confirm-button" title="Cancella il modulo formativo" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ m.nome }}" data-contenuto="{{ 'message.cancella_moduloFormativo'|trans }}" data-href="{{ path('scuola_moduliFormativi_delete', {id: m.id}) }}" data-csrf="{{ csrf_token('delete') }}"><i class="fas fa-trash"></i></button>
-            <div class="d-none" id="info-moduloFormativo-{{ m.id }}">
-              <dl class="row">
-                <dt class="col-sm-3 text-right">{{ 'label.nome'|trans }}</dt>
-                <dd class="col-sm-9">{{ m.nome }}</dd>
-                <dt class="col-sm-3 text-right">{{ 'label.nome_breve'|trans }}</dt>
-                <dd class="col-sm-9">{{ m.nomeBreve }}</dd>
-                <dt class="col-sm-3 text-right">{{ 'label.tipo'|trans }}</dt>
-                <dd class="col-sm-9">{{ ('label.modulo_formativo_tipo_' ~ m.tipo)|trans }}</dd>
-                <dt class="col-sm-3 text-right">{{ 'label.classi'|trans }}</dt>
-                <dd class="col-sm-9">{% for c in m.classi %}{{ ('label.classi_' ~ c)|trans }}{{ not loop.last ? ', ' }}{% endfor %}</dd>
-              </dl>
-            </div>
-          </td>
-        </tr>
+    {% set classi = [] %}
+    {% for c in m.classi %}
+      {% set classi = classi|merge([('label.classi_' ~ c)|trans]) %}
+    {% endfor %}
+    {% set righe = righe|merge([{
+      nome_breve: m.nomeBreve,
+      tipo: ('label.modulo_formativo_tipo_' ~ m.tipo)|trans,
+      classi: classi|join(', ')
+    }]) %}
+    {% set azioni = azioni|merge([{voci: [
+      {tipo: 'info', etichetta: 'label.show'|trans, titolo: 'Mostra i dettagli del modulo formativo', titolo_modale: m.nome,
+        contenuto: t.info([
+          {etichetta: 'label.nome'|trans, valore: m.nome, classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-9'},
+          {etichetta: 'label.nome_breve'|trans, valore: m.nomeBreve, classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-9'},
+          {etichetta: 'label.tipo'|trans, valore: ('label.modulo_formativo_tipo_' ~ m.tipo)|trans,
+            classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-9'},
+          {etichetta: 'label.classi'|trans, valore: classi|join(', '), classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-9'}
+        ])},
+      {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del modulo formativo',
+        url: path('scuola_moduliFormativi_edit', {id: m.id})},
+      {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Cancella il modulo formativo', titolo_modale: m.nome,
+        contenuto: 'message.cancella_moduloFormativo'|trans, url: path('scuola_moduliFormativi_delete', {id: m.id})}
+    ]}]) %}
   {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="4" class="text-center">
-            <a class="btn btn-primary btn-sm" href="{{ path('scuola_moduliFormativi_edit') }}" role="button" title="Nuovo modulo formativo">{{ 'label.add'|trans }}</a>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-  {{ include('admin/include/modal-info.html.twig') }}
-  {{ include('admin/include/modal-confirm.html.twig') }}
+  {{ t.tabella(colonne, righe, {
+    vuoto: 'Nessun modulo formativo trovato',
+    azioni: azioni
+  }) }}
 </div>
 {% endblock %}
 
 {% block pagina_js_fine %}
 {{ include('admin/include/thfloat.html.twig') }}
-<script>
-$(document).ready(function() {
-  $('#gs-modal-info').on('show.bs.modal', function (e) {
-    var titolo = $(e.relatedTarget).data('titolo');
-    var contenuto = $('#'+$(e.relatedTarget).data('cont-id')).html();
-    $(this).find('#gs-modal-info-titolo').html(titolo);
-    $(this).find('#gs-modal-info-contenuto').html(contenuto);
-  });
-  $('#gs-modal-confirm').on('show.bs.modal', function (e) {
-    var href = $(e.relatedTarget).data('href');
-    var csrf = $(e.relatedTarget).data('csrf');
-    var titolo = $(e.relatedTarget).data('titolo');
-    var contenuto = $(e.relatedTarget).data('contenuto');
-    $(this).find('#gs-modal-confirm-titolo').html(titolo);
-    $(this).find('#gs-modal-confirm-contenuto').html(contenuto);
-    $(this).find('#gs-modal-confirm-form').attr('action', href);
-    $(this).find('#gs-modal-confirm-csrf').val(csrf);
-  });
-});
-</script>
+{{ include('admin/include/tabella-js.html.twig') }}
 {% endblock %}

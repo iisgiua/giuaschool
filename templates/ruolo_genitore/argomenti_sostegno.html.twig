@@ -26,17 +26,13 @@
     </div>
   </div>
     {% for periodo, v in dati %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th>Data</th>
-        <th>Materia</th>
-        <th>Argomenti e attività</th>
-        <th>Sostegno</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Data', scope: 'col'},
+      {contenuto: 'Materia', scope: 'col'},
+      {contenuto: 'Argomenti e attività', scope: 'col'},
+      {contenuto: 'Sostegno', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for data, v1 in v %}
         {% for materia, v2 in v1 %}
           {% for e in v2 %}
@@ -53,8 +49,8 @@
           {% endfor %}
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
     {% endfor %}
   {% endif %}
 </div>

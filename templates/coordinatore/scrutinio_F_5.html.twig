@@ -25,15 +25,12 @@
   </div>
   <div id="gs-alunni" class="gs-mt-5 gs-mb-5">
     <div class="text-primary text-center gs-h3">Impostare per ogni alunno i requisiti di ammissione all'esame</div>
-    <table class="table table-bordered table-hover table-striped">
-      <thead class="bg-success">
-        <tr>
-          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">Alunno</th>
-          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">Prove INVALSI</th>
-          <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">Ore FSL</th>
-        </tr>
-      </thead>
-      <tbody>
+    {% set intestazione = [
+      {contenuto: 'Alunno', classi: 'gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
+      {contenuto: 'Prove INVALSI', classi: 'gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
+      {contenuto: 'Ore FSL', classi: 'gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for alunno, a in dati.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
@@ -50,8 +47,8 @@
           </td>
         </tr>
       {% endfor %}
-      </tbody>
-    </table>
+      {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   </div>
     {% endif %}
   <div class="row gs-mt-5 gs-mb-5">

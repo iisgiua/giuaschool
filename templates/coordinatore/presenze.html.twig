@@ -8,41 +8,45 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ titolo|trans({classe: info.classe}) }}</h1>
-    {% for type, msgs in app.flashes %}
-      {% for msg in msgs %}
-  <div class="alert alert-{{ type }} text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert"><strong>{{ msg|trans }}</strong></div>
-      {% endfor %}
-    {% endfor %}
-  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="form-inline gs-mb-2">
+    {{ include('admin/include/flash.html.twig') }}
+  {% form_theme form[0] 'bootstrap_3_layout.html.twig' %}
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-filters gs-mb-3">
     <div id="{{ form[0].vars.id }}">
-      <div class="form-group" title="Filtro sull'alunno">
-        <label class="sr-only control-label" for="{{ form[0].alunno.vars.id }}">{{ form[0].alunno.vars.label|trans }}</label>
-        {{ form_widget(form[0].alunno) }}
+      <div class="gs-filters-row">
+        <div class="form-group gs-filter-col">
+          {{ form_label(form[0].alunno, null, {label_attr: {class: 'control-label'}}) }}
+          {{ form_widget(form[0].alunno) }}
+        </div>
       </div>
-      <div class="input-group date" title="Data iniziale per il filtro">
-        {{ form_widget(form[0].inizio, {attr: {widget: false}}) }}
-        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+      <div class="gs-filters-row">
+        <div class="form-group gs-filter-col">
+          {{ form_label(form[0].inizio, null, {label_attr: {class: 'control-label'}}) }}
+          <div class="input-group date">
+            {{ form_widget(form[0].inizio, {attr: {widget: false}}) }}
+            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+          </div>
+        </div>
+        <div class="form-group gs-filter-col">
+          {{ form_label(form[0].fine, null, {label_attr: {class: 'control-label'}}) }}
+          <div class="input-group date">
+            {{ form_widget(form[0].fine, {attr: {widget: false}}) }}
+            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+          </div>
+        </div>
       </div>
-      <div class="input-group date" title="Data finale per il filtro">
-        {{ form_widget(form[0].fine, {attr: {widget: false}}) }}
-        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
-      </div>
-      <div class="form-group _col-sm-2">
+      <div class="gs-filters-buttons">
         {{ form_widget(form[0].submit) }}
       </div>
       {{ form_widget(form[0]._token) }}
     </div>
   </form>
-  <table class="table table-bordered table-hover table-striped">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-3">Alunno</th>
-        <th class="col-sm-3">Data</th>
-        <th class="col-sm-3">Attività</th>
-        <th class="col-sm-3">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Alunno', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Data', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Attività', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'label.action'|trans, classi: 'col-sm-3', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for p in dati.lista %}
       <tr>
         <td>{{ p.alunno }}</td>
@@ -56,8 +60,8 @@
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   <div class="row gs-mt-2">
     <div class="col-sm-offset-6 col-sm-6 text-right">
       <a class="btn btn-primary" href="{{ path('coordinatore_presenze_add', {classe: info.classe.id}) }}" role="button" title="Pianifica nuove presenze fuori classe"><strong>Aggiungi</strong></a>

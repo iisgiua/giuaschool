@@ -1,5 +1,6 @@
 <!doctype html>
-<html dir="ltr" lang="it">
+{# gs-admin: imposta in main.css una dimensione base del font più compatta per l'area admin #}
+<html dir="ltr" lang="it" class="gs-admin">
 
 <head>
   <meta charset="utf-8">
@@ -13,7 +14,6 @@
   <meta name="author" content="Antonello Dessì">
   <title>{{ pagina_titolo|trans }}</title>
   <link href="{{ asset('vendor/bootstrap-italia/css/bootstrap-italia.min.css') }}" rel="stylesheet">
-  <link href="{{ asset('vendor/fontawesome/css/all.min.css') }}" rel="stylesheet">
   <link href="{{ asset('css/main.css?v=' ~ (filedate('css/main.css')|date('U'))) }}" rel="stylesheet">
   {% block pagina_css %}
   {% endblock %}
@@ -54,7 +54,7 @@
     <div class="gs-hdr-bar">
       <button type="button" class="gs-hdr-toggle" aria-expanded="false" aria-controls="gs-navbar-collapse-1"
         aria-label="Apri il menu di navigazione">
-        <i class="fas fa-bars" aria-hidden="true"></i>
+        {{ include('admin/include/icona.html.twig', {nome: 'menu-2'}) }}
       </button>
       <div class="gs-hdr-brand"
         aria-label="{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }} - anno scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}">
@@ -64,17 +64,17 @@
       {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         {% if is_granted('ROLE_IMPERSONATOR') %}
         <a class="gs-hdr-exit" href="{{ path('sistema_alias_exit') }}" title="Esci dall'alias" aria-label="Esci dall'alias">
-          <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
           <strong class="gs-hdr-exit-label">{{ 'label.alias'|trans|upper }}</strong>
         </a>
         {% elseif is_granted('ROLE_DOCENTE') and app.session.get('/APP/UTENTE/tipo_accesso') == 'Google' %}
         <a class="gs-hdr-exit" href="#" onClick="logoutGoogle()" title="Esci dal Registro Elettronico" aria-label="Esci dal Registro Elettronico">
-          <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
           <strong class="gs-hdr-exit-label">{{ 'label.logout'|trans|upper }}</strong>
         </a>
         {% else %}
         <a class="gs-hdr-exit" href="{{ path('logout') }}" title="Esci dal Registro Elettronico" aria-label="Esci dal Registro Elettronico">
-          <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
           <strong class="gs-hdr-exit-label">{{ 'label.logout'|trans|upper }}</strong>
         </a>
         {% endif %}
@@ -93,7 +93,7 @@
         {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <div class="gs-hdr-account">
           <a class="gs-hdr-profile" href="{{ path('utenti_profilo') }}" title="{{ 'title.modifica_profilo'|trans }}">
-            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+            {{ include('admin/include/icona.html.twig', {nome: 'user'}) }}
             <span class="gs-hdr-user">
               <span class="gs-hdr-user-name">{% if is_granted('ROLE_GENITORE') %}{{ app.user.alunno.nome }} {{
                 app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %}</span>
@@ -103,8 +103,21 @@
         </div>
         {% endif %}
         <nav class="gs-hdr-menu" aria-label="Menu principale">
+          {## # icone delle voci di primo livello, indicizzate per nome # ##}
+          {# Tabler Icons, set filled (sprite SVG, MIT): nomi dei <symbol> in #}
+          {# public/vendor/tabler-icons/tabler-sprite-filled.svg #}
+          {% set icone_menu = {
+            'Home':     'home',
+            'Sistema':  'settings',
+            'Scuola':   'school',
+            'ATA':      'briefcase',
+            'Docenti':  'book',
+            'Alunni':   'user'
+          } %}
           <ul class="nav navbar-nav gs-navbar-nav">
             {% for opt in app.session.get('/CONFIG/MENU/main').opzioni %}
+              {# il nome nel DB puo' contenere entity HTML (es. 'Recupero&nbsp;Password') #}
+              {% set nome_opzione = opt.nome|replace({'&nbsp;': ' ', '&agrave;': 'à', '&egrave;': 'è', '&igrave;': 'ì', '&ograve;': 'ò', '&ugrave;': 'ù'})|trim %}
               {% if opt.nome == '__SEPARATORE__' %}
                 <li role="none"><span class="divider"></span></li>
               {% elseif opt.sottomenu %}
@@ -116,6 +129,9 @@
                 {% endfor %}
                 <li class="dropdown{{ submenu_active ? ' active open' }}">
                   <a href="#" title="{{ opt.descrizione|raw }}" class="dropdown-toggle"{{ submenu_active ? ' aria-expanded="true"' }}>
+                    {% if icone_menu[nome_opzione] is defined %}
+                      {{ include('admin/include/icona.html.twig', {nome: icone_menu[nome_opzione], classe: 'icon-sm gs-mr-2'}) }}
+                    {% endif %}
                     <span>{{ opt.nome|raw }}</span>
                     <span class="caret"></span>
                   </a>
@@ -132,8 +148,8 @@
               {% else %}
                 <li{{ page_route == opt.url ? ' class="active"' }}>
                   <a href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
-                    {% if opt.icona %}
-                      <span class="glyphicon glyphicon-{{ opt.icona }} gs-mr-2" aria-hidden="true"></span>
+                    {% if icone_menu[nome_opzione] is defined %}
+                      {{ include('admin/include/icona.html.twig', {nome: icone_menu[nome_opzione], classe: 'icon-sm gs-mr-2'}) }}
                     {% endif %}
                     <span>{{ opt.nome|raw }}</span>
                   </a>
@@ -166,9 +182,7 @@
   {## # link TornaSu # ##}
   <a class="back-to-top back-to-top-small shadow" href="#" aria-hidden="true" data-attribute="back-to-top"
     title="Vai a inizio pagina">
-    <svg class="icon icon-light" aria-hidden="true">
-      <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#arrow-up"></use>
-    </svg>
+    {{ include('admin/include/icona.html.twig', {nome: 'circle-arrow-up', classe: 'icon-light'}) }}
   </a>
   {## # FINE link TornaSu # ##}
 
@@ -176,6 +190,7 @@
   <script>window.__PUBLIC_PATH__ = "{{ asset('vendor/bootstrap-italia/fonts') }}"</script>
   <script src="{{ asset('vendor/bootstrap-italia/js/bootstrap-italia.bundle.min.js') }}"></script>
   <script src="{{ asset('js/main.js?v=' ~ (filedate('js/main.js')|date('U'))) }}"></script>
+  <script src="{{ asset('js/notifiche.js?v=' ~ (filedate('js/notifiche.js')|date('U'))) }}"></script>
   <script>
     /* pannello di navigazione mobile: apre/chiude la barra laterale sotto i 992px */
     (function () {

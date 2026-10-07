@@ -58,15 +58,11 @@
   </div>
         {% endif %}
         {% if dati.voti|length > 0 and dati.esitoRinviato is empty %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>Voti assegnati</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-8">Materia</th>
-        <th class="col-sm-4">Voto</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', classi: 'col-sm-8', scope: 'col'},
+      {contenuto: 'Voto', classi: 'col-sm-4', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
           {% for v in dati.voti %}
       <tr>
         <td><strong>{{ v.materia.nome }}</strong></td>
@@ -75,18 +71,14 @@
         </td>
       </tr>
           {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
         {% elseif dati.votiRinviato is defined %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>Voti assegnati</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-8">Materia</th>
-        <th class="col-sm-4">Voto</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', classi: 'col-sm-8', scope: 'col'},
+      {contenuto: 'Voto', classi: 'col-sm-4', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_1 %}
           {% for v in dati.votiRinviato %}
       <tr>
         <td><strong>{{ v.materia.nome }}</strong></td>
@@ -95,27 +87,23 @@
         </td>
       </tr>
           {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_1, classi: 'table table-bordered table-hover table-striped'}) }}
         {% endif %}
         {% if dati.carenze|length > 0 and (dati.esito.esito == 'A' or (dati.esitoRinviato and dati.esitoRinviato.esito == 'A')) %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>Carenze da recuperare autonomamente</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Materia</th>
-        <th class="col-sm-6">Argomenti da recuperare</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Argomenti da recuperare', classi: 'col-sm-6', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_2 %}
           {% for v in dati.carenze %}
       <tr>
         <td><strong>{{ v[0] }}</strong></td>
         <td><small>{{ v[1] }}</small></td>
       </tr>
           {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_2, classi: 'table table-bordered table-hover table-striped'}) }}
         {% endif %}
       {% elseif periodo == 'P' or periodo == 'S' %}
         {% if dati.estero is defined or alunno.frequenzaEstero %}
@@ -123,19 +111,12 @@
     <div class="text-center"><strong class="gs-big">L'ALUNN{{ alunno.sesso == 'M' ? 'O' : 'A' }} FREQUENTA ALL'ESTERO</strong></div>
   </div>
         {% else %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-2">
-      <strong>Scrutinio del {{ periodo == 'P' ? app.session.get('/CONFIG/SCUOLA/periodo1_nome') : app.session.get('/CONFIG/SCUOLA/periodo2_nome') }}</strong>
-      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {classe: classe.id, alunno: alunno.id, tipo: 'P', periodo: periodo}) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei voti</strong></a>
-    </caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Materia</th>
-        <th class="col-sm-2">Voto</th>
-        <th class="col-sm-4">Ore di assenza</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Voto', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Ore di assenza', classi: 'col-sm-4', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_3 %}
           {% for materia, m in dati.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
@@ -148,22 +129,15 @@
             {% endif %}
       </tr>
           {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_3, classi: 'table table-bordered table-hover table-striped'}) }}
           {% if dati.debiti is defined %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-2">
-      <strong>Recupero dei debiti formativi</strong>
-      <a class="btn btn-primary btn-sm gs-ml-4" href="{{ path('pagelle_alunno', {classe: classe.id, alunno: alunno.id, tipo: 'D', periodo: periodo}) }}" role="button" title="Scarica la comunicazione con le indicazioni del recupero"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Comunicazione dei debiti</strong></a>
-    </caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-4">Materia</th>
-        <th class="col-sm-6">Argomenti da recuperare</th>
-        <th class="col-sm-2">Modalità di recupero</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'Argomenti da recuperare', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Modalità di recupero', classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_4 %}
             {% for materia, d in dati.debiti %}
       <tr>
         <td><strong>{{ dati.materie[materia].nome }}</strong></td>
@@ -171,8 +145,8 @@
         <td>{{ ('label.recupero_' ~ d.recupero)|trans }}</td>
       </tr>
             {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_4, classi: 'table table-bordered table-hover table-striped'}) }}
           {% endif %}
         {% endif %}
       {% elseif periodo == 'F' %}
@@ -241,15 +215,12 @@
     <div class="text-center"><strong class="gs-big">Esito dello scrutinio: SOSPENSIONE DEL GIUDIZIO</strong></div>
   </div>
           {% endif %}
-  <table class="table table-bordered table-hover table-striped ">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Materia</th>
-        <th class="col-sm-2">Voto</th>
-        <th class="col-sm-4">Ore di assenza</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Voto', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Ore di assenza', classi: 'col-sm-4', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_5 %}
           {% for materia, m in dati.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
@@ -262,8 +233,8 @@
             {% endif %}
       </tr>
           {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_5, classi: 'table table-bordered table-hover table-striped'}) }}
   <div class="text-info text-center gs-big gs-pb-2">
     <strong>Comunicazioni</strong>
   </div>
@@ -338,15 +309,12 @@
   </div>
         {% endif %}
         {% if dati.esito.esito != 'X' %}
-  <table class="table table-bordered table-hover table-striped ">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Materia</th>
-        <th class="col-sm-2">Voto</th>
-        <th class="col-sm-4">Ore di assenza</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Voto', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Ore di assenza', classi: 'col-sm-4', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_6 %}
           {% for materia, m in dati.materie %}
       <tr>
         <td><strong>{{ m.nome }}</strong></td>
@@ -359,8 +327,8 @@
             {% endif %}
       </tr>
           {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_6, classi: 'table table-bordered table-hover table-striped'}) }}
         {% endif %}
   <div class="text-info text-center gs-big gs-pb-2">
     <strong>Comunicazioni</strong>

@@ -11,15 +11,12 @@
   {% if dati.periodo is defined and dati.periodo != 'G' %}<h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Sessione supplettiva</h2>{% endif %}
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Scrutinio chiuso</h2>
     {{ include('include/modal-error.html.twig') }}
-    <table class="table table-bordered table-hover table-striped gs-mt-4">
-      <thead class="bg-success">
-        <tr>
-          <th class="col-sm-2">Documento</th>
-          <th class="col-sm-7">Note</th>
-          <th class="col-sm-3">Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
+    {% set intestazione = [
+      {contenuto: 'Documento', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Note', classi: 'col-sm-7', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-3', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
         <tr>
           <td><strong>Verbale</strong></td>
           <td>
@@ -92,8 +89,8 @@
     {% endfor %}
           </td>
         </tr>
-      </tbody>
-    </table>
+      {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
     {% if dati.precedente %}
   <div class="row text-center gs-mt-5 gs-mb-5">
     <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '4'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>

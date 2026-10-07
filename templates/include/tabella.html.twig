@@ -1,0 +1,131 @@
+{##
+  # tabella: componente generico per le tabelle delle pagine utenti standard.
+  #
+  # Uso:
+  #   {{ include('include/tabella.html.twig', {
+  #      intestazione: [[{contenuto: 'Sede', classi: 'col-sm-5'}], ...],
+  #      corpo: [[{contenuto: '<small>Grossetto</small>'}], ...],
+  #      piede: [[...]], didascalia: '...', classi: '...', id: '...' })
+  #
+  # Le celle sono {contenuto, classi, colspan, rowspan}: il contenuto e' gia'
+  # pronto (stampe senza escape, i valori sono gia' protetti dal template
+  # chiamante). Una lista di celle dentro una cella viene resa in .gs-azioni,
+  # cioe' affiancata e senza andare a capo: e' il caso dei pulsanti di riga.
+  #
+  # intestazione: lista di righe di celle, cosi' si coprono le testate a due
+  #   livelli con colspan e rowspan
+  # intestazione_grezza: la <thead> intera come markup. Serve quando la testata
+  #   contiene un ciclo o una condizione (una colonna per materia, per
+  #   esempio): una lista di celle non puo' descrivere un {% for %}.
+  # piede / piede_grezzo: stessa distinzione, per la riga di <tfoot>
+  # corpo:        lista di righe di celle
+  # corpo_grezzo: il <tbody> come markup, per le tabelle non ancora descritte
+  #   come dati: il componente fornisce l'involucro e le righe passano come sono
+  # didascalia:   testo della <caption>, con classi_didascalia per lo stile
+  # classi:       classi della <table> (default 'table table-bordered ...')
+  # classe_intestazione: classi della <thead>; senza default, cosi' una testata
+  #   descritta a dati ma non colorata esplicitamente resta senza attributo
+  #   class e puo' ricevere lo stile dalle regole thead:not([class]) di main.css
+  # vuoto:        messaggio quando il corpo e' vuoto
+  # #}
+
+{# stampa una cella: rotta dai suoi attributi, senza escape sul contenuto #}
+{% macro cella(etichetta, cella) %}
+<{{ etichetta }}{% if cella.classi|default('') %} class="{{ cella.classi }}"{% endif %}{% if cella.colspan|default(1) > 1 %} colspan="{{ cella.colspan }}"{% endif %}{% if cella.rowspan|default(1) > 1 %} rowspan="{{ cella.rowspan }}"{% endif %}{% if etichetta == 'th' and cella.scope is defined %} scope="{{ cella.scope }}"{% endif %}>
+{%- if cella.contenuto is iterable -%}
+  {# piu' elementi nella stessa cella (pulsanti di riga): affiancati #}
+  <div class="gs-azioni">{% for item in cella.contenuto %}{{ item|raw }}{% endfor %}</div>
+{%- else -%}
+  {{ cella.contenuto|default('')|raw }}
+{%- endif -%}
+</{{ etichetta }}>
+{% endmacro %}
+
+{# stampa un insieme di righe
+   una riga e' una lista di celle; puo' anche essere {celle: [...], classi: '...'}
+   per dare classi alla riga stessa. #}
+{% macro righe(righe, etichetta) %}
+  {% for riga in righe %}
+    {%- set celle = riga.celle is defined ? riga.celle : riga -%}
+    {%- if riga.classi is defined %}    <tr class="{{ riga.classi }}">
+    {%- else %}    <tr>
+    {%- endif %}
+{%- for cella in celle %}
+{{ _self.cella(etichetta, cella) }}
+{%- endfor %}
+    </tr>
+  {% endfor %}
+{% endmacro %}
+
+{# corpo_grezzo: le righe gia' scritte come markup, raccolte in un blocco.
+    Serve per le tabelle che il template chiamante ancora non ha trasformato
+    in dati: il componente fornisce l'involucro (contenitore responsive,
+    classi, stato vuoto) e le righe passano come sono, colspan compresi.
+    Non si puo' usare insieme a corpo.
+    Se il ciclo non produce righe il blocco contiene solo il whitespace fra
+    i tag: il componente lo riconosce come vuoto e mostra l'alert. #}
+{% set intestazione = intestazione|default([]) %}
+{# intestazione_grezza: la <thead> intera, markup gia' pronto.
+    Serve per le testate che non sono una lista di celle ma contengono un
+    ciclo o una condizione (una colonna per materia, per esempio): li si
+    passano cosi', senza tentare di descriverle come dati. #}
+{% set corpo = corpo|default([]) %}
+{% set piede = piede|default([]) %}
+{# piede_grezzo: il <tfoot> intero, markup gia' pronto. Vale la stessa
+    ragione di intestazione_grezza: quando la riga di piede ha colspan o un
+    bottone, descriverla come lista di celle non ci si riesce. #}
+{% set corpo_grezzo = corpo_grezzo|default(null) %}
+{# ha_corpo: il corpo contiene davvero delle righe.
+   Un blocco {% set corpo_grezzo %}...{% endset %} conserva sempre il
+   whitespace di indentazione fra i tag, quindi a ciclo vuoto corpo_grezzo
+   e' una stringa di spazi e non null: controllare solo "is not null"
+   renderebbe lo stato vuoto irraggiungibile e la tabella uscirebbe con un
+   tbody vuoto. Il trim distingue il caso senza righe da quello con righe
+   fisse fuori dai cicli (tabellone, scrutini), che devono restare tabella. #}
+{% set ha_corpo = corpo_grezzo is not null and corpo_grezzo|trim is not empty %}
+{% set didascalia = didascalia|default(null) %}
+{% set classi_didascalia = classi_didascalia|default('') %}
+{% set id_tabella = id|default(null) %}
+{% set classi_tabella = classi|default('table table-bordered table-hover table-striped gs-mb-0') %}
+{% set classe_intestazione = classe_intestazione|default('') %}
+{% set vuoto = vuoto|default('Nessun dato trovato') %}
+{# righe_brevi = true tiene la tabella anche senza dati (per i filtri di ricerca) #}
+{% set righe_brevi = righe_brevi|default(false) %}
+
+{# Una lista piatta di celle (le celle una dopo l'altra, senza righe attorno)
+   viene chiusa in una sola riga. Senza questo ogni cella verrebbe scambiata
+   per una riga: la tabella uscirebbe con una riga per cella e testate vuote.
+   Va fatto qui, non dentro la macro: li' la riassegnazione del parametro non
+   tiene. #}
+{% if intestazione is not empty and intestazione[0].contenuto is defined %}{% set intestazione = [intestazione] %}{% endif %}
+{% if piede is not empty and piede[0].contenuto is defined %}{% set piede = [piede] %}{% endif %}
+{% if corpo is not empty and corpo[0].contenuto is defined %}{% set corpo = [corpo] %}{% endif %}
+
+<div class="table-responsive">
+{% if ha_corpo or corpo is not empty or righe_brevi %}
+  <table{% if id_tabella %} id="{{ id_tabella }}"{% endif %} class="{{ classi_tabella }} gs-table">
+{# la didascalia e' HTML gia' pronto, come le celle: va stampata senza escape #}
+{% if didascalia %}    <caption{% if classi_didascalia %} class="{{ classi_didascalia }}"{% endif %}>{{ didascalia|raw }}</caption>
+{% endif %}
+{% if intestazione_grezza|default('') is not empty %}{{ intestazione_grezza|raw }}
+{% elseif intestazione|length > 0 %}    <thead{% if classe_intestazione %} class="{{ classe_intestazione }}"{% endif %}>
+{{ _self.righe(intestazione, 'th') }}
+    </thead>
+{% endif %}
+    <tbody>
+{%- if corpo_grezzo is not null -%}
+{{ corpo_grezzo|raw }}
+{%- else -%}
+{{ _self.righe(corpo, 'td') }}
+{%- endif %}
+    </tbody>
+{% if piede_grezzo|default('') is not empty %}{{ piede_grezzo|raw }}
+{% elseif piede|length > 0 %}    <tfoot>
+{{ _self.righe(piede, 'td') }}
+    </tfoot>
+{% endif %}
+  </table>
+{% else %}
+  <div class="alert alert-info" role="alert">{{ vuoto }}</div>
+{% endif %}
+</div>

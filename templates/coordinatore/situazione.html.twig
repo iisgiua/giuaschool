@@ -8,14 +8,11 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_situazione'|trans }} {{ classe }}</h1>
-  <table class="table table-bordered table-hover table-striped">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-6">Alunno</th>
-        <th class="col-sm-6">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Alunno', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for alunno, a in dati.alunni %}
       <tr>
         <td>
@@ -39,19 +36,15 @@
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
     {% if dati.trasferiti|length > 0 %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-center text-primary gs-h2">Traferiti o ritirati</caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-3">Alunno</th>
-        <th class="col-sm-3">Situazione</th>
-        <th class="col-sm-6">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Alunno', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Situazione', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_1 %}
       {% for alunno, a in dati.trasferiti %}
       <tr>
         <td>
@@ -70,8 +63,8 @@
         </td>
       </tr>
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_1, classi: 'table table-bordered table-hover table-striped'}) }}
     {% endif %}
     {{ include('include/modal-info.html.twig') }}
   {% endif %}

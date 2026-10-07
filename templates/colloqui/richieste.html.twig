@@ -23,16 +23,13 @@
         <span>- {{ r.valide }}/{{ r.numero }} -</span>
       </h3>
     </div>
-    <table class="table table-bordered table-hover">
-      <thead class="bg-info">
-        <tr>
-          <th class="col-sm-2">Appuntamento</th>
-          <th class="col-sm-2">Classe</th>
-          <th class="col-sm-4">Alunno</th>
-          <th class="col-sm-4">Stato della richiesta</th>
-        </tr>
-      </thead>
-      <tbody>
+    {% set intestazione = [
+      {contenuto: 'Appuntamento', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Classe', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Alunno', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'Stato della richiesta', classi: 'col-sm-4', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
         {% for p in r.prenotazioni %}
         <tr class="{% if p.stato == 'A' %}gs-em text-muted{% elseif p.stato == 'N' %}gs-em{% endif %}">
           <td>
@@ -76,8 +73,8 @@
         {% else %}
         <tr><td colspan="4" class="text-center"><em>Nessuna richiesta</em></td></tr>
         {% endfor %}
-      </tbody>
-    </table>
+      {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover', classe_intestazione: 'bg-info'}) }}
   </div>
       {% endfor %}
     {% else %}

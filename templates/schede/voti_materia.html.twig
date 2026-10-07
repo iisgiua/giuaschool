@@ -10,16 +10,12 @@
 {% for periodo, v in dati.lista %}
   {% for tipo in ['S', 'O', 'P'] %}
     {% if v[tipo] is defined %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }} - {{ ('label.voti_' ~ tipo)|trans }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-2">{{ info.edcivica ? 'Materia e ' }}Data</th>
-        <th class="col-sm-7">Argomenti o descrizione della prova</th>
-        <th class="col-sm-3">Valutazione</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: info.edcivica ? 'Materia e Data' : 'Data', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Argomenti o descrizione della prova', classi: 'col-sm-7', scope: 'col'},
+      {contenuto: 'Valutazione', classi: 'col-sm-3', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for data, v1 in v[tipo] %}
         {% for e in v1 %}
       <tr>
@@ -50,8 +46,8 @@
         <td class="bg-success"><strong class="gs-big"><em>{{ dati.media[periodo][tipo]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</em></strong></td>
       </tr>
       {% endif %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
     {% endif %}
   {% endfor %}
   <div class="alert alert-warning text-center gs-text-normal" role="alert">

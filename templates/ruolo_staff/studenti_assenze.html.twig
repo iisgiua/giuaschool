@@ -15,7 +15,21 @@
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-  {{ include(('include/form-inline.html.twig')) }}
+  {% form_theme form 'bootstrap_3_layout.html.twig' %}
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-filters gs-mb-3">
+    <div id="{{ form.vars.id }}">
+      <div class="gs-filters-row">
+        <div class="form-group gs-filter-col">
+          {{ form_label(form.classe, null, {label_attr: {class: 'control-label'}}) }}
+          {{ form_widget(form.classe) }}
+        </div>
+      </div>
+      <div class="gs-filters-buttons">
+        {{ form_widget(form.submit) }}
+      </div>
+      {{ form_widget(form._token) }}
+    </div>
+  </form>
   <div class="row gs-mb-4">
     <div class="col-sm-12">
       {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_assenze', {data: data_prec|date('Y-m-d'), classe: (classe ? classe.id : 0)}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
@@ -51,7 +65,7 @@ $(document).ready(function() {
     defaultViewDate: "{{ data }}",
     startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
     endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
-    datesDisabled: {{ lista_festivi|raw }},
+    {% if lista_festivi %}datesDisabled: {{ lista_festivi|raw }},{% endif %}
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,

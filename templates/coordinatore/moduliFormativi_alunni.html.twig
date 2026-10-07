@@ -13,15 +13,12 @@
       <a class="btn btm-sm btn-success" href="{{ path('coordinatore_moduliFormativi', {classe: info.classe.id}) }}" role="button" title="Lista dei moduli formativi svolti nella classe"><strong>Situazione classe</strong></a>
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-4">Alunno</th>
-        <th class="col-sm-4">Ore</th>
-        <th class="col-sm-4">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Alunno', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'Ore', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'label.action'|trans, classi: 'col-sm-4', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for a in dati.alunni %}
       <tr>
         <td><strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong></td>
@@ -57,8 +54,8 @@
         </td>
       </tr>
      {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   {{ include('include/modal-info.html.twig') }}
   {% endif %}
 </div>

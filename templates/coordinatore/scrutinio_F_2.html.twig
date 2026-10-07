@@ -24,15 +24,12 @@
     {% if dati.assenze_extra|length > 0 %}
   <div id="gs-alunni-trasferiti" class="gs-mt-5">
     <p class="gs-mb-0"><strong class="text-info gs-big">* Inserimento delle assenze registrate in altre scuole per gli alunni trasferiti in corso d'anno:</strong></p>
-    <table class="table table-bordered table-hover table-striped">
-      <thead class="bg-success">
-        <tr>
-          <th>Alunno</th>
-          <th>Note</th>
-          <th>Ore di assenza</th>
-        </tr>
-      </thead>
-      <tbody>
+    {% set intestazione = [
+      {contenuto: 'Alunno', scope: 'col'},
+      {contenuto: 'Note', scope: 'col'},
+      {contenuto: 'Ore di assenza', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
         {% for alu, da in dati.assenze_extra %}
         <tr>
           <td>
@@ -48,15 +45,16 @@
           </td>
         </tr>
         {% endfor %}
-      </tbody>
-      <tfoot>
+      {% endset %}
+    {# il <tfoot> col bottone "Aggiorna dati" ha colspan e un form: resta markup #}
+    {% set piede_grezzo %}<tfoot>
         <tr>
           <td colspan="3">
             <button id="gs-aggiorna" type="submit" name="aggiorna" class="center-block btn btn-default" title="Modifica le ore di assenza e aggiorna i dati della pagina" disabled="disabled"><span class="glyphicon glyphicon-refresh gs-mr-2"></span><strong>Aggiorna dati</strong></button>
           </td>
         </tr>
-      </tfoot>
-    </table>
+      </tfoot>{% endset %}
+    {{ include('include/tabella.html.twig', {intestazione: [intestazione], piede_grezzo: piede_grezzo, corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   </div>
     {% endif %}
   <div id="gs-alunni-no-scrutinabili" class="gs-mt-5">

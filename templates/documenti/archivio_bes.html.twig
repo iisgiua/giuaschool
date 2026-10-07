@@ -4,11 +4,7 @@
 <div class="container-fluid">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.documenti_archivio_bes'|trans }}</h1>
   <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.documenti_archivio_bes'|trans|raw }}</em></div>
-  {% for type, msgs in app.flashes %}
-    {% for msg in msgs %}
-  <div class="alert alert-{{ type }} text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert"><strong>{{ msg }}</strong></div>
-    {% endfor %}
-  {% endfor %}
+  {{ include('admin/include/flash.html.twig') }}
   <div class="row  gs-mb-3">
     <div class="col-sm-4 gs-mb-0">
     </div>
@@ -18,21 +14,47 @@
     <div class="col-sm-4 text-right gs-mb-0">
     </div>
   </div>
-  {{ include(('include/form-inline.html.twig')) }}
+  {% form_theme form 'bootstrap_3_layout.html.twig' %}
+  {{ form_start(form, {attr: {class: 'gs-filters gs-mb-3'}}) }}
+    <div class="gs-filters-row">
+      <div class="form-group gs-filter-col">
+        {{ form_label(form.anno, null, {label_attr: {class: 'control-label'}}) }}
+        {{ form_widget(form.anno) }}
+      </div>
+      <div class="form-group gs-filter-col">
+        {{ form_label(form.tipo, null, {label_attr: {class: 'control-label'}}) }}
+        {{ form_widget(form.tipo) }}
+      </div>
+    </div>
+    <div class="gs-filters-row">
+      <div class="form-group gs-filter-col">
+        {{ form_label(form.cognome, null, {label_attr: {class: 'control-label'}}) }}
+        {{ form_widget(form.cognome) }}
+      </div>
+      <div class="form-group gs-filter-col">
+        {{ form_label(form.nome, null, {label_attr: {class: 'control-label'}}) }}
+        {{ form_widget(form.nome) }}
+      </div>
+      <div class="form-group gs-filter-col">
+        {{ form_label(form.codice_fiscale, null, {label_attr: {class: 'control-label'}}) }}
+        {{ form_widget(form.codice_fiscale) }}
+      </div>
+    </div>
+    <div class="gs-filters-buttons">
+      {{ form_widget(form.submit) }}
+    </div>
+  {{ form_end(form) }}
   {% if dati.lista is empty %}
   <div class="alert alert-warning gs-mt-2" role="alert">
     <strong class="gs-big">{{ 'message.no_documenti'|trans }}</strong>
   </div>
   {% else %}
-  <table class="table table-bordered table-hover table-striped gs-mt-2">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-5">{{ 'label.alunno'|trans }}</th>
-        <th class="col-sm-5">{{ 'label.documento'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'label.alunno'|trans, classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'label.documento'|trans, classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for d in dati.lista %}
       <tr>
         <td><strong>{{ d.titolo }}</strong></td>
@@ -53,8 +75,8 @@
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mt-2'}) }}
     {% if dati.maxPagine > 1 %}
   <nav aria-label="Navigazione tra le pagine" class="text-center">
     <ul class="pagination pagination-sm gs-mt-2">

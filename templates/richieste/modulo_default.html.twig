@@ -1,0 +1,15 @@
+{#
+  # Modulo generico di riserva, usato quando il template personalizzato del
+  # modulo (in PERSONAL/data/moduli o PERSONAL/data/consultazioni) non è
+  # disponibile: evita l'errore 500 "Unable to find template" mostrando
+  # comunque i campi da compilare.
+  # #}
+{% for campo in form %}
+  {% if campo.vars.name != '_token' %}
+  <div class="form-group">
+    <label class="control-label"{% if campo.vars.id %} for="{{ campo.vars.id }}"{% endif %}>{{ campo.vars.name }}</label>
+    {{ form_widget(campo) }}
+    {{ form_errors(campo) }}
+  </div>
+  {% endif %}
+{% endfor %}

@@ -7,6 +7,8 @@
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   {% elseif not cattedra %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_proposte'|trans }}</h1>
   <div class="alert alert-warning" role="alert">
@@ -15,6 +17,8 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_proposte'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   <div class="row gs-mb-1">
     <div class="col-sm-4">
       <strong class="gs-big">Periodo:</strong>

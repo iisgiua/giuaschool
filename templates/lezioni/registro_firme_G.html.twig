@@ -7,9 +7,13 @@
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_registro'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
     {% if errore %}
   <div class="row gs-mb-5">
     <div class="col-sm-12">
@@ -72,11 +76,7 @@
         {% endif %}
   </div>
       {% endif %}
-      {% for type, msgs in app.flashes %}
-        {% for msg in msgs %}
-  <div class="alert alert-{{ type }} text-center gs-big gs-mb-4 gs-pt-2 gs-pb-2" role="alert"><strong>{{ msg|raw }}</strong></div>
-        {% endfor %}
-      {% endfor %}
+      {{ include('admin/include/flash.html.twig') }}
   <div class="row gs-mb-2">
     <div class="col-sm-5">
       {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
@@ -169,17 +169,14 @@
       </div>
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped gs-mb-2">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-2">Ora</th>
-        <th class="col-sm-2">Materia</th>
-        <th class="col-sm-2">Docenti</th>
-        <th class="col-sm-4">Argomenti/Attività</th>
-        <th class="col-sm-2">Azioni</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Ora', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Materia', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Docenti', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Argomenti/Attività', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for k, v in dati[data].lezioni %}
       <tr>
         <td style="background-color: white;"{% if v.materia|length > 1 %} rowspan="{{ v.materia|length }}"{% endif %}><strong>{{ k }}ª: <span class="text-info">{{ v.inizio }} - {{ v.fine }}</span></strong></td>
@@ -244,8 +241,8 @@
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mb-2'}) }}
   <div class="row gs-mb-3">
       {% if assenti.fc is defined %}
     <div id="gs-fuoriclasse" class="panel panel-info gs-mb-2 gs-mr-4 gs-ml-4">
@@ -332,7 +329,7 @@ $(document).ready(function() {
     defaultViewDate: "{{ data }}",
     startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
     endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
-    datesDisabled: {{ lista_festivi|raw }},
+    {% if lista_festivi %}datesDisabled: {{ lista_festivi|raw }},{% endif %}
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,

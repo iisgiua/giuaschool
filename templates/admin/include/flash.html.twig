@@ -1,8 +1,27 @@
-{## # flash: alert box per i messaggi temporanei impostati tramite la sessione # ##}
+{## # flash: messaggi temporanei impostati tramite la sessione # ##}
+{## #    resi come notifiche ancorate al bordo inferiore (contenitore posizionato # ##}
+{## #    in main.css): restano fuori dal flusso del contenuto, quindi non spostano # ##}
+{## #    nulla e la pagina non torna in alto. Comportamento in js/notifiche.js # ##}
 {## #    parametri: - # ##}
+{## #             tipo, messaggio (opzionali: messaggio da mostrare anche se non # ##}
+{## #             arriva dal flashbag, es. conferma di un form reinviato) # ##}
 
-{% for tipo, messaggi in app.flashes %}
-  {% for msg in messaggi %}
-<div class="alert alert-{{ tipo }}" role="alert">{{ msg|trans|raw }}</div>
+{% set ha_extra = tipo is defined and messaggio is defined %}
+{% if ha_extra or app.session.flashbag.peekAll() is not empty %}
+<div class="gs-flash-region" role="region" aria-label="Messaggi">
+  {% if ha_extra %}
+  <div class="alert alert-{{ tipo }} gs-flash" role="alert" data-gs-flash-autochiusura="{{ tipo == 'success' ? '1' : '0' }}">
+    <span class="gs-flash-testo">{{ messaggio|trans|raw }}</span>
+    <button type="button" class="gs-flash-chiudi" data-gs-flash-chiudi title="Chiudi" aria-label="Chiudi il messaggio">&times;</button>
+  </div>
+  {% endif %}
+  {% for flash_tipo, flash_messaggi in app.flashes %}
+    {% for flash_messaggio in flash_messaggi %}
+  <div class="alert alert-{{ flash_tipo }} gs-flash" role="alert" data-gs-flash-autochiusura="{{ flash_tipo == 'success' ? '1' : '0' }}">
+    <span class="gs-flash-testo">{{ flash_messaggio|trans|raw }}</span>
+    <button type="button" class="gs-flash-chiudi" data-gs-flash-chiudi title="Chiudi" aria-label="Chiudi il messaggio">&times;</button>
+  </div>
+    {% endfor %}
   {% endfor %}
-{% endfor %}
+</div>
+{% endif %}

@@ -2,11 +2,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% for tipo, messaggi in app.flashes %}
-    {% for msg in messaggi %}
-  <div class="alert alert-{{ tipo }} gs-mt-5" role="alert"><strong>{{ msg|trans }}<strong></div>
-    {% endfor %}
-  {% endfor %}
+  {{ include('admin/include/flash.html.twig') }}
   <div class="panel panel-primary gs-mt-5" >
     <div class="panel-heading">
       <div class="panel-title"><strong class="gs-big">{{ 'title.utenti_profilo'|trans }}</strong></div>

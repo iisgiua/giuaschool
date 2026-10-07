@@ -15,16 +15,16 @@
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-studenti-autorizza-filters gs-mb-3">
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-filters gs-mb-3">
     <div id="{{ form.vars.id }}">
-      <div class="gs-studenti-autorizza-filters-row">
-        <div class="gs-studenti-autorizza-filter-col">
-          {{ form_label(form.classe) }}
+      <div class="gs-filters-row">
+        <div class="gs-filter-col">
+          {{ form_label(form.classe, null, {label_attr: {class: 'control-label'}}) }}
           {{ form_widget(form.classe) }}
         </div>
-        <div class="gs-studenti-autorizza-filter-col gs-studenti-autorizza-btn">
-          {{ form_widget(form.submit) }}
-        </div>
+      </div>
+      <div class="gs-filters-buttons">
+        {{ form_widget(form.submit) }}
       </div>
       {{ form_widget(form._token) }}
     </div>
@@ -39,17 +39,14 @@
       <strong class="gs-big">{{ info.periodo.nome }}</strong>
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped gs-mb-0">
-    <thead class="bg-success">
-      <tr>
-        <th>{{ 'label.alunno'|trans }}</th>
-        <th>{{ 'label.classe'|trans }}</th>
-        <th>{{ 'label.ritardi'|trans }}</th>
-        <th>{{ 'label.uscite'|trans }}</th>
-        <th>{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'label.alunno'|trans, scope: 'col'},
+      {contenuto: 'label.classe'|trans, scope: 'col'},
+      {contenuto: 'label.ritardi'|trans, scope: 'col'},
+      {contenuto: 'label.uscite'|trans, scope: 'col'},
+      {contenuto: 'label.action'|trans, scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for a in dati.lista %}
       <tr>
         <td>
@@ -106,8 +103,8 @@
         </td>
       </tr>
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
     {{ include('include/modal-info.html.twig') }}
     {% if maxPages > 1 %}
   <nav aria-label="Navigazione tra le pagine" class="text-center">
@@ -155,7 +152,7 @@ $(document).ready(function() {
     defaultViewDate: "{{ data }}",
     startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
     endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
-    datesDisabled: {{ lista_festivi|raw }},
+    {% if lista_festivi %}datesDisabled: {{ lista_festivi|raw }},{% endif %}
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,

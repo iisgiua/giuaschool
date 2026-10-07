@@ -14,8 +14,7 @@
     {{ include('include/modal-error.html.twig') }}
     {{ form_start(form) }}
   <div id="gs-fixed-header">
-    <table class="table table-bordered table-hover table-striped">
-      <thead class="bg-success">
+  {% set intestazione_grezza_0 %}      <thead>
         <tr>
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2"><small>Alunno</small></th>
     {% for materia, m in dati.materie %}
@@ -30,8 +29,9 @@
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Esito finale">Esito</span></small>
           </th>
         </tr>
-      </thead>
-      <tbody>
+      </thead>{% endset %}
+
+{% set corpo_grezzo_0 %}
     {% for alunno, a in dati.alunni %}
         <tr>
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
@@ -67,8 +67,8 @@
           </td>
         </tr>
     {% endfor %}
-      </tbody>
-    </table>
+      {% endset %}
+    {{ include('include/tabella.html.twig', {intestazione_grezza: intestazione_grezza_0, corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   </div>
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
@@ -114,16 +114,6 @@ $(document).ready(function() {
   $('a.gs-wait-page').click(function (event) {
     $('#gs-modal-waiting').modal('show');
     return true;
-  });
-  $('#gs-fixed-header table').on("floatThead", function(e, isFloated, floatContainer) {
-    var c=floatContainer.find('thead');
-    if(isFloated){
-      c.hide();
-      c.removeClass("bg-success").addClass("bg-info");
-      c.fadeIn();
-    } else {
-      c.removeClass("bg-info").addClass("bg-success");
-    }
   });
   // init
   $('#gs-fixed-header table').floatThead({top: 60});

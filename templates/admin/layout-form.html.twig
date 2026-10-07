@@ -1,4 +1,11 @@
 {# Widgets #}
+{#
+ # NOSONAR Web:InputWithoutLabelCheck - questo file e' un form theme di Symfony, non un form completo:
+ # i blocchi widget (form_widget_simple, textarea_widget, choice_widget_collapsed, checkbox_widget_simple,
+ # radio_widget_simple, password_widget) renderizzano solo il controllo. L'attributo id arriva da attr ed e'
+ # emesso dal blocco widget_attributes; l'associazione con la label e' gia' applicata dal blocco form_label
+ # (label_attr|merge({for: id})). Non e' quindi possibile aggiungere id/for qui senza rompere il markup.
+ #}
 
 {%- block form_widget -%}
 {%- if compound -%}
@@ -531,8 +538,7 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
           <div class="bootstrap-select-wrapper">
             {%- if attr.widget is defined and attr.widget == 'search' -%}
             {%- if widget_attr is empty -%}
-            {%- set widget_attr = {attr: {'data-live-search': 'true', 'data-live-search-placeholder': 'Cerca nelle
-            opzioni'}} -%}
+            {%- set widget_attr = {attr: {'data-live-search': 'true', 'data-live-search-placeholder': 'Cerca nelle opzioni'}} -%}
             {%- else -%}
             {%- set widget_attr = {attr: widget_attr.attr|merge({'data-live-search': 'true',
             'data-live-search-placeholder': 'Cerca nelle opzioni'})} -%}
@@ -617,6 +623,9 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
                 </div>
           </div>
           </fieldset>
+          {# NOSONAR Web:S6819 - role="region"/"spinbutton"/"progressbar" non hanno un elemento HTML5 #}
+          {# equivalente che conservi il comportamento: sostituire il div altererebbe lo stile .spinner-control #}
+          {# e .progress-bar, mentre i controlli devono restare <input type="number">. #}
           <div class="spinner-control" role="region" aria-label="{{ 'label.form_time_spinner'|trans }}">
             <div class="spinner-hour spinner">
               <input class="spinnerHour form-control" id="{{ id }}_hourSpinner" aria-label="ore" type="number"
@@ -701,6 +710,8 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
               </svg>
             </button>
             <div class="progress">
+              {# NOSONAR Web:S6819 - role="progressbar" non ha equivalente nativo: #}
+              {# sostituirlo con <progress> cambierebbe lo stile .progress-bar di Bootstrap. #}
               <div class="progress-bar" role="progressbar" style="width:0%" aria-valuenow="0" aria-valuemin="0"
                 aria-valuemax="100" data-dz-uploadprogress></div>
             </div>

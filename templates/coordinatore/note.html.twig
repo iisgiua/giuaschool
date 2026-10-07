@@ -14,40 +14,39 @@
       <a class="btn btn-success btn-sm" href="{{ path('coordinatore_note', {classe: classe.id, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-1">Data</th>
-        <th class="col-sm-3">Destinatari</th>
-        <th class="col-sm-5">Nota</th>
-        <th class="col-sm-3">Provvedimento</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for data, v1 in v %}
-        {% for tipo, v2 in v1 %}
-          {% for k, e in v2 %}
-      <tr>
-        <td><strong>{{ e.data }}</strong></td>
+  {% set intestazione = [
+      {contenuto: 'Data', classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'Destinatari', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Nota', classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'Provvedimento', classi: 'col-sm-3', scope: 'col'}
+    ] %}
+    {% set righe = [] %}
+    {% for data, v1 in v %}
+      {% for tipo, v2 in v1 %}
+        {% for k, e in v2 %}
+          {# destinatari: cambia a seconda che sia la classe o un gruppo di alunni #}
           {% if tipo == 'classe' %}
-        <td>
-          <em>Tutta la classe</em>
-            {% if e.esclusi|length > 0 %}
-          <br><strong>Esclusi:</strong> {% for a in e.esclusi %}{{ a }}{{ not loop.last ? ', ' }}{% endfor %}
-            {% endif %}
-        </td>
-        {% else %}
-        <td>{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}</td>
+            {% set destinatari %}
+              <em>Tutta la classe</em>
+              {%- if e.esclusi|length > 0 %} <br><strong>Esclusi:</strong> {% for a in e.esclusi %}{{ a }}{{ not loop.last ? ', ' }}{% endfor %}{% endif -%}
+            {% endset %}
+          {% else %}
+            {% set destinatari %}{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}{% endset %}
           {% endif %}
-        <td><small>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></small></td>
-        <td><small>{{ e.provvedimento|raw|nl2br ? (e.provvedimento ~ '<br><em>(' ~ e.provvedimento_doc ~ ')</em>')|raw }}</small></td>
-      </tr>
-          {% endfor %}
+          {% set righe = righe|merge([{celle: [
+            {contenuto: '<strong>' ~ e.data ~ '</strong>'},
+            {contenuto: destinatari},
+            {contenuto: '<small>' ~ e.nota|raw|nl2br ~ '<br><em>(' ~ e.nota_doc ~ ')</em></small>'},
+            {contenuto: '<small>' ~ (e.provvedimento|raw|nl2br ? (e.provvedimento ~ '<br><em>(' ~ e.provvedimento_doc ~ ')</em>')|raw) ~ '</small>'}
+          ]}]) %}
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endfor %}
+    {{ include('include/tabella.html.twig', {
+      didascalia: '<strong>' ~ periodo ~ '</strong>',
+      classi_didascalia: 'text-info text-center gs-big',
+      intestazione: [intestazione], corpo: righe
+    }) }}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti note disciplinari</strong>

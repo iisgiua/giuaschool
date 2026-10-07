@@ -7,26 +7,26 @@
   <!-- Filtri unici -->
   <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-avvisi-filters-form">
     <div class="gs-avvisi-filters-desktop">
-      <div class="gs-avvisi-filters-row">
-        <div class="gs-avvisi-filter-col">
-          {{ form_label(form.autore) }}
+      <div class="gs-filters-row">
+        <div class="gs-filter-col">
+          {{ form_label(form.autore, null, {label_attr: {class: 'control-label'}}) }}
           {{ form_widget(form.autore) }}
         </div>
-        <div class="gs-avvisi-filter-col">
-          {{ form_label(form.tipo) }}
+        <div class="gs-filter-col">
+          {{ form_label(form.tipo, null, {label_attr: {class: 'control-label'}}) }}
           {{ form_widget(form.tipo) }}
         </div>
-        <div class="gs-avvisi-filter-col">
-          {{ form_label(form.mese) }}
+        <div class="gs-filter-col">
+          {{ form_label(form.mese, null, {label_attr: {class: 'control-label'}}) }}
           {{ form_widget(form.mese) }}
         </div>
-        <div class="gs-avvisi-filter-col gs-avvisi-filter-expand">
-          {{ form_label(form.oggetto) }}
+        <div class="gs-filter-col gs-avvisi-filter-expand">
+          {{ form_label(form.oggetto, null, {label_attr: {class: 'control-label'}}) }}
           {{ form_widget(form.oggetto) }}
         </div>
-        <div class="gs-avvisi-filter-col gs-avvisi-filter-btn">
-          {{ form_widget(form.submit) }}
-        </div>
+      </div>
+      <div class="gs-filters-buttons">
+        {{ form_widget(form.submit) }}
       </div>
     </div>
 
@@ -103,16 +103,18 @@
     </div>
   </div>
 
-  {% set headers = [
-    {label: 'label.autore'|trans},
-    {label: 'label.tipo'|trans},
-    {label: 'label.data'|trans},
-    {label: 'label.oggetto'|trans},
-    {label: 'label.sede'|trans},
-    {label: 'label.destinatari'|trans},
-    {label: 'label.action'|trans}
+  {# pagina utenti standard: tabella resa dal componente include/tabella #}
+  {# i pulsanti di riga sono resi da include/bottone-azione.html.twig: solo icona Tabler #}
+  {% set intestazione = [
+    {contenuto: 'label.autore'|trans, classi: 'col-auto', scope: 'col'},
+    {contenuto: 'label.tipo'|trans, classi: 'col-auto', scope: 'col'},
+    {contenuto: 'label.data'|trans, classi: 'col-auto', scope: 'col'},
+    {contenuto: 'label.oggetto'|trans, classi: 'col-auto', scope: 'col'},
+    {contenuto: 'label.sede'|trans, classi: 'col-auto', scope: 'col'},
+    {contenuto: 'label.destinatari'|trans, classi: 'col-auto', scope: 'col'},
+    {contenuto: 'label.action'|trans, classi: 'col-auto', scope: 'col'}
   ] %}
-  {% set rows = [] %}
+  {% set righe = [] %}
   {% for k, a in dati.lista %}
     {% set destinatari %}
       <small>{% set inizio = 1 %}
@@ -143,33 +145,50 @@
     {% set sedi %}
       <small>{% for s in a.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small>
     {% endset %}
+    {#- pulsanti di riga: solo icona Tabler a tratti, senza fondo (gs-btn-icona).
+        Le tre azioni restano quelle di prima: dettagli in modale remota, modifica
+        a pagina nuova, cancellazione con conferma. -#}
     {% set buttons = [] %}
-    {% set buttons = buttons|merge(['<button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli dell\'avviso" data-toggle="modal" data-target="#gs-modal-remote" data-href="' ~ path('avvisi_dettagli_gestione', {avviso: a.id}) ~ '"><span class="glyphicon glyphicon-zoom-in"></span><span class="sr-only">Visualizza</span></button>']) %}
+    {% set buttons = buttons|merge([include('include/bottone-azione.html.twig', {
+      nome: 'eye', etichetta: 'Visualizza', titolo: 'Visualizza i dettagli dell\'avviso',
+      classi: 'gs-button-remote',
+      attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote',
+                  'data-href': path('avvisi_dettagli_gestione', {avviso: a.id})}
+    })]) %}
     {% if dati.azioni[k].edit is defined %}
-      {% set buttons = buttons|merge(['<a class="btn btn-primary btn-xs" href="' ~ (a.tipo() in ['E', 'U', 'A'] ? path('avvisi_edit_classi', {tipo: a.tipo, avviso: a.id}) : (a.tipo() == 'I' ? path('avvisi_edit_personali', {avviso: a.id}) : path('avvisi_edit', {avviso: a.id}))) ~ '" role="button" title="Modifica l\'avviso indicato"><span class="glyphicon glyphicon-edit"></span><span class="sr-only">Modifica</span></a>']) %}
+      {% set url_edit = a.tipo() in ['E', 'U', 'A'] ? path('avvisi_edit_classi', {tipo: a.tipo, avviso: a.id})
+          : (a.tipo() == 'I' ? path('avvisi_edit_personali', {avviso: a.id}) : path('avvisi_edit', {avviso: a.id})) %}
+      {% set buttons = buttons|merge([include('include/bottone-azione.html.twig', {
+        nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica l\'avviso indicato', url: url_edit
+      })]) %}
     {% endif %}
     {% if dati.azioni[k].delete is defined %}
-      {% set buttons = buttons|merge(['<button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l\'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="' ~ path('avvisi_delete', {avviso: a.id}) ~ '" data-text="' ~ 'message.cancella_avviso'|trans ~ '" data-csrf="' ~ csrf_token('delete') ~ '"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><span class="sr-only">Cancella</span></button>']) %}
+      {% set buttons = buttons|merge([include('include/bottone-azione.html.twig', {
+        nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella l\'avviso indicato', stile: 'danger',
+        classi: 'gs-modal-confirm-button',
+        attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm',
+                    'data-href': path('avvisi_delete', {avviso: a.id}),
+                    'data-text': 'message.cancella_avviso'|trans,
+                    'data-csrf': csrf_token('delete')}
+      })]) %}
     {% endif %}
-    {% set rows = rows|merge([{
+    {% set righe = righe|merge([{
       cells: [
-        {content: '<small>' ~ a.autore.nome ~ ' ' ~ a.autore.cognome ~ '</small>'},
-        {content: '<small>' ~ ('label.avvisi_tipo_' ~ a.tipo)|trans ~ '</small>'},
-        {content: a.data|date('d/m/Y')},
-        {content: a.titolo},
-        {content: sedi},
-        {content: destinatari},
-        {content: buttons}
+        {contenuto: '<small>' ~ a.autore.nome ~ ' ' ~ a.autore.cognome ~ '</small>'},
+        {contenuto: '<small>' ~ ('label.avvisi_tipo_' ~ a.tipo)|trans ~ '</small>'},
+        {contenuto: a.data|date('d/m/Y')},
+        {contenuto: a.titolo},
+        {contenuto: sedi},
+        {contenuto: destinatari},
+        {contenuto: buttons}
       ]
     }]) %}
   {% endfor %}
-  {{ include('include/table-responsive-bs3.html.twig', {
-    table_id: 'avvisi-table',
-    table_class: 'table table-bordered table-hover table-striped gs-mb-0',
-    thead_class: 'bg-success',
-    headers: headers,
-    rows: rows,
-    empty_message: 'Nessun avviso trovato'
+  {{ include('include/tabella.html.twig', {
+    id: 'avvisi-table',
+        intestazione: [intestazione],
+    corpo: righe,
+    vuoto: 'Nessun avviso trovato'
   }) }}
   {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'avvisi_gestione'}) }}
   {{ include('include/modal-remote.html.twig') }}

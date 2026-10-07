@@ -22,19 +22,15 @@
     </div>
   </div>
     {% for periodo, v in dati %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th>Data</th>
-        <th>Tipo</th>
-        <th>Docente</th>
-        <th>Argomenti o descrizione della prova</th>
-        <th>Voto</th>
-        <th>Giudizio</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Data', scope: 'col'},
+      {contenuto: 'Tipo', scope: 'col'},
+      {contenuto: 'Docente', scope: 'col'},
+      {contenuto: 'Argomenti o descrizione della prova', scope: 'col'},
+      {contenuto: 'Voto', scope: 'col'},
+      {contenuto: 'Giudizio', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for materia, v1 in v %}
         {% for data, v2 in v1 %}
           {% for e in v2 %}
@@ -56,8 +52,8 @@
           {% endfor %}
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
     {% else %}
   <div class="alert alert-info gs-mt-4" role="alert">
     <strong class="gs-big">Non sono presenti valutazioni per la materia indicata</strong>

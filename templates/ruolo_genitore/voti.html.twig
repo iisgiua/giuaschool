@@ -22,19 +22,13 @@
     </div>
   </div>
     {% for periodo, v in dati %}
-  <table class="gs-grades-table">
-    {% if periodo %}
-    <caption class="gs-grades-caption"><strong>{{ periodo }}</strong></caption>
-    {% endif %}
-    <thead>
-      <tr>
-        <th>Materia</th>
-        <th>Scritto/Grafico</th>
-        <th>Orale</th>
-        <th>Pratico</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'Materia', scope: 'col'},
+      {contenuto: 'Scritto/Grafico', scope: 'col'},
+      {contenuto: 'Orale', scope: 'col'},
+      {contenuto: 'Pratico', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for materia, v1 in v %}
       <tr>
         <td class="gs-grades-materia">{{ materia }}</td>
@@ -75,8 +69,8 @@
         {% endfor %}
       </tr>
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, intestazione: [intestazione], classi: 'gs-grades-table'}) }}
       {{ include('include/modal-info.html.twig') }}
     {% else %}
   <div class="alert alert-info gs-mt-4" role="alert">

@@ -3,25 +3,25 @@
 {% block pagina_contenuto %}
 <div class="container-fluid gs-colloqui-cerca">
   <h1 class="text-center gs-h2 gs-mt-2">{{ titolo|trans }}</h1>
-  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-colloqui-cerca-filters gs-mb-3">
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-filters gs-mb-3">
     <div id="{{ form[0].vars.id }}">
-      <div class="gs-colloqui-cerca-filters-row">
-        <div class="gs-colloqui-cerca-filter-col">
-          {{ form_label(form[0].docente) }}
+      <div class="gs-filters-row">
+        <div class="gs-filter-col">
+          {{ form_label(form[0].docente, null, {label_attr: {class: 'control-label'}}) }}
           {{ form_widget(form[0].docente) }}
-        </div>
-        <div class="gs-colloqui-cerca-filter-col gs-colloqui-cerca-btn">
-          {{ form_widget(form[0].submit) }}
         </div>
       </div>
       {% if form[0].data is defined %}
-        <div class="gs-colloqui-cerca-filters-row">
-          <div class="gs-colloqui-cerca-filter-col">
-            {{ form_label(form[0].data) }}
+        <div class="gs-filters-row">
+          <div class="gs-filter-col">
+            {{ form_label(form[0].data, null, {label_attr: {class: 'control-label'}}) }}
             {{ form_widget(form[0].data) }}
           </div>
         </div>
       {% endif %}
+      <div class="gs-filters-buttons">
+        {{ form_widget(form[0].submit) }}
+      </div>
       {{ form_widget(form[0]._token) }}
     </div>
   </form>
@@ -36,26 +36,23 @@
         <strong>{{ dati[0].docente.cognome }} {{ dati[0].docente.nome }}</strong>
       </h3>
     </div>
-    <table class="table table-bordered table-hover">
-      <thead class="bg-info">
-        <tr>
-          <th class="col-sm-2">Ricevimento</th>
-          <th class="col-sm-2">Modalità</th>
-        </tr>
-      </thead>
-      <tbody>
+    {% set intestazione = [
+      {contenuto: 'Ricevimento', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Modalità', classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set righe = [] %}
     {% for r in dati %}
-        <tr>
-          <td class="gs-big">
-            {{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i') }} alle {{ r.fine|date('G:i') }}
-          </td>
-          <td class="gs-big">
-            {{ ('label.tipo_colloquio_' ~ r.tipo)|trans }}: {{ r.luogo }}
-          </td>
-        </tr>
+      {% set righe = righe|merge([{celle: [
+        {contenuto: '<span class="gs-big">' ~ r.data|format_date('full')|title
+          ~ ' dalle ' ~ r.inizio|date('G:i') ~ ' alle ' ~ r.fine|date('G:i') ~ '</span>'},
+        {contenuto: '<span class="gs-big">' ~ ('label.tipo_colloquio_' ~ r.tipo)|trans ~ ': '
+          ~ r.luogo ~ '</span>'}
+      ]}]) %}
     {% endfor %}
-      </tbody>
-    </table>
+    {{ include('include/tabella.html.twig', {
+      intestazione: [intestazione], corpo: righe,
+      classi: 'table table-bordered table-hover', classe_intestazione: 'bg-info'
+    }) }}
   </div>
   {% endif %}
 </div>

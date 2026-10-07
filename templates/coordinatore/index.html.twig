@@ -1,11 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block pagina_menu %}
-  {{ include('ruolo_docente/menu.html.twig', {attivo: 'coordinatore'}) }}
-{% endblock %}
-
-{% block pagina_submenu %}
-  {{ include('ruolo_docente/menu_coordinatore.html.twig') }}
+  {{ include('ruolo_docente/menu.html.twig') }}
 {% endblock %}
 
 {% block pagina_contenuto %}

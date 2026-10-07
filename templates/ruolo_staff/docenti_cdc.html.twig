@@ -3,16 +3,16 @@
 {% block pagina_contenuto %}
 <div class="container-fluid gs-docenti-cdc">
   <h1 class="text-center gs-h2 gs-mt-2">{{ titolo|trans }}</h1>
-  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-docenti-cdc-filters gs-mb-3">
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-filters gs-mb-3">
     <div id="{{ form[0].vars.id }}">
-      <div class="gs-docenti-cdc-filters-row">
-        <div class="gs-docenti-cdc-filter-col">
-          {{ form_label(form[0].classe) }}
+      <div class="gs-filters-row">
+        <div class="gs-filter-col">
+          {{ form_label(form[0].classe, null, {label_attr: {class: 'control-label'}}) }}
           {{ form_widget(form[0].classe) }}
         </div>
-        <div class="gs-docenti-cdc-filter-col gs-docenti-cdc-btn">
-          {{ form_widget(form[0].submit) }}
-        </div>
+      </div>
+      <div class="gs-filters-buttons">
+        {{ form_widget(form[0].submit) }}
       </div>
       {{ form_widget(form[0]._token) }}
     </div>
@@ -28,15 +28,12 @@
         <strong>Classe {{ info.classe }} - {{ info.classe.corso }} - {{ info.classe.sede.nomeBreve }}</strong>
       </h3>
     </div>
-    <table class="table table-bordered table-hover">
-      <thead class="bg-info">
-        <tr>
-          <th class="col-sm-4">Docente</th>
-          <th class="col-sm-6">Materie</th>
-          <th class="col-sm-2">Incarico</th>
-        </tr>
-      </thead>
-      <tbody>
+    {% set intestazione = [
+      {contenuto: 'Docente', classi: 'col-sm-4', scope: 'col'},
+      {contenuto: 'Materie', classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'Incarico', classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for d, c in dati %}
         <tr>
           <td class="gs-big">{{ c[0].docente.cognome }} {{ c[0].docente.nome }}</td>
@@ -59,8 +56,8 @@
           </td>
         </tr>
     {% endfor %}
-      </tbody>
-    </table>
+      {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover', classe_intestazione: 'bg-info'}) }}
   </div>
   {% endif %}
 </div>

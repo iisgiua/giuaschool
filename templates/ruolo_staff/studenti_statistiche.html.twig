@@ -15,7 +15,25 @@
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-  {{ include(('include/form-inline.html.twig')) }}
+  {% form_theme form 'bootstrap_3_layout.html.twig' %}
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-filters gs-mb-3">
+    <div id="{{ form.vars.id }}">
+      <div class="gs-filters-row">
+        <div class="form-group gs-filter-col">
+          {{ form_label(form.sede, null, {label_attr: {class: 'control-label'}}) }}
+          {{ form_widget(form.sede) }}
+        </div>
+        <div class="form-group gs-filter-col">
+          {{ form_label(form.classe, null, {label_attr: {class: 'control-label'}}) }}
+          {{ form_widget(form.classe) }}
+        </div>
+      </div>
+      <div class="gs-filters-buttons">
+        {{ form_widget(form.submit) }}
+      </div>
+      {{ form_widget(form._token) }}
+    </div>
+  </form>
   <div class="row gs-mb-4">
     <div class="col-sm-12">
       {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_statistiche', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
@@ -23,15 +41,12 @@
       {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_statistiche', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped gs-mb-0">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-3">{{ 'label.sede'|trans }}</th>
-        <th class="col-sm-3">{{ 'label.classe'|trans }}</th>
-        <th class="col-sm-6">{{ 'label.presenti'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'label.sede'|trans, classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'label.classe'|trans, classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'label.presenti'|trans, classi: 'col-sm-6', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for k, a in dati %}
       <tr>
         <td>{{ a.sede }}</td>
@@ -39,8 +54,8 @@
         <td><strong>{{ a.presenti }}</strong> su {{ a.totale }}<span class="label label-info gs-ml-3">{{ a.percentuale }}%</span></td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   {% endif %}
 </div>
 {% endblock %}
@@ -64,7 +79,7 @@ $(document).ready(function() {
     defaultViewDate: "{{ data }}",
     startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
     endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
-    datesDisabled: {{ lista_festivi|raw }},
+    {% if lista_festivi %}datesDisabled: {{ lista_festivi|raw }},{% endif %}
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,
