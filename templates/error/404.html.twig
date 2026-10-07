@@ -1,0 +1,23 @@
+{# pagina di errore generica: mostra le richieste non soddisfatte (404) #}
+{% extends autenticato ? 'base.html.twig' : 'base-login.html.twig' %}
+
+{% block pagina_contenuto %}
+{% set contenitore = autenticato ? 'container-fluid' : 'gs-login-main gs-mt-4' %}
+<div class="{{ contenitore }}">
+  <div class="panel panel-danger">
+    <div class="panel-heading">
+      <div class="panel-title text-center"><strong>{{ 'page.error.404'|trans }} [Errore 404]</strong></div>
+    </div>
+    <div class="panel-body text-center">
+      <p class="gs-big gs-mb-4">{{ 'message.error_404_descrizione'|trans }}</p>
+      {% if messaggio %}
+      <p class="gs-mb-4"><em>{{ messaggio }}</em></p>
+      {% endif %}
+      <p class="gs-mb-4"><a href="{{ path(rotta_principale) }}" class="btn btn-primary">
+          <span class="glyphicon {{ autenticato ? 'glyphicon-home' : 'glyphicon-log-in' }} gs-mr-2"></span>{{ (autenticato ?
+            'label.torna_pagina_principale' : 'label.torna_accesso')|trans }}
+        </a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

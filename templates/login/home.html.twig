@@ -2,11 +2,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {% for label, messages in app.flashes %}
-  {% for msg in messages %}
-  <div class="alert alert-{{ label }}">{{ msg|trans }}</div>
-  {% endfor %}
-  {% endfor %}
+  {{ include('admin/include/flash.html.twig') }}
   <div class="panel panel-info gs-mb-5">
     <div class="panel-heading gs-pt-1 gs-pb-1">
       <div class="panel-title">

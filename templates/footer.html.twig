@@ -26,6 +26,15 @@
       {# Colonna destra #}
       <div class="gs-footer-col">
         <address>
+          <strong>Progetto</strong><br>
+          <a href="https://iisgiua.github.io/giuaschool-docs/" target="_blank">
+            <em>Documentazione</em>
+          </a><br>
+          <a href="https://github.com/iisgiua/giuaschool/" target="_blank">
+            GitHub
+          </a> — v{{ app.session.get('/CONFIG/SISTEMA/versione') }}
+        </address>
+        <address>
           <strong>Contatti</strong><br>
           <a href="mailto:{{ app.session.get('/CONFIG/ISTITUTO/email') }}">{{ app.session.get('/CONFIG/ISTITUTO/email') }}</a><br>
           <a href="mailto:{{ app.session.get('/CONFIG/ISTITUTO/pec') }}">{{ app.session.get('/CONFIG/ISTITUTO/pec') }}</a>
@@ -35,15 +44,6 @@
           <a href="{{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}" target="_blank">
             {{ app.session.get('/CONFIG/ISTITUTO/url_sito') }}
           </a>
-        </address>
-        <address>
-          <strong>Progetto</strong><br>
-          <a href="https://iisgiua.github.io/giuaschool-docs/" target="_blank">
-            <em>Documentazione</em>
-          </a><br>
-          <a href="https://github.com/iisgiua/giuaschool/" target="_blank">
-            GitHub
-          </a> — v{{ app.session.get('/CONFIG/SISTEMA/versione') }}
         </address>
       </div>
 

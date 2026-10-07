@@ -17,7 +17,7 @@
     <div class="panel-body">
   {% if is_granted('ROLE_DOCENTE') %}
     {% if dati.richieste > 0 %}
-      <div class="alert alert-danger gs-mb-2" role="alert"><strong class="gs-big">{{ dati.richieste == 1 ? 'È presente 1 richiesta' : 'Sono presenti ' ~ dati.richieste ~ ' richieste' }} di colloquio a cui rispondere: <a href="{{ path('colloqui') }}">vai alla gestione dei colloqui</a></strong></div>
+      <div class="alert alert-danger gs-mb-2" role="alert"><strong class="gs-big">{{ dati.richieste == 1 ? 'È presente 1 richiesta' : 'Sono presenti ' ~ dati.richieste ~ ' richieste' }} di colloquio a cui rispondere: <a href="{{ path('colloqui_richieste') }}">vai alla gestione dei colloqui</a></strong></div>
     {% endif %}
     {% if dati.colloqui %}
       {% for c in dati.colloqui %}

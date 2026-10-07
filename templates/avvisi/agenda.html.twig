@@ -2,7 +2,7 @@
 
 {% block pagina_menu %}
   {% if is_granted('ROLE_DOCENTE') %}
-    {{ include('ruolo_docente/menu.html.twig', {attivo: 'agenda'}) }}
+    {{ include('ruolo_docente/menu.html.twig') }}
   {% elseif is_granted('ROLE_ATA') %}
     {{ include('ruolo_ata/menu.html.twig') }}
   {% elseif is_granted('ROLE_GENITORE') %}
@@ -20,12 +20,18 @@
     <strong class="gs-big gs-mr-4 gs-ml-4">{{ info.nome_mese }}</strong>
     {% if info.url_succ %}<a class="btn btn-success btn-sm" href="{{ path('avvisi_agenda', {mese: info.url_succ, visualizzazione: info.visualizzazione, classe: info.classeId}) }}" role="button" title="Mese successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
   </div>
-  {% if app.user.controllaRuolo('DSP') %}
+  {# Riga con la scelta della visualizzazione e i pulsanti di inserimento: si
+     mostra solo ai docenti. Prima usava controllaRuolo('DSP'), che per
+     str_contains vuol dire D, S, P: la riga compariva anche a dirigenti e
+     staff, che pero' non hanno cattedre, quindi dati.filtro non esisteva e il
+     menu rimaneva con la sola voce 'Normale'. Il controller, infatti,
+     popola dati.filtro e dati.azioni solo per gli utenti Docente. #}
+  {% if app.user.controllaRuolo('D') %}
   <div class="row gs-mb-1">
     <div class="col-sm-6">
       <strong class="gs-big">Visualizzazione:</strong>
-      <div style="display:inline-block" class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per cambiare il tipo di visualizzazione"><strong id="gs-visualizza-tipo">{{ info.visualizzazione == 'P' ? 'Normale' : 'Verifiche ' ~ info.classe }}</strong><span class="caret gs-ml-3"></span></button>
+      <div style="display:inline-block" class="dropdown gs-dropdown">
+        <button class="btn btn-link gs-dropdown-testo dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Clicca per cambiare il tipo di visualizzazione"><strong id="gs-visualizza-tipo">{{ info.visualizzazione == 'P' ? 'Normale' : 'Verifiche ' ~ info.classe }}</strong><span class="caret gs-ml-2"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
           <li{{ info.visualizzazione == 'P' ? ' class="active"' }}><a href="{{ path('avvisi_agenda', {mese: info.url_mese}) }}">Normale</a></li>
     {% for c, n in dati.filtro %}
@@ -42,29 +48,30 @@
     </div>
   </div>
   {% endif %}
-  <table class="gs-calendar gs-mb-5">
-    <thead>
-      <tr>
-        <th class="text-center col-sm-2">{{ 'label.lunedi'|trans }}</th>
-        <th class="text-center col-sm-2">{{ 'label.martedi'|trans }}</th>
-        <th class="text-center col-sm-2">{{ 'label.mercoledi'|trans }}</th>
-        <th class="text-center col-sm-2">{{ 'label.giovedi'|trans }}</th>
-        <th class="text-center col-sm-2">{{ 'label.venerdi'|trans }}</th>
-        <th class="text-center col-sm-2">{{ 'label.sabato'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'label.lunedi'|trans, classi: 'text-center col-sm-2', scope: 'col'},
+      {contenuto: 'label.martedi'|trans, classi: 'text-center col-sm-2', scope: 'col'},
+      {contenuto: 'label.mercoledi'|trans, classi: 'text-center col-sm-2', scope: 'col'},
+      {contenuto: 'label.giovedi'|trans, classi: 'text-center col-sm-2', scope: 'col'},
+      {contenuto: 'label.venerdi'|trans, classi: 'text-center col-sm-2', scope: 'col'},
+      {contenuto: 'label.sabato'|trans, classi: 'text-center col-sm-2', scope: 'col'},
+      {contenuto: 'label.domenica'|trans, classi: 'text-center col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
       <tr>
   {% for i in (1 - info.inizio)..info.ultimo_giorno %}
+{#  la griglia e' di 7 colonne (lunedi..domenica): la riga si chiude PRIMA di
+    stampare l'ottava cella. Prima il salto era dentro l'if che decideva il
+    contenuto della cella, quindi consumava la cella stessa e le domeniche del
+    mese non venivano disegnate. #}
+    {% if loop.index > 1 and (loop.index - 1) % 7 == 0 %}
+    </tr>
+    <tr>
+    {% endif %}
     {% if i < 1 %}
       <td class="gs-calendar-empty">&nbsp;</td>
     {% else %}
-      {% if loop.index % 7 == 0 %}
-        {% if not loop.last %}
-    </tr>
-    <tr>
-        {% endif %}
-      {% elseif dati.festivi[i] is defined %}
+      {% if dati.festivi[i] is defined %}
       <td class="gs-calendar-holiday">
         <strong class="gs-calendar-day-number">{{ i }}</strong>
       </td>
@@ -101,8 +108,8 @@
     {% endfor %}
   {% endif %}
       </tr>
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, intestazione: [intestazione], classi: 'gs-calendar gs-mb-5'}) }}
   {{ include('include/modal-remote.html.twig') }}
   {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_verifica'}) }}
 </div>

@@ -3,6 +3,7 @@
 framework:
   secret: '%env(APP_SECRET)%'
   ide: 'vscode'
+  error_controller: App\Controller\ErrorController
   http_method_override: false
   handle_all_throwables: true
   form:

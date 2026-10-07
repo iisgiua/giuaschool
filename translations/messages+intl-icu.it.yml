@@ -150,6 +150,7 @@ label.descrizione_verifica: Descrizione o argomenti
 label.destinatari: Destinatari
 label.disabilitato: Disabilitato
 label.disable: Disabilita
+label.domenica: Domenica
 label.maggio: Documenti del 15 maggio
 label.docente: Docente
 label.docenti_classe: Docenti della classe
@@ -369,6 +370,8 @@ label.next: Continua
 label.successiva: Successiva
 label.successivo: Successivo
 label.testo: Testo
+label.torna_accesso: Torna alla pagina di accesso
+label.torna_pagina_principale: Torna alla pagina principale
 label.tipo_documento: Tipo di documenti
 label.tipo_I: ITP
 label.tipo_N: Normale
@@ -769,6 +772,8 @@ page.info.cookie: Informativa sui cookie
 title.info.cookie: Informativa sui cookie
 page.info.credits: Credits
 title.info.credits: Credits
+page.error.404: Pagina non trovata
+title.error.404: Pagina non trovata
 page.ata.importa: Importa ATA
 title.ata.importa: Importa i dati del personale ATA
 page.ata.modifica: Modifica ATA
@@ -1245,6 +1250,7 @@ title.lezioni_voti_configura: Configura la visualizzazione della pagina con i vo
 
 ##### MESSAGGI #####
 message.required_fields: I campi contrassegnati con l'asterisco (*) sono obbligatori.
+message.error_404_descrizione: La pagina richiesta non esiste, oppure non è più disponibile.
 message.update_ok: La modifica è stata memorizzata correttamente.
 message.delete_ok: La cancellazione è stata effettuata correttamente.
 message.importa_cattedre: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
