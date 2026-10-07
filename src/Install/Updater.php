@@ -8,12 +8,16 @@
 
 namespace App\Install;
 
+use Closure;
+
 require_once __DIR__.'/DataMigrator.php';
 require_once __DIR__.'/../Exception/InstallException.php';
 require_once __DIR__.'/../Exception/InstallAuthException.php';
+require_once __DIR__.'/../Util/EnvFile.php';
 
 use App\Exception\InstallException;
 use App\Exception\InstallAuthException;
+use App\Util\EnvFile;
 use Exception;
 use PDO;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
@@ -200,18 +204,16 @@ class Updater {
   //==================== METODI PRIVATI DELLA CLASSE ====================
 
   /**
-   * Legge la configurazione dal file .env
+   * Legge la configurazione da .env.example, .env (compatibilità) e .env.local
    *
    */
   private function readEnv(): void {
-    $path = $this->projectPath.'/.env';
-    // legge .env e carica variabili di ambiente (array vuoto se il file non è leggibile)
-    $dati = parse_ini_file($path);
-    $this->env = is_array($dati) ? $dati : [];
+    // legge il modello e i valori della macchina (questi ultimi hanno la precedenza)
+    $this->env = EnvFile::leggi($this->projectPath);
   }
 
   /**
-   * Scrive la configurazione sul file .env
+   * Scrive la configurazione sul file .env.local
    *
    * @param array $toDelete Lista delle variabili da eliminare
    */
@@ -231,6 +233,10 @@ class Updater {
       'MIMSPID_CLIENT_ID' => ['', 'autenticazione SPID/CIE tramite gateway MIM'],
       'MIMSPID_CLIENT_SECRET' => ['', ],
       'LOG_LEVEL' => ['warning', 'imposta il livello del log del sistema in produzione']];
+    // valori già presenti nella configurazione della macchina (senza il modello)
+    $macchina = EnvFile::leggiMacchina($this->projectPath);
+    // valori scritti esplicitamente in .env.local: hanno la precedenza durante gli aggiornamenti
+    $locale = EnvFile::leggiLocale($this->projectPath);
     // inserisce variabili di ambiente
     $newEnv = '';
     foreach ($vars as $key => $var) {
@@ -239,7 +245,23 @@ class Updater {
         if (!empty($var[1])) {
           $newEnv .= "\n".'### '.$var[1]."\n";
         }
-        $value = (string) ($this->env[$key] ?? $var[0]);
+        if ($key === 'APP_ENV') {
+          // l'installazione e l'aggiornamento sono sempre in produzione
+          $value = 'prod';
+        } elseif ($key === 'APP_SECRET') {
+          // conserva il segreto esistente; ne genera uno nuovo solo se manca o è quello di esempio
+          $segreto = isset($macchina[$key]) ? (string) $macchina[$key] : null;
+          $value = EnvFile::segretoDebole($segreto) ? (string) $var[0] : $segreto;
+        } elseif ($key === 'LOG_LEVEL') {
+          // conserva il livello scelto in .env.local; il vecchio .env non è attendibile
+          $value = (string) ($locale[$key] ?? '');
+          if ($value === '') {
+            $value = (string) $var[0];
+          }
+        } else {
+          // usa il valore corrente (comprese le modifiche già fatte in memoria)
+          $value = (string) ($this->env[$key] ?? $var[0]);
+        }
         $value = str_replace(["\\", "'", "\n", "\r"], ["\\\\", "\\'", '', ''], $value);
         $newEnv .= $key."='".$value."'\n";
       }
@@ -257,10 +279,18 @@ class Updater {
       $newEnv .= "\n".'### altre impostazioni'."\n";
       $newEnv .= $otherVars;
     }
-    // scrive la nuova configurazione
-    $path = $this->projectPath.'/.env';
-    unlink($path);
-    file_put_contents($path, $newEnv);
+    // scrive la nuova configurazione nel file della macchina
+    $path = $this->projectPath.'/'.EnvFile::ENV_LOCAL;
+    if (file_put_contents($path, $newEnv) === false) {
+      throw new InstallException('Impossibile scrivere il file di configurazione ".env.local".');
+    }
+    // il file contiene le credenziali: accessibile solo al proprietario
+    @chmod($path, 0600);
+    // migra il vecchio .env: i valori sono già stati copiati in .env.local
+    $legacy = $this->projectPath.'/'.EnvFile::ENV_LEGACY;
+    if (is_file($legacy)) {
+      @unlink($legacy);
+    }
   }
 
   /**
@@ -317,19 +347,25 @@ class Updater {
     }
     // autenticazione riuscita
     $this->authenticated = true;
+    // migra la configurazione delle installazioni precedenti in .env.local
+    if (!is_file($this->projectPath.'/'.EnvFile::ENV_LOCAL) ||
+        is_file($this->projectPath.'/'.EnvFile::ENV_LEGACY)) {
+      $this->writeEnv([]);
+      $this->readEnv();
+    }
     // controlla versione
     $version = $this->getParameter('versione', '0');
     $build = $this->getParameter('versione_build', '0');
     if (empty($version) || version_compare($version, '1.4.0', '<')) {
       // versione non configurata o precedente a 1.4.0
-      throw new Exception('Non è possibile effettuare l\'aggiornamento dalla versione attuale ['.$version.']', 0);
+      throw new InstallException('Non è possibile effettuare l\'aggiornamento dalla versione attuale ['.$version.']', 0);
     } elseif (version_compare($version, $this->sys['version'], '>')) {
       // sistema già aggiornato
-      throw new Exception('Il sistema risulta già aggiornato alla versione '.$version, 0);
+      throw new InstallException('Il sistema risulta già aggiornato alla versione '.$version, 0);
     } elseif (version_compare($version, $this->sys['version'], '=') &&
               ($this->sys['build'] == '0' || $this->sys['build'] == $build)) {
       // sistema già aggiornato
-      throw new Exception('Il sistema risulta già aggiornato alla versione '.$version, 0);
+      throw new InstallException('Il sistema risulta già aggiornato alla versione '.$version, 0);
     }
     // converte nomi file per compatibilità
     foreach (glob($this->projectPath.'/src/Install/giuaschool-*-v*.zip') as $file) {
@@ -350,12 +386,13 @@ class Updater {
    */
   private function initInstall(string $token): void {
     // carica variabili di ambiente
-    $path = $this->projectPath.'/.env';
-    if (!file_exists($path)) {
-      // scrive file .env
-      $this->writeEnv([]);
-    }
     $this->readEnv();
+    if (!is_file($this->projectPath.'/'.EnvFile::ENV_LOCAL) ||
+        is_file($this->projectPath.'/'.EnvFile::ENV_LEGACY)) {
+      // crea o migra il file della macchina
+      $this->writeEnv([]);
+      $this->readEnv();
+    }
     // carica variabili di sistema
     $this->readSys();
     // controlla token
@@ -379,13 +416,13 @@ class Updater {
 
     // errore se non impostata
     if ($url === '') {
-      throw new Exception('Parametro DATABASE_URL non configurato. Impostare la connessione al database.');
+      throw new InstallException('Parametro DATABASE_URL non configurato. Impostare la connessione al database.');
     }
 
     // parsing URL
     $db = parse_url($url);
     if ($db === false || empty($db['scheme']) || empty($db['host'])) {
-      throw new Exception('Parametro DATABASE_URL non valido.');
+      throw new InstallException('Parametro DATABASE_URL non valido.');
     }
 
     // credenziali
@@ -514,7 +551,7 @@ class Updater {
       'envDelete' => [],
       'procedure' => []];
     foreach ($updates as $update) {
-      $info = include($update[0]);
+      $info = include $update[0]; //NOSONAR php:S2003 - il valore di ritorno e' necessario ad ogni aggiornamento
       // comandi SQL e controllo: in array separati o in unico array
       if (empty($info['sqlCheck'])) {
         // separa in due array distinti
@@ -573,7 +610,7 @@ class Updater {
     $zip = new ZipArchive();
     if ($zip->open($zipPath) !== true) {
       // errore
-      throw new Exception('Errore nell\'apertura del file ZIP.', $step);
+      throw new InstallException('Errore nell\'apertura del file ZIP.', $step);
     }
     // estrae file
     for($i = 0; $i < $zip->numFiles; $i++) {
@@ -593,7 +630,7 @@ class Updater {
         $success = $zip->extractTo($this->projectPath, [$zip->getNameIndex($i)]);
         if (!$success) {
           // errore
-          throw new Exception('Errore nell\'estrazione del file "'.$zip->getNameIndex($i).'"', $step);
+          throw new InstallException('Errore nell\'estrazione del file "'.$zip->getNameIndex($i).'"', $step);
         }
       }
     }
@@ -605,7 +642,7 @@ class Updater {
     $page['title'] = 'Estrazione dei file';
     $page['success'] = 'I file sono stati estratti correttamente.';
     $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.($step + 1);
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -639,7 +676,7 @@ class Updater {
         }
         if (!$success) {
           // errore
-          throw new Exception('Errore nel copiare il file "'.$file.'"', $step);
+          throw new InstallException('Errore nel copiare il file "'.$file.'"', $step);
         }
       }
     }
@@ -659,7 +696,7 @@ class Updater {
         }
         if (!$success) {
           // errore
-          throw new Exception('Errore nel cancellare il file "'.$file.'"', $step);
+          throw new InstallException('Errore nel cancellare il file "'.$file.'"', $step);
         }
       }
     }
@@ -669,7 +706,7 @@ class Updater {
     $page['title'] = 'Aggiornamento dei file e delle directory';
     $page['success'] = 'I file e le directory sono stati aggiornati correttamente.';
     $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.($step + 1);
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -687,7 +724,7 @@ class Updater {
     // controlla coerenza dati
     if (count($updates['sqlCommand']) != count($updates['sqlCheck'])) {
       // errore
-      throw new Exception('Errore nelle informazioni di aggiornamento per il database', $step);
+      throw new InstallException('Errore nelle informazioni di aggiornamento per il database', $step);
     }
     // aggiorna database
     $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 0;');
@@ -711,7 +748,7 @@ class Updater {
         try {
           $this->pdo->exec($sql);
         } catch (Exception) {
-          throw new Exception('Errore nell\'esecuzione dei comandi per l\'aggiornamento del database<br>'.
+          throw new InstallException('Errore nell\'esecuzione dei comandi per l\'aggiornamento del database<br>'.
             '['.$sql.']', $step);
         }
       }
@@ -723,7 +760,7 @@ class Updater {
     $page['title'] = 'Aggiornamento del database';
     $page['success'] = 'Il database è stato correttamente aggiornato alla nuova versione.';
     $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.($step + 1);
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -738,11 +775,11 @@ class Updater {
     $this->writeEnv($updates['envDelete']);
     // visualizza pagina
     $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
-    $page['step'] = $step.' - Aggiornamento .env';
-    $page['title'] = 'Aggiornamento del contenuto del file ".env"';
-    $page['success'] = 'Il file ".env" è stato correttamente aggiornato alla nuova versione.';
+    $page['step'] = $step.' - Aggiornamento .env.local';
+    $page['title'] = 'Aggiornamento del contenuto del file ".env.local"';
+    $page['success'] = 'Il file ".env.local" è stato correttamente aggiornato alla nuova versione.';
     $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.($step + 1);
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -779,7 +816,7 @@ class Updater {
     $page['title'] = 'Pulizia finale della cache e dei file di installazione';
     $page['success'] = 'I file sono stati correttamente rimossi.';
     $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.($step + 1);
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -802,7 +839,7 @@ class Updater {
     $page['title'] = 'Procedura di installazione terminata';
     $page['success'] = 'La procedura di installazione è terminata con successo.';
     $page['text'] = 'Ora puoi andare alla <a href="'.$this->urlPath.'/">pagina principale</a>.';
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -920,11 +957,11 @@ class Updater {
       'Cartella delle sessioni con permessi di scrittura',
       $test ? 'SI' : 'NO (controlla: "'.$path.'")',
       $test];
-    // file scrivibili: .env
-    $path = $this->projectPath.'/.env';
+    // file scrivibili: .env.local
+    $path = $this->projectPath.'/'.EnvFile::ENV_LOCAL;
     $test = is_writable($path);
     $data['mandatory'][] = [
-      'File di configurazione ".env" con permessi di scrittura',
+      'File di configurazione ".env.local" con permessi di scrittura',
       $test ? 'SI' : 'NO (controlla: "'.$path.'")',
       $test];
     // --- requisiti opzionali ---
@@ -1007,7 +1044,7 @@ class Updater {
         "Il sistema non soddisfa i requisiti tecnici indispensabili per il funzionameno dell'applicazione.";
       $page['error'] = $pageUrl.'?token='.$this->sys['token'].'&step='.$step;
     }
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -1033,7 +1070,7 @@ class Updater {
         "Il sistema non soddisfa i requisiti tecnici indispensabili per il funzionameno dell'applicazione.";
       $page['error'] = $pageUrl.'?token='.$this->sys['token'].'&step='.$step;
     }
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -1050,16 +1087,16 @@ class Updater {
       $dbName = (string) ($_POST['install']['db_name'] ?? '');
 
       if (!preg_match('/^[a-zA-Z0-9_\-]+$/', $dbName)) {
-        throw new Exception('Nome del database non valido. Sono consentiti solo caratteri alfanumerici, trattini e trattini bassi.', $step);
+        throw new InstallException('Nome del database non valido. Sono consentiti solo caratteri alfanumerici, trattini e trattini bassi.', $step);
       }
       if (!preg_match('/^[a-zA-Z0-9_\.\-]+$/', $dbServer)) {
-        throw new Exception('Nome server database non valido.', $step);
+        throw new InstallException('Nome server database non valido.', $step);
       }
       if ($dbPort !== '' && (!ctype_digit($dbPort) || (int) $dbPort < 1 || (int) $dbPort > 65535)) {
-        throw new Exception('Porta database non valida.', $step);
+        throw new InstallException('Porta database non valida.', $step);
       }
       if (!preg_match('/^[a-zA-Z0-9_\.\-]+$/', $dbUser)) {
-        throw new Exception('Nome utente database non valido.', $step);
+        throw new InstallException('Nome utente database non valido.', $step);
       }
 
       // salva configurazione
@@ -1102,7 +1139,7 @@ class Updater {
     $page['version'] = 'INSTALL';
     $page['step'] = $step.' - Impostazioni database';
     $page['title'] = 'Impostazioni per la connessione al database';
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -1156,7 +1193,7 @@ class Updater {
     $page['title'] = 'Creazione del database iniziale';
     $page['success'] = 'Il nuovo database è stato creato correttamente.';
     $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 1);
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -1170,23 +1207,23 @@ class Updater {
       $username = trim((string) $_POST['install']['username']);
       if (strlen($username) < 4) {
         // username troppo corto
-        throw new Exception('Il nome utente deve avere una lunghezza di almeno 4 caratteri', $step);
+        throw new InstallException('Il nome utente deve avere una lunghezza di almeno 4 caratteri', $step);
       }
       $password = trim((string) $_POST['install']['password']);
       if (strlen($password) < 8) {
         // password troppo corta
-        throw new Exception('La password deve avere una lunghezza di almeno 8 caratteri', $step);
+        throw new InstallException('La password deve avere una lunghezza di almeno 8 caratteri', $step);
       }
       // codifica password
-      require $this->projectPath.'/vendor/symfony/password-hasher/PasswordHasherInterface.php';
-      require $this->projectPath.'/vendor/symfony/password-hasher/LegacyPasswordHasherInterface.php';
-      require $this->projectPath.'/vendor/symfony/password-hasher/Hasher/PasswordHasherFactoryInterface.php';
-      require $this->projectPath.'/vendor/symfony/password-hasher/Hasher/PasswordHasherFactory.php';
-      require $this->projectPath.'/vendor/symfony/password-hasher/Hasher/CheckPasswordLengthTrait.php';
-      require $this->projectPath.'/vendor/symfony/password-hasher/Hasher/SodiumPasswordHasher.php';
-      require $this->projectPath.'/vendor/symfony/password-hasher/Hasher/NativePasswordHasher.php';
-      require $this->projectPath.'/vendor/symfony/password-hasher/Hasher/Pbkdf2PasswordHasher.php';
-      require $this->projectPath.'/vendor/symfony/password-hasher/Hasher/MigratingPasswordHasher.php';
+      require_once $this->projectPath.'/vendor/symfony/password-hasher/PasswordHasherInterface.php';
+      require_once $this->projectPath.'/vendor/symfony/password-hasher/LegacyPasswordHasherInterface.php';
+      require_once $this->projectPath.'/vendor/symfony/password-hasher/Hasher/PasswordHasherFactoryInterface.php';
+      require_once $this->projectPath.'/vendor/symfony/password-hasher/Hasher/PasswordHasherFactory.php';
+      require_once $this->projectPath.'/vendor/symfony/password-hasher/Hasher/CheckPasswordLengthTrait.php';
+      require_once $this->projectPath.'/vendor/symfony/password-hasher/Hasher/SodiumPasswordHasher.php';
+      require_once $this->projectPath.'/vendor/symfony/password-hasher/Hasher/NativePasswordHasher.php';
+      require_once $this->projectPath.'/vendor/symfony/password-hasher/Hasher/Pbkdf2PasswordHasher.php';
+      require_once $this->projectPath.'/vendor/symfony/password-hasher/Hasher/MigratingPasswordHasher.php';
       $factory = new PasswordHasherFactory(
         ['common' => ['algorithm' => 'auto']]);
       $passwordHasher = $factory->getPasswordHasher('common');
@@ -1212,7 +1249,7 @@ class Updater {
     $page['version'] = 'INSTALL';
     $page['step'] = $step.' - Utente amministratore';
     $page['title'] = 'Credenziali di accesso per l\'utente amministratore';
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -1234,7 +1271,7 @@ class Updater {
     $page['title'] = 'Pulizia finale della cache e dei file di installazione';
     $page['success'] = 'I file sono stati correttamente rimossi.';
     $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 1);
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -1254,7 +1291,7 @@ class Updater {
     $page['success'] = 'La procedura di installazione è terminata con successo.';
     $page['warning'] = 'Viene eliminata la pagina iniziale della procedura di installazione "install/app.php" per motivi di sicurezza.';
     $page['text'] = 'Ora puoi andare alla <a href="'.$this->urlPath.'/">pagina principale</a>.';
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
   /**
@@ -1274,7 +1311,7 @@ class Updater {
     // carica substep
     $subStep = isset($_GET['sub']) ? (int) $_GET['sub'] : 0;
     // controlla che il substep esista e sia una procedura valida
-    if (!isset($updates['procedure'][$subStep]) || !($updates['procedure'][$subStep] instanceof \Closure)) {
+    if (!isset($updates['procedure'][$subStep]) || !($updates['procedure'][$subStep] instanceof Closure)) {
       throw new InstallException('Procedura di aggiornamento non valida', $step);
     }
     // esegue procedura di aggiornamento (le procedure sono Closure e non codice da valutare)
@@ -1291,7 +1328,7 @@ class Updater {
     }
     // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string -- falso positivo: "update" è parte della URL, il valore è convertito in intero
     $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.$step.(isset($subStep) ? '&sub='.$subStep : '');
-    include($this->publicPath.'/install/update_page.php');
+    include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
   }
 
 }

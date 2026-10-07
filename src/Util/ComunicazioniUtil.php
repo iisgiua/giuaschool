@@ -8,6 +8,7 @@
 
 namespace App\Util;
 
+use finfo;
 use App\Entity\Allegato;
 use App\Entity\Annotazione;
 use App\Entity\Alunno;
@@ -122,7 +123,7 @@ class ComunicazioniUtil {
       return false;
     }
     if (class_exists('finfo')) {
-      $finfo = new \finfo(FILEINFO_MIME_TYPE);
+      $finfo = new finfo(FILEINFO_MIME_TYPE);
       return ((string) $finfo->file($percorso)) === 'application/pdf';
     }
     return ((string) @mime_content_type($percorso)) === 'application/pdf';
@@ -139,11 +140,11 @@ class ComunicazioniUtil {
     $testo = mb_strtoupper($nome, 'UTF-8');
     $testo = str_replace(['À', 'È', 'É', 'Ì', 'Ò', 'Ù'], ['A', 'E', 'E', 'I', 'O', 'U'], $testo);
     $testo = preg_replace('/\W+/','-', $testo);
-    if (str_starts_with($testo, '-')) {
-      $testo = substr($testo, 1);
+    if (str_starts_with((string) $testo, '-')) {
+      $testo = substr((string) $testo, 1);
     }
-    if (str_ends_with($testo, '-')) {
-      $testo = substr($testo, 0, -1);
+    if (str_ends_with((string) $testo, '-')) {
+      $testo = substr((string) $testo, 0, -1);
     }
     return $testo;
   }
@@ -215,14 +216,14 @@ class ComunicazioniUtil {
     $this->em->getRepository(ComunicazioneUtente::class)->createQueryBuilder('cu')
       ->delete()
       ->where('cu.comunicazione=:comunicazione')
-			->setParameter('comunicazione', $comunicazione)
+      ->setParameter('comunicazione', $comunicazione)
       ->getQuery()
       ->execute();
     // cancella classi in lista
     $this->em->getRepository(ComunicazioneClasse::class)->createQueryBuilder('cc')
       ->delete()
       ->where('cc.comunicazione=:comunicazione')
-			->setParameter('comunicazione', $comunicazione)
+      ->setParameter('comunicazione', $comunicazione)
       ->getQuery()
       ->execute();
   }
@@ -238,21 +239,9 @@ class ComunicazioniUtil {
     $classi = [];
     $sedi = array_map(fn($o) => $o->getId(), $comunicazione->getSedi()->toArray());
     // speciali
-    if (str_contains($comunicazione->getSpeciali(), 'D')) {
-      // aggiunge DSGA
-      $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdDsga());
-    }
-    if (str_contains($comunicazione->getSpeciali(), 'S')) {
-      // aggiunge RSPP
-      $utenti = array_merge($utenti, $this->em->getRepository(Utente::class)->getIdRspp());
-    }
-    $rappresentanti = array_intersect(['R', 'I', 'P'], str_split($comunicazione->getSpeciali()));
-    if (!empty($rappresentanti)) {
-      // aggiunge rappresentanti
-      $utenti = array_merge($utenti, $this->em->getRepository(Utente::class)->getIdRappresentanti($rappresentanti));
-    }
+    $utenti = $this->utentiSpeciali($comunicazione, $utenti);
     // ATA
-    $ata = array_intersect(['A', 'T', 'C'], str_split($comunicazione->getAta()));
+    $ata = array_intersect(['A', 'T', 'C'], str_split((string) $comunicazione->getAta()));
     if (!empty($ata)) {
       // aggiunge ATA
       $utenti = array_merge($utenti, $this->em->getRepository(Ata::class)->getIdCategorieAta($ata, $sedi));
@@ -265,27 +254,7 @@ class ComunicazioniUtil {
           $comunicazione->getFiltroCoordinatori() : null));
     }
     // docenti
-    if ($comunicazione->getDocenti() != 'N') {
-      // controllo classi
-      $filtroClassi = [];
-      if ($comunicazione->getDocenti() == 'C') {
-        $filtroClassi = $comunicazione->getFiltroDocenti();
-        $articolate = $this->em->getRepository(Classe::class)->classiArticolate($filtroClassi);
-        foreach ($articolate as $articolata) {
-          if (!empty($articolata['comune'])) {
-            // se gruppo classe aggiunge docenti comuni
-            $filtroClassi[] = $articolata['comune'];
-          } else {
-            // se classe comune aggiunge docenti di tutti i gruppi
-            $filtroClassi = array_merge($filtroClassi, $articolata['gruppi']);
-          }
-        }
-      }
-      // aggiunge docenti
-      $utenti = array_merge($utenti, $this->em->getRepository(Docente::class)
-        ->getIdDocente($sedi, $comunicazione->getDocenti(),
-          $comunicazione->getDocenti() == 'C' ? $filtroClassi : $comunicazione->getFiltroDocenti()));
-    }
+    $utenti = $this->utentiDocenti($comunicazione, $sedi, $utenti);
     // genitori
     if ($comunicazione->getGenitori() != 'N') {
       // aggiunge genitori
@@ -323,25 +292,9 @@ class ComunicazioniUtil {
         $comunicazione->getFiltroRappresentantiAlunni()));
     }
     // imposta utenti destinatari
-    $utenti = array_unique($utenti);
-    foreach ($utenti as $utente) {
-      $obj = (new ComunicazioneUtente())
-        ->setComunicazione($comunicazione)
-        ->setUtente($this->em->getReference(Utente::class, $utente));
-      $this->em->persist($obj);
-    }
+    $this->impostaUtentiDestinatari($comunicazione, $utenti);
     // imposta classi destinatarie
-    if ($comunicazione instanceOf Circolare ||
-        ($comunicazione instanceOf Avviso && in_array($comunicazione->getTipo(), ['U', 'E', 'A', 'C']))) {
-      // solo per circolari e avvisi uscite/ritardi/attività/generici
-      $classi = array_unique($classi);
-      foreach ($classi as $classe) {
-        $obj = (new ComunicazioneClasse())
-          ->setComunicazione($comunicazione)
-          ->setClasse($this->em->getReference(Classe::class, $classe));
-        $this->em->persist($obj);
-      }
-    }
+    $this->impostaClassiDestinatrici($comunicazione, $classi);
   }
 
   /**
@@ -393,37 +346,12 @@ class ComunicazioniUtil {
       $this->em->getRepository(Classe::class)->listaClassi($comunicazione->getFiltroCoordinatori()) :
       '');
     // visualizzazione filtro docenti
-    $dati['docenti'] = ($comunicazione->getDocenti() == 'C' ?
-      $this->em->getRepository(Classe::class)->listaClassi($comunicazione->getFiltroDocenti()) :
-      ($comunicazione->getDocenti() == 'M' ?
-      $this->em->getRepository(Materia::class)->listaMaterie($comunicazione->getFiltroDocenti()) :
-      ($comunicazione->getDocenti() == 'U' ?
-      $this->em->getRepository(Docente::class)->listaDocenti($comunicazione->getFiltroDocenti(), 'gs-filtroDocenti-') :
-      '')));
-    // visualizzazione filtro genitori
-    $dati['genitori'] = ($comunicazione->getGenitori() == 'C' ?
-      $this->em->getRepository(Classe::class)->listaClassi($comunicazione->getFiltroGenitori()) :
-      ($comunicazione->getGenitori() == 'U' ?
-      $this->em->getRepository(Alunno::class)->listaAlunni($comunicazione->getFiltroGenitori(), 'gs-filtroGenitori-') :
-      ''));
-    // visualizzazione filtro alunni
-    $dati['alunni'] = ($comunicazione->getAlunni() == 'C' ?
-      $this->em->getRepository(Classe::class)->listaClassi($comunicazione->getFiltroAlunni()) :
-      ($comunicazione->getAlunni() == 'U' ?
-      $this->em->getRepository(Alunno::class)->listaAlunni($comunicazione->getFiltroAlunni(), 'gs-filtroAlunni-') :
-      ''));
-    // visualizzazione filtro rappresentanti dei genitori
-    $dati['rappresentantiGenitori'] = ($comunicazione->getRappresentantiGenitori() == 'C' ?
-      $this->em->getRepository(Classe::class)->listaClassi($comunicazione->getFiltroRappresentantiGenitori()) :
-      ($comunicazione->getRappresentantiGenitori() == 'U' ?
-      $this->em->getRepository(Alunno::class)->listaAlunni($comunicazione->getFiltroRappresentantiGenitori(), 'gs-filtroRappresentantiGenitori-') :
-      ''));
-    // visualizzazione filtro rappresentanti degli alunni
-    $dati['rappresentantiAlunni'] = ($comunicazione->getRappresentantiAlunni() == 'C' ?
-      $this->em->getRepository(Classe::class)->listaClassi($comunicazione->getFiltroRappresentantiAlunni()) :
-      ($comunicazione->getRappresentantiAlunni() == 'U' ?
-      $this->em->getRepository(Alunno::class)->listaAlunni($comunicazione->getFiltroRappresentantiAlunni(), 'gs-filtroRappresentantiAlunni-') :
-      ''));
+    $dati['docenti'] = $this->filtroDocenti($comunicazione);
+    // visualizzazione filtri classi e utenti
+    $dati['genitori'] = $this->filtroClassiUtenti($comunicazione, 'Genitori');
+    $dati['alunni'] = $this->filtroClassiUtenti($comunicazione, 'Alunni');
+    $dati['rappresentantiGenitori'] = $this->filtroClassiUtenti($comunicazione, 'RappresentantiGenitori');
+    $dati['rappresentantiAlunni'] = $this->filtroClassiUtenti($comunicazione, 'RappresentantiAlunni');
     // restituisce dati
     return $dati;
   }
@@ -857,26 +785,13 @@ class ComunicazioniUtil {
             case 'L':   // piano di lavoro
             case 'P':   // programma finale
             case 'R':   // relazione finale
-              $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['attiva' => 1,
-                'docente' => $docente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria(),
-                'alunno' => $documento->getAlunno()]);
-              if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
-                // cattedra docente esiste (escluso potenziamento e Ed.Civica)
-                if ($documento->getMateria()->getTipo() == 'S' && $documento->getTipo() == 'R') {
-                  // relazione finale di sostegno: ok
-                  return true;
-                }
-                if ($documento->getMateria()->getTipo() != 'S' &&
-                    ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L' ||
-                    ($documento->getTipo() == 'P' && $programmiQuinte))) {
-                  // cattedra curricolare, escluso quinte per relazioni o programmi: ok
-                  return true;
-                }
+              if ($this->cattedraCurricolare($docente, $documento, $programmiQuinte)) {
+                // il docente ha la cattedra del documento: ok
+                return true;
               }
               break;
             case 'M':   // documento 15 maggio
-              if ($documento->getClasse()->getAnno() == 5 && $documento->getClasse()->getCoordinatore() &&
-                  $docente->getId() == $documento->getClasse()->getCoordinatore()->getId()) {
+              if ($this->coordinatoreQuinta($docente, $documento)) {
                 // docente coordinatore di quinta: ok
                 return true;
               }
@@ -910,26 +825,13 @@ class ComunicazioniUtil {
             case 'L':   // piano di lavoro
             case 'P':   // programma finale
             case 'R':   // relazione finale
-              $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['attiva' => 1,
-                'docente' => $docente, 'classe' => $documento->getClasse(), 'materia' => $documento->getMateria(),
-                'alunno' => $documento->getAlunno()]);
-              if ($cattedra && $cattedra->getTipo() != 'P' && $documento->getMateria()->getTipo() != 'E') {
-                // cattedra docente esiste (escluso potenziamento e Ed.Civica)
-                if ($documento->getMateria()->getTipo() == 'S' && $documento->getTipo() == 'R') {
-                  // relazione finale di sostegno: ok
-                  return true;
-                }
-                if ($documento->getMateria()->getTipo() != 'S' &&
-                    ($documento->getClasse()->getAnno() != 5 || $documento->getTipo() == 'L' ||
-                    ($documento->getTipo() == 'P' && $programmiQuinte))) {
-                  // cattedra curricolare, escluso quinte per relazioni o programmi: ok
-                  return true;
-                }
+              if ($this->cattedraCurricolare($docente, $documento, $programmiQuinte)) {
+                // il docente ha la cattedra del documento: ok
+                return true;
               }
               break;
             case 'M':   // documento 15 maggio
-              if ($documento->getClasse()->getAnno() == 5 && $documento->getClasse()->getCoordinatore() &&
-                  $docente->getId() == $documento->getClasse()->getCoordinatore()->getId()) {
+              if ($this->coordinatoreQuinta($docente, $documento)) {
                 // docente coordinatore di quinta: ok
                 return true;
               }
@@ -980,9 +882,7 @@ class ComunicazioniUtil {
       // azione di modifica
       if ($circolare && $circolare->getStato() == 'B') {
         // esiste circolare in bozza
-        if ($docente instanceOf Staff &&
-            (!$docente->getSede() ||
-            ($circolare->getSedi()->count() == 1 && $circolare->getSedi()->contains($docente->getSede())))) {
+        if ($this->staffSede($docente, $circolare)) {
           // docente autorizzato a modificare circolari
           return true;
         }
@@ -991,9 +891,7 @@ class ComunicazioniUtil {
       // azione di cancellazione
       if ($circolare && $circolare->getStato() == 'B') {
         // esiste circolare in bozza
-        if ($docente instanceOf Staff &&
-            (!$docente->getSede() ||
-            ($circolare->getSedi()->count() == 1 && $circolare->getSedi()->contains($docente->getSede())))) {
+        if ($this->staffSede($docente, $circolare)) {
           // docente autorizzato a eliminazione circolari
           return true;
         }
@@ -1002,9 +900,7 @@ class ComunicazioniUtil {
       // azione di pubblicazione
       if ($circolare && $circolare->getStato() == 'B') {
         // esiste circolare in bozza
-        if ($docente instanceOf Staff &&
-            (!$docente->getSede() ||
-            ($circolare->getSedi()->count() == 1 && $circolare->getSedi()->contains($docente->getSede())))) {
+        if ($this->staffSede($docente, $circolare)) {
           // docente autorizzato a pubblicare circolari
           return true;
         }
@@ -1013,9 +909,7 @@ class ComunicazioniUtil {
       // azione di rimozione della pubblicazione
       if ($circolare && $circolare->getStato() == 'P') {
         // esiste circolare pubblicata
-        if ($docente instanceOf Staff &&
-            (!$docente->getSede() ||
-            ($circolare->getSedi()->count() == 1 && $circolare->getSedi()->contains($docente->getSede())))) {
+        if ($this->staffSede($docente, $circolare)) {
           // docente autorizzato a togliere pubblicazione
           return true;
         }
@@ -1342,7 +1236,7 @@ class ComunicazioniUtil {
       }
       if ($this->azioneDocumento('edit', $docente, $documento)) {
         // controlla se esiste l'alunno
-        $codiceFiscale = trim(substr($documento->getTitolo(), strpos($documento->getTitolo(), '- C.F. ') + 7));
+        $codiceFiscale = trim(substr((string) $documento->getTitolo(), strpos((string) $documento->getTitolo(), '- C.F. ') + 7));
         $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['codiceFiscale' => $codiceFiscale,
           'abilitato' => 1]);
         if ($alunno && $alunno->getClasse() && ($docente->getResponsabileBesSede() === null ||
@@ -1397,7 +1291,7 @@ class ComunicazioniUtil {
     $errore = $this->validaComunicazione($circolare, $docente);
     if ($errore > 0) {
       // restituisce messaggio di errore
-      return $messaggi[$errore];
+      return $messaggi[$errore] ?? null;
     }
     // controllo numero
     if (!$this->em->getRepository(circolare::class)->controllaNumero($circolare)) {
@@ -1453,7 +1347,7 @@ class ComunicazioniUtil {
     $errore = $this->validaComunicazione($avviso, $docente);
     if ($errore > 0) {
       // restituisce messaggio di errore
-      return $messaggi[$errore];
+      return $messaggi[$errore] ?? null;
     }
     // controlla annotazione
     $creaAnnotazione = $form->get('creaAnnotazione')->getData();
@@ -1599,9 +1493,7 @@ class ComunicazioniUtil {
             // docente autore dell'avviso
             return true;
           }
-          if (!in_array($avviso->getTipo(), ['V', 'P']) &&  $docente instanceOf Staff &&
-              (!$docente->getSede() ||
-              ($avviso->getSedi()->count() == 1 && $avviso->getSedi()->contains($docente->getSede())))) {
+          if ($this->staffSedeAvviso($docente, $avviso)) {
             // docente di staff autorizzato a modificare avvisi
             return true;
           }
@@ -1615,9 +1507,7 @@ class ComunicazioniUtil {
           // docente autore dell'avviso
           return true;
         }
-        if (!in_array($avviso->getTipo(), ['V', 'P']) &&  $docente instanceOf Staff &&
-            (!$docente->getSede() ||
-            ($avviso->getSedi()->count() == 1 && $avviso->getSedi()->contains($docente->getSede())))) {
+        if ($this->staffSedeAvviso($docente, $avviso)) {
           // docente di staff autorizzato a modificare avvisi
           return true;
         }
@@ -1647,32 +1537,8 @@ class ComunicazioniUtil {
     // crea nuova annotazione se richiesto
     if ($crea) {
       // determina classi
-      $classi = [];
       $sedi = $avviso->getSedi()->toArray();
-      if ($avviso->getCoordinatori() == 'T' || $avviso->getDocenti() == 'T' ||
-          $avviso->getGenitori() == 'T' || $avviso->getAlunni() == 'T' ||
-          $avviso->getRappresentantiGenitori() == 'T' || $avviso->getRappresentantiAlunni() == 'T') {
-        // tutte le classi di sedi
-        $classi = $this->em->getRepository(Classe::class)->getIdClasse($sedi, null);
-      } elseif ($avviso->getCoordinatori() == 'C' || $avviso->getDocenti() == 'C' ||
-          $avviso->getGenitori() == 'C' || $avviso->getAlunni() == 'C' ||
-          $avviso->getRappresentantiGenitori() == 'C' || $avviso->getRappresentantiAlunni() == 'C') {
-        // solo classi del filtro
-        $filtro = array_merge(
-          $avviso->getCoordinatori() == 'C'? $avviso->getFiltroCoordinatori() : [],
-          $avviso->getDocenti() == 'C' ? $avviso->getFiltroDocenti() : [],
-          $avviso->getGenitori() == 'C' ? $avviso->getFiltroGenitori() : [],
-          $avviso->getAlunni() == 'C' ? $avviso->getFiltroAlunni() : [],
-          $avviso->getRappresentantiGenitori() == 'C' ? $avviso->getFiltroRappresentantiGenitori() : [],
-          $avviso->getRappresentantiAlunni() == 'C' ? $avviso->getFiltroRappresentantiAlunni() : []);
-        $classi = $this->em->getRepository(Classe::class)->getIdClasse($sedi, $filtro);
-      } elseif ($avviso->getGenitori() == 'U' || $avviso->getAlunni() == 'U') {
-        // classi di alunni/genitori
-        $filtro = array_merge(
-          $avviso->getGenitori() == 'U' ? $avviso->getFiltroGenitori() : [],
-          $avviso->getAlunni() == 'U' ? $avviso->getFiltroAlunni() : []);
-        $classi = $this->em->getRepository(Classe::class)->getIdClasseAlunni($sedi, $filtro);
-      }
+      $classi = $this->classiAnnotazione($avviso, $sedi);
       // crea annotazione
       $this->creaAnnotazioneAvviso($avviso, $classi, $oggetto);
     }
@@ -1738,7 +1604,7 @@ class ComunicazioniUtil {
     $errore = $this->validaComunicazione($avviso, $docente);
     if ($errore > 0) {
       // restituisce messaggio di errore
-      return $messaggi[$errore];
+      return $messaggi[$errore] ?? null;
     }
     // controllo data
     if ($avviso->getTipo() != 'A' && $reg->controlloData($avviso->getData(), null)) {
@@ -1793,7 +1659,7 @@ class ComunicazioniUtil {
     $errore = $this->validaComunicazione($avviso, $docente);
     if ($errore > 0) {
       // restituisce messaggio di errore
-      return $messaggi[$errore];
+      return $messaggi[$errore] ?? null;
     }
     // controlla filtro utenti
     if (empty($avviso->getFiltroGenitori())) {
@@ -1879,7 +1745,7 @@ class ComunicazioniUtil {
     $errore = $this->validaComunicazione($avviso, $docente);
     if ($errore > 0) {
       // restituisce messaggio di errore
-      return $messaggi[$errore];
+      return $messaggi[$errore] ?? null;
     }
     // controllo data
     if ($reg->controlloData($avviso->getData(), null)) {
@@ -1898,24 +1764,15 @@ class ComunicazioniUtil {
       return $messaggi[52];
     }
     // controllo cattedra di sostegno
-    if ($avviso->getCattedra() && $avviso->getCattedra()->getMateria()->getTipo() == 'S' &&
-        (!$avviso->getMateria() || ($avviso->getCattedra()->getAlunno() &&
-        $avviso->getCattedra()->getAlunno()->getId() != (int) $avviso->getFiltroGenitori()[0]))) {
+    if ($this->cattedraSostegnoDiversa($avviso)) {
       // materia curricolare non indicata o alunno diverso da quello della cattedra
       return $messaggi[53];
     }
+    // controllo annotazione sul registro
     if ($avviso->getTipo() == 'V') {
-      // controlla permessi
-      if (!$reg->azioneAnnotazione('add', $avviso->getData(), $docente, null, null)) {
-        // errore: nuova annotazione non permessa
-        return $messaggi[54];
-      }
-      if ($avviso->getAnnotazioni()->count() > 0) {
-        $a = $avviso->getAnnotazioni()[0];
-        if (!$reg->azioneAnnotazione('delete', $a->getData(), $docente, $a->getClasse(), $a)) {
-          // errore: cancellazione annotazione non permessa
-          return $messaggi[54];
-        }
+      $erroreAnnotazione = $this->controllaAnnotazioneAgenda($reg, $avviso, $docente);
+      if ($erroreAnnotazione) {
+        return $erroreAnnotazione;
       }
     }
     // nessun errore

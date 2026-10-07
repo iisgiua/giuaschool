@@ -8,6 +8,7 @@
 
 namespace App\Security;
 
+use App\Exception\MimSpidValidationException;
 use Exception;
 use Firebase\JWT\CachedKeySet;
 use Firebase\JWT\JWT;
@@ -85,17 +86,45 @@ class MimSpidValidator {
       $decoded = JWT::decode($idToken, $this->keySet);
     } catch (Exception $exception) {
       // errore: validazione ID token fallita
-      throw new RuntimeException('ID token MIM-SPID non valido.', 0, $exception);
+      throw new MimSpidValidationException('ID token MIM-SPID non valido.', 0, $exception);
     }
     // converte dati in array
     $claims = json_decode(json_encode($decoded, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
-    // verifica ISS
+    // verifica le dichiarazioni del token, nell'ordine previsto dal protocollo
+    $this->validaIssuer($claims);
+    $audiences = $this->validaAudience($claims);
+    $this->validaAuthorizedParty($claims, $audiences);
+    $this->validaSubject($claims);
+    $this->validaNonce($claims, $nonce);
+    // tutto ok: restituisce i dati verificati
+    return $claims;
+  }
+
+  /**
+   * Verifica il claim iss (emittente del token)
+   *
+   * @param array $claims Claim estratti dal token
+   *
+   * @throws MimSpidValidationException Eccezione lanciata se il claim non e' valido
+   */
+  private function validaIssuer(array $claims): void {
     if (!isset($claims['iss']) || !is_string($claims['iss']) ||
         !hash_equals($this->provider->getIssuerUrl(), $claims['iss'])) {
       // errore: validazione ISS falita
-      throw new RuntimeException('Issuer dell\'ID token MIM-SPID non valido.');
+      throw new MimSpidValidationException('Issuer dell\'ID token MIM-SPID non valido.');
     }
-    // verifica AUD
+  }
+
+  /**
+   * Verifica il claim aud (destinatario del token) e restituisce l'elenco dei destinatari
+   *
+   * @param array $claims Claim estratti dal token
+   *
+   * @return array Elenco dei destinatari previsti dal token
+   *
+   * @throws MimSpidValidationException Eccezione lanciata se il claim non e' valido
+   */
+  private function validaAudience(array $claims): array {
     $audience = $claims['aud'] ?? null;
     if (is_string($audience)) {
       $audiences = [$audience];
@@ -103,31 +132,60 @@ class MimSpidValidator {
       $audiences = $audience;
     } else {
       // errore: validazione AUD fallita, audience assente
-      throw new RuntimeException('Audience dell\'ID token MIM-SPID assente.');
+      throw new MimSpidValidationException('Audience dell\'ID token MIM-SPID assente.');
     }
     if (!in_array($this->provider->getClientId(), $audiences, true)) {
       // errore: validazione AUD fallita, audience non corrisponde a quella prevista
-      throw new RuntimeException('Audience dell\'ID token MIM-SPID non valida.');
+      throw new MimSpidValidationException('Audience dell\'ID token MIM-SPID non valida.');
     }
-    // verifica AZP (se sono presenti più audience è richiesto l'authorized party)
+    return $audiences;
+  }
+
+  /**
+   * Verifica il claim azp (authorized party, richiesto con piu' destinatari)
+   *
+   * @param array $claims Claim estratti dal token
+   * @param array $audiences Elenco dei destinatari previsti dal token
+   *
+   * @throws MimSpidValidationException Eccezione lanciata se il claim non e' valido
+   */
+  private function validaAuthorizedParty(array $claims, array $audiences): void {
+    // se sono presenti piu' audience e' richiesto l'authorized party
     if (count($audiences) > 1) {
       if (!isset($claims['azp']) || $claims['azp'] !== $this->provider->getClientId()) {
         // errore: validazione AUD fallita, audience non corrisponde a quella prevista
-        throw new RuntimeException('Authorized party dell\'ID token MIM-SPID non valido.');
+        throw new MimSpidValidationException('Authorized party dell\'ID token MIM-SPID non valido.');
       }
     }
-    // verifica SUB (codice fiscale)
+  }
+
+  /**
+   * Verifica il claim sub (codice fiscale)
+   *
+   * @param array $claims Claim estratti dal token
+   *
+   * @throws MimSpidValidationException Eccezione lanciata se il claim non e' valido
+   */
+  private function validaSubject(array $claims): void {
     if (!isset($claims['sub']) || !is_string($claims['sub']) || trim($claims['sub']) === '') {
       // errore: SUB non valido
-      throw new RuntimeException('Claim sub dell\'ID token MIM-SPID non valido.');
+      throw new MimSpidValidationException('Claim sub dell\'ID token MIM-SPID non valido.');
     }
-    // nonce (deve essere identico a quello generato al momento della chiamata al gateway MIM-SPID)
+  }
+
+  /**
+   * Verifica il claim nonce, che deve coincidere con quello generato per la richiesta
+   *
+   * @param array $claims Claim estratti dal token
+   * @param string $nonce Nonce usato nella richiesta al gateway MIM-SPID
+   *
+   * @throws MimSpidValidationException Eccezione lanciata se il claim non e' valido
+   */
+  private function validaNonce(array $claims, string $nonce): void {
     if (!isset($claims['nonce']) || !is_string($claims['nonce']) || !hash_equals($nonce, $claims['nonce'])) {
       // errore: nonce non valido
-      throw new RuntimeException('Nonce dell\'ID token MIM-SPID non valido.');
+      throw new MimSpidValidationException('Nonce dell\'ID token MIM-SPID non valido.');
     }
-    // tutto ok: restituisce i dati verificati
-    return $claims;
   }
 
 }

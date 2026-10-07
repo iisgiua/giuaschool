@@ -43,7 +43,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->select('ata.cognome,ata.nome,ata.username,cu.letto')
         ->join(Ata::class, 'ata', 'WITH', 'ata.id=cu.utente')
         ->where("cu.comunicazione=:comunicazione AND ata.tipo='D'")
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();
@@ -60,7 +60,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->select('d.cognome,d.nome,d.username,cu.letto')
         ->join(Docente::class, 'd', 'WITH', 'd.id=cu.utente')
         ->where("cu.comunicazione=:comunicazione AND d.rspp=1")
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->setMaxResults(1)
         ->getQuery()
         ->getOneOrNullResult();
@@ -77,7 +77,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->select('u.cognome,u.nome,u.username,cu.letto')
         ->join('cu.utente', 'u')
         ->where("cu.comunicazione=:comunicazione AND FIND_IN_SET('R', u.rappresentante)>0")
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->orderBy('u.cognome,u.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -97,7 +97,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->select('u.cognome,u.nome,u.username,cu.letto')
         ->join('cu.utente', 'u')
         ->where("cu.comunicazione=:comunicazione AND FIND_IN_SET('I', u.rappresentante)>0")
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->orderBy('u.cognome,u.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -117,7 +117,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->select('u.cognome,u.nome,u.username,cu.letto')
         ->join('cu.utente', 'u')
         ->where("cu.comunicazione=:comunicazione AND FIND_IN_SET('P', u.rappresentante)>0")
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->orderBy('u.cognome,u.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -137,8 +137,8 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->select('ata.cognome,ata.nome,ata.username,ata.tipo,cu.letto')
         ->join(Ata::class, 'ata', 'WITH', 'ata.id=cu.utente')
         ->where("cu.comunicazione=:comunicazione AND ata.tipo IN (:tipi)")
-			  ->setParameter('comunicazione', $comunicazione)
-			  ->setParameter('tipi', str_split($comunicazione->getAta()))
+        ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('tipi', str_split($comunicazione->getAta()))
         ->orderBy('ata.cognome,ata.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -161,7 +161,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->join(Docente::class, 'd', 'WITH', 'd.id=cu.utente')
         ->join(Classe::class, 'cl', 'WITH', 'cl.coordinatore=d.id')
         ->where("cu.comunicazione=:comunicazione")
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->orderBy('cl.anno,cl.sezione,cl.gruppo', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -181,7 +181,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->select('COUNT(cu.id) AS totali,COUNT(cu.letto) AS letti')
         ->join(Docente::class, 'd', 'WITH', 'd.id=cu.utente')
         ->where('cu.comunicazione=:comunicazione')
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->getQuery()
         ->getOneOrNullResult();
       if ($statistica['totali'] > 0) {
@@ -205,7 +205,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->select('COUNT(cu.id) AS totali,COUNT(cu.letto) AS letti')
         ->join(Genitore::class, 'g', 'WITH', 'g.id=cu.utente')
         ->where('cu.comunicazione=:comunicazione')
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->getQuery()
         ->getOneOrNullResult();
       if ($statistica['totali'] > 0) {
@@ -231,7 +231,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->select('COUNT(cu.id) AS totali,COUNT(cu.letto) AS letti')
         ->join(Alunno::class, 'a', 'WITH', 'a.id=cu.utente')
         ->where('cu.comunicazione=:comunicazione')
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->getQuery()
         ->getOneOrNullResult();
       if ($statistica['totali'] > 0) {
@@ -258,7 +258,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->join('g.alunno', 'a')
         ->join('a.classe', 'cl')
         ->where("cu.comunicazione=:comunicazione AND FIND_IN_SET('C', g.rappresentante)>0")
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -279,7 +279,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
         ->join(Alunno::class, 'a', 'WITH', 'a.id=cu.utente')
         ->join('a.classe', 'cl')
         ->where("cu.comunicazione=:comunicazione AND FIND_IN_SET('C', a.rappresentante)>0")
-			  ->setParameter('comunicazione', $comunicazione)
+        ->setParameter('comunicazione', $comunicazione)
         ->orderBy('cl.anno,cl.sezione,cl.gruppo,a.cognome,a.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -378,7 +378,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
       ->select('(cu.utente) AS utente')
       ->join('cu.comunicazione', 'c')
       ->where("cu.comunicazione=:comunicazione AND cu.letto IS NULL AND c.stato='P'")
-			->setParameter('comunicazione', $comunicazione)
+      ->setParameter('comunicazione', $comunicazione)
       ->getQuery()
       ->getArrayResult();
     // restituisce lista utenti
@@ -399,7 +399,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
       ->select('COUNT(cu)')
       ->join(Circolare::class, 'c', 'WITH', 'cu.comunicazione=c.id AND cu.utente=:utente')
       ->where("cu.letto IS NULL AND c.stato='P'")
-			->setParameter('utente', $utente)
+      ->setParameter('utente', $utente)
       ->getQuery()
       ->getSingleScalarResult();
     // restituisce dati

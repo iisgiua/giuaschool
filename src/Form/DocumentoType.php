@@ -121,7 +121,7 @@ class DocumentoType extends AbstractType {
           'required' => false])
         ->add('titolo', TextType::class, ['label' => 'label.titolo_documento',
           'data' => $options['values'][6],
-          'attr' => ['placeholder' =>'label.titolo_documento', 'title' => 'label.filtro_titolo_documento', 'class' => 'gs-placeholder', 'style' => 'width:30em'],
+          'attr' => ['placeholder' =>'label.titolo_documento', 'title' => 'label.filtro_titolo_documento', 'class' => 'gs-placeholder'],
           'label_attr' => ['class' => 'sr-only'],
           'required' => false])
         ->add('submit', SubmitType::class, ['label' => 'label.filtra',

@@ -2145,6 +2145,10 @@ class PagelleUtil {
     $trovato = null;
     // legge scrutinio
     $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => $periodo, 'classe' => $classe]);
+    if ( !$scrutinio ) {
+      // scrutinio non presente
+      return null;
+    }
     if ( $periodo == 'P' || $periodo == 'S' ) {
       // solo gli alunni al momento dello scrutinio
       if ( in_array($alunno, $scrutinio->getDato('alunni') ?? []) ) {

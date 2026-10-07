@@ -222,6 +222,33 @@ class GenitoriUtil {
   }
 
   /**
+   * Restituisce le materie per le quali l'alunno indicato ha voti visibili.
+   *
+   * Va unita a materie() per il filtro per materia: voti() mostra tutti i voti
+   * visibili, anche di materie la cui cattedra non e' piu' attiva, quindi il
+   * filtro deve poter arrivare anche a quelle, altrimenti in tabella ci sono
+   * righe che non si possono filtrare.
+   *
+   * @param Alunno $alunno Alunno di riferimento
+   *
+   * @return array Materie come array associativo, con le stesse chiavi di
+   *               materie(): id, nomeBreve e ordinamento
+   */
+  public function materieConVoti(Alunno $alunno) {
+    return $this->em->getRepository(Valutazione::class)->createQueryBuilder('v')
+      ->select('DISTINCT m.id,m.nomeBreve,m.ordinamento')
+      ->join('v.lezione', 'l')
+      ->join('v.materia', 'm')
+      ->where('v.alunno=:alunno AND v.visibile=:visibile')
+      ->orderBy('m.ordinamento', 'ASC')
+      ->addOrderBy('m.nomeBreve', 'ASC')
+      ->setParameter('alunno', $alunno)
+      ->setParameter('visibile', 1)
+      ->getQuery()
+      ->getArrayResult();
+  }
+
+  /**
    * Restituisce gli argomenti per la classe e materia indicata.
    *
    * @param Classe $classe Classe delle lezioni
@@ -1003,6 +1030,7 @@ class GenitoriUtil {
       // controlla presenza alunno in scrutinio
       foreach ($scrutini as $sc) {
         $alunni = ($sc->getPeriodo() == 'G' ? $sc->getDato('sospesi') : $sc->getDato('alunni'));
+        $alunni = (is_array($alunni) ? $alunni : []);
         if (in_array($alunno->getId(), $alunni) || $alunno->getFrequenzaEstero()) {
           $periodi[] = [$sc->getPeriodo(), $sc];
         }

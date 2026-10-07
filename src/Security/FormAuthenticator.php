@@ -189,27 +189,8 @@ class FormAuthenticator extends AbstractAuthenticator {
     $idProviderTipo = $this->em->getRepository(Configurazione::class)->getParametro('id_provider_tipo');
     $spid = $this->em->getRepository(Configurazione::class)->getParametro('spid');
     $loginSpeciale = $credentials['login_speciale'];
-    // se SPID/CIE è obbligatorio e non è stato effettuato il login speciale
-    if (!$loginSpeciale && (
-        $spid == 'O' ||
-        (in_array($spid, ['A', 'M']) && !$user->controllaRuolo('A')) ||
-        ($spid == 'M' && $user->controllaRuoloFunzione('AM')))) {
-      // errore: utente deve usare accesso SPID/CIE
-      $this->logger->error('Tipo di accesso non valido per l\'autenticazione tramite form.', [
-        'username' => $user->getUserIdentifier(),
-        'ruolo' => $user->getCodiceRuolo(),
-        'ip' => $credentials['ip']]);
-      throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_form');
-    }
-    // se è utilizzato un ID provider per l'utente e non è stato effettuato il login speciale
-    if ($idProvider && $user->controllaRuolo($idProviderTipo) && !$loginSpeciale) {
-      // errore: utente deve usare accesso con id provider
-      $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite form.', [
-        'username' => $user->getUserIdentifier(),
-        'ruolo' => $user->getCodiceRuolo(),
-        'ip' => $credentials['ip']]);
-      throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_form');
-    }
+    // verifica che il tipo di accesso sia compatibile con l'utente
+    $this->controllaTipoAccesso($spid, $idProvider, $idProviderTipo, $loginSpeciale, $user, $credentials);
     // controlla password
     if ($this->hasher->isPasswordValid($user, $credentials['password'])) {
       // password ok: se previsto, controlla anche l'OTP

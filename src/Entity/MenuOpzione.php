@@ -103,10 +103,15 @@ class MenuOpzione implements Stringable {
 
   /**
     * @var string!null $icona Nome dell'eventuale icona dell'opzione
+    *
+    * @deprecated le icone del menu sono definite in templates/admin/layout-sidebar.html.twig
+    *             (variabile `icone_menu`): non esiste alcuna UI pereditarle e i valori
+    *             salvati non erano piu' usati. Il campo resta per non rompere lo schema,
+    *             ma non viene piu' letto da alcun template.
     */
-   #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
-   #[Assert\Length(max: 255, maxMessage: 'field.maxlength')]
-   private ?string $icona = '';
+  #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
+  #[Assert\Length(max: 64, maxMessage: 'field.maxlength')]
+  private ?string $icona = '';
 
   /**
    * @var Menu|null $menu Menu a cui appartiene l'opzione
@@ -325,6 +330,8 @@ class MenuOpzione implements Stringable {
    * Restituisce il nome dell'eventuale icona dell'opzione
    *
    * @return string|null Nome dell'icona dell'opzione
+   *
+   * @deprecated non usare: le icone sono definite in templates/admin/layout-sidebar.html.twig
    */
   public function getIcona(): ?string {
     return $this->icona;
@@ -336,6 +343,8 @@ class MenuOpzione implements Stringable {
    * @param string|null $icona Nome dell'icona dell'opzione
    *
    * @return self Oggetto modificato
+   *
+   * @deprecated non usare: le icone sono definite in templates/admin/layout-sidebar.html.twig
    */
   public function setIcona(?string $icona): self {
     $this->icona = $icona;

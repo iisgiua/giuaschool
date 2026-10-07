@@ -203,7 +203,7 @@ class SegreteriaUtil {
       $periodi = [];
       foreach ($scrutini as $sc) {
         $alunni = (($sc->getPeriodo() == 'G' || $sc->getPeriodo() == 'R') ?
-          $sc->getDato('sospesi') : $sc->getDato('alunni'));
+          $sc->getDato('sospesi') : $sc->getDato('alunni')) ?? [];
         if (in_array($alu->getId(), $alunni)) {
           $periodi[] = [$sc->getPeriodo(), $sc->getId()];
         }
@@ -237,7 +237,7 @@ class SegreteriaUtil {
     $dati = [];
     // legge dati
     $dati_scrutinio = $scrutinio->getDati();
-    $alunni = ($scrutinio->getPeriodo() == 'G' ? $dati_scrutinio['sospesi'] : $dati_scrutinio['alunni']);
+    $alunni = ($scrutinio->getPeriodo() == 'G' ? $dati_scrutinio['sospesi'] : $dati_scrutinio['alunni']) ?? [];
     // controlla alunno
     if (in_array($alunno->getId(), $alunni)) {
       // alunno in scrutinio
