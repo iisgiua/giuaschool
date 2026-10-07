@@ -1,0 +1,255 @@
+####################
+# DemoRegistroFixtures - dati demo per il registro delle lezioni
+#
+# Aggiunge ore di lezione, firme e assenze-lezione per tutte le classi, in modo
+# che il registro di ogni classe risulti popolato. Le date sono comprese
+# nell'anno scolastico configurato (2022/2023) per essere visibili nelle pagine
+# filtrate per anno.
+####################
+
+
+App\Entity\Lezione:
+
+  # ----- prime ore del giorno, classi del gruppo A -----
+  lezione_demo_A1_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 1
+    classe: '@classe_<($current . "A")>'
+    materia: '@materia_curricolare_<current()>'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  lezione_demo_A2_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 2
+    classe: '@classe_<($current . "A")>'
+    materia: '@materia_itp_<current()>'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  # ----- classi del gruppo B -----
+  lezione_demo_B1_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 1
+    classe: '@classe_<($current . "B")>'
+    materia: '@materia_curricolare_<current()>'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  lezione_demo_B2_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 2
+    classe: '@classe_<($current . "B")>'
+    materia: '@materia_curricolare_<current()>'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  # ----- classi del gruppo C (biennio) -----
+  lezione_demo_C1_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 1
+    classe: '@classe_<($current . "C")>'
+    materia: '@materia_curricolare_<current()>'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  lezione_demo_C2_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 3
+    classe: '@classe_<($current . "C")>'
+    materia: '@materia_itp_<current()>'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  # ----- classi articolate del triennio -----
+  lezione_demo_3CAMB_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 4
+    classe: '@classe_3CAMB'
+    materia: '@materia_curricolare_<current()>'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  lezione_demo_3CCHI_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 5
+    classe: '@classe_3CCHI'
+    materia: '@materia_curricolare_<current()>'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  # ----- ore di religione per tutti i gruppi -----
+  lezione_demo_religioneA_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 6
+    classe: '@classe_<($current . "A")>'
+    materia: '@materia_RELIGIONE'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  lezione_demo_religioneB_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 6
+    classe: '@classe_<($current . "B")>'
+    materia: '@materia_RELIGIONE'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  # ----- ore di sostegno -----
+  lezione_demo_sostegno_1:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 7
+    classe: '@classe_1A'
+    materia: '@materia_SOSTEGNO'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+  lezione_demo_sostegno_2:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 7
+    classe: '@classe_1A'
+    materia: '@materia_SOSTEGNO'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+  lezione_demo_sostegno_3:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 7
+    classe: '@classe_3CCHI'
+    materia: '@materia_SOSTEGNO'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+  lezione_demo_sostegno_4:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 7
+    classe: '@classe_3CAMB'
+    materia: '@materia_SOSTEGNO'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+
+App\Entity\Firma:
+
+  firma_demo_A1_{1..5}:
+    lezione: '@lezione_demo_A1_<current()>'
+    docente: '@docente_curricolare_<current()>'
+
+  firma_demo_A2_{1..5}:
+    lezione: '@lezione_demo_A2_<current()>'
+    docente: '@docente_itp_<current()>'
+
+  firma_demo_B1_{1..5}:
+    lezione: '@lezione_demo_B1_<current()>'
+    docente: '@docente_curricolare_<current()>'
+
+  firma_demo_B2_{1..5}:
+    lezione: '@lezione_demo_B2_<current()>'
+    docente: '@docente_curricolare_<current()>'
+
+  firma_demo_C1_{1..2}:
+    lezione: '@lezione_demo_C1_<current()>'
+    docente: '@docente_curricolare_<current()>'
+
+  firma_demo_C2_{1..2}:
+    lezione: '@lezione_demo_C2_<current()>'
+    docente: '@docente_itp_<current()>'
+
+  firma_demo_religioneA_{1..5}:
+    lezione: '@lezione_demo_religioneA_<current()>'
+    docente: '@docente_religione_<current()>'
+
+  firma_demo_religioneB_{1..5}:
+    lezione: '@lezione_demo_religioneB_<current()>'
+    docente: '@docente_religione_<current()>'
+
+
+App\Entity\FirmaSostegno:
+
+  firma_sostegno_demo_{1..4}:
+    lezione: '@lezione_demo_sostegno_<current()>'
+    docente: '@docente_sostegno_<current()>'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    alunno: '@alunno_sostegno_<current()>'
+
+
+App\Entity\AssenzaLezione:
+
+  assenza_lezione_demo_A_{1..5}_1:
+    alunno: '@alunno_<($current . "A_1")>'
+    lezione: '@lezione_demo_A1_<current()>'
+    ore: '<randomElement([1.0, 2.0, 3.0])>'
+
+  assenza_lezione_demo_A_{1..5}_2:
+    alunno: '@alunno_<($current . "A_2")>'
+    lezione: '@lezione_demo_A2_<current()>'
+    ore: '<randomElement([1.0, 2.0, 3.0])>'
+
+  assenza_lezione_demo_B_{1..5}_1:
+    alunno: '@alunno_<($current . "B_1")>'
+    lezione: '@lezione_demo_B1_<current()>'
+    ore: '<randomElement([1.0, 2.0, 3.0])>'
+
+  assenza_lezione_demo_B_{1..5}_2:
+    alunno: '@alunno_<($current . "B_2")>'
+    lezione: '@lezione_demo_B2_<current()>'
+    ore: '<randomElement([1.0, 2.0, 3.0])>'
+
+  assenza_lezione_demo_C_{1..2}_1:
+    alunno: '@alunno_<($current . "C_1")>'
+    lezione: '@lezione_demo_C1_<current()>'
+    ore: '<randomElement([1.0, 2.0, 3.0])>'

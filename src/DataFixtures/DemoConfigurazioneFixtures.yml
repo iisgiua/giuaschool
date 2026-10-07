@@ -1,0 +1,53 @@
+####################
+# DemoConfigurazioneFixtures - anno scolastico demo recente
+#
+# Ridefinisce le voci di configurazione legate alle date portando l'anno
+# scolastico demo al 2026/2027. Le chiavi coincidono volutamente con quelle di
+# ConfigurazioneFixtures.yml: Alice le sovrascrive (una sola riga per parametro),
+# senza modificare il file condiviso con i test.
+####################
+
+
+App\Entity\Configurazione:
+
+  configurazione_SCUOLA1:
+    categoria: 'SCUOLA'
+    parametro: 'anno_scolastico'
+    descrizione: 'Anno scolastico corrente\<br>[formato: AAAA/AAAA]'
+    valore: '2026/2027'
+    gestito: false
+
+  configurazione_SCUOLA2:
+    categoria: 'SCUOLA'
+    parametro: 'anno_inizio'
+    descrizione: 'Data dell''inizio dell''anno scolastico\<br>[formato: AAAA-MM-GG]'
+    valore: '2026-09-15'
+    gestito: false
+
+  configurazione_SCUOLA3:
+    categoria: 'SCUOLA'
+    parametro: 'anno_fine'
+    descrizione: 'Data della fine dell''anno scolastico\<br>[formato: AAAA-MM-GG]'
+    valore: '2027-06-10'
+    gestito: false
+
+  configurazione_SCUOLA5:
+    categoria: 'SCUOLA'
+    parametro: 'periodo1_fine'
+    descrizione: 'Data della fine del primo periodo, da \<em>anno_inizio</em> sino al giorno indicato incluso<br>[formato: AAAA-MM-GG]'
+    valore: '2027-01-31'
+    gestito: false
+
+  configurazione_SCUOLA7:
+    categoria: 'SCUOLA'
+    parametro: 'periodo2_fine'
+    descrizione: 'Data della fine del secondo periodo, da \<em>periodo1_fine</em>+1 sino al giorno indicato incluso (se non &egrave; usato un terzo periodo, la data dovr&agrave; essere uguale a <em>anno_fine</em><br>[formato AAAA-MM-GG]'
+    valore: '2027-06-10'
+    gestito: false
+
+  configurazione_SCUOLA26:
+    categoria: 'SCUOLA'
+    parametro: 'fine_colloqui'
+    descrizione: 'Data finale per i colloqui individuali\<br>[formato: AAAA-MM-GG]'
+    valore: '2027-05-10'
+    gestito: false

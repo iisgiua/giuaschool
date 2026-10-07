@@ -1,0 +1,3485 @@
+####################
+# DemoCompitiFixtures - verifiche e compiti per tutte le classi
+#
+# Genera avvisi di tipo V (verifica) e P (compito) collegati alle cattedre
+# di ogni classe, con i destinatari (alunni e genitori) in ComunicazioneUtente
+# così che l'agenda di ogni utente risulti popolata.
+####################
+
+
+App\Entity\Avviso:
+  avviso_verifica_demo_A1_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica A1 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_A1_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica A1 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_A1_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito A1 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_A1_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito A1 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_A2_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica A2 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_A2_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica A2 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_A2_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito A2 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_A2_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito A2 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_A3_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica A3 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_3'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_3'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_A3_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica A3 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_3'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_3'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_A3_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito A3 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_3'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_3'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_A3_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito A3 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_3'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_3'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_A4_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica A4 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_4'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_4'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_A4_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica A4 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_4'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_4'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_A4_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito A4 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_4'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_4'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_A4_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito A4 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_4'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_4'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_A5_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica A5 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_5'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_5'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_A5_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica A5 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_5'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_5'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_A5_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito A5 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_5'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_5'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_A5_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito A5 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_5'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_A_5'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_B1_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica B1 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_B1_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica B1 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_B1_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito B1 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_B1_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito B1 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_B2_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica B2 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_B2_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica B2 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_B2_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito B2 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_B2_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito B2 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_B3_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica B3 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_3'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_3'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_B3_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica B3 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_3'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_3'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_B3_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito B3 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_3'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_3'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_B3_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito B3 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_3'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_3'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_B4_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica B4 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_4'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_4'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_B4_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica B4 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_4'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_4'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_B4_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito B4 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_4'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_4'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_B4_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito B4 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_4'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_4'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_B5_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica B5 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_5'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_5'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_B5_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica B5 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_5'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_5'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_B5_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito B5 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_5'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_5'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_B5_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito B5 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_5'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_2)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_B_5'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_C1_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica C1 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_C_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_C1_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica C1 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_C_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_C1_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito C1 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_C_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_C1_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito C1 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_C_1'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_C2_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica C2 - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_C_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_C2_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica C2 - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_C_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_C2_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito C2 - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_C_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_C2_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito C2 - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_2'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_C_2'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_3CAMB_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica 3CAMB - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3CAMB'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_3CAMB_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica 3CAMB - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3CAMB'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_3CAMB_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito 3CAMB - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3CAMB'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_3CAMB_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito 3CAMB - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3CAMB'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_3CCHI_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica 3CCHI - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3CCHI'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_3CCHI_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica 3CCHI - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3CCHI'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_3CCHI_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito 3CCHI - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3CCHI'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_3CCHI_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito 3CCHI - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3CCHI'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+
+
+App\Entity\ComunicazioneUtente:
+  cu_avviso_verifica_demo_A1_1_alunno_1A_1:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@alunno_1A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_alunno_1A_2:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@alunno_1A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_genitore1_1A_1:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@genitore1_1A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_genitore2_1A_1:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@genitore2_1A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_genitore1_1A_2:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@genitore1_1A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_genitore2_1A_2:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@genitore2_1A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_alunno_1A_1:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@alunno_1A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_alunno_1A_2:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@alunno_1A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_genitore1_1A_1:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@genitore1_1A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_genitore2_1A_1:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@genitore2_1A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_genitore1_1A_2:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@genitore1_1A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_genitore2_1A_2:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@genitore2_1A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_alunno_1A_1:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@alunno_1A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_alunno_1A_2:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@alunno_1A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_genitore1_1A_1:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@genitore1_1A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_genitore2_1A_1:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@genitore2_1A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_genitore1_1A_2:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@genitore1_1A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_genitore2_1A_2:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@genitore2_1A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_alunno_1A_1:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@alunno_1A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_alunno_1A_2:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@alunno_1A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_genitore1_1A_1:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@genitore1_1A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_genitore2_1A_1:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@genitore2_1A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_genitore1_1A_2:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@genitore1_1A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_genitore2_1A_2:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@genitore2_1A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_1_alunno_2A_1:
+    comunicazione: '@avviso_verifica_demo_A2_1'
+    utente: '@alunno_2A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_1_alunno_2A_2:
+    comunicazione: '@avviso_verifica_demo_A2_1'
+    utente: '@alunno_2A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_1_genitore1_2A_1:
+    comunicazione: '@avviso_verifica_demo_A2_1'
+    utente: '@genitore1_2A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_1_genitore2_2A_1:
+    comunicazione: '@avviso_verifica_demo_A2_1'
+    utente: '@genitore2_2A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_1_genitore1_2A_2:
+    comunicazione: '@avviso_verifica_demo_A2_1'
+    utente: '@genitore1_2A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_1_genitore2_2A_2:
+    comunicazione: '@avviso_verifica_demo_A2_1'
+    utente: '@genitore2_2A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_2_alunno_2A_1:
+    comunicazione: '@avviso_verifica_demo_A2_2'
+    utente: '@alunno_2A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_2_alunno_2A_2:
+    comunicazione: '@avviso_verifica_demo_A2_2'
+    utente: '@alunno_2A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_2_genitore1_2A_1:
+    comunicazione: '@avviso_verifica_demo_A2_2'
+    utente: '@genitore1_2A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_2_genitore2_2A_1:
+    comunicazione: '@avviso_verifica_demo_A2_2'
+    utente: '@genitore2_2A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_2_genitore1_2A_2:
+    comunicazione: '@avviso_verifica_demo_A2_2'
+    utente: '@genitore1_2A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A2_2_genitore2_2A_2:
+    comunicazione: '@avviso_verifica_demo_A2_2'
+    utente: '@genitore2_2A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_3_alunno_2A_1:
+    comunicazione: '@avviso_compito_demo_A2_3'
+    utente: '@alunno_2A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_3_alunno_2A_2:
+    comunicazione: '@avviso_compito_demo_A2_3'
+    utente: '@alunno_2A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_3_genitore1_2A_1:
+    comunicazione: '@avviso_compito_demo_A2_3'
+    utente: '@genitore1_2A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_3_genitore2_2A_1:
+    comunicazione: '@avviso_compito_demo_A2_3'
+    utente: '@genitore2_2A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_3_genitore1_2A_2:
+    comunicazione: '@avviso_compito_demo_A2_3'
+    utente: '@genitore1_2A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_3_genitore2_2A_2:
+    comunicazione: '@avviso_compito_demo_A2_3'
+    utente: '@genitore2_2A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_4_alunno_2A_1:
+    comunicazione: '@avviso_compito_demo_A2_4'
+    utente: '@alunno_2A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_4_alunno_2A_2:
+    comunicazione: '@avviso_compito_demo_A2_4'
+    utente: '@alunno_2A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_4_genitore1_2A_1:
+    comunicazione: '@avviso_compito_demo_A2_4'
+    utente: '@genitore1_2A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_4_genitore2_2A_1:
+    comunicazione: '@avviso_compito_demo_A2_4'
+    utente: '@genitore2_2A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_4_genitore1_2A_2:
+    comunicazione: '@avviso_compito_demo_A2_4'
+    utente: '@genitore1_2A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A2_4_genitore2_2A_2:
+    comunicazione: '@avviso_compito_demo_A2_4'
+    utente: '@genitore2_2A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_1_alunno_3A_1:
+    comunicazione: '@avviso_verifica_demo_A3_1'
+    utente: '@alunno_3A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_1_alunno_3A_2:
+    comunicazione: '@avviso_verifica_demo_A3_1'
+    utente: '@alunno_3A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_1_genitore1_3A_1:
+    comunicazione: '@avviso_verifica_demo_A3_1'
+    utente: '@genitore1_3A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_1_genitore2_3A_1:
+    comunicazione: '@avviso_verifica_demo_A3_1'
+    utente: '@genitore2_3A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_1_genitore1_3A_2:
+    comunicazione: '@avviso_verifica_demo_A3_1'
+    utente: '@genitore1_3A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_1_genitore2_3A_2:
+    comunicazione: '@avviso_verifica_demo_A3_1'
+    utente: '@genitore2_3A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_2_alunno_3A_1:
+    comunicazione: '@avviso_verifica_demo_A3_2'
+    utente: '@alunno_3A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_2_alunno_3A_2:
+    comunicazione: '@avviso_verifica_demo_A3_2'
+    utente: '@alunno_3A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_2_genitore1_3A_1:
+    comunicazione: '@avviso_verifica_demo_A3_2'
+    utente: '@genitore1_3A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_2_genitore2_3A_1:
+    comunicazione: '@avviso_verifica_demo_A3_2'
+    utente: '@genitore2_3A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_2_genitore1_3A_2:
+    comunicazione: '@avviso_verifica_demo_A3_2'
+    utente: '@genitore1_3A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A3_2_genitore2_3A_2:
+    comunicazione: '@avviso_verifica_demo_A3_2'
+    utente: '@genitore2_3A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_3_alunno_3A_1:
+    comunicazione: '@avviso_compito_demo_A3_3'
+    utente: '@alunno_3A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_3_alunno_3A_2:
+    comunicazione: '@avviso_compito_demo_A3_3'
+    utente: '@alunno_3A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_3_genitore1_3A_1:
+    comunicazione: '@avviso_compito_demo_A3_3'
+    utente: '@genitore1_3A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_3_genitore2_3A_1:
+    comunicazione: '@avviso_compito_demo_A3_3'
+    utente: '@genitore2_3A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_3_genitore1_3A_2:
+    comunicazione: '@avviso_compito_demo_A3_3'
+    utente: '@genitore1_3A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_3_genitore2_3A_2:
+    comunicazione: '@avviso_compito_demo_A3_3'
+    utente: '@genitore2_3A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_4_alunno_3A_1:
+    comunicazione: '@avviso_compito_demo_A3_4'
+    utente: '@alunno_3A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_4_alunno_3A_2:
+    comunicazione: '@avviso_compito_demo_A3_4'
+    utente: '@alunno_3A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_4_genitore1_3A_1:
+    comunicazione: '@avviso_compito_demo_A3_4'
+    utente: '@genitore1_3A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_4_genitore2_3A_1:
+    comunicazione: '@avviso_compito_demo_A3_4'
+    utente: '@genitore2_3A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_4_genitore1_3A_2:
+    comunicazione: '@avviso_compito_demo_A3_4'
+    utente: '@genitore1_3A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A3_4_genitore2_3A_2:
+    comunicazione: '@avviso_compito_demo_A3_4'
+    utente: '@genitore2_3A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_1_alunno_4A_1:
+    comunicazione: '@avviso_verifica_demo_A4_1'
+    utente: '@alunno_4A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_1_alunno_4A_2:
+    comunicazione: '@avviso_verifica_demo_A4_1'
+    utente: '@alunno_4A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_1_genitore1_4A_1:
+    comunicazione: '@avviso_verifica_demo_A4_1'
+    utente: '@genitore1_4A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_1_genitore2_4A_1:
+    comunicazione: '@avviso_verifica_demo_A4_1'
+    utente: '@genitore2_4A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_1_genitore1_4A_2:
+    comunicazione: '@avviso_verifica_demo_A4_1'
+    utente: '@genitore1_4A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_1_genitore2_4A_2:
+    comunicazione: '@avviso_verifica_demo_A4_1'
+    utente: '@genitore2_4A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_2_alunno_4A_1:
+    comunicazione: '@avviso_verifica_demo_A4_2'
+    utente: '@alunno_4A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_2_alunno_4A_2:
+    comunicazione: '@avviso_verifica_demo_A4_2'
+    utente: '@alunno_4A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_2_genitore1_4A_1:
+    comunicazione: '@avviso_verifica_demo_A4_2'
+    utente: '@genitore1_4A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_2_genitore2_4A_1:
+    comunicazione: '@avviso_verifica_demo_A4_2'
+    utente: '@genitore2_4A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_2_genitore1_4A_2:
+    comunicazione: '@avviso_verifica_demo_A4_2'
+    utente: '@genitore1_4A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A4_2_genitore2_4A_2:
+    comunicazione: '@avviso_verifica_demo_A4_2'
+    utente: '@genitore2_4A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_3_alunno_4A_1:
+    comunicazione: '@avviso_compito_demo_A4_3'
+    utente: '@alunno_4A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_3_alunno_4A_2:
+    comunicazione: '@avviso_compito_demo_A4_3'
+    utente: '@alunno_4A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_3_genitore1_4A_1:
+    comunicazione: '@avviso_compito_demo_A4_3'
+    utente: '@genitore1_4A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_3_genitore2_4A_1:
+    comunicazione: '@avviso_compito_demo_A4_3'
+    utente: '@genitore2_4A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_3_genitore1_4A_2:
+    comunicazione: '@avviso_compito_demo_A4_3'
+    utente: '@genitore1_4A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_3_genitore2_4A_2:
+    comunicazione: '@avviso_compito_demo_A4_3'
+    utente: '@genitore2_4A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_4_alunno_4A_1:
+    comunicazione: '@avviso_compito_demo_A4_4'
+    utente: '@alunno_4A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_4_alunno_4A_2:
+    comunicazione: '@avviso_compito_demo_A4_4'
+    utente: '@alunno_4A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_4_genitore1_4A_1:
+    comunicazione: '@avviso_compito_demo_A4_4'
+    utente: '@genitore1_4A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_4_genitore2_4A_1:
+    comunicazione: '@avviso_compito_demo_A4_4'
+    utente: '@genitore2_4A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_4_genitore1_4A_2:
+    comunicazione: '@avviso_compito_demo_A4_4'
+    utente: '@genitore1_4A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A4_4_genitore2_4A_2:
+    comunicazione: '@avviso_compito_demo_A4_4'
+    utente: '@genitore2_4A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_1_alunno_5A_1:
+    comunicazione: '@avviso_verifica_demo_A5_1'
+    utente: '@alunno_5A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_1_alunno_5A_2:
+    comunicazione: '@avviso_verifica_demo_A5_1'
+    utente: '@alunno_5A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_1_genitore1_5A_1:
+    comunicazione: '@avviso_verifica_demo_A5_1'
+    utente: '@genitore1_5A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_1_genitore2_5A_1:
+    comunicazione: '@avviso_verifica_demo_A5_1'
+    utente: '@genitore2_5A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_1_genitore1_5A_2:
+    comunicazione: '@avviso_verifica_demo_A5_1'
+    utente: '@genitore1_5A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_1_genitore2_5A_2:
+    comunicazione: '@avviso_verifica_demo_A5_1'
+    utente: '@genitore2_5A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_2_alunno_5A_1:
+    comunicazione: '@avviso_verifica_demo_A5_2'
+    utente: '@alunno_5A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_2_alunno_5A_2:
+    comunicazione: '@avviso_verifica_demo_A5_2'
+    utente: '@alunno_5A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_2_genitore1_5A_1:
+    comunicazione: '@avviso_verifica_demo_A5_2'
+    utente: '@genitore1_5A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_2_genitore2_5A_1:
+    comunicazione: '@avviso_verifica_demo_A5_2'
+    utente: '@genitore2_5A_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_2_genitore1_5A_2:
+    comunicazione: '@avviso_verifica_demo_A5_2'
+    utente: '@genitore1_5A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A5_2_genitore2_5A_2:
+    comunicazione: '@avviso_verifica_demo_A5_2'
+    utente: '@genitore2_5A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_3_alunno_5A_1:
+    comunicazione: '@avviso_compito_demo_A5_3'
+    utente: '@alunno_5A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_3_alunno_5A_2:
+    comunicazione: '@avviso_compito_demo_A5_3'
+    utente: '@alunno_5A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_3_genitore1_5A_1:
+    comunicazione: '@avviso_compito_demo_A5_3'
+    utente: '@genitore1_5A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_3_genitore2_5A_1:
+    comunicazione: '@avviso_compito_demo_A5_3'
+    utente: '@genitore2_5A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_3_genitore1_5A_2:
+    comunicazione: '@avviso_compito_demo_A5_3'
+    utente: '@genitore1_5A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_3_genitore2_5A_2:
+    comunicazione: '@avviso_compito_demo_A5_3'
+    utente: '@genitore2_5A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_4_alunno_5A_1:
+    comunicazione: '@avviso_compito_demo_A5_4'
+    utente: '@alunno_5A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_4_alunno_5A_2:
+    comunicazione: '@avviso_compito_demo_A5_4'
+    utente: '@alunno_5A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_4_genitore1_5A_1:
+    comunicazione: '@avviso_compito_demo_A5_4'
+    utente: '@genitore1_5A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_4_genitore2_5A_1:
+    comunicazione: '@avviso_compito_demo_A5_4'
+    utente: '@genitore2_5A_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_4_genitore1_5A_2:
+    comunicazione: '@avviso_compito_demo_A5_4'
+    utente: '@genitore1_5A_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A5_4_genitore2_5A_2:
+    comunicazione: '@avviso_compito_demo_A5_4'
+    utente: '@genitore2_5A_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_1_alunno_1B_1:
+    comunicazione: '@avviso_verifica_demo_B1_1'
+    utente: '@alunno_1B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_1_alunno_1B_2:
+    comunicazione: '@avviso_verifica_demo_B1_1'
+    utente: '@alunno_1B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_1_genitore1_1B_1:
+    comunicazione: '@avviso_verifica_demo_B1_1'
+    utente: '@genitore1_1B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_1_genitore2_1B_1:
+    comunicazione: '@avviso_verifica_demo_B1_1'
+    utente: '@genitore2_1B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_1_genitore1_1B_2:
+    comunicazione: '@avviso_verifica_demo_B1_1'
+    utente: '@genitore1_1B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_1_genitore2_1B_2:
+    comunicazione: '@avviso_verifica_demo_B1_1'
+    utente: '@genitore2_1B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_2_alunno_1B_1:
+    comunicazione: '@avviso_verifica_demo_B1_2'
+    utente: '@alunno_1B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_2_alunno_1B_2:
+    comunicazione: '@avviso_verifica_demo_B1_2'
+    utente: '@alunno_1B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_2_genitore1_1B_1:
+    comunicazione: '@avviso_verifica_demo_B1_2'
+    utente: '@genitore1_1B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_2_genitore2_1B_1:
+    comunicazione: '@avviso_verifica_demo_B1_2'
+    utente: '@genitore2_1B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_2_genitore1_1B_2:
+    comunicazione: '@avviso_verifica_demo_B1_2'
+    utente: '@genitore1_1B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B1_2_genitore2_1B_2:
+    comunicazione: '@avviso_verifica_demo_B1_2'
+    utente: '@genitore2_1B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_3_alunno_1B_1:
+    comunicazione: '@avviso_compito_demo_B1_3'
+    utente: '@alunno_1B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_3_alunno_1B_2:
+    comunicazione: '@avviso_compito_demo_B1_3'
+    utente: '@alunno_1B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_3_genitore1_1B_1:
+    comunicazione: '@avviso_compito_demo_B1_3'
+    utente: '@genitore1_1B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_3_genitore2_1B_1:
+    comunicazione: '@avviso_compito_demo_B1_3'
+    utente: '@genitore2_1B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_3_genitore1_1B_2:
+    comunicazione: '@avviso_compito_demo_B1_3'
+    utente: '@genitore1_1B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_3_genitore2_1B_2:
+    comunicazione: '@avviso_compito_demo_B1_3'
+    utente: '@genitore2_1B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_4_alunno_1B_1:
+    comunicazione: '@avviso_compito_demo_B1_4'
+    utente: '@alunno_1B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_4_alunno_1B_2:
+    comunicazione: '@avviso_compito_demo_B1_4'
+    utente: '@alunno_1B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_4_genitore1_1B_1:
+    comunicazione: '@avviso_compito_demo_B1_4'
+    utente: '@genitore1_1B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_4_genitore2_1B_1:
+    comunicazione: '@avviso_compito_demo_B1_4'
+    utente: '@genitore2_1B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_4_genitore1_1B_2:
+    comunicazione: '@avviso_compito_demo_B1_4'
+    utente: '@genitore1_1B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B1_4_genitore2_1B_2:
+    comunicazione: '@avviso_compito_demo_B1_4'
+    utente: '@genitore2_1B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_1_alunno_2B_1:
+    comunicazione: '@avviso_verifica_demo_B2_1'
+    utente: '@alunno_2B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_1_alunno_2B_2:
+    comunicazione: '@avviso_verifica_demo_B2_1'
+    utente: '@alunno_2B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_1_genitore1_2B_1:
+    comunicazione: '@avviso_verifica_demo_B2_1'
+    utente: '@genitore1_2B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_1_genitore2_2B_1:
+    comunicazione: '@avviso_verifica_demo_B2_1'
+    utente: '@genitore2_2B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_1_genitore1_2B_2:
+    comunicazione: '@avviso_verifica_demo_B2_1'
+    utente: '@genitore1_2B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_1_genitore2_2B_2:
+    comunicazione: '@avviso_verifica_demo_B2_1'
+    utente: '@genitore2_2B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_2_alunno_2B_1:
+    comunicazione: '@avviso_verifica_demo_B2_2'
+    utente: '@alunno_2B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_2_alunno_2B_2:
+    comunicazione: '@avviso_verifica_demo_B2_2'
+    utente: '@alunno_2B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_2_genitore1_2B_1:
+    comunicazione: '@avviso_verifica_demo_B2_2'
+    utente: '@genitore1_2B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_2_genitore2_2B_1:
+    comunicazione: '@avviso_verifica_demo_B2_2'
+    utente: '@genitore2_2B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_2_genitore1_2B_2:
+    comunicazione: '@avviso_verifica_demo_B2_2'
+    utente: '@genitore1_2B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B2_2_genitore2_2B_2:
+    comunicazione: '@avviso_verifica_demo_B2_2'
+    utente: '@genitore2_2B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_3_alunno_2B_1:
+    comunicazione: '@avviso_compito_demo_B2_3'
+    utente: '@alunno_2B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_3_alunno_2B_2:
+    comunicazione: '@avviso_compito_demo_B2_3'
+    utente: '@alunno_2B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_3_genitore1_2B_1:
+    comunicazione: '@avviso_compito_demo_B2_3'
+    utente: '@genitore1_2B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_3_genitore2_2B_1:
+    comunicazione: '@avviso_compito_demo_B2_3'
+    utente: '@genitore2_2B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_3_genitore1_2B_2:
+    comunicazione: '@avviso_compito_demo_B2_3'
+    utente: '@genitore1_2B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_3_genitore2_2B_2:
+    comunicazione: '@avviso_compito_demo_B2_3'
+    utente: '@genitore2_2B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_4_alunno_2B_1:
+    comunicazione: '@avviso_compito_demo_B2_4'
+    utente: '@alunno_2B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_4_alunno_2B_2:
+    comunicazione: '@avviso_compito_demo_B2_4'
+    utente: '@alunno_2B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_4_genitore1_2B_1:
+    comunicazione: '@avviso_compito_demo_B2_4'
+    utente: '@genitore1_2B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_4_genitore2_2B_1:
+    comunicazione: '@avviso_compito_demo_B2_4'
+    utente: '@genitore2_2B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_4_genitore1_2B_2:
+    comunicazione: '@avviso_compito_demo_B2_4'
+    utente: '@genitore1_2B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B2_4_genitore2_2B_2:
+    comunicazione: '@avviso_compito_demo_B2_4'
+    utente: '@genitore2_2B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_1_alunno_3B_1:
+    comunicazione: '@avviso_verifica_demo_B3_1'
+    utente: '@alunno_3B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_1_alunno_3B_2:
+    comunicazione: '@avviso_verifica_demo_B3_1'
+    utente: '@alunno_3B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_1_genitore1_3B_1:
+    comunicazione: '@avviso_verifica_demo_B3_1'
+    utente: '@genitore1_3B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_1_genitore2_3B_1:
+    comunicazione: '@avviso_verifica_demo_B3_1'
+    utente: '@genitore2_3B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_1_genitore1_3B_2:
+    comunicazione: '@avviso_verifica_demo_B3_1'
+    utente: '@genitore1_3B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_1_genitore2_3B_2:
+    comunicazione: '@avviso_verifica_demo_B3_1'
+    utente: '@genitore2_3B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_2_alunno_3B_1:
+    comunicazione: '@avviso_verifica_demo_B3_2'
+    utente: '@alunno_3B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_2_alunno_3B_2:
+    comunicazione: '@avviso_verifica_demo_B3_2'
+    utente: '@alunno_3B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_2_genitore1_3B_1:
+    comunicazione: '@avviso_verifica_demo_B3_2'
+    utente: '@genitore1_3B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_2_genitore2_3B_1:
+    comunicazione: '@avviso_verifica_demo_B3_2'
+    utente: '@genitore2_3B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_2_genitore1_3B_2:
+    comunicazione: '@avviso_verifica_demo_B3_2'
+    utente: '@genitore1_3B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B3_2_genitore2_3B_2:
+    comunicazione: '@avviso_verifica_demo_B3_2'
+    utente: '@genitore2_3B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_3_alunno_3B_1:
+    comunicazione: '@avviso_compito_demo_B3_3'
+    utente: '@alunno_3B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_3_alunno_3B_2:
+    comunicazione: '@avviso_compito_demo_B3_3'
+    utente: '@alunno_3B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_3_genitore1_3B_1:
+    comunicazione: '@avviso_compito_demo_B3_3'
+    utente: '@genitore1_3B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_3_genitore2_3B_1:
+    comunicazione: '@avviso_compito_demo_B3_3'
+    utente: '@genitore2_3B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_3_genitore1_3B_2:
+    comunicazione: '@avviso_compito_demo_B3_3'
+    utente: '@genitore1_3B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_3_genitore2_3B_2:
+    comunicazione: '@avviso_compito_demo_B3_3'
+    utente: '@genitore2_3B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_4_alunno_3B_1:
+    comunicazione: '@avviso_compito_demo_B3_4'
+    utente: '@alunno_3B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_4_alunno_3B_2:
+    comunicazione: '@avviso_compito_demo_B3_4'
+    utente: '@alunno_3B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_4_genitore1_3B_1:
+    comunicazione: '@avviso_compito_demo_B3_4'
+    utente: '@genitore1_3B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_4_genitore2_3B_1:
+    comunicazione: '@avviso_compito_demo_B3_4'
+    utente: '@genitore2_3B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_4_genitore1_3B_2:
+    comunicazione: '@avviso_compito_demo_B3_4'
+    utente: '@genitore1_3B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B3_4_genitore2_3B_2:
+    comunicazione: '@avviso_compito_demo_B3_4'
+    utente: '@genitore2_3B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_1_alunno_4B_1:
+    comunicazione: '@avviso_verifica_demo_B4_1'
+    utente: '@alunno_4B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_1_alunno_4B_2:
+    comunicazione: '@avviso_verifica_demo_B4_1'
+    utente: '@alunno_4B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_1_genitore1_4B_1:
+    comunicazione: '@avviso_verifica_demo_B4_1'
+    utente: '@genitore1_4B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_1_genitore2_4B_1:
+    comunicazione: '@avviso_verifica_demo_B4_1'
+    utente: '@genitore2_4B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_1_genitore1_4B_2:
+    comunicazione: '@avviso_verifica_demo_B4_1'
+    utente: '@genitore1_4B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_1_genitore2_4B_2:
+    comunicazione: '@avviso_verifica_demo_B4_1'
+    utente: '@genitore2_4B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_2_alunno_4B_1:
+    comunicazione: '@avviso_verifica_demo_B4_2'
+    utente: '@alunno_4B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_2_alunno_4B_2:
+    comunicazione: '@avviso_verifica_demo_B4_2'
+    utente: '@alunno_4B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_2_genitore1_4B_1:
+    comunicazione: '@avviso_verifica_demo_B4_2'
+    utente: '@genitore1_4B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_2_genitore2_4B_1:
+    comunicazione: '@avviso_verifica_demo_B4_2'
+    utente: '@genitore2_4B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_2_genitore1_4B_2:
+    comunicazione: '@avviso_verifica_demo_B4_2'
+    utente: '@genitore1_4B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B4_2_genitore2_4B_2:
+    comunicazione: '@avviso_verifica_demo_B4_2'
+    utente: '@genitore2_4B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_3_alunno_4B_1:
+    comunicazione: '@avviso_compito_demo_B4_3'
+    utente: '@alunno_4B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_3_alunno_4B_2:
+    comunicazione: '@avviso_compito_demo_B4_3'
+    utente: '@alunno_4B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_3_genitore1_4B_1:
+    comunicazione: '@avviso_compito_demo_B4_3'
+    utente: '@genitore1_4B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_3_genitore2_4B_1:
+    comunicazione: '@avviso_compito_demo_B4_3'
+    utente: '@genitore2_4B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_3_genitore1_4B_2:
+    comunicazione: '@avviso_compito_demo_B4_3'
+    utente: '@genitore1_4B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_3_genitore2_4B_2:
+    comunicazione: '@avviso_compito_demo_B4_3'
+    utente: '@genitore2_4B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_4_alunno_4B_1:
+    comunicazione: '@avviso_compito_demo_B4_4'
+    utente: '@alunno_4B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_4_alunno_4B_2:
+    comunicazione: '@avviso_compito_demo_B4_4'
+    utente: '@alunno_4B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_4_genitore1_4B_1:
+    comunicazione: '@avviso_compito_demo_B4_4'
+    utente: '@genitore1_4B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_4_genitore2_4B_1:
+    comunicazione: '@avviso_compito_demo_B4_4'
+    utente: '@genitore2_4B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_4_genitore1_4B_2:
+    comunicazione: '@avviso_compito_demo_B4_4'
+    utente: '@genitore1_4B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B4_4_genitore2_4B_2:
+    comunicazione: '@avviso_compito_demo_B4_4'
+    utente: '@genitore2_4B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_1_alunno_5B_1:
+    comunicazione: '@avviso_verifica_demo_B5_1'
+    utente: '@alunno_5B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_1_alunno_5B_2:
+    comunicazione: '@avviso_verifica_demo_B5_1'
+    utente: '@alunno_5B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_1_genitore1_5B_1:
+    comunicazione: '@avviso_verifica_demo_B5_1'
+    utente: '@genitore1_5B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_1_genitore2_5B_1:
+    comunicazione: '@avviso_verifica_demo_B5_1'
+    utente: '@genitore2_5B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_1_genitore1_5B_2:
+    comunicazione: '@avviso_verifica_demo_B5_1'
+    utente: '@genitore1_5B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_1_genitore2_5B_2:
+    comunicazione: '@avviso_verifica_demo_B5_1'
+    utente: '@genitore2_5B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_2_alunno_5B_1:
+    comunicazione: '@avviso_verifica_demo_B5_2'
+    utente: '@alunno_5B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_2_alunno_5B_2:
+    comunicazione: '@avviso_verifica_demo_B5_2'
+    utente: '@alunno_5B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_2_genitore1_5B_1:
+    comunicazione: '@avviso_verifica_demo_B5_2'
+    utente: '@genitore1_5B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_2_genitore2_5B_1:
+    comunicazione: '@avviso_verifica_demo_B5_2'
+    utente: '@genitore2_5B_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_2_genitore1_5B_2:
+    comunicazione: '@avviso_verifica_demo_B5_2'
+    utente: '@genitore1_5B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_B5_2_genitore2_5B_2:
+    comunicazione: '@avviso_verifica_demo_B5_2'
+    utente: '@genitore2_5B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_3_alunno_5B_1:
+    comunicazione: '@avviso_compito_demo_B5_3'
+    utente: '@alunno_5B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_3_alunno_5B_2:
+    comunicazione: '@avviso_compito_demo_B5_3'
+    utente: '@alunno_5B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_3_genitore1_5B_1:
+    comunicazione: '@avviso_compito_demo_B5_3'
+    utente: '@genitore1_5B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_3_genitore2_5B_1:
+    comunicazione: '@avviso_compito_demo_B5_3'
+    utente: '@genitore2_5B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_3_genitore1_5B_2:
+    comunicazione: '@avviso_compito_demo_B5_3'
+    utente: '@genitore1_5B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_3_genitore2_5B_2:
+    comunicazione: '@avviso_compito_demo_B5_3'
+    utente: '@genitore2_5B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_4_alunno_5B_1:
+    comunicazione: '@avviso_compito_demo_B5_4'
+    utente: '@alunno_5B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_4_alunno_5B_2:
+    comunicazione: '@avviso_compito_demo_B5_4'
+    utente: '@alunno_5B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_4_genitore1_5B_1:
+    comunicazione: '@avviso_compito_demo_B5_4'
+    utente: '@genitore1_5B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_4_genitore2_5B_1:
+    comunicazione: '@avviso_compito_demo_B5_4'
+    utente: '@genitore2_5B_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_4_genitore1_5B_2:
+    comunicazione: '@avviso_compito_demo_B5_4'
+    utente: '@genitore1_5B_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_B5_4_genitore2_5B_2:
+    comunicazione: '@avviso_compito_demo_B5_4'
+    utente: '@genitore2_5B_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_1_alunno_1C_1:
+    comunicazione: '@avviso_verifica_demo_C1_1'
+    utente: '@alunno_1C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_1_alunno_1C_2:
+    comunicazione: '@avviso_verifica_demo_C1_1'
+    utente: '@alunno_1C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_1_genitore1_1C_1:
+    comunicazione: '@avviso_verifica_demo_C1_1'
+    utente: '@genitore1_1C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_1_genitore2_1C_1:
+    comunicazione: '@avviso_verifica_demo_C1_1'
+    utente: '@genitore2_1C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_1_genitore1_1C_2:
+    comunicazione: '@avviso_verifica_demo_C1_1'
+    utente: '@genitore1_1C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_1_genitore2_1C_2:
+    comunicazione: '@avviso_verifica_demo_C1_1'
+    utente: '@genitore2_1C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_2_alunno_1C_1:
+    comunicazione: '@avviso_verifica_demo_C1_2'
+    utente: '@alunno_1C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_2_alunno_1C_2:
+    comunicazione: '@avviso_verifica_demo_C1_2'
+    utente: '@alunno_1C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_2_genitore1_1C_1:
+    comunicazione: '@avviso_verifica_demo_C1_2'
+    utente: '@genitore1_1C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_2_genitore2_1C_1:
+    comunicazione: '@avviso_verifica_demo_C1_2'
+    utente: '@genitore2_1C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_2_genitore1_1C_2:
+    comunicazione: '@avviso_verifica_demo_C1_2'
+    utente: '@genitore1_1C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C1_2_genitore2_1C_2:
+    comunicazione: '@avviso_verifica_demo_C1_2'
+    utente: '@genitore2_1C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_3_alunno_1C_1:
+    comunicazione: '@avviso_compito_demo_C1_3'
+    utente: '@alunno_1C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_3_alunno_1C_2:
+    comunicazione: '@avviso_compito_demo_C1_3'
+    utente: '@alunno_1C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_3_genitore1_1C_1:
+    comunicazione: '@avviso_compito_demo_C1_3'
+    utente: '@genitore1_1C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_3_genitore2_1C_1:
+    comunicazione: '@avviso_compito_demo_C1_3'
+    utente: '@genitore2_1C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_3_genitore1_1C_2:
+    comunicazione: '@avviso_compito_demo_C1_3'
+    utente: '@genitore1_1C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_3_genitore2_1C_2:
+    comunicazione: '@avviso_compito_demo_C1_3'
+    utente: '@genitore2_1C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_4_alunno_1C_1:
+    comunicazione: '@avviso_compito_demo_C1_4'
+    utente: '@alunno_1C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_4_alunno_1C_2:
+    comunicazione: '@avviso_compito_demo_C1_4'
+    utente: '@alunno_1C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_4_genitore1_1C_1:
+    comunicazione: '@avviso_compito_demo_C1_4'
+    utente: '@genitore1_1C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_4_genitore2_1C_1:
+    comunicazione: '@avviso_compito_demo_C1_4'
+    utente: '@genitore2_1C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_4_genitore1_1C_2:
+    comunicazione: '@avviso_compito_demo_C1_4'
+    utente: '@genitore1_1C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C1_4_genitore2_1C_2:
+    comunicazione: '@avviso_compito_demo_C1_4'
+    utente: '@genitore2_1C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_1_alunno_2C_1:
+    comunicazione: '@avviso_verifica_demo_C2_1'
+    utente: '@alunno_2C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_1_alunno_2C_2:
+    comunicazione: '@avviso_verifica_demo_C2_1'
+    utente: '@alunno_2C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_1_genitore1_2C_1:
+    comunicazione: '@avviso_verifica_demo_C2_1'
+    utente: '@genitore1_2C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_1_genitore2_2C_1:
+    comunicazione: '@avviso_verifica_demo_C2_1'
+    utente: '@genitore2_2C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_1_genitore1_2C_2:
+    comunicazione: '@avviso_verifica_demo_C2_1'
+    utente: '@genitore1_2C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_1_genitore2_2C_2:
+    comunicazione: '@avviso_verifica_demo_C2_1'
+    utente: '@genitore2_2C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_2_alunno_2C_1:
+    comunicazione: '@avviso_verifica_demo_C2_2'
+    utente: '@alunno_2C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_2_alunno_2C_2:
+    comunicazione: '@avviso_verifica_demo_C2_2'
+    utente: '@alunno_2C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_2_genitore1_2C_1:
+    comunicazione: '@avviso_verifica_demo_C2_2'
+    utente: '@genitore1_2C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_2_genitore2_2C_1:
+    comunicazione: '@avviso_verifica_demo_C2_2'
+    utente: '@genitore2_2C_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_2_genitore1_2C_2:
+    comunicazione: '@avviso_verifica_demo_C2_2'
+    utente: '@genitore1_2C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_C2_2_genitore2_2C_2:
+    comunicazione: '@avviso_verifica_demo_C2_2'
+    utente: '@genitore2_2C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_3_alunno_2C_1:
+    comunicazione: '@avviso_compito_demo_C2_3'
+    utente: '@alunno_2C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_3_alunno_2C_2:
+    comunicazione: '@avviso_compito_demo_C2_3'
+    utente: '@alunno_2C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_3_genitore1_2C_1:
+    comunicazione: '@avviso_compito_demo_C2_3'
+    utente: '@genitore1_2C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_3_genitore2_2C_1:
+    comunicazione: '@avviso_compito_demo_C2_3'
+    utente: '@genitore2_2C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_3_genitore1_2C_2:
+    comunicazione: '@avviso_compito_demo_C2_3'
+    utente: '@genitore1_2C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_3_genitore2_2C_2:
+    comunicazione: '@avviso_compito_demo_C2_3'
+    utente: '@genitore2_2C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_4_alunno_2C_1:
+    comunicazione: '@avviso_compito_demo_C2_4'
+    utente: '@alunno_2C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_4_alunno_2C_2:
+    comunicazione: '@avviso_compito_demo_C2_4'
+    utente: '@alunno_2C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_4_genitore1_2C_1:
+    comunicazione: '@avviso_compito_demo_C2_4'
+    utente: '@genitore1_2C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_4_genitore2_2C_1:
+    comunicazione: '@avviso_compito_demo_C2_4'
+    utente: '@genitore2_2C_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_4_genitore1_2C_2:
+    comunicazione: '@avviso_compito_demo_C2_4'
+    utente: '@genitore1_2C_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_C2_4_genitore2_2C_2:
+    comunicazione: '@avviso_compito_demo_C2_4'
+    utente: '@genitore2_2C_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_1_alunno_3CAMB_1:
+    comunicazione: '@avviso_verifica_demo_3CAMB_1'
+    utente: '@alunno_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_1_alunno_3CAMB_2:
+    comunicazione: '@avviso_verifica_demo_3CAMB_1'
+    utente: '@alunno_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_1_genitore1_3CAMB_1:
+    comunicazione: '@avviso_verifica_demo_3CAMB_1'
+    utente: '@genitore1_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_1_genitore2_3CAMB_1:
+    comunicazione: '@avviso_verifica_demo_3CAMB_1'
+    utente: '@genitore2_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_1_genitore1_3CAMB_2:
+    comunicazione: '@avviso_verifica_demo_3CAMB_1'
+    utente: '@genitore1_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_1_genitore2_3CAMB_2:
+    comunicazione: '@avviso_verifica_demo_3CAMB_1'
+    utente: '@genitore2_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_2_alunno_3CAMB_1:
+    comunicazione: '@avviso_verifica_demo_3CAMB_2'
+    utente: '@alunno_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_2_alunno_3CAMB_2:
+    comunicazione: '@avviso_verifica_demo_3CAMB_2'
+    utente: '@alunno_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_2_genitore1_3CAMB_1:
+    comunicazione: '@avviso_verifica_demo_3CAMB_2'
+    utente: '@genitore1_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_2_genitore2_3CAMB_1:
+    comunicazione: '@avviso_verifica_demo_3CAMB_2'
+    utente: '@genitore2_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_2_genitore1_3CAMB_2:
+    comunicazione: '@avviso_verifica_demo_3CAMB_2'
+    utente: '@genitore1_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_2_genitore2_3CAMB_2:
+    comunicazione: '@avviso_verifica_demo_3CAMB_2'
+    utente: '@genitore2_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_3_alunno_3CAMB_1:
+    comunicazione: '@avviso_compito_demo_3CAMB_3'
+    utente: '@alunno_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_3_alunno_3CAMB_2:
+    comunicazione: '@avviso_compito_demo_3CAMB_3'
+    utente: '@alunno_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_3_genitore1_3CAMB_1:
+    comunicazione: '@avviso_compito_demo_3CAMB_3'
+    utente: '@genitore1_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_3_genitore2_3CAMB_1:
+    comunicazione: '@avviso_compito_demo_3CAMB_3'
+    utente: '@genitore2_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_3_genitore1_3CAMB_2:
+    comunicazione: '@avviso_compito_demo_3CAMB_3'
+    utente: '@genitore1_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_3_genitore2_3CAMB_2:
+    comunicazione: '@avviso_compito_demo_3CAMB_3'
+    utente: '@genitore2_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_4_alunno_3CAMB_1:
+    comunicazione: '@avviso_compito_demo_3CAMB_4'
+    utente: '@alunno_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_4_alunno_3CAMB_2:
+    comunicazione: '@avviso_compito_demo_3CAMB_4'
+    utente: '@alunno_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_4_genitore1_3CAMB_1:
+    comunicazione: '@avviso_compito_demo_3CAMB_4'
+    utente: '@genitore1_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_4_genitore2_3CAMB_1:
+    comunicazione: '@avviso_compito_demo_3CAMB_4'
+    utente: '@genitore2_3CAMB_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_4_genitore1_3CAMB_2:
+    comunicazione: '@avviso_compito_demo_3CAMB_4'
+    utente: '@genitore1_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_4_genitore2_3CAMB_2:
+    comunicazione: '@avviso_compito_demo_3CAMB_4'
+    utente: '@genitore2_3CAMB_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_1_alunno_3CCHI_1:
+    comunicazione: '@avviso_verifica_demo_3CCHI_1'
+    utente: '@alunno_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_1_alunno_3CCHI_2:
+    comunicazione: '@avviso_verifica_demo_3CCHI_1'
+    utente: '@alunno_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_1_genitore1_3CCHI_1:
+    comunicazione: '@avviso_verifica_demo_3CCHI_1'
+    utente: '@genitore1_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_1_genitore2_3CCHI_1:
+    comunicazione: '@avviso_verifica_demo_3CCHI_1'
+    utente: '@genitore2_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_1_genitore1_3CCHI_2:
+    comunicazione: '@avviso_verifica_demo_3CCHI_1'
+    utente: '@genitore1_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_1_genitore2_3CCHI_2:
+    comunicazione: '@avviso_verifica_demo_3CCHI_1'
+    utente: '@genitore2_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_2_alunno_3CCHI_1:
+    comunicazione: '@avviso_verifica_demo_3CCHI_2'
+    utente: '@alunno_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_2_alunno_3CCHI_2:
+    comunicazione: '@avviso_verifica_demo_3CCHI_2'
+    utente: '@alunno_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_2_genitore1_3CCHI_1:
+    comunicazione: '@avviso_verifica_demo_3CCHI_2'
+    utente: '@genitore1_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_2_genitore2_3CCHI_1:
+    comunicazione: '@avviso_verifica_demo_3CCHI_2'
+    utente: '@genitore2_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_2_genitore1_3CCHI_2:
+    comunicazione: '@avviso_verifica_demo_3CCHI_2'
+    utente: '@genitore1_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_2_genitore2_3CCHI_2:
+    comunicazione: '@avviso_verifica_demo_3CCHI_2'
+    utente: '@genitore2_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_3_alunno_3CCHI_1:
+    comunicazione: '@avviso_compito_demo_3CCHI_3'
+    utente: '@alunno_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_3_alunno_3CCHI_2:
+    comunicazione: '@avviso_compito_demo_3CCHI_3'
+    utente: '@alunno_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_3_genitore1_3CCHI_1:
+    comunicazione: '@avviso_compito_demo_3CCHI_3'
+    utente: '@genitore1_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_3_genitore2_3CCHI_1:
+    comunicazione: '@avviso_compito_demo_3CCHI_3'
+    utente: '@genitore2_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_3_genitore1_3CCHI_2:
+    comunicazione: '@avviso_compito_demo_3CCHI_3'
+    utente: '@genitore1_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_3_genitore2_3CCHI_2:
+    comunicazione: '@avviso_compito_demo_3CCHI_3'
+    utente: '@genitore2_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_4_alunno_3CCHI_1:
+    comunicazione: '@avviso_compito_demo_3CCHI_4'
+    utente: '@alunno_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_4_alunno_3CCHI_2:
+    comunicazione: '@avviso_compito_demo_3CCHI_4'
+    utente: '@alunno_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_4_genitore1_3CCHI_1:
+    comunicazione: '@avviso_compito_demo_3CCHI_4'
+    utente: '@genitore1_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_4_genitore2_3CCHI_1:
+    comunicazione: '@avviso_compito_demo_3CCHI_4'
+    utente: '@genitore2_3CCHI_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_4_genitore1_3CCHI_2:
+    comunicazione: '@avviso_compito_demo_3CCHI_4'
+    utente: '@genitore1_3CCHI_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_4_genitore2_3CCHI_2:
+    comunicazione: '@avviso_compito_demo_3CCHI_4'
+    utente: '@genitore2_3CCHI_2'
+    letto:
+    firmato:

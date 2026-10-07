@@ -1,0 +1,801 @@
+####################
+# DemoVotiExtraFixtures - voti aggiuntivi per ogni alunno
+#
+# Aggiunge due valutazioni per ogni alunno (compresi sostegno e attività
+# alternativa), così che ogni studente abbia almeno tre voti.
+####################
+
+
+App\Entity\Valutazione:
+  valutazione_extra_A1_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_1A_1'
+    lezione: '@lezione_demo_A1_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A1_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_1'
+    alunno: '@alunno_1A_1'
+    lezione: '@lezione_demo_A2_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A1_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_1A_2'
+    lezione: '@lezione_demo_A1_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A1_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_1'
+    alunno: '@alunno_1A_2'
+    lezione: '@lezione_demo_A2_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A2_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_2'
+    alunno: '@alunno_2A_1'
+    lezione: '@lezione_demo_A1_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A2_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_2'
+    alunno: '@alunno_2A_1'
+    lezione: '@lezione_demo_A2_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A2_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_2'
+    alunno: '@alunno_2A_2'
+    lezione: '@lezione_demo_A1_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A2_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_2'
+    alunno: '@alunno_2A_2'
+    lezione: '@lezione_demo_A2_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A3_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_3'
+    alunno: '@alunno_3A_1'
+    lezione: '@lezione_demo_A1_3'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A3_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_3'
+    alunno: '@alunno_3A_1'
+    lezione: '@lezione_demo_A2_3'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A3_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_3'
+    alunno: '@alunno_3A_2'
+    lezione: '@lezione_demo_A1_3'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A3_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_3'
+    alunno: '@alunno_3A_2'
+    lezione: '@lezione_demo_A2_3'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A4_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_4'
+    alunno: '@alunno_4A_1'
+    lezione: '@lezione_demo_A1_4'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A4_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_4'
+    alunno: '@alunno_4A_1'
+    lezione: '@lezione_demo_A2_4'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A4_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_4'
+    alunno: '@alunno_4A_2'
+    lezione: '@lezione_demo_A1_4'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A4_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_4'
+    alunno: '@alunno_4A_2'
+    lezione: '@lezione_demo_A2_4'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A5_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_5'
+    alunno: '@alunno_5A_1'
+    lezione: '@lezione_demo_A1_5'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A5_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_5'
+    alunno: '@alunno_5A_1'
+    lezione: '@lezione_demo_A2_5'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A5_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_5'
+    alunno: '@alunno_5A_2'
+    lezione: '@lezione_demo_A1_5'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_A5_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_5'
+    alunno: '@alunno_5A_2'
+    lezione: '@lezione_demo_A2_5'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B1_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_1B_1'
+    lezione: '@lezione_demo_B1_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B1_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_1B_1'
+    lezione: '@lezione_demo_B2_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B1_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_1B_2'
+    lezione: '@lezione_demo_B1_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B1_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_1B_2'
+    lezione: '@lezione_demo_B2_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B2_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_2'
+    alunno: '@alunno_2B_1'
+    lezione: '@lezione_demo_B1_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B2_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_2'
+    alunno: '@alunno_2B_1'
+    lezione: '@lezione_demo_B2_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B2_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_2'
+    alunno: '@alunno_2B_2'
+    lezione: '@lezione_demo_B1_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B2_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_2'
+    alunno: '@alunno_2B_2'
+    lezione: '@lezione_demo_B2_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B3_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_3'
+    alunno: '@alunno_3B_1'
+    lezione: '@lezione_demo_B1_3'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B3_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_3'
+    alunno: '@alunno_3B_1'
+    lezione: '@lezione_demo_B2_3'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B3_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_3'
+    alunno: '@alunno_3B_2'
+    lezione: '@lezione_demo_B1_3'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B3_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_3'
+    alunno: '@alunno_3B_2'
+    lezione: '@lezione_demo_B2_3'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B4_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_4'
+    alunno: '@alunno_4B_1'
+    lezione: '@lezione_demo_B1_4'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B4_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_4'
+    alunno: '@alunno_4B_1'
+    lezione: '@lezione_demo_B2_4'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B4_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_4'
+    alunno: '@alunno_4B_2'
+    lezione: '@lezione_demo_B1_4'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B4_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_4'
+    alunno: '@alunno_4B_2'
+    lezione: '@lezione_demo_B2_4'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B5_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_5'
+    alunno: '@alunno_5B_1'
+    lezione: '@lezione_demo_B1_5'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B5_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_5'
+    alunno: '@alunno_5B_1'
+    lezione: '@lezione_demo_B2_5'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B5_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_5'
+    alunno: '@alunno_5B_2'
+    lezione: '@lezione_demo_B1_5'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_B5_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_5'
+    alunno: '@alunno_5B_2'
+    lezione: '@lezione_demo_B2_5'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_C1_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_1C_1'
+    lezione: '@lezione_demo_C1_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_C1_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_1'
+    alunno: '@alunno_1C_1'
+    lezione: '@lezione_demo_C2_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_C1_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_1C_2'
+    lezione: '@lezione_demo_C1_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_C1_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_1'
+    alunno: '@alunno_1C_2'
+    lezione: '@lezione_demo_C2_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_C2_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_2'
+    alunno: '@alunno_2C_1'
+    lezione: '@lezione_demo_C1_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_C2_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_2'
+    alunno: '@alunno_2C_1'
+    lezione: '@lezione_demo_C2_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_C2_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_2'
+    alunno: '@alunno_2C_2'
+    lezione: '@lezione_demo_C1_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_C2_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_2'
+    alunno: '@alunno_2C_2'
+    lezione: '@lezione_demo_C2_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_3CAMB_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_3CAMB_1'
+    lezione: '@lezione_demo_3CAMB_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_3CAMB_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_3CAMB_1'
+    lezione: '@lezione_demo_3CAMB_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_3CAMB_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_3CAMB_2'
+    lezione: '@lezione_demo_3CAMB_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_3CAMB_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_3CAMB_2'
+    lezione: '@lezione_demo_3CAMB_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_3CCHI_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_3CCHI_1'
+    lezione: '@lezione_demo_3CCHI_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_3CCHI_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_3CCHI_1'
+    lezione: '@lezione_demo_3CCHI_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_3CCHI_2_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_3CCHI_2'
+    lezione: '@lezione_demo_3CCHI_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_3CCHI_2_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_3CCHI_2'
+    lezione: '@lezione_demo_3CCHI_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_SOST1_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_sostegno_1'
+    alunno: '@alunno_sostegno_1'
+    lezione: '@lezione_demo_sostegno_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_SOST1_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_sostegno_1'
+    lezione: '@lezione_demo_A1_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_SOST2_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_sostegno_2'
+    alunno: '@alunno_sostegno_2'
+    lezione: '@lezione_demo_sostegno_2'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_SOST2_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_1'
+    alunno: '@alunno_sostegno_2'
+    lezione: '@lezione_demo_A2_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_SOST3_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_sostegno_3'
+    alunno: '@alunno_sostegno_3'
+    lezione: '@lezione_demo_sostegno_3'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_SOST3_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_sostegno_3'
+    lezione: '@lezione_demo_3CCHI_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_SOST4_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_sostegno_4'
+    alunno: '@alunno_sostegno_4'
+    lezione: '@lezione_demo_sostegno_4'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_SOST4_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_sostegno_4'
+    lezione: '@lezione_demo_3CAMB_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_ALT1_1_1:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_alternativa_1'
+    lezione: '@lezione_demo_A1_1'
+    materia: '<($lezione->getMateria())>'
+  valutazione_extra_ALT1_1_2:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_1'
+    alunno: '@alunno_alternativa_1'
+    lezione: '@lezione_demo_A2_1'
+    materia: '<($lezione->getMateria())>'

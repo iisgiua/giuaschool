@@ -1,0 +1,97 @@
+####################
+# DemoExtraFixtures - dati demo per le sezioni minori
+#
+# Popola raggruppamenti interclasse, cambi classe, orario dei docenti,
+# autenticazione dispositivi, provisioning, log e API.
+####################
+
+
+App\Entity\Raggruppamento:
+
+  raggruppamento_demo_1:
+    nome (unique): 'Gruppo interclasse Alpha'
+    alunni: '<collection(@alunno_1A_1, @alunno_2A_1, @alunno_3A_1)>'
+  raggruppamento_demo_2:
+    nome (unique): 'Gruppo interclasse Beta'
+    alunni: '<collection(@alunno_1B_1, @alunno_2B_1, @alunno_3B_1)>'
+  raggruppamento_demo_3:
+    nome (unique): 'Gruppo interclasse Gamma'
+    alunni: '<collection(@alunno_4A_1, @alunno_5A_1, @alunno_1C_1, @alunno_2C_1)>'
+
+
+App\Entity\CambioClasse:
+
+  cambio_classe_demo_A_{1..5}:
+    alunno: '@alunno_<($current . "A_1")>'
+    inizio: '<dateTimeBetween("2026-09-15", "2026-10-31")>'
+    fine: '<dateTimeBetween($inizio, "2027-05-30")>'
+    classe: '@classe_<($current . "A")>'
+    note: 'Cambio classe demo <current()>'
+
+  cambio_classe_demo_B_{1..5}:
+    alunno: '@alunno_<($current . "B_1")>'
+    inizio: '<dateTimeBetween("2026-09-15", "2026-10-31")>'
+    fine: '<dateTimeBetween($inizio, "2027-05-30")>'
+    classe: '@classe_<($current . "B")>'
+    note: '<strval("")>'
+
+
+App\Entity\OrarioDocente:
+
+  orariodocente_demo_{1..5}:
+    orario: '@orario_definitivo_1'
+    giorno: '<current()>'
+    ora: '<numberBetween(1, 5)>'
+    cattedra: '@cattedra_curricolare_<current()>'
+
+  orariodocente_demo_B_{1..5}:
+    orario: '@orario_definitivo_2'
+    giorno: '<current()>'
+    ora: '<numberBetween(1, 5)>'
+    cattedra: '@cattedra_itp_<current()>'
+
+
+App\Entity\AutenticazioneDispositivo:
+
+  autenticazioneDispositivo_demo_{1..5}:
+    idPubblico (unique): '<uuid()>'
+    utente: '@docente_curricolare_<current()>'
+    casuale: '<uuid()>'
+    scadenzaRichiesta: '<dateTimeBetween("-1 days", "now")>'
+    richiestaUsata: '<boolean(50)>'
+    token (unique): '<uuid()>'
+    scadenzaToken: '<dateTimeBetween("-1 days", "now")>'
+    tokenUsato: '<boolean(50)>'
+
+
+App\Entity\Provisioning:
+
+  provisioning_demo_{1..5}:
+    utente: '@utente_<current()>'
+    dati: '<(array())>'
+    funzione: '<substr(<text()>, 0, 255)>'
+    stato: '<randomElement(["A", "P", "C", "E"])>'
+
+
+App\Entity\Log:
+
+  log_demo_{1..5}:
+    utente: '@docente_curricolare_<current()>'
+    username: '<($utente->getUsername())>'
+    ruolo: '<($utente->getRoles()[0])>'
+    alias: '30%? admin'
+    ip: '<ipv4()>'
+    origine: 'App\\Controller\\DemoController::indexAction'
+    tipo: '<randomElement(["A", "C", "U", "D"])>'
+    categoria: '<strtoupper(<word()>)>'
+    azione: '<substr(<sentence(4)>, 0, -1)>'
+    dati: '<words(4, false)>'
+
+
+App\Entity\Api:
+
+  api_demo_{1..3}:
+    nome: 'API demo <current()>'
+    token (unique): '<md5(<text()>)>'
+    attiva: true
+    dati: '<(array())>'

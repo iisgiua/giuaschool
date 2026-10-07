@@ -106,8 +106,32 @@ set minimo di un'installazione fresca (configurazione, materie, menu, utente amm
 php bin/console app:alice:load _giuaschool
 ```
 
-Senza argomento carica **tutti** i file `*Fixtures.yml` presenti in `src/DataFixtures/` — utile
-per un ambiente di sviluppo con dati di prova, non per la produzione.
+Senza argomento carica il manifest `_entityTestFixtures.yml`, che include l'intero set delle
+fixture di test senza passare separatamente ad Alice anche i file già inclusi — utile per un
+ambiente di sviluppo con dati di prova, non per la produzione.
+
+Per un ambiente di sviluppo con **tutte le sezioni popolate** c'è il set demo `_demoFixtures.yml`,
+che sovrappone ai dati di test i file `Demo*Fixtures.yml`: ogni classe, docente, alunno e genitore
+ha almeno 2-3 record per sezione, compresi **voti** (minimo 3 per alunno) e **compiti/verifiche**
+dell'agenda (minimo 4 eventi per alunno e genitore):
+
+```bash
+php bin/console app:alice:load _demo
+```
+
+Il set demo porta l'anno scolastico all'**A.S. 2026/2027** tramite `DemoConfigurazioneFixtures.yml`
+e `DemoOrarioFixtures.yml` (sovrascrittura delle chiavi di configurazione e della validità
+dell'orario, sempre senza modificare i file condivisi con i test). Poiché le cattedre sono generate
+in modo casuale, al termine del caricamento il comando completa automaticamente il dataset con i
+dati legati al singolo utente/cattedra (coordinatori e segretari, documenti, lezioni, argomenti,
+valutazioni, osservazioni, proposte di voto, scrutini e tabellone degli scrutini svolti con relativi
+esiti delle pagelle, comunicazioni per tutti gli utenti, colloqui, presenze, moduli formativi e
+rappresentanti di classe/istituto/RSU/consulta). Il completamento è idempotente e può essere
+rieseguito da solo con:
+
+```bash
+php bin/console app:demo:populate
+```
 
 La riga di comando dell'amministratore creata dalla fixture iniziale è `admin`; la password
 viene impostata dalla fixture tramite il provider `PersonaProvider` (vedi `tests/CustomProvider.php`).
@@ -544,4 +568,5 @@ Va aggiornato almeno a ogni rilascio.
 AGPL-3.0-or-later. Vedi [LICENSE](LICENSE).
 
 Il progetto include asset con licenze proprie: `public/vendor/bootstrap-slider/LICENSE.md`,
-`public/vendor/fontawesome/LICENSE.txt` e i font in `public/vendor/bootstrap-italia/fonts/`.
+`public/vendor/fontawesome/LICENSE.txt`, `public/vendor/tabler-icons/LICENSE` (MIT, generato da
+`tools/tabler_icons.py`) e i font in `public/vendor/bootstrap-italia/fonts/`.

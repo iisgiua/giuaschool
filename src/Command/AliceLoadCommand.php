@@ -11,6 +11,7 @@ namespace App\Command;
 use App\EventListener\LogListener;
 use App\Tests\CustomProvider;
 use App\Tests\PersonaProvider;
+use App\Util\DemoPopulator;
 use Doctrine\ORM\EntityManagerInterface;
 use Faker\Generator;
 use Fidry\AliceDataFixtures\Loader\PurgerLoader;
@@ -24,7 +25,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireLocator;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -51,6 +51,7 @@ class AliceLoadCommand extends Command {
    * @param string $dirProgetto Percorso del progetto
    * @param ContainerInterface $locator Gestore per i servizi registrati
    * @param CustomProvider|null $customProvider Generatore automatico personalizzato di dati fittizi
+   * @param DemoPopulator|null $demoPopulator Completamento dei dati del set demo
    */
   public function __construct(
       protected EntityManagerInterface $em,
@@ -60,7 +61,8 @@ class AliceLoadCommand extends Command {
       private readonly string $dirProgetto,
       #[AutowireLocator([LogListener::class => '?'.LogListener::class])]
       private ContainerInterface $locator,
-      protected ?CustomProvider $customProvider = null) {
+      protected ?CustomProvider $customProvider = null,
+      protected ?DemoPopulator $demoPopulator = null) {
     parent::__construct();
     $this->faker->addProvider(new PersonaProvider($this->faker, $this->hasher));
     $this->customProvider = new CustomProvider($this->faker);
@@ -142,14 +144,10 @@ class AliceLoadCommand extends Command {
     $path = $this->dirProgetto.'/src/DataFixtures/';
     $fixtures = [];
     if (empty($fixture)) {
-      // carica tutti i file della directory DataFixtures
-      $finder = new Finder();
-      $finder->files()->in($path)->depth('== 0')->name('*Fixtures.yml');
-      $fixtures = [];
-      foreach ($finder as $file) {
-        $fixtures[] = $file;
-        print("...fixture: $file\n");
-      }
+      // carica il manifest che include tutte le fixture di test, evitando di caricare più volte i file inclusi
+      $file = $path.'_entityTestFixtures.yml';
+      $fixtures[] = $file;
+      print("...fixture: $file\n");
     } elseif (file_exists($path.$fixture.'Fixtures.yml')) {
       // carica file indicato con il solo nome della classe
       $file = $path.$fixture.'Fixtures.yml';
@@ -167,6 +165,11 @@ class AliceLoadCommand extends Command {
     $this->customProvider->postPersistArrayId();
     $this->em->flush();
     print("---> dati caricati correttamente\n");
+    // completa il dataset demo con i dati legati al singolo utente/cattedra
+    if ($fixture === '_demo' && $this->demoPopulator) {
+      $stats = $this->demoPopulator->populate();
+      print("...completamento dati demo: ".json_encode($stats)."\n");
+    }
     // dump dei dati
     if ($dump) {
       // legge configurazione db

@@ -1,0 +1,32 @@
+####################
+# DemoScrutiniFixtures - dati demo per lo storico degli scrutini
+#
+# Aggiunge lo storico degli esiti e dei voti del precedente anno scolastico per
+# gli alunni non coperti dalle fixture di base. Proposte di voto, voti di
+# scrutinio ed esiti sono già presenti nelle fixture di base (in numero
+# sufficiente a popolare le relative sezioni) e non vengono duplicati per
+# evitare conflitti sui vincoli di unicità.
+####################
+
+
+App\Entity\StoricoEsito:
+
+  storico_esito_demo_{1..5}:
+    classe: '<randomElement(["1A", "2A", "3B", "4B", "5B"])>'
+    esito: '<randomElement(["A", "N", "R", "L", "E"])>'
+    periodo: 'F'
+    media: '<randomFloat()>'
+    credito: '<numberBetween(0, 14)>'
+    creditoPrecedente: '<numberBetween(0, 25)>'
+    alunno: '@alunno_<($current . "A_2")>'
+    dati: '<(array())>'
+
+
+App\Entity\StoricoVoto:
+
+  storico_voto_demo_{1..5}:
+    voto: '<numberBetween(4, 10)>'
+    carenze: '50%? <text()>: <strval("")>'
+    dati: '<(array())>'
+    storicoEsito: '@storico_esito_demo_<current()>'
+    materia: '@materia_curricolare_<current()>'

@@ -1,0 +1,29 @@
+####################
+# _demoFixtures - dataset demo per popolare tutte le sezioni dell'applicazione
+#
+# Carica l'intero set delle fixture di test e vi sovrappone dati demo aggiuntivi,
+# in modo che ogni sezione/pagina mostri almeno 2-3 record per ogni utente e ruolo.
+#
+# Uso:
+#   php bin/console app:alice:load _demo
+####################
+
+
+include:
+  - _entityTestFixtures.yml
+  - DemoConfigurazioneFixtures.yml
+  - DemoOrarioFixtures.yml
+  - DemoRegistroFixtures.yml
+  - DemoValutazioniFixtures.yml
+  - DemoVotiExtraFixtures.yml
+  - DemoPresenzeFixtures.yml
+  - DemoNoteOsservazioniFixtures.yml
+  - DemoComunicazioniFixtures.yml
+  - DemoColloquiFixtures.yml
+  - DemoScrutiniFixtures.yml
+  - DemoExtraFixtures.yml
+  - DemoCoperturaFixtures.yml
+  - DemoCopertura2Fixtures.yml
+  - DemoCopertura3Fixtures.yml
+  - DemoCompitiFixtures.yml
+  - DemoCompitiSostegnoFixtures.yml

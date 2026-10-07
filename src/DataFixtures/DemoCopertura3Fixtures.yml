@@ -1,0 +1,139 @@
+####################
+# DemoCopertura3Fixtures - chiusura copertura utenti
+#
+# Ultimi dati demo necessari perché ogni alunno e genitore abbia contenuti in
+# tutte le sezioni principali.
+####################
+
+
+App\Entity\Entrata:
+
+  entrata_demo_1C_2:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("08:30", "10:30")>'
+    ritardoBreve: true
+    note: '<strval("")>'
+    valido: true
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_1C_2'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica: '@docente_curricolare_1'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+  entrata_demo_2C_1:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("08:30", "10:30")>'
+    ritardoBreve: true
+    note: '<strval("")>'
+    valido: true
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_2C_1'
+    docente: '@docente_curricolare_2'
+    docenteGiustifica: '@docente_curricolare_2'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+  entrata_demo_alternativa_1:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("08:30", "10:30")>'
+    ritardoBreve: true
+    note: '<strval("")>'
+    valido: true
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_alternativa_1'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica: '@docente_curricolare_1'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+
+App\Entity\Uscita:
+
+  uscita_demo_1C_2:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("10:00", "12:00")>'
+    note: '<strval("")>'
+    valido: true
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_1C_2'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica: '@docente_curricolare_1'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+  uscita_demo_2C_1:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("10:00", "12:00")>'
+    note: '<strval("")>'
+    valido: true
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_2C_1'
+    docente: '@docente_curricolare_2'
+    docenteGiustifica: '@docente_curricolare_2'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+  uscita_demo_alternativa_1:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("10:00", "12:00")>'
+    note: '<strval("")>'
+    valido: true
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_alternativa_1'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica: '@docente_curricolare_1'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+
+App\Entity\Nota:
+
+  nota_demo_3B_2:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_3B'
+    docente: '@docente_curricolare_3'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_3B_2)>'
+  nota_demo_4B_2:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_4B'
+    docente: '@docente_curricolare_4'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_4B_2)>'
+  nota_demo_1C_2:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_1C'
+    docente: '@docente_curricolare_1'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_1C_2)>'
+  nota_demo_3CAMB_1:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_3CAMB'
+    docente: '@docente_curricolare_1'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_3CAMB_1)>'
+
+
+App\Entity\RichiestaColloquio:
+
+  richiesta_colloquio_demo_sost_4_f:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_sostegno_4'
+    genitore: '@genitore1_sostegno_4'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
