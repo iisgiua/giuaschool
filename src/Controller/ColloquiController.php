@@ -10,6 +10,7 @@ namespace App\Controller;
 
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
+use Doctrine\DBAL\LockMode;
 use App\Entity\Festivita;
 use App\Entity\Docente;
 use App\Entity\ScansioneOraria;
@@ -363,7 +364,11 @@ class ColloquiController extends BaseController {
    */
   #[Route(path: '/colloqui/enable/{id}/{stato}', name: 'colloqui_enable', requirements: ['id' => '\d+', 'stato' => '0|1'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function enable(LogHandler $dblogger, int $id, int $stato): Response {
+  public function enable(Request $request, LogHandler $dblogger, int $id, int $stato): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla colloquio
     $oggi = new DateTime('today');
     $colloquio = $this->em->getRepository(Colloquio::class)->findOneBy(['id' => $id,
@@ -513,9 +518,13 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/colloqui/disdetta/{id}', name: 'colloqui_disdetta')]
-  #[IsGranted('ROLE_GENITORE')] // requirements={"id": "\d+"},
-  public function disdetta(LogHandler $dblogger, int $id): Response {
+  #[Route(path: '/colloqui/disdetta/{id}', name: 'colloqui_disdetta', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[IsGranted('ROLE_GENITORE')]
+  public function disdetta(Request $request, LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla alunno
     $alunno = $this->getUser()->getAlunno();
     if (!$alunno || !$alunno->getAbilitato()) {
@@ -597,28 +606,57 @@ class ColloquiController extends BaseController {
       'values' => [$dati['lista']]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      $colloquioId = $form->get('data')->getData();
-      // controlla duplicati
-      $prenotazione = $this->em->getRepository(RichiestaColloquio::class)->findOneBy([
-        'colloquio' => $colloquioId, 'alunno' => $alunno, 'stato' => ['R', 'C']]);
-      if (!empty($prenotazione)) {
-        // esiste già richiesta
-        $form->addError(new FormError($trans->trans('exception.colloqui_esiste')));
-      } else {
-        // nuova richiesta
-        $appuntamento = $this->em->getRepository(Colloquio::class)->
-          nuovoAppuntamento($dati['validi'][$colloquioId]['ricevimento']);
-        $richiesta = (new RichiestaColloquio)
-          ->setColloquio($dati['validi'][$colloquioId]['ricevimento'])
-          ->setAppuntamento($appuntamento)
-          ->setAlunno($alunno)
-          ->setStato('R')
-          ->setGenitore($this->getUser());
-        $this->em->persist($richiesta);
-        // ok: memorizzazione e log
-        $dblogger->logAzione('COLLOQUI', 'Nuova prenotazione');
-        // redirezione
-        return $this->redirectToRoute('colloqui_genitori');
+      $colloquioId = (int) $form->get('data')->getData();
+      // esegue la prenotazione in transazione, con lock in scrittura sul ricevimento: cosi'
+      // due richieste concorrenti non possono occupare lo stesso posto o superare la capienza
+      $conn = $this->em->getConnection();
+      $conn->beginTransaction();
+      try {
+        // rilegge il ricevimento con lock in scrittura (serializza le prenotazioni concorrenti)
+        $colloquio = $this->em->getRepository(Colloquio::class)->createQueryBuilder('c')
+          ->where('c.id = :colloquio')
+          ->setParameter('colloquio', $colloquioId)
+          ->getQuery()
+          ->setLockMode(LockMode::PESSIMISTIC_WRITE)
+          ->getOneOrNullResult();
+        // controlla esistenza e stato del ricevimento
+        if (!$colloquio || !$colloquio->getAbilitato()) {
+          throw $this->createNotFoundException('exception.id_notfound');
+        }
+        // ricontrolla i duplicati dopo il lock
+        $prenotazione = $this->em->getRepository(RichiestaColloquio::class)->findOneBy([
+          'colloquio' => $colloquio, 'alunno' => $alunno, 'stato' => ['R', 'C']]);
+        if (!empty($prenotazione)) {
+          // esiste già richiesta
+          $conn->rollBack();
+          $form->addError(new FormError($trans->trans('exception.colloqui_esiste')));
+        } elseif ($this->em->getRepository(Colloquio::class)->numeroRichieste($colloquio) >= $colloquio->getNumero()) {
+          // tutti i posti del ricevimento sono occupati
+          $conn->rollBack();
+          $form->addError(new FormError($trans->trans('exception.colloqui_esauriti')));
+        } else {
+          // calcola l'appuntamento e memorizza la richiesta
+          $appuntamento = $this->em->getRepository(Colloquio::class)->nuovoAppuntamento($colloquio);
+          $richiesta = (new RichiestaColloquio)
+            ->setColloquio($colloquio)
+            ->setAppuntamento($appuntamento)
+            ->setAlunno($alunno)
+            ->setStato('R')
+            ->setGenitore($this->getUser());
+          $this->em->persist($richiesta);
+          // ok: memorizzazione e log
+          $dblogger->logAzione('COLLOQUI', 'Nuova prenotazione');
+          // conferma transazione
+          $conn->commit();
+          // redirezione
+          return $this->redirectToRoute('colloqui_genitori');
+        }
+      } catch (\Throwable $e) {
+        // annulla la transazione in caso di errore
+        if ($conn->isTransactionActive()) {
+          $conn->rollBack();
+        }
+        throw $e;
       }
     }
     // pagina di risposta
