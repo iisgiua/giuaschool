@@ -237,9 +237,8 @@ class PagelleUtil {
         if ( !isset($ns['deroga']) ) {
           $dati['no_scrutinabili'][] = $alu;
         }
-      }
-      // alunni all'estero
-      $estero = $dati['scrutinio']->getDato('estero') ?? [];
+      }	// alunni all'estero
+      $estero = $dati['scrutinio']->getDato('estero');
       $dati['estero'] = (is_array($estero) ? $estero : []);
       // dati degli alunni (scrutinati/non scrutinabili/all'estero, sono esclusi i ritirati)
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
@@ -1256,9 +1255,8 @@ class PagelleUtil {
         } else {
           $dati['no_scrutinabili'][] = $alu;
         }
-      }
-      // alunni estero
-      $estero = $dati['scrutinio']->getDato('estero') ?? [];
+      }	// alunni estero
+      $estero = $dati['scrutinio']->getDato('estero');
       $dati['estero'] = (is_array($estero) ? $estero : []);
       // dati degli alunni (scrutinati/cessata frequenza/non scrutinabili/all'estero)
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')

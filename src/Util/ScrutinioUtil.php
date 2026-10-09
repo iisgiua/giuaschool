@@ -1908,7 +1908,10 @@ class ScrutinioUtil {
       }
       // controlla validazione argomenti
       $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo($scrutinio->getPeriodo());
-      if (!isset($scrutinio->getDati()['verbale'])) {
+      if (!$def) {
+        // definizione assente: errore grave
+        $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_definizionemancante'));
+      } elseif (!isset($scrutinio->getDati()['verbale'])) {
         // errore di validazione
         $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
           ['sezione' => '']));
@@ -3804,7 +3807,10 @@ class ScrutinioUtil {
       }
       // controlla validazione argomenti
       $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo('F');
-      if (!isset($scrutinio->getDati()['verbale'])) {
+      if (!$def) {
+        // definizione assente: errore grave
+        $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_definizionemancante'));
+      } elseif (!isset($scrutinio->getDati()['verbale'])) {
         // errore di validazione
         $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
           ['sezione' => '']));
@@ -4765,7 +4771,10 @@ class ScrutinioUtil {
       }
       // controlla validazione argomenti
       $def = $this->em->getRepository(DefinizioneScrutinio::class)->findOneByPeriodo($scrutinio->getPeriodo());
-      if (!isset($scrutinio->getDati()['verbale'])) {
+      if (!$def) {
+        // definizione assente: errore grave
+        $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.scrutinio_definizionemancante'));
+      } elseif (!isset($scrutinio->getDati()['verbale'])) {
         // errore di validazione
         $this->reqstack->getSession()->getFlashBag()->add('errore', $this->trans->trans('exception.verbale_argomento_mancante',
           ['sezione' => '']));

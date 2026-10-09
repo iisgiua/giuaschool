@@ -231,8 +231,12 @@ class ColloquiController extends BaseController {
     // inizializza
     $info = [];
     $dati = [];
-    $inizio = DateTime::createFromFormat('Y-m-d H:i:s',
-      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00:00');
+    $annoInizio = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio');
+    $inizio = DateTime::createFromFormat('Y-m-d H:i:s', $annoInizio.' 00:00:00');
+    if (!$inizio) {
+      // dato di configurazione invalido: nessun ricevimento da mostrare
+      return $this->renderHtml('colloqui', 'gestione', $dati, $info);
+    }
     // legge dati
     $dati = $this->em->getRepository(Colloquio::class)->ricevimenti($this->getUser(), null, $inizio);
     // pagina di risposta
@@ -259,12 +263,20 @@ class ColloquiController extends BaseController {
     $dati = [];
     $oggi = new DateTime('today');
     // informazioni per la visualizzazione
-    $inizio = DateTime::createFromFormat('Y-m-d',
-      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'));
-    $info['inizio'] = $inizio > $oggi ? $inizio->format('d/m/Y') : $oggi->format('d/m/Y');
-    $fine = DateTime::createFromFormat('Y-m-d H:i:s',
-      $this->reqstack->getSession()->get('/CONFIG/SCUOLA/fine_colloqui').' 00:00:00');
-    $info['fine'] = $fine->format('d/m/Y');
+    $annoInizio = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio');
+    $inizio = DateTime::createFromFormat('Y-m-d', $annoInizio);
+    if (!$inizio) {
+      $info['inizio'] = $oggi->format('d/m/Y');
+    } else {
+      $info['inizio'] = $inizio > $oggi ? $inizio->format('d/m/Y') : $oggi->format('d/m/Y');
+    }
+    $fineColloqui = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/fine_colloqui');
+    $fine = DateTime::createFromFormat('Y-m-d H:i:s', $fineColloqui.' 00:00:00');
+    if (!$fine) {
+      $info['fine'] = '-';
+    } else {
+      $info['fine'] = $fine->format('d/m/Y');
+    }
     $info['festivi'] = $this->em->getRepository(Festivita::class)->listaFestivi();
     // lista sedi
     $listaSedi = $this->em->getRepository(Sede::class)->sedi($this->getUser());

@@ -49,7 +49,7 @@
 {# scelta corrente in sessione: sede e classe restano selezionate #}
 {% set sc_classe_attiva = sc_attiva > 0 ? (sc_classi|filter(c => c.id == sc_attiva)|first) : null %}
 {% set sc_sede_attiva = sc_classe_attiva ? sc_classe_attiva.sede|default('') : '' %}
-<form id="{{ sc_id }}-form" class="gs-selettore-classe{{ sc_attiva > 0 ? ' gs-selettore-classe--attiva' : '' }}" method="get" action="{{ path(sc_azione) }}">
+<form id="{{ sc_id }}-form" class="gs-selettore-classe" method="get" action="{{ path(sc_azione) }}">
   <div class="gs-selettore-classe-campo">
     <div class="gs-selettore-classe-gruppo">
       <label class="gs-selettore-classe-label" for="{{ sc_id }}-sede">{{ 'label.sede'|trans }}</label>
