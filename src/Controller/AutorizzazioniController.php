@@ -369,11 +369,15 @@ class AutorizzazioniController extends BaseController {
       ->setClasse($classe);
     $this->em->persist($autorizzazione);
     // informazioni per la visualizzazione
-    $info['modulo'] = '@data/autorizzazioni/'.$modulo->getModulo();
+    $moduloTemplate = '@data/autorizzazioni/'.$modulo->getModulo();
+    $percorsoModulo = $this->getParameter('kernel.project_dir').'/PERSONAL/data/autorizzazioni/'.$modulo->getModulo();
+    $info['modulo'] = file_exists($percorsoModulo) ? $moduloTemplate : 'autorizzazioni/default.html.twig';
     $info['ruolo'] = $utente->getCodiceRuolo() == 'G' ? 'GN' :
       ($utente->controllaRuoloFunzione('AM') ? 'AM' : '');
     $info['autorizzazione'] = $modulo;
     $info['sedi'] = $this->em->getRepository(Sede::class)->lista();
+    $info['modulo_sconosciuto'] = !file_exists($percorsoModulo);
+    $info['modulo_sconosciuto'] = !file_exists($percorsoModulo);
     // form di inserimento
     $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
       'values' => [$modulo->getCampi(), $modulo->getUnica()]]);

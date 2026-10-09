@@ -1,0 +1,18 @@
+{% if info.modulo_sconosciuto %}
+<div class="alert alert-warning">
+  {% trans %}message.autorizzazione_senza_modulo{% endtrans %}
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title gs-h3">{{ ('label.tipo_attivita_' ~ info.autorizzazione.tipo)|trans }}: {{ info.autorizzazione.nome }}</h3>
+  </div>
+  <div class="panel-body gs-big">
+    <p><strong>Data dell'attività:</strong> {{ info.autorizzazione.inizio|date('d/m/Y') }} dalle ore {{ info.autorizzazione.inizio|date('H:i') }} alle ore {{ info.autorizzazione.fine|date('H:i') }}.</p>
+    {% if info.autorizzazione.descrizione is not empty %}
+    <p>{% autoescape false %}{{ info.autorizzazione.descrizione|e }}{% endautoescape %}</p>
+    {% endif %}
+  </div>
+</div>
+{% else %}
+  {{ include(info.modulo, {ruolo: info.ruolo, autorizzazione: info.autorizzazione, sedi: info.sedi}) }}
+{% endif %}
