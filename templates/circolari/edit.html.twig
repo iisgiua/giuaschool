@@ -264,6 +264,7 @@ $(document).ready(function() {
     acceptedFiles: ".pdf",
     timeout: 0,
     paramName: "documento",
+    params: {_csrf_token: "{{ csrf_token('file') }}"},
     uploadMultiple: true,
     addRemoveLinks: true,
     createImageThumbnails: false,
@@ -284,9 +285,9 @@ $(document).ready(function() {
       });
       this.on("removedfile", function(file) {
         if (file.uploaded) {
-          $.post("{{ path('file_remove', {pagina: 'circolari_edit', param: 'documento'}) }}", {"documento": file.uploaded});
+          $.post("{{ path('file_remove', {pagina: 'circolari_edit', param: 'documento'}) }}", {"documento": file.uploaded, _csrf_token: "{{ csrf_token('file') }}"});
         } else if (file.existent) {
-          $.post("{{ path('file_remove', {pagina: 'circolari_edit', param: 'documento'}) }}", {"documento": file.existent});
+          $.post("{{ path('file_remove', {pagina: 'circolari_edit', param: 'documento'}) }}", {"documento": file.existent, _csrf_token: "{{ csrf_token('file') }}"});
           this.options.maxFiles++;
         }
       });
@@ -314,6 +315,7 @@ $(document).ready(function() {
     acceptedFiles: ".pdf,.zip,.doc,.docx,.rtf,.xls,.xlsx",
     timeout: 0,
     paramName: "allegati",
+    params: {_csrf_token: "{{ csrf_token('file') }}"},
     uploadMultiple: true,
     addRemoveLinks: true,
     createImageThumbnails: false,
@@ -334,9 +336,9 @@ $(document).ready(function() {
       });
       this.on("removedfile", function(file) {
         if (file.uploaded) {
-          $.post("{{ path('file_remove', {pagina: 'circolari_edit', param: 'allegati'}) }}", {"allegati": file.uploaded});
+          $.post("{{ path('file_remove', {pagina: 'circolari_edit', param: 'allegati'}) }}", {"allegati": file.uploaded, _csrf_token: "{{ csrf_token('file') }}"});
         } else if (file.existent) {
-          $.post("{{ path('file_remove', {pagina: 'circolari_edit', param: 'allegati'}) }}", {"allegati": file.existent});
+          $.post("{{ path('file_remove', {pagina: 'circolari_edit', param: 'allegati'}) }}", {"allegati": file.existent, _csrf_token: "{{ csrf_token('file') }}"});
           this.options.maxFiles++;
         }
       });

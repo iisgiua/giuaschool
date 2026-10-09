@@ -77,10 +77,10 @@
           }) }}
     {% endset %}
     {% set righe = righe|merge([{celle: [
-      {contenuto: '<small>' ~ a.autore.nome ~ ' ' ~ a.autore.cognome ~ '</small>'},
+      {contenuto: '<small>' ~ a.autore.nome|e ~ ' ' ~ a.autore.cognome|e ~ '</small>'},
       {contenuto: '<small>' ~ ('label.avvisi_tipo_' ~ a.tipo)|trans ~ '</small>'},
       {contenuto: a.data|date('d/m/Y')},
-      {contenuto: a.titolo},
+      {contenuto: a.titolo|e},
       {contenuto: destinatari},
       {contenuto: [pulsante]},
     ]}]) %}

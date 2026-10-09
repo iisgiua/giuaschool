@@ -924,6 +924,10 @@ class AlunniController extends BaseController {
    * @param mixed $genitore Genitore di cui impostare i numeri di telefono
    */
   private function impostaNumeriTelefono(mixed $genitore): void {
+    if (!$genitore) {
+      // genitore non presente: niente da fare
+      return;
+    }
     $telefono = [];
     foreach ($genitore->getNumeriTelefono() as $tel) {
       $tel = preg_replace('/[^+\d]/', '', (string) $tel);

@@ -187,7 +187,7 @@ $(document).ready(function() {
     $('#gs-modal-waiting').modal('show');
   });
   $('#gs-modal-info').on('show.bs.modal', function (e) {
-    $.get("{{ path('avvisi_legge') }}/"+$(e.relatedTarget).data('info-id'));
+    $.get("{{ path('avvisi_legge') }}/"+$(e.relatedTarget).data('info-id'), {_csrf_token: "{{ csrf_token('avvisi_legge') }}"});
     $(e.relatedTarget).data('info-title');
     var title = $(e.relatedTarget).data('info-date')+'<br><em class="gs-small">'+$(e.relatedTarget).data('info-title')+'</em>';
     var id = $(e.relatedTarget).data('body');

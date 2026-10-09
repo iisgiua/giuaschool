@@ -50,11 +50,19 @@
       {% if d.ricevimento.abilitato and d.richieste == 0 %}
         {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
           nome: 'circle-x', etichetta: 'Disabilita', titolo: 'Disabilita il ricevimento indicato', stile: 'danger',
-          url: path('colloqui_enable', {id: d.ricevimento.id, stato: 0})})]) %}
+          classi: 'gs-modal-confirm-button',
+          attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm',
+                      'data-href': path('colloqui_enable', {id: d.ricevimento.id, stato: 0}),
+                      'data-text': 'message.disabilita_ricevimento'|trans,
+                      'data-csrf': csrf_token('delete')}})]) %}
       {% elseif not d.ricevimento.abilitato %}
         {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
           nome: 'check', etichetta: 'Abilita', titolo: 'Abilita il ricevimento indicato', stile: 'success',
-          url: path('colloqui_enable', {id: d.ricevimento.id, stato: 1})})]) %}
+          classi: 'gs-modal-confirm-button',
+          attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm',
+                      'data-href': path('colloqui_enable', {id: d.ricevimento.id, stato: 1}),
+                      'data-text': 'message.abilita_ricevimento'|trans,
+                      'data-csrf': csrf_token('delete')}})]) %}
       {% endif %}
     {% endif %}
     {# le celle scadute restano in corsivo: era cosi' prima #}
@@ -64,9 +72,9 @@
       classi: d.ricevimento.abilitato ? '' : 'danger',
       celle: [
         {contenuto: prima},
-        {contenuto: apri ~ d.ricevimento.sede.nomeBreve ~ chiudi},
+        {contenuto: apri ~ d.ricevimento.sede.nomeBreve|e ~ chiudi},
         {contenuto: apri ~ ('label.tipo_colloquio_' ~ d.ricevimento.tipo)|trans ~ chiudi},
-        {contenuto: apri ~ '<small>' ~ d.ricevimento.luogo ~ '</small>' ~ chiudi},
+        {contenuto: apri ~ '<small>' ~ d.ricevimento.luogo|e ~ '</small>' ~ chiudi},
         {contenuto: apri ~ d.ricevimento.durata ~ ' minuti (' ~ d.ricevimento.numero ~ ' colloqui)' ~ chiudi},
         {contenuto: pulsanti},
       ]}]) %}

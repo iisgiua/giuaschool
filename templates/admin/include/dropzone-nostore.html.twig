@@ -16,6 +16,7 @@ $(document).ready(function() {
   $(".dropzone").dropzone({
     url: "{{ path('file_upload', {pagina: dz_pagina, param: dz_param}) }}",
     paramName: "{{ dz_param }}",
+    params: {_csrf_token: "{{ csrf_token('file') }}"},
     maxFiles: {{ dz_numfile }},
     maxFilesize: {{ dz_maxdim }},
     acceptedFiles: "{{ dz_accettati }}",
@@ -52,7 +53,7 @@ $(document).ready(function() {
         $(id_previews+" li.dz-error").removeClass("dz-error uploading").addClass("error");
       });
       this.on("removedfile", function(file) {
-        $.post("{{ path('file_remove', {pagina: dz_pagina, param: dz_param}) }}", {"{{ dz_param }}": file.uploaded});
+        $.post("{{ path('file_remove', {pagina: dz_pagina, param: dz_param}) }}", {"{{ dz_param }}": file.uploaded, _csrf_token: "{{ csrf_token('file') }}"});
 {% if dz_idsubmit %}
         $("#{{ dz_idsubmit }}").prop('disabled', true);
 {% endif %}
