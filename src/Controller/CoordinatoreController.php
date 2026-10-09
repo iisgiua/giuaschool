@@ -473,6 +473,7 @@ class CoordinatoreController extends BaseController {
     $info['classe'] = null;
     $info['annoInizio'] = null;
     $info['annoFine'] = null;
+    $info['configErrore'] = false;
     // parametro classe
     if ($classe == 0) {
       // recupera parametri da sessione
