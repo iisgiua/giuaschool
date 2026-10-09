@@ -14,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 
 /**
@@ -98,6 +99,51 @@ class BaseController extends AbstractController {
     $response->headers->set('Content-Disposition', $disposition);
     $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
     return $response;
+  }
+
+  /**
+   * Invia un allegato scaricabile o visualizzabile.
+   *
+   * La visualizzazione inline è consentita solo per i file che risultano realmente
+   * in formato PDF: altri contenuti (es. pagine HTML con estensione ".pdf") vengono
+   * forzati come download, per non poter essere eseguiti nell'origine dell'applicazione.
+   *
+   * @param string $nomefile Percorso completo del file da inviare
+   * @param string $nome Nome da mostrare nel download
+   * @param bool $inline Vero se l'utente ha richiesto la visualizzazione inline
+   *
+   * @return Response Risposta con il file allegato
+   */
+  protected function rispostaAllegato(string $nomefile, string $nome, bool $inline): Response {
+    // inline solo per i PDF effettivamente validati
+    $inline = $inline && $this->isPdf($nomefile);
+    $response = $this->file($nomefile, $nome, $inline ?
+      ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT);
+    // impedisce l'interpretazione del contenuto in base all'estensione
+    $response->headers->set('X-Content-Type-Options', 'nosniff');
+    $response->headers->set('Content-Type', $inline ? 'application/pdf' : 'application/octet-stream');
+    return $response;
+  }
+
+  /**
+   * Controlla se il file indicato è realmente un PDF.
+   *
+   * @param string $nomefile Percorso completo del file da controllare
+   *
+   * @return bool Vero se il contenuto del file è in formato PDF
+   */
+  private function isPdf(string $nomefile): bool {
+    if (!is_file($nomefile)) {
+      return false;
+    }
+    $tipo = '';
+    if (class_exists('finfo')) {
+      $finfo = new \finfo(FILEINFO_MIME_TYPE);
+      $tipo = (string) $finfo->file($nomefile);
+    } else {
+      $tipo = (string) @mime_content_type($nomefile);
+    }
+    return $tipo === 'application/pdf';
   }
 
 }
