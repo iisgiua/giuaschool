@@ -9,6 +9,7 @@
 namespace App\Controller;
 
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use DateTime;
 use Symfony\Component\ExpressionLanguage\Expression;
 use App\Entity\Classe;
 use App\Entity\Scrutinio;
@@ -54,17 +55,7 @@ class PagelleController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controllo accesso alla funzione
-    if (($this->getUser() instanceOf Ata) && !$this->getUser()->getSegreteria()) {
-      // ATA non abiliatato alla segreteria
-      throw $this->createNotFoundException('exception.invalid_params');
-    } elseif (($this->getUser() instanceOf Docente) && !($this->getUser() instanceOf Staff)) {
-      // coordinatore
-      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
-      if (!in_array($classe->getId(), $classi)) {
-        // docente non abilitato
-        throw $this->createNotFoundException('exception.invalid_params');
-      }
-    }
+    $this->controllaAccessoClasse($classe);
     // controllo periodo (scrutinio deve essere chiuso)
     $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
@@ -185,16 +176,23 @@ class PagelleController extends BaseController {
     } elseif (($this->getUser() instanceOf Alunno) && $this->getUser() !== $alunno) {
       // non è pagella di alunno
       throw $this->createNotFoundException('exception.id_notfound');
-    } elseif (($this->getUser() instanceOf Ata) && !$this->getUser()->getSegreteria()) {
-      // ATA non abilitato alla segreteria
-      throw $this->createNotFoundException('exception.invalid_params');
     }
+    // controllo accesso alla classe (ATA e docenti ordinari)
+    $this->controllaAccessoClasse($classe);
     // controllo periodo (scrutinio deve essere chiuso)
     $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['classe' => $classe,
       'periodo' => $periodo, 'stato' => 'C']);
     if (!$scrutinio) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo pubblicazione: genitori e alunni solo dopo la data di pubblicazione dello scrutinio
+    if (($this->getUser() instanceOf Genitore) || ($this->getUser() instanceOf Alunno)) {
+      $visibile = $scrutinio->getVisibile();
+      if (!$visibile || $visibile > new DateTime()) {
+        // scrutinio non ancora pubblicato
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
     }
     // scarica documento
     if ($periodo == 'P' || $periodo == 'S') {
@@ -269,6 +267,31 @@ class PagelleController extends BaseController {
     }
     // invia il documento
     return $this->file($nomefile);
+  }
+
+  /**
+   * Controlla l'accesso dell'utente alla classe indicata.
+   *
+   * Gli utenti ATA devono essere abilitati alla segreteria; i docenti ordinari
+   * (non Staff) sono limitati alle classi di cui sono coordinatori. Lo stesso
+   * controllo è richiesto per i documenti di classe e per quelli individuali.
+   *
+   * @param Classe $classe Classe a cui si vuole accedere
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException Se l'utente non è autorizzato ad accedere alla classe
+   */
+  private function controllaAccessoClasse(Classe $classe): void {
+    if (($this->getUser() instanceOf Ata) && !$this->getUser()->getSegreteria()) {
+      // ATA non abilitato alla segreteria
+      throw $this->createNotFoundException('exception.invalid_params');
+    } elseif (($this->getUser() instanceOf Docente) && !($this->getUser() instanceOf Staff)) {
+      // docente ordinario: solo le classi di cui è coordinatore
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      if (!in_array($classe->getId(), $classi)) {
+        // docente non abilitato
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
   }
 
 }
