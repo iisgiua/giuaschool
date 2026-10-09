@@ -25,6 +25,9 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  */
 class FileController extends BaseController {
 
+  // estensioni ammesse per i file caricati
+  private const ESTENSIONI_AMMESSE = ['csv', 'doc', 'docx', 'jpeg', 'jpg', 'odt', 'pdf', 'rtf', 'txt', 'xls', 'xlsx', 'zip'];
+
   /**
    * Esegue l'upload di un file tramite chiamata AJAX.
    *
@@ -38,9 +41,16 @@ class FileController extends BaseController {
   #[Route(path: '/file/upload/{pagina}/{param}', name: 'file_upload', requirements: ['pagina' => '\w+', 'param' => '\w+'], methods: ['POST'])]
   #[IsGranted('ROLE_UTENTE')]
   public function upload(Request $request, string $pagina, string $param): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('file', $request->request->get('_csrf_token'))) {
+      return new JsonResponse(['errore' => 'exception.invalid_params'], Response::HTTP_BAD_REQUEST);
+    }
     $risposta = [];
     // legge file
     $files = $request->files->get($param);
+    if (!is_array($files)) {
+      $files = ($files === null) ? [] : [$files];
+    }
     // imposta directory temporanea
     $dir = $this->getParameter('dir_tmp');
     // controlla upload
@@ -48,7 +58,11 @@ class FileController extends BaseController {
       $nomefile = date('Ymd_His').'_'.bin2hex(random_bytes(8));
       $info = pathinfo($file->getClientOriginalName());
       $nomeCaricato = $info['filename'];
-      $tipoCaricato = $file->getClientOriginalExtension();
+      $tipoCaricato = strtolower($file->getClientOriginalExtension());
+      // controlla l'estensione del file
+      if (!in_array($tipoCaricato, self::ESTENSIONI_AMMESSE, true)) {
+        return new Response('Errore nel caricamento del file', Response::HTTP_INTERNAL_SERVER_ERROR);
+      }
       if ($file->isValid() && $file->move($dir, $nomefile.'.'.$tipoCaricato)) {
         // file caricato senza errori
         $risposta[$k]['type'] = 'uploaded';
@@ -83,6 +97,10 @@ class FileController extends BaseController {
   #[Route(path: '/file/remove/{pagina}/{param}', name: 'file_remove', requirements: ['pagina' => '\w+', 'param' => '\w+'], methods: ['POST'])]
   #[IsGranted('ROLE_UTENTE')]
   public function remove(Request $request, string $pagina, string $param): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('file', $request->request->get('_csrf_token'))) {
+      return new JsonResponse(['errore' => 'exception.invalid_params'], Response::HTTP_BAD_REQUEST);
+    }
     // legge file
     $file = $request->request->all($param);
     // imposta directory temporanea
