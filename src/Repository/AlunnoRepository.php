@@ -158,19 +158,20 @@ class AlunnoRepository extends BaseRepository {
   public function listaAlunni($lista, $attr): string {
     // legge alunni validi
     $alunni = $this->createQueryBuilder('a')
-      ->select("CONCAT('<span id=',:quote,:attr,a.id,:quote,'>',a.cognome,' ',a.nome,' (',DATE_FORMAT(a.dataNascita,'%d/%m/%Y'),') ',c.anno,'ª ',c.sezione) AS nome,c.gruppo")
+      ->select("a.id AS id, a.cognome AS cognome, a.nome AS nome, DATE_FORMAT(a.dataNascita,'%d/%m/%Y') AS dataNascita, c.anno AS anno, c.sezione AS sezione, c.gruppo AS gruppo")
       ->join('a.classe', 'c')
       ->where('a.id IN (:lista) AND a.abilitato=:abilitato')
       ->setParameter('lista', $lista)
       ->setParameter('abilitato', 1)
-      ->setParameter('attr', $attr)
-      ->setParameter('quote', '\\"')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->getQuery()
       ->getArrayResult();
+    // costruisce la lista codificando i valori (evita iniezione di markup nei nomi)
     $lista_alunni = array_map(
-      fn($c) => $c['nome'].($c['gruppo'] ? ('-'.$c['gruppo']) : '').'</span>', $alunni);
-      // restituisce lista
+      fn($a) => '<span id=\"'.htmlspecialchars($attr.$a['id'], ENT_QUOTES).'\">'.
+        htmlspecialchars($a['cognome'].' '.$a['nome'].' ('.$a['dataNascita'].') '.$a['anno'].'ª '.$a['sezione'],
+          ENT_QUOTES).($a['gruppo'] ? '-'.htmlspecialchars($a['gruppo'], ENT_QUOTES) : '').'</span>', $alunni);
+    // restituisce lista
     return implode(', ', $lista_alunni);
   }
 
