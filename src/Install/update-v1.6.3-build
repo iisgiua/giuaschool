@@ -60,6 +60,5 @@ return [
   'envDelete' => [
   ],
   'procedure' => [
-    ''
   ]
 ];
