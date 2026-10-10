@@ -31,6 +31,8 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 
 /**
@@ -48,6 +50,15 @@ use Symfony\Component\Security\Http\SecurityRequestAttributes;
 class FormAuthenticator extends AbstractAuthenticator {
 
   use AuthenticatorTrait;
+
+
+  //==================== COSTANTI DELLA CLASSE  ====================
+
+  /** Numero massimo di tentativi di login falliti prima del blocco temporaneo */
+  private const MAX_TENTATIVI_LOGIN = 5;
+
+  /** Durata del blocco temporaneo dopo troppi tentativi falliti (in secondi) */
+  private const BLOCCO_LOGIN_SECONDI = 900;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -70,7 +81,8 @@ class FormAuthenticator extends AbstractAuthenticator {
       private OtpUtil $otp,
       private LoggerInterface $logger,
       private LogHandler $dblogger,
-      private ConfigLoader $config) {
+      private ConfigLoader $config,
+      private CacheInterface $throttleCache) {
   }
 
   /**
@@ -154,6 +166,16 @@ class FormAuthenticator extends AbstractAuthenticator {
    * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
   public function checkCredentials(mixed $credentials, UserInterface $user): bool {
+    // protezione brute-force: blocca la verifica se troppi tentativi falliti recenti
+    $throttleKey = 'login_fail_'.md5(strtolower((string) $user->getUserIdentifier()).'|'.(string) $credentials['ip']);
+    $failCount = (int) $this->throttleCache->get($throttleKey, function (ItemInterface $item) {
+      $item->expiresAfter(self::BLOCCO_LOGIN_SECONDI);
+      return 0;
+    });
+    if ($failCount >= self::MAX_TENTATIVI_LOGIN) {
+      // blocco temporaneo: stesso messaggio generico per non rivelare informazioni
+      throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
+    }
     // controlla modalità manutenzione
     $this->controllaManutenzione($user);
     // legge configurazione e verifica se si è effettuato il login speciale
@@ -225,6 +247,14 @@ class FormAuthenticator extends AbstractAuthenticator {
       'ruolo' => $user->getCodiceRuolo(),
       'login_speciale' => $loginSpeciale,
       'ip' => $credentials['ip']]);
+    // protezione brute-force: massimo N tentativi falliti ogni 15 minuti per utente+IP
+    $failCount++;
+    $this->throttleCache->delete($throttleKey);
+    $this->throttleCache->get($throttleKey, function (ItemInterface $item) use ($failCount) {
+      $item->expiresAfter(self::BLOCCO_LOGIN_SECONDI);
+      return $failCount;
+    });
+    // stesso messaggio generico sia per credenziali errate che per blocco temporaneo
     throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
   }
 
@@ -238,6 +268,9 @@ class FormAuthenticator extends AbstractAuthenticator {
    * @return Response|null Pagina di risposta o null per continuare la richiesta come utente autenticato
    */
   public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {
+    // login riuscito: azzera il contatore dei tentativi falliti (protezione brute-force)
+    $this->throttleCache->delete('login_fail_'.md5(
+      strtolower((string) $token->getUser()->getUserIdentifier()).'|'.(string) $request->getClientIp()));
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login
