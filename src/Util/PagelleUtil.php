@@ -69,6 +69,26 @@ class PagelleUtil {
   }
 
   /**
+   * Restituisce true solo se il template Twig indicato esiste fisicamente.
+   *
+   * Questo metodo serve a evitare errori in fase di renderizzazione quando
+   * un periodo o una configurazione non ha un template dedicato.
+   *
+   * @param string $template Percorso logico del template Twig
+   *
+   * @return bool Vero se il template esiste
+   */
+  private function templateEsistente(string $template): bool {
+    try {
+      $r = new \ReflectionClass($this->tpl);
+      $dir = dirname($r->getFileName());
+      return is_file($dir.'/'.$template);
+    } catch (\Throwable) {
+      return false;
+    }
+  }
+
+  /**
    * Restituisce i dati per creare il riepilogo dei voti dello scrutinio
    *
    * @param Classe $classe Classe dello scrutinio
@@ -91,7 +111,7 @@ class PagelleUtil {
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-			  ->setParameter('lista', $scrutinio->getDato('alunni'))
+			  ->setParameter('lista', $scrutinio->getDato('alunni') ?? [])
         ->getQuery()
         ->getArrayResult();
       foreach ($alunni as $alu) {
@@ -122,12 +142,12 @@ class PagelleUtil {
       $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista)')
         ->setParameter('scrutinio', $scrutinio)
-        ->setParameter('lista', $scrutinio->getDato('alunni'))
+        ->setParameter('lista', $scrutinio->getDato('alunni') ?? [])
         ->getQuery()
         ->getResult();
       $somma = [];
       $numero = [];
-      $valutazioni = $scrutinio->getDato('valutazioni');
+      $valutazioni = $scrutinio->getDato('valutazioni') ?? [];
       foreach ($voti as $v) {
         // inserisce voti/assenze
         $dati['voti'][$v->getAlunno()->getId()][$v->getMateria()->getId()] = [
@@ -143,7 +163,7 @@ class PagelleUtil {
             $numero[$v->getAlunno()->getId()] = 0;
           }
           $somma[$v->getAlunno()->getId()] +=
-            ($v->getUnico() == $valutazioni[$v->getMateria()->getTipo()]['min']) ? 0 : $v->getUnico();
+            ($v->getUnico() == ($valutazioni[$v->getMateria()->getTipo()]['min'] ?? null)) ? 0 : $v->getUnico();
           $numero[$v->getAlunno()->getId()]++;
         }
       }
@@ -152,8 +172,8 @@ class PagelleUtil {
         $dati['medie'][$alu] = number_format($somma[$alu] / $numero[$alu], 2, ',', null);
       }
       // docenti
-      $docenti = $scrutinio->getDato('docenti');
-      $docenti_presenti = $scrutinio->getDato('presenze');
+      $docenti = $scrutinio->getDato('docenti') ?? [];
+      $docenti_presenti = $scrutinio->getDato('presenze') ?? [];
       $dati_docenti = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
@@ -163,14 +183,14 @@ class PagelleUtil {
         ->getArrayResult();
       // dati per materia
       foreach ($dati_docenti as $doc) {
-        if ( $docenti_presenti[$doc['id']]->getPresenza() ) {
+        if ( !isset($docenti_presenti[$doc['id']]) || $docenti_presenti[$doc['id']]->getPresenza() ) {
           // dati docente
           $dati['docenti'][$doc['id']] = ($doc['sesso'] == 'M' ? 'Prof. ' : 'Prof.ssa ') .
             $doc['cognome'] . ' ' . $doc['nome'];
         } else {
           // dati sostituto
-          $dati['docenti'][$doc['id']] = ($docenti_presenti[$doc['id']]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ') .
-            ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
+          $dati['docenti'][$doc['id']] = (($docenti_presenti[$doc['id']]?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof. ' : 'Prof.ssa ') .
+            ucwords(strtolower((string) ($docenti_presenti[$doc['id']]?->getSostituto() ?? '')));
         }
       }
       // ordina docenti
@@ -180,16 +200,16 @@ class PagelleUtil {
         return strcmp($pa[1] . ' ' . $pa[2], $pb[1] . ' ' . $pb[2]);
       });
       // presidente
-      if ( $scrutinio->getDato('presiede_ds') ) {
+      if ( $scrutinio->getDato('presiede_ds') ?? false ) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
-        $id_presidente = $scrutinio->getDato('presiede_docente');
-        $d = $dati['docenti'][$id_presidente];
-        if ( $scrutinio->getDato('presenze')[$id_presidente]->getPresenza() ) {
-          $dati['presidente_nome'] = $d;
+        $id_presidente = $scrutinio->getDato('presiede_docente') ?? null;
+        $d = $dati['docenti'][$id_presidente] ?? null;
+        if ( (($scrutinio->getDato('presenze') ?? [])[$id_presidente] ?? null)?->getPresenza() ?? true ) {
+          $dati['presidente_nome'] = $d ?? '';
         } else {
-          $s = $scrutinio->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
+          $s = ($scrutinio->getDato('presenze') ?? [])[$id_presidente] ?? null;
+          $dati['presidente_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
         }
       }
     } elseif ( $periodo == 'F' ) {
@@ -201,18 +221,19 @@ class PagelleUtil {
       $dati['classe'] = $classe;
       // alunni scrutinati
       $dati['scrutinati'] = ($dati['scrutinio']->getDato('scrutinabili') == null ? [] :
-        array_keys($dati['scrutinio']->getDato('scrutinabili')));
+        array_keys($dati['scrutinio']->getDato('scrutinabili') ?? []));
       // alunni non scrutinabili per limite di assenza
       $dati['no_scrutinabili'] = [];
       $no_scrut = ($dati['scrutinio']->getDato('no_scrutinabili') == null ? [] :
-        $dati['scrutinio']->getDato('no_scrutinabili'));
+        ($dati['scrutinio']->getDato('no_scrutinabili') ?? []));
       foreach ($no_scrut as $alu => $ns) {
         if ( !isset($ns['deroga']) ) {
           $dati['no_scrutinabili'][] = $alu;
         }
       }
       // alunni all'estero
-      $dati['estero'] = $dati['scrutinio']->getDato('estero');
+      $estero = $dati['scrutinio']->getDato('estero') ?? [];
+      $dati['estero'] = (is_array($estero) ? $estero : []);
       // dati degli alunni (scrutinati/non scrutinabili/all'estero, sono esclusi i ritirati)
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.frequenzaEstero,a.codiceFiscale')
@@ -272,8 +293,8 @@ class PagelleUtil {
         $dati['esiti'][$e->getAlunno()->getId()] = $e;
       }
       // docenti
-      $docenti = $dati['scrutinio']->getDato('docenti');
-      $docenti_presenti = $dati['scrutinio']->getDato('presenze');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
+      $docenti_presenti = $dati['scrutinio']->getDato('presenze') ?? [];
       $dati_docenti = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
@@ -282,14 +303,14 @@ class PagelleUtil {
         ->getQuery()
         ->getArrayResult();
       foreach ($dati_docenti as $doc) {
-        if ( $docenti_presenti[$doc['id']]->getPresenza() ) {
+        if ( !isset($docenti_presenti[$doc['id']]) || $docenti_presenti[$doc['id']]->getPresenza() ) {
           // dati docente
           $dati['docenti'][$doc['id']] = ($doc['sesso'] == 'M' ? 'Prof. ' : 'Prof.ssa ') .
             $doc['cognome'] . ' ' . $doc['nome'];
         } else {
           // dati sostituto
-          $dati['docenti'][$doc['id']] = ($docenti_presenti[$doc['id']]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ') .
-            ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
+          $dati['docenti'][$doc['id']] = (($docenti_presenti[$doc['id']]?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof. ' : 'Prof.ssa ') .
+            ucwords(strtolower((string) ($docenti_presenti[$doc['id']]?->getSostituto() ?? '')));
         }
       }
       // ordina docenti
@@ -299,16 +320,16 @@ class PagelleUtil {
         return strcmp($pa[1] . ' ' . $pa[2], $pb[1] . ' ' . $pb[2]);
       });
       // presidente
-      if ( $dati['scrutinio']->getDato('presiede_ds') ) {
+      if ( $dati['scrutinio']->getDato('presiede_ds') ?? false ) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
-        $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
-        $d = $dati['docenti'][$id_presidente];
-        if ( $dati['scrutinio']->getDato('presenze')[$id_presidente]->getPresenza() ) {
-          $dati['presidente_nome'] = $d;
+        $id_presidente = $dati['scrutinio']->getDato('presiede_docente') ?? null;
+        $d = $dati['docenti'][$id_presidente] ?? null;
+        if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null)?->getPresenza() ?? true ) {
+          $dati['presidente_nome'] = $d ?? '';
         } else {
-          $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
+          $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null;
+          $dati['presidente_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
         }
       }
     } elseif ( $periodo == 'G' || $periodo == 'R' ) {
@@ -319,7 +340,7 @@ class PagelleUtil {
         'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
-      $sospesi = $dati['scrutinio']->getDato('sospesi');
+      $sospesi = $dati['scrutinio']->getDato('sospesi') ?? [];
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note')
         ->where('a.id IN (:lista)')
@@ -378,8 +399,8 @@ class PagelleUtil {
         $dati['esiti'][$e->getAlunno()->getId()] = $e;
       }
       // docenti
-      $docenti = $dati['scrutinio']->getDato('docenti');
-      $docenti_presenti = $dati['scrutinio']->getDato('presenze');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
+      $docenti_presenti = $dati['scrutinio']->getDato('presenze') ?? [];
       $dati_docenti = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
@@ -389,14 +410,14 @@ class PagelleUtil {
         ->getArrayResult();
       // dati per materia
       foreach ($dati_docenti as $doc) {
-        if ( $docenti_presenti[$doc['id']]->getPresenza() ) {
+        if ( !isset($docenti_presenti[$doc['id']]) || $docenti_presenti[$doc['id']]->getPresenza() ) {
           // dati docente
           $dati['docenti'][$doc['id']] = ($doc['sesso'] == 'M' ? 'Prof. ' : 'Prof.ssa ') .
             $doc['cognome'] . ' ' . $doc['nome'];
         } else {
           // dati sostituto
-          $dati['docenti'][$doc['id']] = ($docenti_presenti[$doc['id']]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ') .
-            ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
+          $dati['docenti'][$doc['id']] = (($docenti_presenti[$doc['id']]?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof. ' : 'Prof.ssa ') .
+            ucwords(strtolower((string) ($docenti_presenti[$doc['id']]?->getSostituto() ?? '')));
         }
       }
       // ordina docenti
@@ -406,16 +427,16 @@ class PagelleUtil {
         return strcmp($pa[1] . ' ' . $pa[2], $pb[1] . ' ' . $pb[2]);
       });
       // presidente
-      if ( $dati['scrutinio']->getDato('presiede_ds') ) {
+      if ( $dati['scrutinio']->getDato('presiede_ds') ?? false ) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
-        $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
-        $d = $dati['docenti'][$id_presidente];
-        if ( $dati['scrutinio']->getDato('presenze')[$id_presidente]->getPresenza() ) {
-          $dati['presidente_nome'] = $d;
+        $id_presidente = $dati['scrutinio']->getDato('presiede_docente') ?? null;
+        $d = $dati['docenti'][$id_presidente] ?? null;
+        if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null)?->getPresenza() ?? true ) {
+          $dati['presidente_nome'] = $d ?? '';
         } else {
-          $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
+          $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null;
+          $dati['presidente_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
         }
       }
       // anno scolastico
@@ -432,19 +453,19 @@ class PagelleUtil {
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-			  ->setParameter('lista', $dati['scrutinio']->getDato('alunni'))
+			  ->setParameter('lista', $dati['scrutinio']->getDato('alunni') ?? [])
         ->getQuery()
         ->getArrayResult();
       foreach ($alunni as $alu) {
         $dati['alunni'][$alu['id']] = $alu;
-        $dati['alunni'][$alu['id']]['religione'] = $dati['scrutinio']->getDato('religione')[$alu['id']];
+        $dati['alunni'][$alu['id']]['religione'] = ($dati['scrutinio']->getDato('religione') ?? [])[$alu['id']] ?? null;
       }
       // legge materie
       $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameter('tipi', ['S'])
-        ->setParameter('lista', $dati['scrutinio']->getDato('materie'))
+        ->setParameter('lista', $dati['scrutinio']->getDato('materie') ?? [])
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -455,7 +476,7 @@ class PagelleUtil {
       $voti = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista)')
         ->setParameter('scrutinio', $dati['scrutinio'])
-        ->setParameter('lista', $dati['scrutinio']->getDato('alunni'))
+        ->setParameter('lista', $dati['scrutinio']->getDato('alunni') ?? [])
         ->getQuery()
         ->getResult();
       foreach ($voti as $v) {
@@ -470,7 +491,7 @@ class PagelleUtil {
       // legge esiti
       $esiti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
-        ->setParameter('lista', $dati['scrutinio']->getDato('alunni'))
+        ->setParameter('lista', $dati['scrutinio']->getDato('alunni') ?? [])
         ->setParameter('scrutinio', $dati['scrutinio'])
         ->getQuery()
         ->getResult();
@@ -478,31 +499,31 @@ class PagelleUtil {
         $dati['esiti'][$e->getAlunno()->getId()] = $e;
       }
       // docenti
-      $docenti = $dati['scrutinio']->getDato('docenti');
-      $docenti_presenti = $dati['scrutinio']->getDato('presenze');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
+      $docenti_presenti = $dati['scrutinio']->getDato('presenze') ?? [];
       // dati docenti presenti
       foreach ($docenti as $iddoc => $doc) {
-        if ( $docenti_presenti[$iddoc]->getPresenza() ) {
+        if ( !isset($docenti_presenti[$iddoc]) || $docenti_presenti[$iddoc]->getPresenza() ) {
           // dati docente
           $dati['docenti'][$iddoc] = ($doc['sesso'] == 'M' ? 'Prof. ' : 'Prof.ssa ') .
             $doc['cognome'] . ' ' . $doc['nome'];
         } else {
           // dati sostituto
-          $dati['docenti'][$iddoc] = ($docenti_presenti[$iddoc]->getSessoSostituto() == 'M' ? 'Prof. ' : 'Prof.ssa ') .
-            ucwords(strtolower((string) $docenti_presenti[$iddoc]->getSostituto()));
+          $dati['docenti'][$iddoc] = (($docenti_presenti[$iddoc]?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof. ' : 'Prof.ssa ') .
+            ucwords(strtolower((string) ($docenti_presenti[$iddoc]?->getSostituto() ?? '')));
         }
       }
       // presidente
-      if ( $dati['scrutinio']->getDato('presiede_ds') ) {
+      if ( $dati['scrutinio']->getDato('presiede_ds') ?? false ) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
       } else {
-        $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
-        $d = $dati['docenti'][$id_presidente];
-        if ( $dati['scrutinio']->getDato('presenze')[$id_presidente]->getPresenza() ) {
-          $dati['presidente_nome'] = $d;
+        $id_presidente = $dati['scrutinio']->getDato('presiede_docente') ?? null;
+        $d = $dati['docenti'][$id_presidente] ?? null;
+        if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null)?->getPresenza() ?? true ) {
+          $dati['presidente_nome'] = $d ?? '';
         } else {
-          $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
+          $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null;
+          $dati['presidente_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
         }
       }
       // anno scolastico
@@ -731,8 +752,8 @@ class PagelleUtil {
         ->getArrayResult();
       $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
       // legge docenti del CdC
-      $docenti = $dati['scrutinio']->getDato('docenti');
-      $docenti_presenti = $dati['scrutinio']->getDato('presenze');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
+      $docenti_presenti = $dati['scrutinio']->getDato('presenze') ?? [];
       $dati_docenti = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
@@ -752,13 +773,13 @@ class PagelleUtil {
               $dati['materie'][$mat['id']]['nome'] = $mat['nome'] .
                 (isset($docenti[$doc['id']][$edcivica->getId()]) ? (', ' . $edcivica->getNome()) : '');
             }
-            if ( $docenti_presenti[$doc['id']]->getPresenza() ) {
+            if ( !isset($docenti_presenti[$doc['id']]) || $docenti_presenti[$doc['id']]->getPresenza() ) {
               // dati docente
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] = $doc['cognome'] . ' ' . $doc['nome'];
             } else {
               // dati sostituto
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] =
-                ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
+                ucwords(strtolower((string) ($docenti_presenti[$doc['id']]?->getSostituto() ?? '')));
             }
           }
         }
@@ -781,8 +802,8 @@ class PagelleUtil {
         ->getArrayResult();
       $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
       // legge docenti del CdC
-      $docenti = $dati['scrutinio']->getDato('docenti');
-      $docenti_presenti = $dati['scrutinio']->getDato('presenze');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
+      $docenti_presenti = $dati['scrutinio']->getDato('presenze') ?? [];
       $dati_docenti = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
@@ -796,13 +817,13 @@ class PagelleUtil {
           if ( isset($docenti[$doc['id']][$mat['id']]) ) {
             $dati['materie'][$mat['id']]['nome'] = $mat['nome'] .
               (isset($docenti[$doc['id']][$edcivica->getId()]) ? (', ' . $edcivica->getNome()) : '');
-            if ( $docenti_presenti[$doc['id']]->getPresenza() ) {
+            if ( !isset($docenti_presenti[$doc['id']]) || $docenti_presenti[$doc['id']]->getPresenza() ) {
               // dati docente
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] = $doc['cognome'] . ' ' . $doc['nome'];
             } else {
               // dati sostituto
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] =
-                ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
+                ucwords(strtolower((string) ($docenti_presenti[$doc['id']]?->getSostituto() ?? '')));
             }
           }
         }
@@ -825,8 +846,8 @@ class PagelleUtil {
         ->getArrayResult();
       $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
       // legge docenti del CdC
-      $docenti = $dati['scrutinio']->getDato('docenti');
-      $docenti_presenti = $dati['scrutinio']->getDato('presenze');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
+      $docenti_presenti = $dati['scrutinio']->getDato('presenze') ?? [];
       $dati_docenti = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
@@ -840,13 +861,13 @@ class PagelleUtil {
           if ( isset($docenti[$doc['id']][$mat['id']]) ) {
             $dati['materie'][$mat['id']]['nome'] = $mat['nome'] .
               (isset($docenti[$doc['id']][$edcivica->getId()]) ? (', ' . $edcivica->getNome()) : '');
-            if ( $docenti_presenti[$doc['id']]->getPresenza() ) {
+            if ( !isset($docenti_presenti[$doc['id']]) || $docenti_presenti[$doc['id']]->getPresenza() ) {
               // dati docente
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] = $doc['cognome'] . ' ' . $doc['nome'];
             } else {
               // dati sostituto
               $dati['materie'][$mat['id']]['docenti'][$doc['id']] =
-                ucwords(strtolower((string) $docenti_presenti[$doc['id']]->getSostituto()));
+                ucwords(strtolower((string) ($docenti_presenti[$doc['id']]?->getSostituto() ?? '')));
             }
           }
         }
@@ -866,14 +887,14 @@ class PagelleUtil {
         ->select('m.id,m.nome,m.tipo')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameter('tipi', ['U', 'C', 'E'])
-        ->setParameter('lista', $dati['scrutinio']->getDato('materie'))
+        ->setParameter('lista', $dati['scrutinio']->getDato('materie') ?? [])
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
       $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
       // legge docenti del CdC
-      $docenti = $dati['scrutinio']->getDato('docenti');
-      $docenti_presenti = $dati['scrutinio']->getDato('presenze');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
+      $docenti_presenti = $dati['scrutinio']->getDato('presenze') ?? [];
       // dati per materia
       foreach ($materie as $mat) {
         foreach ($docenti as $iddoc => $doc) {
@@ -887,13 +908,13 @@ class PagelleUtil {
                   break;
                 }
               }
-              if ( $docenti_presenti[$iddoc]->getPresenza() ) {
+              if ( !isset($docenti_presenti[$iddoc]) || $docenti_presenti[$iddoc]->getPresenza() ) {
                 // dati docente
                 $dati['materie'][$mat['id']]['docenti'][$iddoc] = $doc['cognome'] . ' ' . $doc['nome'];
               } else {
                 // dati sostituto
                 $dati['materie'][$mat['id']]['docenti'][$iddoc] =
-                  ucwords(strtolower((string) $docenti_presenti[$iddoc]->getSostituto()));
+                  ucwords(strtolower((string) ($docenti_presenti[$iddoc]?->getSostituto() ?? '')));
               }
             }
           }
@@ -1070,7 +1091,7 @@ class PagelleUtil {
         ->getQuery()
         ->getArrayResult();
       // legge docenti del CdC
-      $docenti = $dati['scrutinio']->getDato('docenti');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
       $dati_docenti = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
@@ -1096,7 +1117,7 @@ class PagelleUtil {
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.credito3,a.credito4')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-			  ->setParameter('lista', $dati['scrutinio']->getDato('alunni'))
+			  ->setParameter('lista', $dati['scrutinio']->getDato('alunni') ?? [])
         ->getQuery()
         ->getArrayResult();
       $dati['alunni_noreligione'] = [];
@@ -1111,7 +1132,7 @@ class PagelleUtil {
         ->join('vs.materia', 'm')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista) AND m.tipo=:tipo')
         ->setParameter('scrutinio', $dati['scrutinio'])
-        ->setParameter('lista', $dati['scrutinio']->getDato('alunni'))
+        ->setParameter('lista', $dati['scrutinio']->getDato('alunni') ?? [])
         ->setParameter('tipo', 'C')
         ->getQuery()
         ->getResult();
@@ -1120,33 +1141,33 @@ class PagelleUtil {
         $dati['voti'][$v->getAlunno()->getId()] = $v;
       }
       // presidente
-      if ( $dati['scrutinio']->getDato('presiede_ds') ) {
+      if ( $dati['scrutinio']->getDato('presiede_ds') ?? false ) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, ' . $dati['presidente_nome'];
       } else {
-        $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
-        $d = $dati['docenti'][$id_presidente];
-        if ( $dati['scrutinio']->getDato('presenze')[$id_presidente]->getPresenza() ) {
-          $dati['presidente_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . $d['cognome'] . ' ' . $d['nome'];
+        $id_presidente = $dati['scrutinio']->getDato('presiede_docente') ?? null;
+        $d = $dati['docenti'][$id_presidente] ?? null;
+        if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null)?->getPresenza() ?? true ) {
+          $dati['presidente_nome'] = (($d['sesso'] ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ($d['cognome'] ?? '') . ' ' . ($d['nome'] ?? '');
           $dati['presidente'] = 'il Coordinatore della classe, ' . $dati['presidente_nome'] . ', ' .
-            'delegat' . ($d['sesso'] == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
+            'delegat' . (($d['sesso'] ?? 'M') == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         } else {
-          $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
-          $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
-            'delegat' . ($s->getSessoSostituto() == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
+          $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null;
+          $dati['presidente_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
+          $dati['presidente'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
+            'delegat' . (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         }
       }
       // segretario
-      $id_segretario = $dati['scrutinio']->getDato('segretario');
-      $d = $dati['docenti'][$id_segretario];
-      if ( $dati['scrutinio']->getDato('presenze')[$id_segretario]->getPresenza() ) {
-        $dati['segretario_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . $d['cognome'] . ' ' . $d['nome'];
-        $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
+      $id_segretario = $dati['scrutinio']->getDato('segretario') ?? null;
+      $d = $dati['docenti'][$id_segretario] ?? null;
+      if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_segretario] ?? null)?->getPresenza() ?? true ) {
+        $dati['segretario_nome'] = (($d['sesso'] ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ($d['cognome'] ?? '') . ' ' . ($d['nome'] ?? '');
+        $dati['segretario'] = (($d['sesso'] ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       } else {
-        $s = $dati['scrutinio']->getDato('presenze')[$id_segretario];
-        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
-        $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
+        $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_segretario] ?? null;
+        $dati['segretario_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
+        $dati['segretario'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       }
     } elseif ( $periodo == 'F' ) {
       // legge materie
@@ -1158,7 +1179,7 @@ class PagelleUtil {
         ->getQuery()
         ->getArrayResult();
       // legge docenti del CdC
-      $docenti = $dati['scrutinio']->getDato('docenti');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
       $dati_docenti = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
@@ -1180,42 +1201,42 @@ class PagelleUtil {
         }
       }
       // presidente
-      if ( $dati['scrutinio']->getDato('presiede_ds') ) {
+      if ( $dati['scrutinio']->getDato('presiede_ds') ?? false ) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, ' . $dati['presidente_nome'];
       } else {
-        $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
-        $d = $dati['docenti'][$id_presidente];
-        if ( $dati['scrutinio']->getDato('presenze')[$id_presidente]->getPresenza() ) {
-          $dati['presidente_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . $d['cognome'] . ' ' . $d['nome'];
-          $dati['presidente'] = ($d['sesso'] == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
-            'delegat' . ($d['sesso'] == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
+        $id_presidente = $dati['scrutinio']->getDato('presiede_docente') ?? null;
+        $d = $dati['docenti'][$id_presidente] ?? null;
+        if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null)?->getPresenza() ?? true ) {
+          $dati['presidente_nome'] = (($d['sesso'] ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ($d['cognome'] ?? '') . ' ' . ($d['nome'] ?? '');
+          $dati['presidente'] = (($d['sesso'] ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
+            'delegat' . (($d['sesso'] ?? 'M') == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         } else {
-          $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
-          $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
-            'delegat' . ($s->getSessoSostituto() == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
+          $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null;
+          $dati['presidente_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
+          $dati['presidente'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
+            'delegat' . (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         }
       }
       // segretario
-      $id_segretario = $dati['scrutinio']->getDato('segretario');
-      $d = $dati['docenti'][$id_segretario];
-      if ( $dati['scrutinio']->getDato('presenze')[$id_segretario]->getPresenza() ) {
-        $dati['segretario_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . $d['cognome'] . ' ' . $d['nome'];
-        $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
+      $id_segretario = $dati['scrutinio']->getDato('segretario') ?? null;
+      $d = $dati['docenti'][$id_segretario] ?? null;
+      if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_segretario] ?? null)?->getPresenza() ?? true ) {
+        $dati['segretario_nome'] = (($d['sesso'] ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ($d['cognome'] ?? '') . ' ' . ($d['nome'] ?? '');
+        $dati['segretario'] = (($d['sesso'] ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       } else {
-        $s = $dati['scrutinio']->getDato('presenze')[$id_segretario];
-        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
-        $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
+        $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_segretario] ?? null;
+        $dati['segretario_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
+        $dati['segretario'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       }
       // alunni scrutinati
       $dati['scrutinati'] = ($dati['scrutinio']->getDato('scrutinabili') == null ? [] :
-        array_keys($dati['scrutinio']->getDato('scrutinabili')));
+        array_keys($dati['scrutinio']->getDato('scrutinabili') ?? []));
       // alunni non scrutinabili per limite di assenza e in deroga
       $dati['no_scrutinabili'] = [];
       $dati['deroga'] = [];
       $no_scrut = ($dati['scrutinio']->getDato('no_scrutinabili') == null ? [] :
-        $dati['scrutinio']->getDato('no_scrutinabili'));
+        ($dati['scrutinio']->getDato('no_scrutinabili') ?? []));
       foreach ($no_scrut as $alu => $ns) {
         if ( isset($ns['deroga']) ) {
           $dati['deroga'][] = $alu;
@@ -1224,8 +1245,8 @@ class PagelleUtil {
         }
       }
       // alunni estero
-      $dati['estero'] = ($dati['scrutinio']->getDato('estero') == null ? [] :
-        $dati['scrutinio']->getDato('estero'));
+      $estero = $dati['scrutinio']->getDato('estero') ?? [];
+      $dati['estero'] = (is_array($estero) ? $estero : []);
       // dati degli alunni (scrutinati/cessata frequenza/non scrutinabili/all'estero)
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.frequenzaEstero,a.credito3,a.credito4,a.codiceFiscale')
@@ -1236,9 +1257,10 @@ class PagelleUtil {
         ->getQuery()
         ->getResult();
       $dati['alunni_noreligione'] = [];
+      $religione_data = $dati['scrutinio']->getDato('religione') ?? [];
       foreach ($alunni as $alu) {
         $dati['alunni'][$alu['id']] = $alu;
-        if ( $alu['religione'] != 'S' && $alu['religione'] != 'A' && in_array($alu['id'], $dati['scrutinati']) ) {
+        if ( ($religione_data[$alu['id']] ?? '') != 'S' && ($religione_data[$alu['id']] ?? '') != 'A' && in_array($alu['id'], $dati['scrutinati']) ) {
           $dati['alunni_noreligione'][] = $alu['cognome'] . ' ' . $alu['nome'];
         }
       }
@@ -1247,7 +1269,7 @@ class PagelleUtil {
         ->join('vs.materia', 'm')
         ->where('vs.scrutinio=:scrutinio AND vs.alunno IN (:lista) AND m.tipo=:tipo')
         ->setParameter('scrutinio', $dati['scrutinio'])
-        ->setParameter('lista', $dati['scrutinio']->getDato('alunni'))
+        ->setParameter('lista', $dati['scrutinio']->getDato('alunni') ?? [])
         ->setParameter('tipo', 'C')
         ->getQuery()
         ->getResult();
@@ -1306,7 +1328,7 @@ class PagelleUtil {
           ->setParameter('normale', ['N', 'E'])
           ->setParameter('suff', 6)
           ->setParameter('religione', 'R')
-          ->setParameter('suffrel', $dati['scrutinio']->getDato('valutazioni')['R']['suff'])
+          ->setParameter('suffrel', ((($dati['scrutinio']->getDato('valutazioni') ?? [])['R'] ?? [])['suff'] ?? 6))
           ->setParameter('ammesso', 'A')
           ->getQuery()
           ->getArrayResult();
@@ -1351,8 +1373,8 @@ class PagelleUtil {
       // controlla criteri ammissione esame
       $dati['esame_esclusi'] = [];
       if ($classe->getAnno() == 5) {
-        if ($dati['scrutinio']->getDato('requisitiEsame') != 'T') {
-          foreach ($dati['scrutinio']->getDato('requisitiAlunni') as $idAlunno => $requisito) {
+        if (($dati['scrutinio']->getDato('requisitiEsame') ?? '') != 'T') {
+          foreach ($dati['scrutinio']->getDato('requisitiAlunni') ?? [] as $idAlunno => $requisito) {
             if (!$requisito['invalsi'] || !$requisito['pcto']) {
               $dati['esame_esclusi'][] = $idAlunno;
             }
@@ -1369,7 +1391,7 @@ class PagelleUtil {
         ->getQuery()
         ->getArrayResult();
       // legge docenti del CdC
-      $docenti = $dati['scrutinio']->getDato('docenti');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
       $dati_docenti = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
         ->select('d.id,d.cognome,d.nome,d.sesso')
         ->where('d.id IN (:lista)')
@@ -1391,36 +1413,36 @@ class PagelleUtil {
         }
       }
       // presidente
-      if ( $dati['scrutinio']->getDato('presiede_ds') ) {
+      if ( $dati['scrutinio']->getDato('presiede_ds') ?? false ) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, ' . $dati['presidente_nome'];
       } else {
-        $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
-        $d = $dati['docenti'][$id_presidente];
-        if ( $dati['scrutinio']->getDato('presenze')[$id_presidente]->getPresenza() ) {
-          $dati['presidente_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . $d['cognome'] . ' ' . $d['nome'];
+        $id_presidente = $dati['scrutinio']->getDato('presiede_docente') ?? null;
+        $d = $dati['docenti'][$id_presidente] ?? null;
+        if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null)?->getPresenza() ?? true ) {
+          $dati['presidente_nome'] = (($d['sesso'] ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ($d['cognome'] ?? '') . ' ' . ($d['nome'] ?? '');
           $dati['presidente'] = 'il Coordinatore della classe, ' . $dati['presidente_nome'] . ', ' .
-            'delegat' . ($d['sesso'] == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
+            'delegat' . (($d['sesso'] ?? 'M') == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         } else {
-          $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
-          $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
-            'delegat' . ($s->getSessoSostituto() == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
+          $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null;
+          $dati['presidente_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
+          $dati['presidente'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
+            'delegat' . (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         }
       }
       // segretario
-      $id_segretario = $dati['scrutinio']->getDato('segretario');
-      $d = $dati['docenti'][$id_segretario];
-      if ( $dati['scrutinio']->getDato('presenze')[$id_segretario]->getPresenza() ) {
-        $dati['segretario_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . $d['cognome'] . ' ' . $d['nome'];
-        $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
+      $id_segretario = $dati['scrutinio']->getDato('segretario') ?? null;
+      $d = $dati['docenti'][$id_segretario] ?? null;
+      if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_segretario] ?? null)?->getPresenza() ?? true ) {
+        $dati['segretario_nome'] = (($d['sesso'] ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ($d['cognome'] ?? '') . ' ' . ($d['nome'] ?? '');
+        $dati['segretario'] = (($d['sesso'] ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       } else {
-        $s = $dati['scrutinio']->getDato('presenze')[$id_segretario];
-        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
-        $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
+        $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_segretario] ?? null;
+        $dati['segretario_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
+        $dati['segretario'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       }
       // legge dati di alunni
-      $sospesi = $dati['scrutinio']->getDato('sospesi');
+      $sospesi = $dati['scrutinio']->getDato('sospesi') ?? [];
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.religione,a.bes,a.note,a.credito3,a.credito4')
         ->where('a.id IN (:lista)')
@@ -1429,9 +1451,10 @@ class PagelleUtil {
         ->getQuery()
         ->getArrayResult();
       $dati['alunni_noreligione'] = [];
+      $religione_data = $dati['scrutinio']->getDato('religione') ?? [];
       foreach ($alunni as $alu) {
         $dati['alunni'][$alu['id']] = $alu;
-        if ( $alu['religione'] != 'S' && $alu['religione'] != 'A' && in_array($alu['id'], $sospesi) ) {
+        if ( ($religione_data[$alu['id']] ?? '') != 'S' && ($religione_data[$alu['id']] ?? '') != 'A' && in_array($alu['id'], $sospesi) ) {
           $dati['alunni_noreligione'][] = $alu['cognome'] . ' ' . $alu['nome'];
         }
       }
@@ -1472,7 +1495,7 @@ class PagelleUtil {
       }
       // credito per sospensione giudizio
       foreach ($dati['alunni'] as $kalu => $alu) {
-        if ( $dati['esiti'][$kalu]->getEsito() == 'A' ) {
+        if ( ($dati['esiti'][$kalu] ?? null)?->getEsito() == 'A' ) {
           $dati['creditoSospeso'][$kalu] = false;
           // legge i voti di recupero maggiori al 6
           $maggioriSuff = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
@@ -1494,12 +1517,12 @@ class PagelleUtil {
         ->select('m.id,m.nome')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameter('tipi', ['C'])
-        ->setParameter('lista', $dati['scrutinio']->getDato('materie'))
+        ->setParameter('lista', $dati['scrutinio']->getDato('materie') ?? [])
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
       // legge docenti del CdC
-      $docenti = $dati['scrutinio']->getDato('docenti');
+      $docenti = $dati['scrutinio']->getDato('docenti') ?? [];
       // dati per la visualizzazione della pagina
       $dati['docenti'] = $docenti;
       foreach ($dati_materie as $mat) {
@@ -1514,57 +1537,58 @@ class PagelleUtil {
         }
       }
       // presidente
-      if ( $dati['scrutinio']->getDato('presiede_ds') ) {
+      if ( $dati['scrutinio']->getDato('presiede_ds') ?? false ) {
         $dati['presidente_nome'] = $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/firma_preside');
         $dati['presidente'] = 'il Dirigente Scolastico, ' . $dati['presidente_nome'];
       } else {
-        $id_presidente = $dati['scrutinio']->getDato('presiede_docente');
-        $d = $dati['docenti'][$id_presidente];
-        if ( $dati['scrutinio']->getDato('presenze')[$id_presidente]->getPresenza() ) {
-          $dati['presidente_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . $d['cognome'] . ' ' . $d['nome'];
+        $id_presidente = $dati['scrutinio']->getDato('presiede_docente') ?? null;
+        $d = $dati['docenti'][$id_presidente] ?? null;
+        if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null)?->getPresenza() ?? true ) {
+          $dati['presidente_nome'] = (($d['sesso'] ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ($d['cognome'] ?? '') . ' ' . ($d['nome'] ?? '');
           $dati['presidente'] = 'il Coordinatore della classe, ' . $dati['presidente_nome'] . ', ' .
-            'delegat' . ($d['sesso'] == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
+            'delegat' . (($d['sesso'] ?? 'M') == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         } else {
-          $s = $dati['scrutinio']->getDato('presenze')[$id_presidente];
-          $dati['presidente_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
-          $dati['presidente'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
-            'delegat' . ($s->getSessoSostituto() == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
+          $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_presidente] ?? null;
+          $dati['presidente_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
+          $dati['presidente'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['presidente_nome'] . ', ' .
+            'delegat' . (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'o' : 'a') . ' dal Dirigente Scolastico';
         }
       }
       // segretario
-      $id_segretario = $dati['scrutinio']->getDato('segretario');
-      $d = $dati['docenti'][$id_segretario];
-      if ( $dati['scrutinio']->getDato('presenze')[$id_segretario]->getPresenza() ) {
-        $dati['segretario_nome'] = ($d['sesso'] == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . $d['cognome'] . ' ' . $d['nome'];
-        $dati['segretario'] = ($d['sesso'] == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
+      $id_segretario = $dati['scrutinio']->getDato('segretario') ?? null;
+      $d = $dati['docenti'][$id_segretario] ?? null;
+      if ( (($dati['scrutinio']->getDato('presenze') ?? [])[$id_segretario] ?? null)?->getPresenza() ?? true ) {
+        $dati['segretario_nome'] = (($d['sesso'] ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ($d['cognome'] ?? '') . ' ' . ($d['nome'] ?? '');
+        $dati['segretario'] = (($d['sesso'] ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       } else {
-        $s = $dati['scrutinio']->getDato('presenze')[$id_segretario];
-        $dati['segretario_nome'] = ($s->getSessoSostituto() == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) $s->getSostituto()));
-        $dati['segretario'] = ($s->getSessoSostituto() == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
+        $s = ($dati['scrutinio']->getDato('presenze') ?? [])[$id_segretario] ?? null;
+        $dati['segretario_nome'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'Prof.' : 'Prof.ssa') . ' ' . ucwords(strtolower((string) ($s?->getSostituto() ?? '')));
+        $dati['segretario'] = (($s?->getSessoSostituto() ?? 'M') == 'M' ? 'il' : 'la') . ' ' . $dati['segretario_nome'];
       }
       // legge dati di alunni
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-			  ->setParameter('lista', $dati['scrutinio']->getDato('alunni'))
+			  ->setParameter('lista', $dati['scrutinio']->getDato('alunni') ?? [])
         ->getQuery()
         ->getArrayResult();
       $dati['alunni_noreligione'] = [];
       foreach ($alunni as $alu) {
         $dati['alunni'][$alu['id']] = $alu;
-        $dati['alunni'][$alu['id']]['bes'] = $dati['scrutinio']->getDato('bes')[$alu['id']];
-        $dati['alunni'][$alu['id']]['religione'] = $dati['scrutinio']->getDato('religione')[$alu['id']];
-        $dati['alunni'][$alu['id']]['credito3'] = $dati['scrutinio']->getDato('credito3')[$alu['id']];
+        $dati['alunni'][$alu['id']]['bes'] = (($dati['scrutinio']->getDato('bes') ?? [])[$alu['id']] ?? null);
+        $dati['alunni'][$alu['id']]['religione'] = ($dati['scrutinio']->getDato('religione') ?? [])[$alu['id']] ?? null;
+        $dati['alunni'][$alu['id']]['credito3'] = (($dati['scrutinio']->getDato('credito3') ?? [])[$alu['id']] ?? null);
         $dati['alunni'][$alu['id']]['credito4'] = null;
-        if ( $dati['alunni'][$alu['id']]['religione'] != 'S' && $dati['alunni'][$alu['id']]['religione'] != 'A' ) {
+        $religione_data = $dati['scrutinio']->getDato('religione') ?? [];
+        if ( ($dati['alunni'][$alu['id']]['religione'] ?? '') != 'S' && ($dati['alunni'][$alu['id']]['religione'] ?? '') != 'A' ) {
           $dati['alunni_noreligione'][] = $alu['cognome'] . ' ' . $alu['nome'];
         }
       }
       // legge esiti
       $esiti = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno IN (:lista) AND e.scrutinio=:scrutinio')
-        ->setParameter('lista', $dati['scrutinio']->getDato('alunni'))
+        ->setParameter('lista', $dati['scrutinio']->getDato('alunni') ?? [])
         ->setParameter('scrutinio', $dati['scrutinio'])
         ->getQuery()
         ->getResult();
@@ -1581,7 +1605,7 @@ class PagelleUtil {
       }
       // credito per sospensione giudizio
       foreach ($dati['alunni'] as $kalu => $alu) {
-        if ( $dati['esiti'][$kalu]->getEsito() == 'A' ) {
+        if ( ($dati['esiti'][$kalu] ?? null)?->getEsito() == 'A' ) {
           $dati['creditoSospeso'][$kalu] = false;
           // legge i voti di recupero maggiori al 6
           $maggioriSuff = $this->em->getRepository(VotoScrutinio::class)->createQueryBuilder('vs')
@@ -1624,7 +1648,7 @@ class PagelleUtil {
       'periodo' => $periodo,
       'stato' => 'C']);
     // legge valutazioni
-    $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
+    $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni') ?? [];
     // legge materie
     $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
       ->select('DISTINCT m.id,m.nome,m.tipo,m.ordinamento')
@@ -1666,7 +1690,7 @@ class PagelleUtil {
     }
     if ( $periodo == 'F' ) {
       // legge valutazioni
-      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
+      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni') ?? [];
       // legge esito
       $dati['esito'] = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
@@ -1678,14 +1702,14 @@ class PagelleUtil {
       // controllo alunno
       $dati['errore'] = false;
       $scrut = ($dati['scrutinio']->getDato('scrutinabili') == null ? [] :
-        array_keys($dati['scrutinio']->getDato('scrutinabili')));
+        array_keys($dati['scrutinio']->getDato('scrutinabili') ?? []));
       if ( !in_array($alunno->getId(), $scrut) || !$dati['esito'] ) {
         // errore
         $dati['errore'] = true;
       }
     } elseif ( $periodo == 'G' || $periodo == 'R' ) {
       // legge valutazioni
-      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
+      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni') ?? [];
       // legge esito
       $dati['esito'] = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
@@ -1696,7 +1720,7 @@ class PagelleUtil {
         ->getOneOrNullResult();
       // controlla alunno
       $dati['errore'] = false;
-      if ( !in_array($alunno->getId(), $dati['scrutinio']->getDato('sospesi')) || !$dati['esito'] ) {
+      if ( !in_array($alunno->getId(), $dati['scrutinio']->getDato('sospesi') ?? []) || !$dati['esito'] ) {
         // errore
         $dati['errore'] = true;
       }
@@ -1704,9 +1728,9 @@ class PagelleUtil {
       $dati['annoScolastico'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico');
     } elseif ( $periodo == 'X' ) {
       // esame rinviato
-      $dati['religione'] = $dati['scrutinio']->getDato('religione')[$alunno->getId()];
+      $dati['religione'] = ($dati['scrutinio']->getDato('religione') ?? [])[$alunno->getId()] ?? null;
       // legge valutazioni
-      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
+      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni') ?? [];
       // legge esito
       $dati['esito'] = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
@@ -1717,7 +1741,7 @@ class PagelleUtil {
         ->getOneOrNullResult();
       // controlla alunno
       $dati['errore'] = false;
-      if ( !in_array($alunno->getId(), $dati['scrutinio']->getDato('alunni')) || !$dati['esito'] ) {
+      if ( !in_array($alunno->getId(), $dati['scrutinio']->getDato('alunni') ?? []) || !$dati['esito'] ) {
         // errore
         $dati['errore'] = true;
       }
@@ -1726,7 +1750,7 @@ class PagelleUtil {
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameter('tipi', ['S'])
-        ->setParameter('lista', $dati['scrutinio']->getDato('materie'))
+        ->setParameter('lista', $dati['scrutinio']->getDato('materie') ?? [])
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -1904,7 +1928,7 @@ class PagelleUtil {
         'classe' => $classe,
         'periodo' => $periodo,
         'stato' => 'C']);
-      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
+      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni') ?? [];
       // legge materie
       $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
         ->select('DISTINCT m.id,m.nome,m.tipo,m.ordinamento')
@@ -1948,7 +1972,7 @@ class PagelleUtil {
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
-      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
+      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni') ?? [];
       // legge esito
       $dati['esito'] = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
@@ -1990,7 +2014,7 @@ class PagelleUtil {
       // controllo alunno
       $dati['errore'] = false;
       $scrut = ($dati['scrutinio']->getDato('scrutinabili') == null ? [] :
-        array_keys($dati['scrutinio']->getDato('scrutinabili')));
+        array_keys($dati['scrutinio']->getDato('scrutinabili') ?? []));
       if ( !in_array($alunno->getId(), $scrut) || !$dati['esito'] || $dati['esito']->getEsito() != 'S' ) {
         // alunno non sospeso o non scrutinato
         $dati['errore'] = true;
@@ -2115,20 +2139,20 @@ class PagelleUtil {
     $scrutinio = $this->em->getRepository(Scrutinio::class)->findOneBy(['periodo' => $periodo, 'classe' => $classe]);
     if ( $periodo == 'P' || $periodo == 'S' ) {
       // solo gli alunni al momento dello scrutinio
-      if ( in_array($alunno, $scrutinio->getDato('alunni')) ) {
+      if ( in_array($alunno, $scrutinio->getDato('alunni') ?? []) ) {
         // alunno trovato
         $trovato = $this->em->getRepository(Alunno::class)->find($alunno);
       }
     } elseif ( $periodo == 'F' ) {
       // controlla se alunno scrutinato
       $scrut = ($scrutinio->getDato('scrutinabili') == null ? [] :
-        array_keys($scrutinio->getDato('scrutinabili')));
+        array_keys($scrutinio->getDato('scrutinabili') ?? []));
       if ( in_array($alunno, $scrut) ) {
         // alunno scrutinato
         return $this->em->getRepository(Alunno::class)->find($alunno);
       }
       // controlla se alunno all'estero
-      $estero = $scrutinio->getDato('estero');
+      $estero = $scrutinio->getDato('estero') ?? [];
       if ( in_array($alunno, $estero) ) {
         // alunno all'estero
         return $this->em->getRepository(Alunno::class)->find($alunno);
@@ -2143,13 +2167,13 @@ class PagelleUtil {
       return null;
     } elseif ( $periodo == 'G' || $periodo == 'R' ) {
       // esame sospesi
-      if ( in_array($alunno, $scrutinio->getDato('sospesi')) ) {
+      if ( in_array($alunno, $scrutinio->getDato('sospesi') ?? []) ) {
         // alunno trovato
         $trovato = $this->em->getRepository(Alunno::class)->find($alunno);
       }
     } elseif ( $periodo == 'X' ) {
       // esame sospesi
-      if ( in_array($alunno, $scrutinio->getDato('alunni')) ) {
+      if ( in_array($alunno, $scrutinio->getDato('alunni') ?? []) ) {
         // alunno trovato
         $trovato = $this->em->getRepository(Alunno::class)->find($alunno);
       }
@@ -2396,7 +2420,7 @@ class PagelleUtil {
         ->join(Esito::class, 'e', 'WITH', 'e.alunno=a.id')
         ->where('a.id IN (:lista) AND e.scrutinio=:scrutinio AND e.esito=:esito')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-        ->setParameter('lista', array_keys($dati['scrutinio']->getDato('scrutinabili')))
+        ->setParameter('lista', array_keys($dati['scrutinio']->getDato('scrutinabili') ?? []))
         ->setParameter('scrutinio', $dati['scrutinio'])
         ->setParameter('esito', 'A')
         ->getQuery()
@@ -2414,7 +2438,7 @@ class PagelleUtil {
         'stato' => 'C']);
       $dati['classe'] = $classe;
       // legge dati di alunni
-      $sospesi = (($periodo == 'G' || $periodo == 'R') ? $dati['scrutinio']->getDato('sospesi') : $dati['scrutinio']->getDato('alunni'));
+      $sospesi = (($periodo == 'G' || $periodo == 'R') ? ($dati['scrutinio']->getDato('sospesi') ?? []) : ($dati['scrutinio']->getDato('alunni') ?? []));
       // alunni ammessi
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id,a.nome,a.cognome,a.dataNascita,a.sesso,a.comuneNascita,a.provinciaNascita,e.dati')
@@ -2566,7 +2590,7 @@ class PagelleUtil {
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
-      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
+      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni') ?? [];
       // legge esito
       $dati['esito'] = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
@@ -2578,9 +2602,9 @@ class PagelleUtil {
       // controllo tipo di non ammissione
       $dati['tipo'] = null;
       $scrut = ($dati['scrutinio']->getDato('scrutinabili') == null ? [] :
-        array_keys($dati['scrutinio']->getDato('scrutinabili')));
+        array_keys($dati['scrutinio']->getDato('scrutinabili') ?? []));
       $no_scrut = ($dati['scrutinio']->getDato('no_scrutinabili') == null ? [] :
-        $dati['scrutinio']->getDato('no_scrutinabili'));
+        ($dati['scrutinio']->getDato('no_scrutinabili') ?? []));
       if (in_array($alunno->getId(), $scrut) && $dati['esito'] && $dati['esito']->getEsito() == 'N' ) {
         // non ammesso durante lo scrutinio
         $dati['tipo'] = 'N';
@@ -2632,7 +2656,7 @@ class PagelleUtil {
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
-      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
+      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni') ?? [];
       // legge esito
       $dati['esito'] = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
@@ -2643,7 +2667,7 @@ class PagelleUtil {
         ->getOneOrNullResult();
       // controllo tipo di non ammissione
       $dati['tipo'] = null;
-      if ( in_array($alunno->getId(), $dati['scrutinio']->getDato('sospesi')) && $dati['esito'] &&
+      if ( in_array($alunno->getId(), $dati['scrutinio']->getDato('sospesi') ?? []) && $dati['esito'] &&
           $dati['esito']->getEsito() == 'N' ) {
         // non ammesso durante lo scrutinio
         $dati['tipo'] = 'N';
@@ -2691,11 +2715,11 @@ class PagelleUtil {
         'classe' => $classe,
         'periodo' => $periodo,
         'stato' => 'C']);
-      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni');
+      $dati['valutazioni'] = $dati['scrutinio']->getDato('valutazioni') ?? [];
       $dati['classe'] = $classe;
       $dati['alunno'] = $alunno;
       $dati['sex'] = ($alunno->getSesso() == 'M' ? 'o' : 'a');
-      $dati['religione'] = $dati['scrutinio']->getDato('religione')[$alunno->getId()];
+      $dati['religione'] = ($dati['scrutinio']->getDato('religione') ?? [])[$alunno->getId()] ?? null;
       // legge esito
       $dati['esito'] = $this->em->getRepository(Esito::class)->createQueryBuilder('e')
         ->where('e.alunno=:alunno AND e.scrutinio=:scrutinio')
@@ -2706,7 +2730,7 @@ class PagelleUtil {
         ->getOneOrNullResult();
       // controllo tipo di non ammissione
       $dati['tipo'] = null;
-      if ( in_array($alunno->getId(), $dati['scrutinio']->getDato('alunni')) && $dati['esito'] &&
+      if ( in_array($alunno->getId(), $dati['scrutinio']->getDato('alunni') ?? []) && $dati['esito'] &&
           $dati['esito']->getEsito() == 'N' ) {
         // non ammesso durante lo scrutinio
         $dati['tipo'] = 'N';
@@ -2716,7 +2740,7 @@ class PagelleUtil {
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
         ->where('m.tipo NOT IN (:tipi) AND m.id IN (:lista)')
         ->setParameter('tipi', ['S'])
-        ->setParameter('lista', $dati['scrutinio']->getDato('materie'))
+        ->setParameter('lista', $dati['scrutinio']->getDato('materie') ?? [])
         ->orderBy('m.ordinamento,m.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
@@ -2875,7 +2899,7 @@ class PagelleUtil {
       // controllo alunno
       $dati['errore'] = false;
       $scrut = ($dati['scrutinio']->getDato('scrutinabili') == null ? [] :
-        array_keys($dati['scrutinio']->getDato('scrutinabili')));
+        array_keys($dati['scrutinio']->getDato('scrutinabili') ?? []));
       if (!in_array($alunno->getId(), $scrut) || !$dati['esito'] ||
           !in_array($dati['esito']->getEsito(), ['A', 'S']) || empty($dati['carenze'])) {
         // alunno non scrutinato o non ammesso
@@ -2934,8 +2958,9 @@ class PagelleUtil {
         // legge dati
         $dati = $this->verbaleDati($classe, $periodo);
         // crea documento
-        $html = $this->tpl->render('coordinatore/documenti/scrutinio_verbale_' . $periodo . '.html.twig', [
-          'dati' => $dati]);
+      $template = 'coordinatore/documenti/scrutinio_verbale_' . $periodo . '.html.twig';
+      $html = $this->tpl->render($this->templateEsistente($template) ? $template :
+        'coordinatore/documenti/scrutinio_verbale_F.html.twig', ['dati' => $dati]);
         $this->pdf->createFromHtml($html);
         // salva il documento
         $this->pdf->save($percorso . '/' . $nomefile);
@@ -2969,8 +2994,9 @@ class PagelleUtil {
         // legge dati
         $dati = $this->verbaleDati($classe, $periodo);
         // crea documento
-        $html = $this->tpl->render('coordinatore/documenti/scrutinio_verbale_' . $periodo . '.html.twig', [
-          'dati' => $dati]);
+      $template = 'coordinatore/documenti/scrutinio_verbale_' . $periodo . '.html.twig';
+      $html = $this->tpl->render($this->templateEsistente($template) ? $template :
+        'coordinatore/documenti/scrutinio_verbale_F.html.twig', ['dati' => $dati]);
         $this->pdf->createFromHtml($html);
         // salva il documento
         $this->pdf->save($percorso . '/' . $nomefile);
@@ -3005,8 +3031,9 @@ class PagelleUtil {
         // legge dati
         $dati = $this->verbaleDati($classe, $periodo);
         // crea documento
-        $html = $this->tpl->render('coordinatore/documenti/scrutinio_verbale_G.html.twig', [
-          'dati' => $dati]);
+      $template = 'coordinatore/documenti/scrutinio_verbale_G.html.twig';
+      $html = $this->tpl->render($this->templateEsistente($template) ? $template :
+        'coordinatore/documenti/scrutinio_verbale_F.html.twig', ['dati' => $dati]);
         $this->pdf->createFromHtml($html);
         // salva il documento
         $this->pdf->save($percorso . '/' . $nomefile);
