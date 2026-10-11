@@ -331,3 +331,9 @@ App\Entity\Configurazione:
     descrizione: 'Durata in giorni della registrazione di un dispositivo per l''accesso tramite app.\<br>[numero intero]'
     valore: '180'
     gestito: false
+  configurazione_ACCESSO7:
+    categoria: 'ACCESSO'
+    parametro: 'protocollo_app'
+    descrizione: 'Versione del protocollo di autenticazione utilizzabile dell''app.\<br>[testo]'
+    valore: 'GS-AUTH-v1'
+    gestito: true

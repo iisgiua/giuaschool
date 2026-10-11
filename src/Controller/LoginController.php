@@ -281,7 +281,7 @@ class LoginController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/login/profilo', name: 'login_profilo', methods: ['GET', 'POST'])]
+  #[Route(path: '/login/profilo/', name: 'login_profilo', methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_UTENTE')]
   public function profilo(Request $request, EventDispatcherInterface $disp,
                           TokenStorageInterface $tokenStorage, LogHandler $dblogger): Response {

@@ -13,6 +13,8 @@ return [
     'public/spid-acs.php',
     'public/spid-login.php',
     'public/spid/',
+    'public/app/giuaschool-app-v1.3.4.apk',
+    'public/app/giuaschool-app-1.3.4.apk',
     'src/Controller/AppController.php',
     'src/DataFixtures/AppFixtures.yml',
     'src/DataFixtures/SpidFixtures.yml',
@@ -49,6 +51,7 @@ return [
     ["CREATE TABLE gs_api (id INT AUTO_INCREMENT NOT NULL, creato DATETIME NOT NULL, modificato DATETIME NOT NULL, nome VARCHAR(255) NOT NULL, token VARCHAR(128) NOT NULL, attiva TINYINT(1) NOT NULL, dati LONGTEXT DEFAULT NULL COMMENT '(DC2Type:array)', UNIQUE INDEX UNIQ_DB6B1AB75F37A13B (token), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB;", "SELECT id FROM gs_api UNION SELECT 1 FROM dual; INSERT INTO gs_api (creato, modificato, nome, token, attiva, dati) SELECT NOW(),NOW(),nome,token,attiva,dati FROM gs_app;"],
     ["DROP TABLE IF EXISTS gs_app;", "SELECT 1 FROM DUAL WHERE (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gs_app') = 0;"],
     ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'ACCESSO', 'durata_registrazione_dispositivo', 'Durata in giorni della registrazione di un dispositivo per l\'accesso tramite app.<br>[numero intero]', '180', 0);", "SELECT valore FROM gs_configurazione WHERE parametro='durata_registrazione_dispositivo';"],
+    ["INSERT INTO gs_configurazione (creato, modificato, categoria, parametro, descrizione, valore, gestito) VALUES (NOW(), NOW(), 'ACCESSO', 'protocollo_app', 'Versione del protocollo di autenticazione utilizzabile dell\'app.<br>[testo]', 'GS-AUTH-v1', 1);", "SELECT valore FROM gs_configurazione WHERE parametro='protocollo_app';"],
     ["CREATE TABLE gs_autenticazione_dispositivo (id INT AUTO_INCREMENT NOT NULL, utente_id INT DEFAULT NULL, creato DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', modificato DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', id_pubblico VARCHAR(128) DEFAULT NULL, casuale VARCHAR(255) DEFAULT NULL, scadenza_richiesta DATETIME DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)', richiesta_usata TINYINT(1) NOT NULL, token VARCHAR(128) DEFAULT NULL, scadenza_token DATETIME DEFAULT NULL COMMENT '(DC2Type:datetime_immutable)', token_usato TINYINT(1) NOT NULL, UNIQUE INDEX UNIQ_D5E097045F37A13B (token), UNIQUE INDEX UNIQ_D5E09704241C2B25 (id_pubblico), INDEX IDX_D5E097046FD5D2A (utente_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB; ALTER TABLE gs_autenticazione_dispositivo ADD CONSTRAINT FK_D5E097046FD5D2A FOREIGN KEY (utente_id) REFERENCES gs_utente (id) ON DELETE CASCADE; ALTER TABLE gs_app_challenge DROP FOREIGN KEY FK_3EAF61FF6FD5D2A; ALTER TABLE gs_app_ticket DROP FOREIGN KEY FK_554F48376FD5D2A; DROP TABLE gs_app_challenge; DROP TABLE gs_app_ticket;", "SELECT id FROM gs_autenticazione_dispositivo UNION SELECT 1 FROM dual;"],
   ],
   'envDelete' => [

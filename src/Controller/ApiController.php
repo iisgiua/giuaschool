@@ -11,6 +11,7 @@ namespace App\Controller;
 use App\Entity\Api;
 use App\Entity\AutenticazioneDispositivo;
 use App\Entity\Cattedra;
+use App\Entity\Configurazione;
 use App\Entity\Docente;
 use App\Entity\Utente;
 use App\Util\LogHandler;
@@ -25,7 +26,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use function is_string;
 
 
 /**
@@ -61,6 +61,43 @@ class ApiController extends BaseController {
     return $this->render('api/infoApp.html.twig', [
       'pagina_titolo' => 'page.api_infoApp',
       'giuaschoolApp' => $giuaschoolApp]);
+  }
+
+  /**
+   * Restituisce le informazioni sulla versione dell'app giua@school/app
+   *
+   * @return Response Pagina di risposta
+   */
+  #[Route(path: '/api/app/version', name: 'api_appVersion', methods: ['POST'])]
+  public function appVersion(): JsonResponse {
+    $risposta = [];
+    // legge versione disponibile dell'app giua@school/app
+    $finder = new Finder();
+    $finder->files()->in($this->getParameter('kernel.project_dir').'/public/app')
+      ->name('giuaschool-app-*.apk');
+    $versione = '---';
+    foreach ($finder as $file) {
+      // considera solo il primo file trovato
+      $versione = substr($file->getBasename(), 15, -4);
+      if (str_starts_with($versione, 'CUSTOM-')) {
+        // versione personalizzata
+        $versione = substr($versione, 7);
+      }
+      if (str_starts_with($versione, 'v')) {
+        // toglie la lettera iniziale "v" dalla versione
+        $versione = substr($versione, 1);
+      }
+      break;
+    }
+    // legge informazioni di configurazione
+    $protocollo = (string) $this->em->getRepository(Configurazione::class)->getParametro('protocollo_app', '');
+    $giorni = (int) $this->em->getRepository(Configurazione::class)->getParametro('durata_registrazione_dispositivo', 0);
+    // crea la risposta JSON
+    $risposta['versione'] = $versione;
+    $risposta['protocollo'] = $protocollo;
+    $risposta['giorni'] = $giorni;
+    // restituisce la risposta
+    return new JsonResponse($risposta);
   }
 
   /**
@@ -264,12 +301,13 @@ class ApiController extends BaseController {
         ['dispositivoId' => $dispositivoId]);
       return new JsonResponse($risposta, 404); // 404 Not Found
     }
-    // controlla se dispositivo è ancora valido
+    // controlla se il dispositivo è ancora valido
     if (!$this->em->getRepository(Utente::class)->dispositivoValido($utente)) {
       // errore: dispositivo non valido
       $logger->error('Richiesta di autenticazione non riuscita: dispositivo non più valido.',
         ['utente' => $utente->getUserIdentifier(), 'dispositivoId' => $dispositivoId]);
-      return new JsonResponse($risposta, 404); // 404 Not Found
+      // segnala al client che la registrazione del dispositivo non è più valida e deve essere rifatta
+      return new JsonResponse(['errore' => 'DISPOSITIVO_NON_VALIDO'], 404); // 404 Not Found
     }
     // crea nuova richiesta di autenticazione (challenge) per il dispositivo
     $autenticazione = (new AutenticazioneDispositivo())
@@ -359,7 +397,8 @@ class ApiController extends BaseController {
       return new JsonResponse($risposta, 404); // 404 Not Found
     }
     // validazione della firma
-    $daControllare = "GS-AUTH-v1\n".$autenticazione->getIdPubblico()."\n".$autenticazione->getCasuale();
+    $protocollo = $this->em->getRepository(Configurazione::class)->getParametro('protocollo_app', '');
+    $daControllare = $protocollo."\n".$autenticazione->getIdPubblico()."\n".$autenticazione->getCasuale();
     if (openssl_verify($daControllare, $firmaBinaria, $chiave, OPENSSL_ALGO_SHA256) !== 1) {
       // errore: firma non valida
       $logger->error('Validazione richiesta di autenticazione non riuscita: firma non valida.',
