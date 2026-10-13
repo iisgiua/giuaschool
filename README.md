@@ -479,7 +479,7 @@ return [
   'fileDelete' => ['percorso', …],
   'sqlCommand' => [['istruzione SQL', 'query di verifica'], …],
   'envDelete'  => ['CHIAVE', …],
-  'procedure'  => ['$migrator->nomeMetodo();', …],
+  'procedure'  => [static function ($pdo, $migrator) { $migrator->nomeMetodo(); }, …],
 ];
 ```
 
@@ -490,10 +490,11 @@ Una nuova versione richiede tre passi:
 3. se lo schema cambia, rigenerare `src/Install/create-db.sql` e `drop-db.sql` con
    `doctrine:schema:create --dump-sql` e `doctrine:schema:drop --dump-sql`
 
-> **Attenzione — `eval()` in `Updater.php`.** La sezione `procedure` dei file `update-v*` viene
-> eseguita con `eval()`. Le procedure sono di norma semplici chiamate al migrator, ma non tutte:
-> `update-v1.6.1` contiene SQL e loop espliciti. Se si aggiunge una procedura, valutare una
-> conversione a metodi nominati con allowlist. Vedi `PIANO_SICUREZZA.md` Fase 1.
+> **Procedure di migrazione.** La sezione `procedure` dei file `update-v*` contiene **closure**
+> (non stringhe): `Updater::procedureUpdate()` le verifica con `instanceof \Closure` prima di
+> invocarle, quindi **non viene più usato `eval()`**. Ogni procedura riceve `$pdo` e il migrator;
+> `update-v1.6.1` contiene anche SQL e loop espliciti. La voce `eval()` di `PIANO_SICUREZZA.md`
+> Fase 1 può essere considerata chiusa.
 
 ### L'aggiornamento dal pannello
 

@@ -679,9 +679,10 @@ Fuori dal framework: script standalone in `public/install/` con logica in `src/I
 | `public/install/update.php` | `unzip`, `fileUpdate`, `requirementsUpdate`, `schemaUpdate`, `envUpdate`, `procedureUpdate`, `cleanUpdate`, `endUpdate` |
 
 I file `src/Install/update-vX.Y.Z` (e `update-vX.Y.Z-build` per le build) dichiarano
-`fileCopy`, `fileDelete`, `sqlCommand`, `envDelete`, `procedure`. La sezione `procedure` è
-eseguita con `eval()` e contiene di norma chiamate al migrator; `update-v1.6.1` è l'eccezione
-con SQL e loop espliciti.
+`fileCopy`, `fileDelete`, `sqlCommand`, `envDelete`, `procedure`. La sezione `procedure` è una
+lista di closure, validate con `instanceof \Closure` ed eseguite con `$pdo` e il migrator: non
+viene usato `eval()`. Contiene di norma chiamate al migrator; `update-v1.6.1` è l'eccezione con
+SQL e loop espliciti.
 
 `DataMigrator` contiene i metodi di migrazione dati che il SQL da solo non esprime (per esempio
 la migrazione `Documento` → `Comunicazione` dell'1.6.1, che doveva spostare dati tra tabelle con
@@ -733,9 +734,9 @@ Punti verificati nel codice, elencati per priorità. I dettagli e i piani di int
 
 **Sicurezza**
 
-- `eval()` in `Updater.php` sulla sezione `procedure` dei file `update-v*`. La soluzione
-  indicata è un allowlist dei nomi di metodo del migrator, con gestione separata dei file
-  "legacy" (`update-v1.6.1` e precedenti) che non seguono il pattern.
+- `Updater.php`: l'uso di `eval()` sulla sezione `procedure` dei file `update-v*` è stato
+  **rimosso**: le procedure sono ora closure validate con `instanceof \Closure` in
+  `procedureUpdate()`. Resta da valutare un allowlist dei metodi del migrator richiamati.
 - `AccountProvisioning::inizializzaGsuite()` usa `sha1($password)` per un requisito della Google
   Directory API. Il commento nel codice lo dichiara; va rimosso finché lo stato dell'integrazione
   non è verificato nell'ambiente di esecuzione.
