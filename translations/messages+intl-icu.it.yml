@@ -370,8 +370,7 @@ label.next: Continua
 label.successiva: Successiva
 label.successivo: Successivo
 label.testo: Testo
-label.torna_accesso: Torna alla pagina di accesso
-label.torna_pagina_principale: Torna alla pagina principale
+label.torna_indietro: Torna indietro
 label.tipo_documento: Tipo di documenti
 label.tipo_I: ITP
 label.tipo_N: Normale
