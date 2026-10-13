@@ -1,0 +1,750 @@
+/* ==========================================================================
+   gs-standard.css — Standard visivo GS
+   Principio: non migra framework. File unico caricato DOPO Bootstrap 3,
+   Bootstrap Italia e main.css in ogni pagina. Normalizza componenti con
+   specificita' alta (body ...) e fornisce alias per classi esistenti.
+   I dev usano solo le classi standard. Nessun colore/radius hardcoded
+   fuori dai token :root.
+   Ordine di caricamento: bootstrap(.min).css > bootstrap-italia.min.css >
+   main.css > gs-standard.css
+   ========================================================================== */
+
+/* 1. Token di base */
+:root {
+  --gs-font: Inter, system-ui, sans-serif;
+  --gs-fs-xs: 12px;
+  --gs-fs-sm: 13px;
+  --gs-fs-md: 14px;
+  --gs-fs-lg: 16px;
+
+  --gs-radius-sm: 6px;
+  --gs-radius-md: 8px;
+  --gs-radius-lg: 12px;
+
+  --gs-primary: #0d6efd;
+  --gs-secondary: #6c757d;
+  --gs-success: #198754;
+  --gs-warning: #ffc107;
+  --gs-danger: #dc3545;
+  --gs-info: #0dcaf0;
+
+  --gs-border: #dee2e6;
+  --gs-text: #212529;
+  --gs-text-muted: #6c757d;
+  --gs-surface: #ffffff;
+
+  --gs-shadow-sm: 0 1px 2px rgba(0, 0, 0, .05);
+  --gs-shadow-md: 0 4px 12px rgba(0, 0, 0, .08);
+  --gs-transition: 150ms ease-in-out;
+}
+
+/* 2. Normalizzazione bottoni — specificita' alta per sovrascrivere
+   BS3, tema BS3 e Bootstrap Italia. */
+
+/* 2.1 Dimensioni fisse: xs 26px / sm 32px / md 40px (default) / lg 48px */
+body .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1;
+  white-space: nowrap;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-md);
+  font-weight: 500;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: var(--gs-radius-md);
+  border: 1px solid transparent;
+  transition: var(--gs-transition);
+  box-shadow: var(--gs-shadow-sm);
+  text-decoration: none;
+  cursor: pointer;
+  background-image: none;
+}
+
+body .btn-xs {
+  height: 26px;
+  padding: 0 8px;
+  font-size: var(--gs-fs-xs);
+  border-radius: var(--gs-radius-sm);
+}
+
+body .btn-sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: var(--gs-fs-sm);
+  border-radius: var(--gs-radius-md);
+}
+
+body .btn-lg {
+  height: 48px;
+  padding: 0 24px;
+  font-size: var(--gs-fs-lg);
+  border-radius: var(--gs-radius-md);
+}
+
+/* Le icone dentro i bottoni seguono la size del bottone */
+body .btn-xs .glyphicon,
+body .btn-xs .icon,
+body .btn-xs svg {
+  font-size: 12px;
+}
+body .btn-sm .glyphicon,
+body .btn-sm .icon,
+body .btn-sm svg {
+  font-size: 14px;
+}
+body .btn .glyphicon,
+body .btn .icon,
+body .btn svg {
+  font-size: 16px;
+}
+body .btn-lg .glyphicon,
+body .btn-lg .icon,
+body .btn-lg svg {
+  font-size: 18px;
+}
+
+/* 2.2 Varianti consentite — solo token, nessun colore hardcoded */
+body .btn-primary {
+  background: var(--gs-primary);
+  background-image: none;
+  border-color: var(--gs-primary);
+  color: var(--gs-surface);
+}
+body .btn-primary:hover,
+body .btn-primary:focus {
+  filter: brightness(.92);
+  border-color: var(--gs-primary);
+  color: var(--gs-surface);
+}
+
+body .btn-secondary {
+  background: var(--gs-secondary);
+  background-image: none;
+  border-color: var(--gs-secondary);
+  color: var(--gs-surface);
+}
+body .btn-secondary:hover,
+body .btn-secondary:focus {
+  filter: brightness(.92);
+  border-color: var(--gs-secondary);
+  color: var(--gs-surface);
+}
+
+body .btn-outline-primary {
+  background: transparent;
+  background-image: none;
+  border: 1px solid var(--gs-primary);
+  color: var(--gs-primary);
+}
+body .btn-outline-primary:hover,
+body .btn-outline-primary:focus {
+  background: var(--gs-primary);
+  color: var(--gs-surface);
+}
+
+body .btn-outline-secondary {
+  background: transparent;
+  background-image: none;
+  border: 1px solid var(--gs-border);
+  color: var(--gs-text);
+}
+body .btn-outline-secondary:hover,
+body .btn-outline-secondary:focus {
+  background: rgba(0, 0, 0, .05);
+  border-color: var(--gs-border);
+  color: var(--gs-text);
+}
+
+body .btn-ghost {
+  background: transparent;
+  background-image: none;
+  border: 1px solid transparent;
+  box-shadow: none;
+  color: var(--gs-text);
+}
+body .btn-ghost:hover,
+body .btn-ghost:focus {
+  background: rgba(0, 0, 0, .05);
+  color: var(--gs-text);
+}
+
+body .btn-danger {
+  background: var(--gs-danger);
+  background-image: none;
+  border-color: var(--gs-danger);
+  color: var(--gs-surface);
+}
+body .btn-danger:hover,
+body .btn-danger:focus {
+  filter: brightness(.92);
+  color: var(--gs-surface);
+}
+
+body .btn-success {
+  background: var(--gs-success);
+  background-image: none;
+  border-color: var(--gs-success);
+  color: var(--gs-surface);
+}
+body .btn-success:hover,
+body .btn-success:focus {
+  filter: brightness(.92);
+  color: var(--gs-surface);
+}
+
+body .btn-warning {
+  background: var(--gs-warning);
+  background-image: none;
+  border-color: var(--gs-warning);
+  color: var(--gs-text);
+}
+body .btn-warning:hover,
+body .btn-warning:focus {
+  filter: brightness(.95);
+  color: var(--gs-text);
+}
+
+body .btn-info {
+  background: var(--gs-info);
+  background-image: none;
+  border-color: var(--gs-info);
+  color: var(--gs-text);
+}
+
+/* btn-default VIETATO: appare come btn-outline-secondary per retrocompatibilita' */
+body .btn-default,
+body .btn-default:hover,
+body .btn-default:focus,
+body .btn-default:active,
+body .open > body .btn-default.dropdown-toggle,
+body .dropdown.open > .btn-default.dropdown-toggle {
+  background: transparent;
+  background-image: none;
+  border: 1px solid var(--gs-border);
+  color: var(--gs-text);
+  box-shadow: var(--gs-shadow-sm);
+  text-shadow: none;
+}
+body .btn-default:hover,
+body .btn-default:focus {
+  background: rgba(0, 0, 0, .05);
+}
+
+/* Neutralizza gradienti del tema Bootstrap 3 su tutti i bottoni */
+body .btn:active,
+body .btn.active {
+  background-image: none;
+  box-shadow: var(--gs-shadow-sm);
+}
+
+/* 2.3 Bottoni icona — sempre quadrati, solo icona, nessuno sfondo.
+   Lato = altezza della size. Se manca un'icona semantica, usare un
+   bottone testuale btn-xs/btn-sm con etichetta breve (Apri, Dettagli). */
+body .btn-icon,
+body .gs-btn-icona {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  background: transparent;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: var(--gs-radius-md);
+  box-shadow: none;
+  color: var(--gs-text);
+  text-shadow: none;
+}
+body .btn-icon.btn-xs,
+body .gs-btn-icona.btn-xs {
+  height: 26px;
+  min-width: 26px;
+  border-radius: var(--gs-radius-sm);
+}
+body .btn-icon.btn-sm,
+body .gs-btn-icona.btn-sm {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+}
+body .btn-icon.btn-lg,
+body .gs-btn-icona.btn-lg {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+}
+body .btn-icon:hover,
+body .btn-icon:focus,
+body .gs-btn-icona:hover,
+body .gs-btn-icona:focus {
+  background: rgba(0, 0, 0, .05);
+  border-color: transparent;
+  color: var(--gs-text);
+  box-shadow: none;
+}
+body .btn-icon.text-danger,
+body .btn-icon.btn-danger,
+body .gs-btn-icona.text-danger,
+body .gs-btn-icona.btn-danger,
+body .gs-btn-icona.gs-icona-danger {
+  color: var(--gs-danger);
+  background: transparent;
+  border-color: transparent;
+}
+body .btn-icon.text-danger:hover,
+body .btn-icon.text-danger:focus,
+body .btn-icon.btn-danger:hover,
+body .btn-icon.btn-danger:focus,
+body .gs-btn-icona.text-danger:hover,
+body .gs-btn-icona.text-danger:focus,
+body .gs-btn-icona.btn-danger:hover,
+body .gs-btn-icona.btn-danger:focus {
+  background: rgba(220, 53, 69, .10);
+  color: var(--gs-danger);
+}
+
+/* Icone dentro btn-icon: dimensione fissa in px, identica nei due mondi
+   (BS3 mette html a 10px, Bootstrap Italia no: niente rem qui). */
+body .btn-icon .icon,
+body .gs-btn-icona .icon,
+body .btn-icon svg,
+body .gs-btn-icona svg {
+  height: 20px;
+}
+body .btn-icon.btn-xs .icon,
+body .gs-btn-icona.btn-xs .icon,
+body .btn-icon.btn-xs svg,
+body .gs-btn-icona.btn-xs svg {
+  height: 16px;
+}
+body .btn-icon.btn-sm .icon,
+body .gs-btn-icona.btn-sm .icon,
+body .btn-icon.btn-sm svg,
+body .gs-btn-icona.btn-sm svg {
+  width: 18px;
+  height: 18px;
+}
+body .btn-icon.btn-lg .icon,
+body .gs-btn-icona.btn-lg .icon,
+body .btn-icon.btn-lg svg,
+body .gs-btn-icona.btn-lg svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* 2.4 Pulsanti del form OTP (pagina profilo utente): Annulla e Conferma
+   sono resi a mano nello stesso div.gs-otp-azioni (template utenti/otp),
+   il flex li tiene sulla stessa riga, ai lati opposti. */
+.gs-otp-azioni {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Serve per centrare l'elemento dentro al container dropdown*/
+.bootstrap-select .dropdown-toggle .filter-option {
+  height: auto;
+}
+
+/* 2.5 Menu dropdown-azioni aperto: scende sotto il bottone e sta sopra la
+   tabella. Senza, la cornice tonda (.table overflow hidden) e il
+   contenitore scrollabile (.table-responsive overflow-x auto) lo
+   taglierebbero ai bordi. Le classi le mette/toglie public/js/script.js. */
+.table-responsive.gs-dropdown-aperto {
+  overflow: visible;
+}
+.table.gs-dropdown-aperto {
+  overflow: visible;
+}
+
+/* 2.6 Voci del dropdown-azioni (menu-azioni.html.twig): i <button> devono
+   sembrare voci di menu come gli <a> (Bootstrap 3 stila solo questi ultimi).
+   Le classi text-* passate dal chiamante conservano il colore del bottone
+   originale (verde/rosso/giallo/blu), anche al passaggio del mouse. */
+.gs-azioni-dropdown .dropdown-menu > li > button {
+  display: block;
+  width: 100%;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: normal;
+  line-height: 1.42857143;
+  color: #333;
+  text-align: left;
+  white-space: nowrap;
+  background: none;
+  background-image: none;
+  border: 0;
+  box-shadow: none;
+}
+.gs-azioni-dropdown .dropdown-menu > li > button:hover,
+.gs-azioni-dropdown .dropdown-menu > li > button:focus {
+  color: #262626;
+  background-color: #f5f5f5;
+}
+.gs-azioni-dropdown .dropdown-menu > li.disabled > button {
+  color: #777;
+}
+.gs-azioni-dropdown .dropdown-menu > li.disabled > button:hover,
+.gs-azioni-dropdown .dropdown-menu > li.disabled > button:focus {
+  background-color: transparent;
+}
+.gs-azioni-dropdown .dropdown-menu > li > a.text-success,
+.gs-azioni-dropdown .dropdown-menu > li > button.text-success,
+.gs-azioni-dropdown .dropdown-menu > li > a.text-success:hover,
+.gs-azioni-dropdown .dropdown-menu > li > button.text-success:hover {
+  color: #3c763d;
+}
+.gs-azioni-dropdown .dropdown-menu > li > a.text-danger,
+.gs-azioni-dropdown .dropdown-menu > li > button.text-danger,
+.gs-azioni-dropdown .dropdown-menu > li > a.text-danger:hover,
+.gs-azioni-dropdown .dropdown-menu > li > button.text-danger:hover {
+  color: #a94442;
+}
+.gs-azioni-dropdown .dropdown-menu > li > a.text-warning,
+.gs-azioni-dropdown .dropdown-menu > li > button.text-warning,
+.gs-azioni-dropdown .dropdown-menu > li > a.text-warning:hover,
+.gs-azioni-dropdown .dropdown-menu > li > button.text-warning:hover {
+  color: #8a6d3b;
+}
+.gs-azioni-dropdown .dropdown-menu > li > a.text-primary,
+.gs-azioni-dropdown .dropdown-menu > li > button.text-primary,
+.gs-azioni-dropdown .dropdown-menu > li > a.text-primary:hover,
+.gs-azioni-dropdown .dropdown-menu > li > button.text-primary:hover {
+  color: #337ab7;
+}
+
+/* 3. Normalizzazione dropdown — stesso aspetto in ogni pagina. */
+body .dropdown-toggle,
+body .gs-dropdown-testo.dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-md);
+  font-weight: 500;
+  line-height: 1;
+  border-radius: var(--gs-radius-md);
+  background: var(--gs-surface);
+  background-image: none;
+  border: 1px solid var(--gs-border);
+  color: var(--gs-text);
+  text-decoration: none;
+}
+
+/* Stato aperto: vince su .dropdown.open > .dropdown-toggle di Bootstrap 3
+   (layout base) e su .show > .btn-*.dropdown-toggle di Bootstrap Italia
+   (layout admin: il bundle BI apre i menu con .show, non con .open).
+   Nessun effetto blu al click: fondo, bordo e ombra restano neutri,
+   niente outline, niente anello di focus. */
+html:not(.gs-admin) body .btn.dropdown-toggle,
+html:not(.gs-admin) body .btn.dropdown-toggle:hover,
+html:not(.gs-admin) body .btn.dropdown-toggle:focus,
+html:not(.gs-admin) body .btn.dropdown-toggle:active,
+html:not(.gs-admin) body .dropdown.open > .btn.dropdown-toggle,
+html:not(.gs-admin) body .dropdown.open > .btn.dropdown-toggle:hover,
+html:not(.gs-admin) body .dropdown.open > .btn.dropdown-toggle:focus,
+html:not(.gs-admin) body .dropdown.open > .btn.dropdown-toggle:active,
+body .dropdown.open > .dropdown-toggle,
+body .dropdown.open > .gs-dropdown-testo.dropdown-toggle,
+body .dropdown.show > .dropdown-toggle,
+body .dropdown.show > .gs-dropdown-testo.dropdown-toggle,
+body .dropdown.show > .dropdown-toggle:focus,
+body .dropdown.show > .gs-dropdown-testo.dropdown-toggle:focus {
+  background: var(--gs-surface);
+  background-image: none;
+  border: 1px solid var(--gs-border);
+  color: var(--gs-text);
+  box-shadow: var(--gs-shadow-sm);
+  outline: 0;
+}
+/* Passaggio del mouse, focus e pressione: nessun bordo o alone blu.
+   Il menu che si apre e' gia' l'indicazione visiva. Vince su
+   .btn-*:hover/:focus di Bootstrap Italia (anello 0 0 0 .2rem blu) e
+   sull'outline globale *:focus di main.css. */
+body .dropdown-toggle:hover,
+body .dropdown-toggle:focus,
+body .dropdown-toggle:active,
+body .dropdown-toggle:active:focus,
+body .gs-dropdown-testo.dropdown-toggle:hover,
+body .gs-dropdown-testo.dropdown-toggle:focus,
+body .gs-dropdown-testo.dropdown-toggle:active {
+  background: var(--gs-surface);
+  background-image: none;
+  border-color: var(--gs-border);
+  color: var(--gs-text);
+  outline: 0;
+}
+/* Istante del click su toggle colorati (es. btn-primary): Bootstrap Italia
+   mette l'anello blu anche su :active:focus con specificita' (0,5,0).
+   I :not() alzano la specificita' senza nominare varianti. */
+body .dropdown.show > .dropdown-toggle:not(:disabled):active:focus {
+  box-shadow: var(--gs-shadow-sm);
+  outline: 0;
+}
+/* bootstrap-select: Bootstrap Italia forza outline con !important, serve
+   !important anche qui per azzerarlo. */
+body .bootstrap-select .dropdown-toggle:focus {
+  outline: 0 !important;
+  box-shadow: var(--gs-shadow-sm);
+}
+body .dropdown-toggle .caret,
+body .gs-dropdown-testo .caret {
+  border-top-color: currentColor;
+}
+body .gs-dropdown-testo strong {
+  font-weight: 500;
+}
+
+body .dropdown-menu {
+  border-radius: var(--gs-radius-md);
+  box-shadow: var(--gs-shadow-md);
+  padding: 4px;
+  min-width: 180px;
+  border: 1px solid var(--gs-border);
+  background: var(--gs-surface);
+  margin-top: 4px;
+}
+
+body .dropdown-menu > li > a,
+body .dropdown-item {
+  min-height: 36px;
+  height: 36px;
+  padding: 0 12px;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-md);
+  line-height: 36px;
+  border-radius: var(--gs-radius-sm);
+  display: flex;
+  align-items: center;
+  color: var(--gs-text);
+  white-space: nowrap;
+}
+body .dropdown-menu > li > a:hover,
+body .dropdown-menu > li > a:focus,
+body .dropdown-item:hover,
+body .dropdown-item:focus {
+  background: rgba(0, 0, 0, .05);
+  color: var(--gs-text);
+}
+
+/* 4. Input, select, textarea — stessa altezza (40px default). */
+body .form-control {
+  height: 40px;
+  padding: 0 12px;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-md);
+  line-height: 1.4;
+  color: var(--gs-text);
+  border: 1px solid var(--gs-border);
+  border-radius: var(--gs-radius-md);
+  box-shadow: none;
+  transition: var(--gs-transition);
+}
+body .form-control:focus {
+  border-color: var(--gs-primary);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, .20);
+  outline: 0;
+}
+
+/* Input dentro .input-group (login/install): l'input e' senza bordo
+   (main.css: border none) e il wrapper ha overflow:hidden. L'alone di
+   focus sull'input verrebbe ritagliato e resterebbe visibile solo come
+   riga blu sul lato sinistro (contro l'addon). Per questo nessun effetto
+   su input e wrapper al click: tutto resta trasparente/neutro. */
+body .input-group .form-control:focus,
+body .input-group .form-control:active {
+  border-color: transparent;
+  box-shadow: none;
+  outline: 0;
+  background: transparent;
+}
+body .input-group:focus-within {
+  box-shadow: none;
+  outline: 0;
+}
+body .input-group:focus-within .input-group-addon {
+  background: transparent;
+  outline: 0;
+}
+body .form-control-sm,
+body .input-sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: var(--gs-fs-sm);
+  border-radius: var(--gs-radius-md);
+}
+body .form-control-lg,
+body .input-lg {
+  height: 48px;
+  padding: 0 16px;
+  font-size: var(--gs-fs-lg);
+  border-radius: var(--gs-radius-md);
+}
+body select.form-control,
+body select.input-sm,
+body select.input-lg {
+  padding-right: 32px;
+  height: 40px;
+}
+body select.form-control-sm,
+body select.input-sm {
+  height: 32px;
+}
+body select.form-control-lg,
+body select.input-lg {
+  height: 48px;
+}
+body textarea.form-control {
+  height: auto;
+  min-height: 96px;
+  padding: 8px 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* 5. Tabelle */
+body table.table thead th {
+  height: 40px;
+  padding: 0 12px;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-sm);
+  font-weight: 600;
+  border-bottom: 1px solid var(--gs-border);
+  vertical-align: middle;
+}
+body table.table tbody td {
+  min-height: 48px;
+  height: 48px;
+  padding: 8px 12px;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-md);
+  vertical-align: middle;
+  border-top: 1px solid var(--gs-border);
+}
+body table.table tbody tr:hover {
+  background: rgba(0, 0, 0, .02);
+}
+body table.table td.actions,
+body table.table th.actions {
+  text-align: right;
+  white-space: nowrap;
+}
+body table.table td.actions .btn,
+body table.table td.actions .btn-icon,
+body table.table td.actions .gs-btn-icona {
+  margin-left: 4px;
+}
+/* Spazio sopra le tabelle che seguono altri contenuti (filtri, pulsanti,
+   testo, altra tabella come nei loop per periodo senza riga intestata).
+   Margin e non padding: sta fuori dal box di scroll, quindi non sposta gli
+   sticky (top: 0/33px) e non rompe la cornice con overflow: hidden.
+   :not(:first-child) e non * + ...: niente spazio se la tabella e' il primo
+   elemento del contenitore (il padding del container basta gia'). */
+body .table-responsive:not(:first-child),
+body .gs-table-sticky-wrapper:not(:first-child) {
+  margin-top: 1.5rem;
+}
+
+/* 6. Badge — pill, mai radius 8px (sembrerebbero bottoni). */
+body .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  min-height: 20px;
+  padding: 0 8px;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-xs);
+  font-weight: 600;
+  line-height: 1;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+/* 7. Alert */
+body .alert {
+  padding: 12px 16px;
+  border-radius: var(--gs-radius-md);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-md);
+  line-height: 1.5;
+}
+body .alert i,
+body .alert svg,
+body .alert .glyphicon {
+  font-size: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* 8. Modali — footer con bottoni allineati a destra, gap 8px. */
+body .modal-content {
+  border-radius: var(--gs-radius-lg);
+  box-shadow: var(--gs-shadow-md);
+  border: none;
+  overflow: hidden;
+}
+body .modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--gs-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+body .modal-body {
+  padding: 24px;
+}
+body .modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--gs-border);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+body .modal-title {
+  font-family: var(--gs-font);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* 9. Card */
+body .card {
+  border-radius: var(--gs-radius-lg);
+  border: 1px solid var(--gs-border);
+  box-shadow: var(--gs-shadow-sm);
+  background: var(--gs-surface);
+}
+body .card-body {
+  padding: 16px;
+}
+body .card-title {
+  font-family: var(--gs-font);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+body .card-header,
+body .card-footer {
+  padding: 12px 16px;
+  background: transparent;
+  border-color: var(--gs-border);
+}
