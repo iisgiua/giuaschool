@@ -6,13 +6,13 @@
   #      titolo (opzionale)    se valorizzato racchiude l'icona in uno <span title="...">
   #      stile  (opzionale)    'filled' (default) oppure 'outline'
   #
-  #    Le icone sono usate solo nella barra laterale e nell'intestazione: nelle
-  #    tabelle pulsanti e stati sono resi in testo.
+  #    Le icone sono usate nella barra laterale, nell'intestazione e nelle
+  #    pagine (pulsanti e azioni): per queste ultime si usa stile='outline',
+  #    come fa include/bottone-azione.html.twig.
   #
   #    L'URL dello sprite sta qui e in nessun altro posto: se cambiano i nomi
-  #    dei file non va toccato alcun template.
-  #    I nomi dei simboli sono in public/vendor/tabler-icons/tabler-sprite-filled.svg
-  #    e tabler-sprite.svg
+  #    dei file non va toccato alcun template.  # I nomi dei simboli sono in public/icons/tabler-sprite-filled.svg
+  # e tabler-sprite.svg
   #
   #    NB: stile='outline' serve per le poche icone che Tabler non fornisce in
   #    versione filled, come 'logout', 'printer' e 'paperclip': usare il filled
@@ -33,7 +33,7 @@
 <span title="{{ titolo }}">
 {%- endif -%}
 <svg class="{{ classi }}" aria-hidden="true">
-  <use xlink:href="{{ asset('vendor/tabler-icons/tabler-sprite' ~ (stile == 'outline' ? '' : '-filled') ~ '.svg') }}#{{ nome }}"></use>
+  <use xlink:href="{{ asset('icons/tabler-sprite' ~ (stile == 'outline' ? '' : '-filled') ~ '.svg') }}#{{ nome }}"></use>
 </svg>
 {%- if titolo|default('')|length > 0 -%}
 </span>
