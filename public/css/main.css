@@ -2232,13 +2232,20 @@ input:-webkit-autofill:active {
 
 .it-timepicker-wrapper .spinner-control {
   z-index: 2;
-  width: auto;
+  width: 100%;
   margin-top: -3rem;
   border-left: 1px solid #b1b1b3;
   border-right: 2px solid #818183;
   border-top: 2px solid #435a70;
   border-bottom: 1px solid #b1b1b3;
   border-radius: 0 0 4px 4px;
+}
+
+/* I due riquadri (ore e minuti) hanno sempre la stessa larghezza. Nella
+   colonna orario, che puo' essere stretta, non si comprimono e non assumono
+   misure diverse: vanno a capo restando uno sotto l'altro. */
+.it-timepicker-wrapper .spinner-control .spinner {
+  width: 80px;
 }
 
 

@@ -353,6 +353,10 @@ body .gs-btn-icona.btn-lg svg {
   height: auto;
 }
 
+.it-timepicker-wrapper .spinner-control {
+  padding: 8px;
+}
+
 /* 2.5 Menu dropdown-azioni aperto: scende sotto il bottone e sta sopra la
    tabella. Senza, la cornice tonda (.table overflow hidden) e il
    contenitore scrollabile (.table-responsive overflow-x auto) lo
@@ -540,7 +544,6 @@ body .dropdown-item:focus {
 /* 4. Input, select, textarea — stessa altezza (40px default). */
 body .form-control {
   height: 40px;
-  padding: 0 12px;
   font-family: var(--gs-font);
   font-size: var(--gs-fs-md);
   line-height: 1.4;
