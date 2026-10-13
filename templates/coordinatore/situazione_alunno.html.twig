@@ -15,10 +15,10 @@
   </div>
   <div class="row gs-mb-4">
     <div class="col-sm-6 text-left">
-      <a class="btn btn-success btn-sm" href="{{ path(info.back) }}" role="button" title="Ritorna alla pagina precedente"><span class="glyphicon glyphicon-backward gs-mr-3"></span><strong>{{ 'label.indietro'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path(info.back) }}" role="button" title="Ritorna alla pagina precedente">{{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ 'label.indietro'|trans }}</strong></a>
     </div>
     <div class="col-sm-6 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_situazione_alunno', {alunno: alunno.id, tipo: tipo, formato: 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_situazione_alunno', {alunno: alunno.id, tipo: tipo, formato: 'P'}) }}" role="button" title="Scarica il documento in formato PDF">{{ include('admin/include/icona.html.twig', {nome: 'printer', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
   {% if dati.voti is defined %}
@@ -44,7 +44,7 @@
           {% endfor %}
         {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ materia ~ ' - ' ~ periodo ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
       {% endfor %}
     {% else %}
   <div class="alert alert-info gs-mt-4" role="alert">
@@ -82,7 +82,7 @@
       </tr>
         {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_1, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ ('label.periodo_' ~ periodo)|trans ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_1, classi: 'table table-bordered table-hover table-striped'}) }}
       {% elseif periodo == 'F' %}
         {% if v.esito.esito == 'L' %}
   <div class="alert alert-warning gs-mt-4 text-center" role="alert">
@@ -136,7 +136,7 @@
       </tr>
           {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_2, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ ('label.periodo_' ~ periodo)|trans ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_2, classi: 'table table-bordered table-hover table-striped'}) }}
         {% endif %}
       {% elseif periodo == 'G' %}
         {% if v.esito.esito == 'X' %}
@@ -171,7 +171,7 @@
       </tr>
           {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_3, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ ('label.periodo_' ~ periodo)|trans ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_3, classi: 'table table-bordered table-hover table-striped'}) }}
         {% endif %}
       {% endif %}
     {% else %}
@@ -181,8 +181,10 @@
     {% endfor %}
   {% endif %}
   {% if dati.assenze is defined %}
+  {# didascalia fuori dalla cornice: vedi include/tabella.html.twig e main.css #}
+  <div class="gs-table-caption text-info text-center gs-big gs-pb-0" aria-hidden="true"><strong>Situazione globale delle assenze</strong></div>
   <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big gs-pb-0"><strong>Situazione globale delle assenze</strong></caption>
+    <caption class="sr-only">Situazione globale delle assenze</caption>
     <tbody>
       <tr>
         <th class="gs-big">Numero di giorni di assenza</th>
@@ -247,7 +249,7 @@
         {% endfor %}
       {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_4, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ periodo ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_4, classi: 'table table-bordered table-hover table-striped'}) }}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti assenze</strong>
@@ -283,7 +285,7 @@
         {% endfor %}
       {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_5, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ periodo ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_5, classi: 'table table-bordered table-hover table-striped'}) }}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti note disciplinari</strong>
@@ -308,7 +310,7 @@
         {% endfor %}
       {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_6, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ periodo ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_6, classi: 'table table-bordered table-hover table-striped'}) }}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti osservazioni</strong>

@@ -23,7 +23,7 @@
   </form>
   <div class="row gs-mb-1">
     <div class="col-sm-offset-6  col-sm-6 text-right">
-      <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('autorizzazioni_edit') }}" role="button" title="Inserisci un nuovo modulo di autorizzazione delle attività"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Nuovo</strong></a>
+      <a class="btn btn-sm btn-primary gs-mr-2" href="{{ path('autorizzazioni_edit') }}" role="button" title="Inserisci un nuovo modulo di autorizzazione delle attività">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Nuovo</strong></a>
     </div>
   </div>
   {% if dati.lista|length == 0 %}
@@ -43,21 +43,24 @@
     {% set corpo_grezzo_0 %}
     {% for a in dati.lista %}
       <tr{% if not a.abilitata %} style="background-color: #f2dede;"{% endif %}>
-        <td>{% if a.abilitata %}<div class="text-success gs-big"><span class="glyphicon glyphicon-ok" title="Modulo di autorizzazione abilitato"></span></div>{% else %}<div class="text-danger gs-big"><span class="glyphicon glyphicon-ban-circle" title="Modulo di autorizzazione non abilitato"></span></div>{% endif %}</td>
+        <td>{% if a.abilitata %}<div class="text-success gs-big">{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', titolo: 'Modulo di autorizzazione abilitato'}) }}</div>{% else %}<div class="text-danger gs-big">{{ include('admin/include/icona.html.twig', {nome: 'ban', stile: 'outline', titolo: 'Modulo di autorizzazione non abilitato'}) }}</div>{% endif %}</td>
         <td>{% if a.sede is empty %}TUTTE{% else %}{{ a.sede|upper }}{% endif %}</td>
         <td>{% if a.classi is empty %}TUTTE{% else %}{{ dati.info[a.id].classi }}{% endif %}</td>
         <td>{{ ('label.tipo_attivita_' ~ a.tipo)|trans }}</td>
         <td>{{ a.inizio|date('d/m/Y') }}</td>
         <td><strong>{{ a.nome }}</strong></td>
         <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza l'anteprima del modulo di autorizzazione" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('autorizzazioni_anteprima', {autorizzazione: a.id}) }}" data-tipo="{{ ('label.tipo_attivita_' ~ a.tipo)|trans }}" data-nome="{{ a.nome }}"><strong>Anteprima</strong></button>
-          <a class="btn btn-primary btn-xs mb-1" href="{{ path('autorizzazioni_edit', {autorizzazione: a.id}) }}" role="button" title="Modifica i dati del modulo di autorizzazione"><strong>{{ 'label.edit'|trans }}</strong></a>
-          <a class="btn btn-primary btn-xs mb-1" href="{{ path('autorizzazioni_dettagli', {modulo: a.id}) }}" role="button" title="Dettagli delle autorizzazioni inviate"><strong>{{ 'label.show'|trans }}</strong></a>
+          {% set voci_azioni = [
+            {etichetta: 'Anteprima', titolo: 'Visualizza l\'anteprima del modulo di autorizzazione', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('autorizzazioni_anteprima', {autorizzazione: a.id}), 'data-tipo': ('label.tipo_attivita_' ~ a.tipo)|trans, 'data-nome': a.nome}, classi: 'gs-button-remote'},
+            {etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del modulo di autorizzazione', url: path('autorizzazioni_edit', {autorizzazione: a.id})},
+            {etichetta: 'label.show'|trans, titolo: 'Dettagli delle autorizzazioni inviate', url: path('autorizzazioni_dettagli', {modulo: a.id})}
+          ] %}
       {% if a.abilitata %}
-          <a class="btn btn-danger btn-xs mb-1" href="{{ path('autorizzazioni_abilita', {autorizzazione: a.id, abilita: 0}) }}" role="button" title="Disabilita il modulo di autorizzazione"><strong>{{ 'label.disable'|trans }}</strong></a>
+          {% set voci_azioni = voci_azioni|merge([{etichetta: 'label.disable'|trans, titolo: 'Disabilita il modulo di autorizzazione', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-titolo': a.nome, 'data-contenuto': 'message.disabilita_autorizzazione'|trans, 'data-href': path('autorizzazioni_abilita', {autorizzazione: a.id, abilita: 0}), 'data-csrf': csrf_token('delete')}, classi: 'gs-modal-confirm-button text-danger'}]) %}
       {% else %}
-          <a class="btn btn-success btn-xs mb-1" href="{{ path('autorizzazioni_abilita', {autorizzazione: a.id, abilita: 1}) }}" role="button" title="Abilita il modulo di autorizzazione"><strong>{{ 'label.enable'|trans }}</strong></a>
+          {% set voci_azioni = voci_azioni|merge([{etichetta: 'label.enable'|trans, titolo: 'Abilita il modulo di autorizzazione', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-titolo': a.nome, 'data-contenuto': 'message.abilita_autorizzazione'|trans, 'data-href': path('autorizzazioni_abilita', {autorizzazione: a.id, abilita: 1}), 'data-csrf': csrf_token('delete')}, classi: 'gs-modal-confirm-button text-success'}]) %}
       {% endif %}
+          {{ include('include/menu-azioni.html.twig', {voci: voci_azioni, titolo: 'Azioni sul modulo di autorizzazione'}) }}
         </td>
       </tr>
     {% endfor %}
@@ -95,7 +98,7 @@ $(document).ready(function() {
     var url = $(event.relatedTarget).data('href');
     var tipo = $(event.relatedTarget).data('tipo');
     var nome = $(event.relatedTarget).data('nome');
-    var html = '<div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><span class="sr-only">Chiudi</span></button><h3 class="modal-title gs-h3">'+nome+'</h3><h4 class="modal-title gs-h4">'+tipo+'</h4></div><div class="modal-body bg-info"></div><div class="modal-footer gs-pb-2 gs-pt-0 gs-pr-2 gs-pl-2"><div class="text-center gs-pt-2 gs-pb-2"><button type="button" class="btn btn-default gs-mb-3" data-dismiss="modal"><strong>Chiudi</strong></button></div></div>';
+    var html = '<div class="modal-header"><button type="button" class="close" data-dismiss="modal">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}<span class="sr-only">Chiudi</span></button><h3 class="modal-title gs-h3">'+nome+'</h3><h4 class="modal-title gs-h4">'+tipo+'</h4></div><div class="modal-body bg-info"></div><div class="modal-footer gs-pb-2 gs-pt-0 gs-pr-2 gs-pl-2"><div class="text-center gs-pt-2 gs-pb-2"><button type="button" class="btn btn-default gs-mb-3" data-dismiss="modal"><strong>Chiudi</strong></button></div></div>';
     $('#gs-modal-remote-content').html(html);
     $(this).find('#gs-modal-remote-content .modal-body').load(url);
   });

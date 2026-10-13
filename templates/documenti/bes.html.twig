@@ -11,14 +11,12 @@
     </div>
     <div class="col-sm-4 text-center gs-mb-0">
       <a class="btn btn-default" href="{{ path('documenti_archivio_bes') }}" role="button"
-        title="Vai all'archivio dei documenti BES"><span
-          class="glyphicon glyphicon-time gs-mr-2"></span><strong>Archivio</strong></a>
+        title="Vai all'archivio dei documenti BES">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Archivio</strong></a>
     </div>
     <div class="col-sm-4 text-right gs-mb-0">
       {% if dati.azioni.add is defined %}
       <a class="btn btn-primary" href="{{ path('documenti_bes_add') }}" role="button"
-        title="Inserisci un nuovo documento"><span
-          class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+        title="Inserisci un nuovo documento">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Aggiungi</strong></a>
       {% endif %}
     </div>
   </div>
@@ -64,12 +62,12 @@
         <td>
           <a href="{{ path('documenti_download', {documento: dati.documenti[i].lista[0].id}) }}"
             title="Scarica il documento indicato">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{
               dati.documenti[i].lista[0].allegati[0].titolo }}</strong>
           </a><br>
           <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso"
             data-placement="auto left" data-toggle="popover"
-            data-content="{{ dati.documenti[i].lista[0].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span
+            data-content="{{ dati.documenti[i].lista[0].cifrato }}">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}<span
               class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[0].cifrato
               }}</span></button>
           <small>Dimensione: {{ (dati.documenti[i].lista[0].allegati[0].dimensione / 1000)|number_format(0, ',', '.') }}
@@ -77,22 +75,13 @@
         </td>
         <td>
           {% if dati.documenti[i].add[0] is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('documenti_bes_add', {alunno: alu.id}) }}" role="button"
-            title="Inserisci il documento per l'alunno BES indicato"><span
-              class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Aggiungi', titolo: 'Inserisci il documento per l\'alunno BES indicato', url: path('documenti_bes_add', {alunno: alu.id})}) }}
           {% endif %}
           {% if dati.documenti[i].edit[0] is defined %}
-          <a class="btn btn-warning btn-xs"
-            href="{{ path('documenti_bes_archive', {documento: dati.documenti[i].lista[0].id}) }}" role="button"
-            title="Archivia il documento indicato"><span
-              class="glyphicon glyphicon-time gs-mr-2"></span><strong>Archivia</strong></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'archive', etichetta: 'Archivia', titolo: 'Archivia il documento indicato', stile: 'warning', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_bes_archive', {documento: dati.documenti[i].lista[0].id}), 'data-text': 'message.archivia_documento_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
           {% endif %}
           {% if dati.documenti[i].delete[0] is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il documento indicato"
-            data-toggle="modal" data-target="#gs-modal-confirm"
-            data-href="{{ path('documenti_delete', {documento: dati.documenti[i].lista[0].id}) }}"
-            data-text="{{ 'message.cancella_documenti_bes'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove gs-mr-2"
-              aria-hidden="true"></span><strong>Cancella</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella il documento indicato', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_delete', {documento: dati.documenti[i].lista[0].id}), 'data-text': 'message.cancella_documenti_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
           {% endif %}
         </td>
       </tr>
@@ -101,12 +90,12 @@
         <td>
           <a href="{{ path('documenti_download', {documento: dati.documenti[i].lista[1].id}) }}"
             title="Scarica il documento indicato">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{
               dati.documenti[i].lista[1].allegati[0].titolo }}</strong>
           </a><br>
           <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso"
             data-placement="auto left" data-toggle="popover"
-            data-content="{{ dati.documenti[i].lista[1].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span
+            data-content="{{ dati.documenti[i].lista[1].cifrato }}">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}<span
               class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[1].cifrato
               }}</span></button>
           <small>Dimensione: {{ (dati.documenti[i].lista[1].allegati[0].dimensione / 1000)|number_format(0, ',', '.') }}
@@ -114,22 +103,13 @@
         </td>
         <td>
           {% if dati.documenti[i].add[1] is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('documenti_bes_add', {alunno: alu.id}) }}" role="button"
-            title="Inserisci il documento per l'alunno BES indicato"><span
-              class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Aggiungi', titolo: 'Inserisci il documento per l\'alunno BES indicato', url: path('documenti_bes_add', {alunno: alu.id})}) }}
           {% endif %}
           {% if dati.documenti[i].edit[1] is defined %}
-          <a class="btn btn-warning btn-xs"
-            href="{{ path('documenti_bes_archive', {documento: dati.documenti[i].lista[1].id}) }}" role="button"
-            title="Archivia il documento indicato"><span
-              class="glyphicon glyphicon-time gs-mr-2"></span><strong>Archivia</strong></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'archive', etichetta: 'Archivia', titolo: 'Archivia il documento indicato', stile: 'warning', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_bes_archive', {documento: dati.documenti[i].lista[1].id}), 'data-text': 'message.archivia_documento_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
           {% endif %}
           {% if dati.documenti[i].delete[1] is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il documento indicato"
-            data-toggle="modal" data-target="#gs-modal-confirm"
-            data-href="{{ path('documenti_delete', {documento: dati.documenti[i].lista[1].id}) }}"
-            data-text="{{ 'message.cancella_documenti_bes'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove gs-mr-2"
-              aria-hidden="true"></span><strong>Cancella</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella il documento indicato', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_delete', {documento: dati.documenti[i].lista[1].id}), 'data-text': 'message.cancella_documenti_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
           {% endif %}
         </td>
       </tr>
@@ -139,12 +119,12 @@
         <td>
           <a href="{{ path('documenti_download', {documento: dati.documenti[i].lista[2].id}) }}"
             title="Scarica il documento indicato">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{
               dati.documenti[i].lista[2].allegati[0].titolo }}</strong>
           </a><br>
           <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso"
             data-placement="auto left" data-toggle="popover"
-            data-content="{{ dati.documenti[i].lista[2].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span
+            data-content="{{ dati.documenti[i].lista[2].cifrato }}">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}<span
               class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[2].cifrato
               }}</span></button>
           <small>Dimensione: {{ (dati.documenti[i].lista[2].allegati[0].dimensione / 1000)|number_format(0, ',', '.') }}
@@ -152,22 +132,13 @@
         </td>
         <td>
           {% if dati.documenti[i].add[2] is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('documenti_bes_add', {alunno: alu.id}) }}" role="button"
-            title="Inserisci il documento per l'alunno BES indicato"><span
-              class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Aggiungi', titolo: 'Inserisci il documento per l\'alunno BES indicato', url: path('documenti_bes_add', {alunno: alu.id})}) }}
           {% endif %}
           {% if dati.documenti[i].edit[2] is defined %}
-          <a class="btn btn-warning btn-xs"
-            href="{{ path('documenti_bes_archive', {documento: dati.documenti[i].lista[2].id}) }}" role="button"
-            title="Archivia il documento indicato"><span
-              class="glyphicon glyphicon-time gs-mr-2"></span><strong>Archivia</strong></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'archive', etichetta: 'Archivia', titolo: 'Archivia il documento indicato', stile: 'warning', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_bes_archive', {documento: dati.documenti[i].lista[2].id}), 'data-text': 'message.archivia_documento_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
           {% endif %}
           {% if dati.documenti[i].delete[2] is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il documento indicato"
-            data-toggle="modal" data-target="#gs-modal-confirm"
-            data-href="{{ path('documenti_delete', {documento: dati.documenti[i].lista[2].id}) }}"
-            data-text="{{ 'message.cancella_documenti_bes'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove gs-mr-2"
-              aria-hidden="true"></span><strong>Cancella</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella il documento indicato', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_delete', {documento: dati.documenti[i].lista[2].id}), 'data-text': 'message.cancella_documenti_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
           {% endif %}
         </td>
       </tr>

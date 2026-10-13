@@ -1,6 +1,6 @@
 <div class="modal-header">
   <button type="button" class="close" data-dismiss="modal">
-    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+    {{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}
     <span class="sr-only">{{ 'label.close'|trans }}</span>
   </button>
   <h3 class="modal-title gs-h3"> {{ info.data|date('j') }} {{ info.mesi[info.data|date('n')] }} {{ info.data|date('Y') }}</h3>
@@ -38,10 +38,10 @@
     {% if app.user.controllaRuolo('DSP') %}
     <div class="text-right">
       {% if dati.azioni[k].edit is defined %}
-      <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_agenda', {tipo: info.tipo == 'S' ? 'V' : info.tipo, avviso: e.id}) }}" role="button" title="{{ info.tipo == 'P' ? 'Modifica i compiti per casa' : 'Modifica la verifica' }}"><span class="glyphicon glyphicon-edit gs-mr-2"></span>Modifica</a>
+      <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_agenda', {tipo: info.tipo == 'S' ? 'V' : info.tipo, avviso: e.id}) }}" role="button" title="{{ info.tipo == 'P' ? 'Modifica i compiti per casa' : 'Modifica la verifica' }}">{{ include('admin/include/icona.html.twig', {nome: 'pencil', stile: 'outline', classe: 'gs-mr-2'}) }}Modifica</a>
       {% endif %}
       {% if dati.azioni[k].delete is defined %}
-      <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="{{ info.tipo == 'P' ? 'Cancella i compiti per casa' : 'Cancella la verifica' }}" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {avviso: e.id}) }}" data-text="{{ (info.tipo == 'P' ? 'message.cancella_compito' : 'message.cancella_verifica')|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>Cancella</button>
+      <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="{{ info.tipo == 'P' ? 'Cancella i compiti per casa' : 'Cancella la verifica' }}" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {avviso: e.id}) }}" data-text="{{ (info.tipo == 'P' ? 'message.cancella_compito' : 'message.cancella_verifica')|trans }}" data-csrf="{{ csrf_token('delete') }}">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}Cancella</button>
       {% endif %}
     </div>
     {% endif %}

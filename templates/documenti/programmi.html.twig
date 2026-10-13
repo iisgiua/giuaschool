@@ -24,7 +24,7 @@
         <td>
       {% if d.documento %}
           <a href="{{ path('documenti_download', {documento: d.documento.id}) }}" title="Scarica il programma indicato">
-          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.documento.allegati[0].titolo }}</strong>
+          {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{ d.documento.allegati[0].titolo }}</strong>
           </a><br>
           <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1000)|number_format(0, ',', '.') }} kB</small>
       {% else %}
@@ -33,10 +33,10 @@
         </td>
         <td>
       {% if d.add is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('documenti_programmi_add', {classe: d.classe_id, materia: d.materia_id}) }}" role="button" title="Inserisci il programma svolto"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Aggiungi', titolo: 'Inserisci il programma svolto', url: path('documenti_programmi_add', {classe: d.classe_id, materia: d.materia_id})}) }}
       {% endif %}
       {% if d.delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il programma indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {documento: d.documento.id}) }}" data-text="{{ 'message.cancella_programma'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella il programma indicato', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_delete', {documento: d.documento.id}), 'data-text': 'message.cancella_programma'|trans, 'data-csrf': csrf_token('delete')}}) }}
       {% endif %}
         </td>
       </tr>

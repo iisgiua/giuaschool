@@ -16,14 +16,14 @@
           {{ form_label(form[0].inizio) }}
           <div class="input-group date">
             {{ form_widget(form[0].inizio, {attr: {widget: false}}) }}
-            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+            <span class="input-group-addon" aria-hidden="true">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline'}) }}</span>
           </div>
         </div>
         <div class="gs-filter-col">
           {{ form_label(form[0].fine) }}
           <div class="input-group date">
             {{ form_widget(form[0].fine, {attr: {widget: false}}) }}
-            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+            <span class="input-group-addon" aria-hidden="true">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline'}) }}</span>
           </div>
         </div>
       </div>
@@ -52,7 +52,7 @@
         <td><strong class="big">{{ c.classe }}</strong></td>
         <td><strong class="big">{{ c.tot }}</strong> ({{ c.nc }} note di classe, {{ c.ni }} note individuali)</td>
         <td>
-          <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza le note disciplinari della classe" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('scheda_note', {classe: c.classe.id, inizio: info.inizio, fine: info.fine}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2" ></span>Mostra note</button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Mostra note', titolo: 'Visualizza le note disciplinari della classe', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('scheda_note', {classe: c.classe.id, inizio: info.inizio, fine: info.fine})}}) }}
         </td>
       </tr>
     {% endfor %}

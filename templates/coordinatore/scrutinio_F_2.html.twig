@@ -50,7 +50,7 @@
     {% set piede_grezzo %}<tfoot>
         <tr>
           <td colspan="3">
-            <button id="gs-aggiorna" type="submit" name="aggiorna" class="center-block btn btn-default" title="Modifica le ore di assenza e aggiorna i dati della pagina" disabled="disabled"><span class="glyphicon glyphicon-refresh gs-mr-2"></span><strong>Aggiorna dati</strong></button>
+            <button id="gs-aggiorna" type="submit" name="aggiorna" class="center-block btn btn-default" title="Modifica le ore di assenza e aggiorna i dati della pagina" disabled="disabled">{{ include('admin/include/icona.html.twig', {nome: 'refresh', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Aggiorna dati</strong></button>
           </td>
         </tr>
       </tfoot>{% endset %}
@@ -80,10 +80,10 @@
   </div>
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
-      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '1'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
+      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '1'}) }}" role="button" title="Annulla e torna al passo precedente">{{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Torna al passo precedente</strong></a>
     </div>
     <div class="text-right col-sm-6">
-      <button id="gs-avanti" type="button" class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Conferma e vai avanti</strong></button>
+      <button id="gs-avanti" type="button" class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting">{{ include('admin/include/icona.html.twig', {nome: 'arrow-right', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma e vai avanti</strong></button>
     </div>
   </div>
     {{ form_widget(form._token) }}

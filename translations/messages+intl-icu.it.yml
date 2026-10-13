@@ -1348,6 +1348,7 @@ message.avviso_attivita_testo: "Si comunica che il giorno {data}, dalle ore {ini
 message.attivita_edit: Il testo dell'avviso utilizza i campi <strong>{DATA}</strong>, <strong>{INIZIO}</strong> e <strong>{FINE}</strong> che verranno sostituiti automaticamente con la data e l'ora di inizio e fine dell'attività indicata.
 message.presenti_avvisi: "{num, plural, one {È presente un avviso da leggere alla classe} other {Sono presenti # avvisi da leggere alla classe}}"
 message.presenti_nuovi_avvisi: "{num, plural, one {È presente un nuovo avviso da leggere} other {Sono presenti # nuovi avvisi da leggere}}"
+message.nessuna_notifica_home: Non ci sono notifiche, avvisi o richieste da mostrare al momento.
 message.avviso_coordinatore_oggetto: Messaggio dal coordinatore della classe {classe}
 message.avviso_predefinito_info: Il testo dell'avviso è predeterminato e utilizza i dati inseriti al suo interno. Usare il pulsante di ANTEPRIMA per visualizzare il testo finale.
 message.avviso_individuale_oggetto: "Comunicazione del{docente}"

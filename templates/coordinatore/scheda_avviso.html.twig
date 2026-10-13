@@ -1,6 +1,6 @@
 <div class="modal-header">
   <button type="button" class="close" data-dismiss="modal">
-    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+    {{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}
     <span class="sr-only">{{ 'label.close'|trans }}</span>
   </button>
   <h3 class="modal-title gs-h3">{{ dati.avviso.data|date('d/m/Y') }}</h3>

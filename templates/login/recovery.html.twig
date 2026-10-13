@@ -42,7 +42,7 @@
           <div class="form-group gs-mt-4">
             <label class="sr-only" for="login_recovery_email">{{ 'label.email'|trans }}</label>
             <div class="input-group gs-ml-4 gs-mr-4">
-              <div class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></div>
+              <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'mail', stile: 'outline'}) }}</div>
               {{ form_widget(form.email) }}
             </div>
           </div>

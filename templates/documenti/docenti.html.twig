@@ -49,7 +49,7 @@
         {% for d in dati.documenti[i] %}
           {{ not loop.first ? '<br>' }}
           <a href="{{ path('documenti_download', {documento: d.id}) }}" title="Scarica il documento indicato">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.allegati[0].titolo }}</strong>
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{ d.allegati[0].titolo }}</strong>
           </a><br>
           <small>Docente: {{ d.autore.nome }} {{ d.autore.cognome }} - Dimensione: {{ (d.allegati[0].dimensione / 1000)|number_format(0, ',', '.') }} kB</small>
         {% else %}
@@ -57,7 +57,7 @@
         {% endfor %}
       {% elseif c.documento %}
           <a href="{{ path('documenti_download', {documento: c.documento.id}) }}" title="Scarica il documento indicato">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ c.documento.allegati[0].titolo }}</strong>
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{ c.documento.allegati[0].titolo }}</strong>
           </a><br>
           <small>Dimensione: {{ (c.documento.allegati[0].dimensione / 1000)|number_format(0, ',', '.') }} kB</small>
       {% else %}

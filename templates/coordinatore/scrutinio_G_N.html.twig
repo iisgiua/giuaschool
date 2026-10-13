@@ -24,7 +24,7 @@
     {% for materia, m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
       {% if dati.errori[materia] is defined and dati.errori[materia] == 1 and dati.modifica %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci i voti mancanti" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_proposte', {classe: classe.id, materia: materia, periodo: periodo}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Inserisci i voti mancanti', titolo: 'Inserisci i voti mancanti', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_proposte', {classe: classe.id, materia: materia, periodo: periodo}) }}) }}
             <br>
       {% endif %}
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
@@ -39,7 +39,7 @@
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
       {% if a.bes != 'N' %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_' ~ a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_' ~ a.bes)|trans }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>
       {% endif %}
           </td>
       {% for materia, m in dati.materie %}
@@ -70,7 +70,7 @@
     </strong>
   </div>
   <div class="text-center">
-    <button type="button" class="btn btn-primary" title="Inizia la procedura dello scrutinio" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-play gs-mr-2"></span><strong>Apri lo scrutinio</strong></button>
+    <button type="button" class="btn btn-primary" title="Inizia la procedura dello scrutinio" data-toggle="modal" data-target="#gs-modal-waiting">{{ include('admin/include/icona.html.twig', {nome: 'player-play', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Apri lo scrutinio</strong></button>
   </div>
     {% endif %}
     {{ form_end(form) }}

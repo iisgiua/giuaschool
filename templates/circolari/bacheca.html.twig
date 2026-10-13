@@ -67,14 +67,14 @@
         <td><small>{% for s in c.circolare.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
         <td>{{ c.circolare.titolo }}</td>
         <td>
-          <button type="button" class="btn btn-xs btn-primary" title="Visualizza la circolare" data-toggle="modal" data-target="#gs-modal-info" data-info-num="{{ c.circolare.numero }}" data-info-date="{{ c.circolare.data|date('j') }} {{ info.mesi[c.circolare.data|date('n')] }} {{ c.circolare.data|date('Y') }}" data-info-title="{{ c.circolare.titolo }}" data-body="circolare-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span>Visualizza</button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza la circolare', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-info-num': c.circolare.numero, 'data-info-date': c.circolare.data|date('j') ~ ' ' ~ info.mesi[c.circolare.data|date('n')] ~ ' ' ~ c.circolare.data|date('Y'), 'data-info-title': c.circolare.titolo, 'data-body': 'circolare-' ~ loop.index}}) }}
           <div id="circolare-{{ loop.index }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <div class="gs-mt-3 gs-mb-3">
                   <strong>Documento:</strong> {{ c.circolare.allegati[0].titolo }}
-                  <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {circolare: c.circolare.id, allegato: 0, tipo: 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
-                  <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {circolare: c.circolare.id, allegato: 0, tipo: 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+                  {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica la circolare', url: path('circolari_download', {circolare: c.circolare.id, allegato: 0, tipo: 'D'}), attributi: {download: ''}, classi: 'pull-right gs-ml-3'}) }}
+                  {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza la circolare', url: path('circolari_download', {circolare: c.circolare.id, allegato: 0, tipo: 'V'}), attributi: {target: '_blank', rel: 'noopener noreferrer'}, classi: 'pull-right'}) }}
                 </div>
               </div>
             </div>
@@ -85,8 +85,8 @@
           {% if not loop.first %}
                 <div class="gs-mt-3 gs-mb-3">
                   <strong>Allegato {{ n }}:</strong> {{ a.titolo }}
-                  <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {circolare: c.circolare.id, allegato: n, tipo: 'D'}) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
-                  <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {circolare: c.circolare.id, allegato: n, tipo: 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+                  {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica l\'allegato', titolo: 'Scarica l\'allegato', url: path('circolari_download', {circolare: c.circolare.id, allegato: n, tipo: 'D'}), attributi: {download: ''}, classi: 'pull-right gs-ml-3'}) }}
+                  {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza l\'allegato', titolo: 'Visualizza l\'allegato', url: path('circolari_download', {circolare: c.circolare.id, allegato: n, tipo: 'V'}), attributi: {target: '_blank', rel: 'noopener noreferrer'}, classi: 'pull-right'}) }}
                 </div>
           {% endif %}
         {% endfor %}
@@ -101,7 +101,7 @@
         {% else %}
                 <div>
                   <em>La circolare non è stata ancora letta.</em>
-                  <a class="btn btn-xs btn-success pull-right gs-ml-3" href="{{ path('circolari_firma', {circolare: c.circolare.id}) }}" role="button" title="Conferma la lettura della circolare"><strong>Conferma lettura</strong></a>
+                  {{ include('include/bottone-azione.html.twig', {nome: 'check', etichetta: 'Conferma lettura', titolo: 'Conferma la lettura della circolare', stile: 'success', url: path('circolari_firma', {circolare: c.circolare.id, _csrf_token: csrf_token('circolari_firma')}), classi: 'pull-right gs-ml-3'}) }}
                 </div>
         {% endif %}
       {% else %}

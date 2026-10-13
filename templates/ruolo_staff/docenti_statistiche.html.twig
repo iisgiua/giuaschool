@@ -16,14 +16,14 @@
           {{ form_label(form.inizio) }}
           <div class="input-group date">
             {{ form_widget(form.inizio, {attr: {widget: false}}) }}
-            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+            <span class="input-group-addon" aria-hidden="true">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline'}) }}</span>
           </div>
         </div>
         <div class="gs-filter-col">
           {{ form_label(form.fine) }}
           <div class="input-group date">
             {{ form_widget(form.fine, {attr: {widget: false}}) }}
-            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+            <span class="input-group-addon" aria-hidden="true">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline'}) }}</span>
           </div>
         </div>
       </div>
@@ -31,7 +31,7 @@
         <button type="button" class="btn btn-default" id="docenti_statistiche_reset" title="Resetta i filtri">Reset</button>
         {{ form_widget(form.submit) }}
         <div class="form-group pull-right">
-          <button type="submit" id="staff_docenti_statistiche_print" name="staff_docenti_statistiche[print]" class="btn btn-success btn-sm" title="Crea e scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-2"></span><strong>{{ 'label.stampa'|trans }}</strong></button>
+          <button type="submit" id="staff_docenti_statistiche_print" name="staff_docenti_statistiche[print]" class="btn btn-success btn-sm" title="Crea e scarica il documento in formato PDF">{{ include('admin/include/icona.html.twig', {nome: 'printer', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ 'label.stampa'|trans }}</strong></button>
         </div>
       </div>
       {{ form_widget(form._token) }}

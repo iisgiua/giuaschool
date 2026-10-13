@@ -34,21 +34,13 @@
         <div class="col-sm-4">
           {% if r.stato == 'R' %}
           <strong class="text-danger"><em>In attesa di conferma</em></strong>
-          <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button"
-            title="Cancella la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm"
-            data-href="{{ path('colloqui_disdetta', {id: r.id}) }}"
-            data-text="{{ 'message.disdetta_colloquio'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove gs-mr-2"
-              aria-hidden="true"></span><strong>Cancella</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella la richiesta di colloquio', stile: 'danger', classi: 'pull-right gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('colloqui_disdetta', {id: r.id}), 'data-text': 'message.disdetta_colloquio'|trans, 'data-csrf': csrf_token('delete')}}) }}
           {% elseif r.stato == 'C' %}
           <strong class="text-success"><em>Appuntamento confermato</em></strong>
           {% if r.messaggio %}
           <br>Messaggio del docente:<small><br><strong><em>{{ r.messaggio }}</em></strong></small>
           {% endif %}
-          <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button"
-            title="Cancella la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm"
-            data-href="{{ path('colloqui_disdetta', {id: r.id}) }}"
-            data-text="{{ 'message.disdetta_colloquio'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove gs-mr-2"
-              aria-hidden="true"></span><strong>Cancella</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella la richiesta di colloquio', stile: 'danger', classi: 'pull-right gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('colloqui_disdetta', {id: r.id}), 'data-text': 'message.disdetta_colloquio'|trans, 'data-csrf': csrf_token('delete')}}) }}
           {% elseif r.stato == 'A' %}
           <strong class="text-danger"><em>Appuntamento annullato dal genitore</em></strong>
           {% elseif r.stato == 'N' %}
@@ -73,8 +65,7 @@
             '<br>' }}{% endfor %}</em></div>
         <div class="col-sm-2"><a class="btn btn-primary btn-xs"
             href="{{ path('colloqui_prenota', {docente: docente}) }}" role="button"
-            title="Prenota il colloquio con il docente"><span
-              class="glyphicon glyphicon-time gs-mr-2"></span><strong>Prenota</strong></a></div>
+            title="Prenota il colloquio con il docente">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Prenota</strong></a></div>
       </li>
       {% endfor %}
     </ul>

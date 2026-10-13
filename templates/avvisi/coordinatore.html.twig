@@ -13,7 +13,7 @@
     </div>
     <div class="col-sm-6 text-right">
     {% if dati.azioni.add is defined %}
-      <a class="btn btn-primary" href="{{ path('avvisi_edit_coordinatore') }}" role="button" title="Aggiungi un nuovo avviso"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+      <a class="btn btn-primary" href="{{ path('avvisi_edit_coordinatore') }}" role="button" title="Aggiungi un nuovo avviso">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</a>
     {% endif %}
     </div>
   </div>
@@ -35,12 +35,12 @@
           </strong>
         </td>
         <td>
-          <button type="button" class="btn btn-xs btn-primary" title="Visualizza i dettagli dell'avviso" data-toggle="modal" data-target="#gs-modal-info" data-info-date="{{ a.data|date('j/n/Y') }}" data-info-title="{{ a.titolo }}" data-info-id="{{ a.id }}" data-body="avviso-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza', titolo: 'Visualizza i dettagli dell\'avviso', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-info-date': a.data|date('j/n/Y'), 'data-info-title': a.titolo, 'data-info-id': a.id, 'data-body': 'avviso-' ~ loop.index}}) }}
       {% if dati.azioni[k].edit is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('avvisi_edit_coordinatore', {avviso: a.id}) }}" role="button" title="Modifica l'avviso indicato"><span class="glyphicon glyphicon-edit"></span></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica l\'avviso indicato', url: path('avvisi_edit_coordinatore', {avviso: a.id})}) }}
       {% endif %}
       {% if dati.azioni[k].delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'avviso indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('avvisi_delete', {avviso: a.id}) }}" data-text="{{ 'message.cancella_avviso_coordinatore'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella l\'avviso indicato', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('avvisi_delete', {avviso: a.id}), 'data-text': 'message.cancella_avviso_coordinatore'|trans, 'data-csrf': csrf_token('delete')}}) }}
       {% endif %}
           <div id="avviso-{{ loop.index }}" style="display:none">
             <div class="alert alert-info gs-mt-0 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
@@ -52,8 +52,8 @@
         {% for n, f in a.allegati %}
               <div class="gs-mt-3 gs-mb-3">
                 <strong>Allegato {{ n + 1 }}:</strong> {{ f.titolo }}
-                <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('avvisi_download', {avviso: a.id, allegato: n, tipo: 'D'}) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
-                <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('avvisi_download', {avviso: a.id, allegato: n, tipo: 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+                {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica l\'allegato', titolo: 'Scarica l\'allegato', url: path('avvisi_download', {avviso: a.id, allegato: n, tipo: 'D'}), attributi: {download: ''}, classi: 'pull-right gs-ml-3'}) }}
+                {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza l\'allegato', titolo: 'Visualizza l\'allegato', url: path('avvisi_download', {avviso: a.id, allegato: n, tipo: 'V'}), attributi: {target: '_blank', rel: 'noopener noreferrer'}, classi: 'pull-right'}) }}
               </div>
         {% endfor %}
             </div>

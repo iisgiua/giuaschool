@@ -34,13 +34,13 @@
         <tr class="{% if p.stato == 'A' %}gs-em text-muted{% elseif p.stato == 'N' %}gs-em{% endif %}">
           <td>
           {% if p.stato == 'R' %}
-          <span class="glyphicon glyphicon-hourglass text-warning gs-mr-2" aria-hidden="true"></span>
+          {{ include('admin/include/icona.html.twig', {nome: 'hourglass', stile: 'outline', classe: 'text-warning gs-mr-2'}) }}
           {% elseif p.stato == 'C' %}
-            <span class="glyphicon glyphicon-ok text-success gs-mr-2" aria-hidden="true"></span>
+            {{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'text-success gs-mr-2'}) }}
           {% elseif p.stato == 'A' %}
-            <span class="glyphicon glyphicon-ban-circle text-danger gs-mr-2" aria-hidden="true"></span>
+            {{ include('admin/include/icona.html.twig', {nome: 'ban', stile: 'outline', classe: 'text-danger gs-mr-2'}) }}
           {% elseif p.stato == 'N' %}
-            <span class="glyphicon glyphicon-remove text-danger gs-mr-2" aria-hidden="true"></span>
+            {{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'text-danger gs-mr-2'}) }}
           {% endif %}
             {{ p.appuntamento|date('H:i') }}
           </td>
@@ -49,15 +49,15 @@
           <td>
           {% if p.stato == 'R' %}
             <strong>In attesa di conferma</strong>
-              <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button gs-ml-3 gs-mb-1" title="Rifiuta la prenotazione per il colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_rifiuta', {id: p.id}) }}" data-text="{{ 'message.rifiuto_colloquio'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Rifiuta</strong></button>
-              <a class="btn btn-success btn-xs pull-right gs-mb-1" href="{{ path('colloqui_conferma', {id: p.id}) }}" role="button" title="Conferma la prenotazione per il colloquio"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma</strong></a>
+              {{ include('include/bottone-azione.html.twig', {nome: 'circle-x', etichetta: 'Rifiuta', titolo: 'Rifiuta la prenotazione per il colloquio', stile: 'danger', classi: 'pull-right gs-modal-confirm-button gs-ml-3 gs-mb-1', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('colloqui_rifiuta', {id: p.id}), 'data-text': 'message.rifiuto_colloquio'|trans, 'data-csrf': csrf_token('delete')}}) }}
+              {{ include('include/bottone-azione.html.twig', {nome: 'check', etichetta: 'Conferma', titolo: 'Conferma la prenotazione per il colloquio', stile: 'success', classi: 'pull-right gs-mb-1', url: path('colloqui_conferma', {id: p.id})}) }}
           {% elseif p.stato == 'C' %}
             Confermato
             {% if p.messaggio %}
             <span class="gs-normal"><br>Messaggio per il genitore:</span>
             <div class="panel panel-default gs-mb-1"><small>{{ p.messaggio }}</small></div>
             {% endif %}
-            <a class="btn btn-primary btn-xs pull-right" href="{{ path('colloqui_modifica', {id: p.id}) }}" role="button" title="Modifica la scelta effettuata per la richiesta di colloquio"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></a>
+            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica la scelta effettuata per la richiesta di colloquio', classi: 'pull-right', url: path('colloqui_modifica', {id: p.id})}) }}
           {% elseif p.stato == 'A' %}
             Annullato dal genitore
           {% elseif p.stato == 'N' %}
@@ -66,7 +66,7 @@
             <span class="gs-normal"><br>Messaggio per il genitore:</span>
             <div class="panel panel-default gs-mb-1"><small>{{ p.messaggio }}</small></div>
             {% endif %}
-            <a class="btn btn-primary btn-xs pull-right gs-normal" href="{{ path('colloqui_modifica', {id: p.id}) }}" role="button" title="Modifica la scelta effettuata per la richiesta di colloquio"><span class="glyphicon glyphicon-edit gs-mr-2"></span><strong>Modifica</strong></a>
+            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica la scelta effettuata per la richiesta di colloquio', classi: 'pull-right gs-normal', url: path('colloqui_modifica', {id: p.id})}) }}
           {% endif %}
           </td>
         </tr>

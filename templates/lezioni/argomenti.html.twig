@@ -16,19 +16,19 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_argomenti'|trans }} {{ classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>{% endif %}</em></h2>
   {# selettore sede/classe per le sostituzioni #}
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
     {% for periodo, v in dati.lista %}
-  <div class="row gs-mb-1">
+  <div class="row gs-mt-4 gs-mb-2">
     <div class="col-sm-4 text-info">
       <strong class="gs-big">{{ periodo }} (ore totali: {{ dati.ore[periodo] }})</strong>
     </div>
     <div class="col-sm-4 text-center">
-      <a class="btn btn-primary btn-sm" href="{{ path('lezioni_argomenti_programma', {cattedra: cattedra.id}) }}" role="button" title="Scarica il programma svolto"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>Programma svolto</strong></a>
+      <a class="btn btn-primary btn-sm" href="{{ path('lezioni_argomenti_programma', {cattedra: cattedra.id}) }}" role="button" title="Scarica il programma svolto">{{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Programma svolto</strong></a>
     </div>
     <div class="col-sm-4 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {cattedra: cattedra.id}) }}" role="button" title="Visualizza il riepilogo mensile delle lezioni"><span class="glyphicon glyphicon-list-alt gs-mr-3"></span><strong>Riepilogo mensile</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {cattedra: cattedra.id}) }}" role="button" title="Visualizza il riepilogo mensile delle lezioni">{{ include('admin/include/icona.html.twig', {nome: 'list-details', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Riepilogo mensile</strong></a>
     </div>
   </div>
   {% set intestazione = [
@@ -42,12 +42,12 @@
       <tr>
           {% if loop.first %}
         <td style="background-color:#ffffff" rowspan="{{ v1|length }}">
-          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'G'}) }}" role="button" title="Visualizza le lezioni del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ v1[0].data }}</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'G'}) }}" role="button" title="Visualizza le lezioni del giorno">{{ include('admin/include/icona.html.twig', {nome: 'pin', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ v1[0].data }}</strong></a>
         </td>
           {% endif %}
         <td{{ e.firme is not empty ? ' class="bg-info"' }}>
           {% if e.moduloFormativo is not empty %}
-          <button type="button" class="btn btn-xs btn-success gs-mr-2" title="Modulo formativo" data-toggle="modal" data-target="#gs-modal-info" data-title="Modulo formativo" data-body="lezione-{{ e.lezioneId }}"><span class="glyphicon glyphicon-tag"></span></button>
+          <button type="button" class="btn btn-xs btn-success gs-mr-2" title="Modulo formativo" data-toggle="modal" data-target="#gs-modal-info" data-title="Modulo formativo" data-body="lezione-{{ e.lezioneId }}">{{ include('admin/include/icona.html.twig', {nome: 'tag', stile: 'outline'}) }}</button>
           <div id="lezione-{{ e.lezioneId }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">

@@ -41,10 +41,10 @@
         </td>
         <td>
           <a href="{{ path('documenti_download', {documento: dati.documenti[i][0].id}) }}" title="Scarica il documento indicato">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ dati.documenti[i][0].allegati[0].titolo }}</strong>
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{ dati.documenti[i][0].allegati[0].titolo }}</strong>
           </a><br>
       {% if dati.documenti[i][0].cifrato %}
-          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-content="{{ dati.documenti[i][0].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i][0].cifrato }}</span></button>
+          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-content="{{ dati.documenti[i][0].cifrato }}">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}<span class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i][0].cifrato }}</span></button>
       {% endif %}
           <small>Dimensione: {{ (dati.documenti[i][0].allegati[0].dimensione / 1000)|number_format(0, ',', '.') }} kB</small>
         </td>
@@ -53,10 +53,10 @@
       <tr>
         <td>
           <a href="{{ path('documenti_download', {documento: dati.documenti[i][1].id}) }}" title="Scarica il documento indicato">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ dati.documenti[i][1].allegati[0].titolo }}</strong>
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{ dati.documenti[i][1].allegati[0].titolo }}</strong>
           </a><br>
       {% if dati.documenti[i][1].cifrato %}
-          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-content="{{ dati.documenti[i][1].cifrato }}"><span class="glyphicon glyphicon-lock"></span><span class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i][1].cifrato }}</span></button>
+          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso" data-placement="auto left" data-toggle="popover" data-content="{{ dati.documenti[i][1].cifrato }}">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}<span class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i][1].cifrato }}</span></button>
       {% endif %}
           <small>Dimensione: {{ (dati.documenti[i][1].allegati[0].dimensione / 1000)|number_format(0, ',', '.') }} kB</small>
         </td>

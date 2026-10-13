@@ -16,7 +16,7 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_proposte'|trans }} {{ classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>{% endif %}</em></h2>
   {# selettore sede/classe per le sostituzioni #}
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   <div class="row gs-mb-1">
@@ -39,7 +39,7 @@
     {% endif %}
     </div>
     <div class="col-sm-4 text-right">
-      <a class="btn btn-success" href="{{ path('lezioni_scrutinio_svolto', {cattedra: cattedra.id, classe: classe.id, periodo: (periodo ? periodo : 0)}) }}" role="button" title="Visualizza il tabellone dei voti degli scrutini svolti"><span class="glyphicon glyphicon-list gs-mr-3"></span><strong>Tabellone</strong></a>
+      <a class="btn btn-success" href="{{ path('lezioni_scrutinio_svolto', {cattedra: cattedra.id, classe: classe.id, periodo: (periodo ? periodo : 0)}) }}" role="button" title="Visualizza il tabellone dei voti degli scrutini svolti">{{ include('admin/include/icona.html.twig', {nome: 'list', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Tabellone</strong></a>
     </div>
   </div>
     {% if periodo == 'F' %}
@@ -52,7 +52,7 @@
     <div class="panel-body">
         {% if form.vars.submitted and form.vars.valid %}
       <div class="alert alert-success" role="alert">
-        <strong><span class="glyphicon glyphicon-ok-sign gs-mr-3"></span>{{ 'message.update_ok'|trans }}</strong>
+        <strong>{{ include('admin/include/icona.html.twig', {nome: 'circle-check', stile: 'outline', classe: 'gs-mr-3'}) }}{{ 'message.update_ok'|trans }}</strong>
       </div>
         {% endif %}
         {{ form_start(form) }}
@@ -66,7 +66,7 @@
             <div class="col-sm-3">
               <strong>{{ proposte.alunni[prop.alunno.vars.value][0] }} {{ proposte.alunni[prop.alunno.vars.value][1] }} ({{ proposte.alunni[prop.alunno.vars.value][2]|date('d/m/Y') }})</strong>
           {% if proposte.alunni[prop.alunno.vars.value][3] != 'N' %}
-              <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ proposte.alunni[prop.alunno.vars.value][0] }} {{ proposte.alunni[prop.alunno.vars.value][1] }} ({{ proposte.alunni[prop.alunno.vars.value][2]|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+              <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ proposte.alunni[prop.alunno.vars.value][0] }} {{ proposte.alunni[prop.alunno.vars.value][1] }} ({{ proposte.alunni[prop.alunno.vars.value][2]|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline'}) }}</button>
               <div id="alunno-{{ loop.index }}" style="display:none">
                 <div class="list-group-item">
                   <div class="list-group-item-text">
@@ -78,7 +78,7 @@
               </div>
           {% endif %}
               <br>
-              <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli delle valutazioni" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('scheda_voti_materia', {cattedra: cattedra.id, alunno: prop.alunno.vars.value, periodo: periodo}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2" ></span>Dettaglio voti</button>
+              <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli delle valutazioni" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('scheda_voti_materia', {cattedra: cattedra.id, alunno: prop.alunno.vars.value, periodo: periodo}) }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}Dettaglio voti</button>
             </div>
           {{ form_widget(prop) }}
           </div>
@@ -101,7 +101,7 @@
             <div class="col-sm-3">
               <strong>{{ alu[0] }} {{ alu[1] }} ({{ alu[2]|date('d/m/Y') }})</strong>
           {% if alu[3] != 'N' %}
-              <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ alu[0] }} {{ alu[1] }} ({{ alu[2]|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+              <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ alu[0] }} {{ alu[1] }} ({{ alu[2]|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline'}) }}</button>
               <div id="alunno-{{ loop.index }}" style="display:none">
                 <div class="list-group-item">
                   <div class="list-group-item-text">
@@ -264,16 +264,16 @@ window.setInterval(function(){
       <div class="col-sm-10">
   {% if form.unico.vars.value is not empty %}
         <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ form.unico.vars.value < app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').med ? 'label-danger' : (form.unico.vars.value < app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').suff ? 'label-warning' : 'label-success') }} gs-mr-4 gs-big">{{ app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').lista[form.unico.vars.value] }}</span>
-        <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+        <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
     {% if form.vars.data.materia.tipo == 'E' %}
-        <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
+        <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}Cancella</button>
     {% endif %}
         <div style="display:inline"><input id="{{ form.unico.vars.id }}" name="{{ form.unico.vars.full_name }}" class="slider" type="text" value="{{ form.unico.vars.value }}" data-slider-value="{{ form.unico.vars.value }}"></div>
   {% else %}
         <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-mr-4 gs-big">--</span>
-        <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+        <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
     {% if form.vars.data.materia.tipo == 'E' %}
-        <button style="display:none" class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
+        <button style="display:none" class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}Cancella</button>
     {% endif %}
         <div style="display:none"><input id="{{ form.unico.vars.id }}" name="{{ form.unico.vars.full_name }}" type="text" value=""></div>
   {% endif %}

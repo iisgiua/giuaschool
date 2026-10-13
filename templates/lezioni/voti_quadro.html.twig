@@ -35,13 +35,13 @@
       </div>
     </div>
     <div class="col-sm-4 text-center">
-      <a class="btn btn-info btn-sm" href="{{ path('lezioni_voti_configura') }}" role="button" title="Configura la visualizzazione della pagina dei voti"><span class="glyphicon glyphicon-pushpin gs-mr-3"></span><strong>Visualizzazione</strong></a>
+      <a class="btn btn-info btn-sm" href="{{ path('lezioni_voti_configura') }}" role="button" title="Configura la visualizzazione della pagina dei voti">{{ include('admin/include/icona.html.twig', {nome: 'pin', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Visualizzazione</strong></a>
     </div>
     <div class="col-sm-4 text-right">
     {% if periodo %}
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_esporta', {cattedra: cattedra.id, classe: classe.id, data: lista_periodi[periodo].fine}) }}" role="button" title="Esporta i dati in formato CSV"><span class="glyphicon glyphicon-download-alt gs-mr-3"></span><strong>{{ 'label.esporta'|trans }}</strong></a>
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_stampa', {cattedra: cattedra.id, classe: classe.id, data: lista_periodi[periodo].fine}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_dettagli', {cattedra: cattedra.id, classe: classe.id}) }}" role="button" title="Visualizza i dettagli delle valutazioni"><span class="glyphicon glyphicon-zoom-in gs-mr-3"></span><strong>Dettagli</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_esporta', {cattedra: cattedra.id, classe: classe.id, data: lista_periodi[periodo].fine}) }}" role="button" title="Esporta i dati in formato CSV">{{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ 'label.esporta'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_stampa', {cattedra: cattedra.id, classe: classe.id, data: lista_periodi[periodo].fine}) }}" role="button" title="Scarica il documento in formato PDF">{{ include('admin/include/icona.html.twig', {nome: 'printer', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ 'label.stampa'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_dettagli', {cattedra: cattedra.id, classe: classe.id}) }}" role="button" title="Visualizza i dettagli delle valutazioni">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Dettagli</strong></a>
     {% endif %}
     </div>
   </div>
@@ -68,7 +68,7 @@
           <th class="gs-color-2"><em class="gs-color-5">Media<br>S/G</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-2"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+          <th class="gs-color-2"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
       {% if info.pagina.orale %}
@@ -77,7 +77,7 @@
           <th class="gs-color-3"><em class="gs-color-5">Media<br>O</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+          <th class="gs-color-3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
       {% if info.pagina.pratico %}
@@ -86,7 +86,7 @@
           <th class="gs-color-4"><em class="gs-color-5">Media<br>P</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-4"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+          <th class="gs-color-4"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
         </tr>
@@ -97,7 +97,7 @@
         {% if (cattedra.materia.tipo != 'R' or a.religione == info.religioneTipo) and dati.trasferiti[a.id] is not defined %}
         <tr>
           <td class="gs-col-sticky gs-pt-1 gs-pb-1">
-            <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+            {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Dettagli alunno', titolo: 'Dettagli alunno', stile: 'default', classi: 'pull-left gs-mr-2', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-title': a.cognome ~ ' ' ~ a.nome ~ ' (' ~ a.dataNascita|date('d/m/Y') ~ ')', 'data-body': 'alunno-' ~ loop.index}}) }}
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
             {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a, g: dati.genitori[a.id]}) }}
           </td>
@@ -107,7 +107,7 @@
               {% if dati.voti[k][tipo][d] is defined %}
                 {% set v = dati.voti[k][tipo][d] %}
                 {% if v.docente_id != app.user.id %}
-            <button type="button" class="btn btn-xs btn-info" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{% if v.voto > 0 %}{{ v.voto_str }}{% else %}<span class="glyphicon glyphicon-asterisk"></span>{% endif %}</strong></button>
+            <button type="button" class="btn btn-xs btn-info" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{% if v.voto > 0 %}{{ v.voto_str }}{% else %}{{ include('admin/include/icona.html.twig', {nome: 'asterisk', stile: 'outline'}) }}{% endif %}</strong></button>
                 {% elseif v.voto > 0 and not v.visibile %}
             <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{{ v.voto_str }}</strong></button>
                 {% elseif v.voto > 0 and not v.media %}
@@ -115,14 +115,14 @@
                 {% elseif v.voto > 0 %}
             <button type="button" class="btn btn-xs btn-{{ v.voto < 5 ? 'danger' : (v.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{{ v.voto_str }}</strong></button>
                 {% else %}
-            <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><span class="glyphicon glyphicon-asterisk gs-big"></span></button>
+            <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}">{{ include('admin/include/icona.html.twig', {nome: 'asterisk', stile: 'outline', classe: 'gs-big'}) }}</button>
                 {% endif %}
             <div id="gs-voti-{{ v.id }}" style="display:none">
               <div class="list-group-item">
                 <div class="list-group-item-text">
                   <p>
                 {% if not v.visibile %}
-                    <span class="glyphicon glyphicon-eye-close text-danger gs-mr-2" title="Non visibile ai genitori"></span>
+                    {{ include('admin/include/icona.html.twig', {nome: 'eye-off', stile: 'outline', classe: 'text-danger gs-mr-2', titolo: 'Non visibile ai genitori'}) }}
                 {% endif %}
                     <strong>Data:</strong> {{ v.data|date('d/m/Y') }}
                   </p>
@@ -195,7 +195,7 @@
           <th class="gs-color-2"><em class="gs-color-5">Media<br>S/G</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-2"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+          <th class="gs-color-2"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
       {% if info.pagina.orale %}
@@ -212,7 +212,7 @@
           <th class="gs-color-3"><em class="gs-color-5">Media<br>O</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+          <th class="gs-color-3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
       {% if info.pagina.pratico %}
@@ -229,7 +229,7 @@
         <th class="gs-color-4"><em class="gs-color-5">Media<br>P</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-4"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe"><span class="glyphicon glyphicon-plus"></span></a></th>
+          <th class="gs-color-4"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
         </tr>
@@ -240,7 +240,7 @@
         {% if (cattedra.materia.tipo != 'R' or a.religione == info.religioneTipo) and dati.trasferiti[a.id] is not defined %}
         <tr>
           <td class="gs-col-sticky gs-pt-1 gs-pb-1">
-            <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+            {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Dettagli alunno', titolo: 'Dettagli alunno', stile: 'default', classi: 'pull-left gs-mr-2', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-title': a.cognome ~ ' ' ~ a.nome ~ ' (' ~ a.dataNascita|date('d/m/Y') ~ ')', 'data-body': 'alunno-' ~ loop.index}}) }}
             <strong>{{ a.cognome }} {{ a.nome }}</strong> <small>({{ a.dataNascita|date('d/m/Y') }})</small>
             {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a, g: dati.genitori[a.id]}) }}
           </td>
@@ -250,7 +250,7 @@
               {% if dati.voti[k][tipo][d] is defined %}
                 {% set v = dati.voti[k][tipo][d] %}
                 {% if v.docente_id != app.user.id %}
-            <button type="button" class="btn btn-xs btn-info" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{% if v.voto > 0 %}{{ v.voto_str }}{% else %}<span class="glyphicon glyphicon-asterisk"></span>{% endif %}</strong></button>
+            <button type="button" class="btn btn-xs btn-info" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{% if v.voto > 0 %}{{ v.voto_str }}{% else %}{{ include('admin/include/icona.html.twig', {nome: 'asterisk', stile: 'outline'}) }}{% endif %}</strong></button>
                 {% elseif v.voto > 0 and not v.visibile %}
             <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{{ v.voto_str }}</strong></button>
                 {% elseif v.voto > 0 and not v.media %}
@@ -258,14 +258,14 @@
                 {% elseif v.voto > 0 %}
             <button type="button" class="btn btn-xs btn-{{ v.voto < 5 ? 'danger' : (v.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><strong class="gs-big">{{ v.voto_str }}</strong></button>
                 {% else %}
-            <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}"><span class="glyphicon glyphicon-asterisk gs-big"></span></button>
+            <button type="button" class="btn btn-xs btn-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="gs-voti-{{ v.id }}">{{ include('admin/include/icona.html.twig', {nome: 'asterisk', stile: 'outline', classe: 'gs-big'}) }}</button>
                 {% endif %}
             <div id="gs-voti-{{ v.id }}" style="display:none">
               <div class="list-group-item">
                 <div class="list-group-item-text">
                   <p>
                 {% if not v.visibile %}
-                    <span class="glyphicon glyphicon-eye-close text-danger gs-mr-2" title="Non visibile ai genitori"></span>
+                    {{ include('admin/include/icona.html.twig', {nome: 'eye-off', stile: 'outline', classe: 'text-danger gs-mr-2', titolo: 'Non visibile ai genitori'}) }}
                 {% endif %}
                     <strong>Data:</strong> {{ v.data|date('d/m/Y') }}
                   </p>
@@ -334,11 +334,15 @@ $(document).ready(function() {
       if (el.is(':visible')) {
         el.fadeOut();
         $(this).attr('title', 'Apre la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-full gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize');
       } else {
         el.fadeIn();
         $(this).attr('title', 'Chiude la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize');
       }
     });
   });

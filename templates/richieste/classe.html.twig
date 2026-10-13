@@ -10,7 +10,7 @@
   {% else %}
     {% if info.scheda_evacuazione is defined %}
   <div class="alert alert-info text-center">
-    <strong class="gs-big"><a href="{{ path('richieste_evacuazione', {classe: info.scheda_evacuazione}) }}"><span class="glyphicon glyphicon-file gs-mr-2"></span><span class="gs-text-normal">Scheda Evacuazione: designazione studenti apri-file, chiudi-fila e assistenti</span></a></strong>
+    <strong class="gs-big"><a href="{{ path('richieste_evacuazione', {classe: info.scheda_evacuazione}) }}">{{ include('admin/include/icona.html.twig', {nome: 'file-text', stile: 'outline', classe: 'gs-mr-2'}) }}<span class="gs-text-normal">Scheda Evacuazione: designazione studenti apri-file, chiudi-fila e assistenti</span></a></strong>
   </div>
     {% endif %}
     {% for mk, mv in dati.uniche %}
@@ -38,11 +38,11 @@
         {% endif %}
       <div class="col-sm-12">
         <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: dati.richieste[mk].nuove[0].id}) }}" title="Scarica il modulo compilato">
-          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong>
+          {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica il modulo compilato</strong>
         </a>
         {% for a in dati.richieste[mk].nuove[0].allegati %}
         <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: dati.richieste[mk].nuove[0].id, documento: loop.index}) }}" title="Scarica l'allegato al modulo">
-          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'allegato {{ loop.index }}</strong>
+          {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica l'allegato {{ loop.index }}</strong>
         </a>
         {% endfor %}
       </div>
@@ -89,11 +89,11 @@
           {% endif %}
         <div class="col-sm-12">
           <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: rv.id}) }}" title="Scarica il modulo compilato">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong>
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica il modulo compilato</strong>
           </a>
           {% for a in rv.allegati %}
           <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: rv.id, documento: loop.index}) }}" title="Scarica l'allegato al modulo">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'allegato {{ loop.index }}</strong>
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica l'allegato {{ loop.index }}</strong>
           </a>
         </div>
           {% endfor %}
@@ -123,11 +123,11 @@
             {% endif %}
           <div>
             <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: rv.id}) }}" title="Scarica il modulo compilato">
-              <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong>
+              {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica il modulo compilato</strong>
             </a>
             {% for a in rv.allegati %}
             <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: rv.id, documento: loop.index}) }}" title="Scarica l'allegato al modulo">
-              <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'allegato {{ loop.index }}</strong>
+              {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica l'allegato {{ loop.index }}</strong>
             </a>
           </div>
             {% endfor %}

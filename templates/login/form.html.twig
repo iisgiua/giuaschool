@@ -39,7 +39,7 @@
           {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
         <div class="gs-login-section gs-mb-4">
           <h3 class="gs-login-section-title text-center">
-            <span class="glyphicon glyphicon-google gs-mr-2"></span>Accesso con Google
+            {{ include('admin/include/icona.html.twig', {nome: 'brand-google', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con Google
           </h3>
           <div class="help-block text-center"><span class="gs-text-normal">Clicca sul pulsante <strong>"Accedi con Google"</strong> e poi inserisci, nella pagina successiva mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@{{ app.session.get('/CONFIG/ACCESSO/id_provider_dominio') }}) e la <strong>password</strong>.</span></div>
           <p class="gs-mb-2 text-center"><strong><em>Password Google dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></em></strong></p>
@@ -52,9 +52,9 @@
         {# --- SPID/CIE --- #}
         <div class="gs-login-section">
           <h3 class="gs-login-section-title text-center">
-            <span class="glyphicon glyphicon-shield gs-mr-2"></span>Accesso con SPID - CIE - eIDAS
+            {{ include('admin/include/icona.html.twig', {nome: 'shield', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con SPID - CIE - eIDAS
             <a href="#" type="button" class="gs-help-icon" data-toggle="modal" data-target="#gs-spid-info" title="Informazioni">
-              <span class="glyphicon glyphicon-question-sign gs-ml-2"></span>
+              {{ include('admin/include/icona.html.twig', {nome: 'help-circle', stile: 'outline', classe: 'gs-ml-2'}) }}
             </a>
           </h3>
           <div class="help-block text-center"><span class="gs-text-normal">Clicca sul pulsante <strong>"Entra con SPID - CIE - eIDAS"</strong> per accedere utilizzando la tua identità digitale.</span></div>
@@ -71,7 +71,7 @@
           {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
         <div class="gs-login-section gs-mb-4">
           <h3 class="gs-login-section-title text-center">
-            <span class="glyphicon glyphicon-google gs-mr-2"></span>Accesso con Google
+            {{ include('admin/include/icona.html.twig', {nome: 'brand-google', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con Google
           </h3>
           <div class="help-block text-center"><span class="gs-text-normal">Clicca sul pulsante <strong>"Accedi con Google"</strong> e poi inserisci, nella pagina successiva mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@{{ app.session.get('/CONFIG/ACCESSO/id_provider_dominio') }}) e la <strong>password</strong>.</span></div>
           <p class="gs-mb-2 text-center"><strong><em>Password Google dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></em></strong></p>
@@ -82,21 +82,21 @@
         <hr class="gs-login-divider">
         <div class="gs-login-section gs-mb-4">
           <h3 class="gs-login-section-title text-center">
-            <span class="glyphicon glyphicon-user gs-mr-2"></span>Accesso con Nome Utente e Password
+            {{ include('admin/include/icona.html.twig', {nome: 'user', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con Nome Utente e Password
           </h3>
           <div class="help-block text-center"><span class="gs-text-normal">Inserisci nei campi sottostanti l'<strong>utente</strong> e la <strong>password</strong>, quindi clicca sul pulsante <strong>"Accedi"</strong>.</span></div>
           <form name="login_form" method="post" class="form-horizontal">
             <div class="form-group">
               <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
               <div class="input-group gs-ml-4 gs-mr-4">
-                <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'user', stile: 'outline'}) }}</div>
                 <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
               </div>
             </div>
             <div class="form-group">
               <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
               <div class="input-group gs-ml-4 gs-mr-4">
-                <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}</div>
                 <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
               </div>
             </div>
@@ -104,7 +104,7 @@
             <div class="form-group gs-pr-4 gs-pl-4 gs-mb-4">
               <label for="otp" class="control-label text-primary text-left gs-d-block">{{ 'label.login_otp'|trans|raw }}</label>
               <div class="input-group">
-                <div class="input-group-addon"><span class="glyphicon glyphicon-flash"></span></div>
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'bolt', stile: 'outline'}) }}</div>
                 <input type="text" class="form-control" id="otp" name="_otp" placeholder="{{ 'label.otp'|trans }}" value="">
               </div>
             </div>
@@ -121,9 +121,9 @@
         <hr class="gs-login-divider">
         <div class="gs-login-section">
           <h3 class="gs-login-section-title text-center">
-            <span class="glyphicon glyphicon-shield gs-mr-2"></span>Accesso con SPID - CIE - eIDAS
+            {{ include('admin/include/icona.html.twig', {nome: 'shield', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con SPID - CIE - eIDAS
             <a href="#" type="button" class="gs-help-icon" data-toggle="modal" data-target="#gs-spid-info" title="Informazioni">
-              <span class="glyphicon glyphicon-question-sign gs-ml-2"></span>
+              {{ include('admin/include/icona.html.twig', {nome: 'help-circle', stile: 'outline', classe: 'gs-ml-2'}) }}
             </a>
           </h3>
           <div class="help-block text-center"><span class="gs-text-normal">Clicca sul pulsante <strong>"Entra con SPID - CIE - eIDAS"</strong> per accedere utilizzando la tua identità digitale.</span></div>
@@ -139,21 +139,21 @@
           {% else %}
         <div class="gs-login-section gs-mb-4">
           <h3 class="gs-login-section-title text-center">
-            <span class="glyphicon glyphicon-user gs-mr-2"></span>Accesso con Nome Utente e Password
+            {{ include('admin/include/icona.html.twig', {nome: 'user', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con Nome Utente e Password
           </h3>
           <div class="help-block text-center"><span class="gs-text-normal">Inserisci nei campi sottostanti l'<strong>utente</strong> e la <strong>password</strong>, quindi clicca sul pulsante <strong>"Accedi"</strong>.</span></div>
           <form name="login_form" method="post" class="form-horizontal">
             <div class="form-group">
               <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
               <div class="input-group gs-ml-4 gs-mr-4">
-                <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'user', stile: 'outline'}) }}</div>
                 <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
               </div>
             </div>
             <div class="form-group">
               <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
               <div class="input-group gs-ml-4 gs-mr-4">
-                <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}</div>
                 <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
               </div>
             </div>
@@ -161,7 +161,7 @@
             <div class="form-group gs-pr-4 gs-pl-4 gs-mb-4">
               <label for="otp" class="control-label text-primary text-left gs-d-block">{{ 'label.login_otp'|trans|raw }}</label>
               <div class="input-group">
-                <div class="input-group-addon"><span class="glyphicon glyphicon-flash"></span></div>
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'bolt', stile: 'outline'}) }}</div>
                 <input type="text" class="form-control" id="otp" name="_otp" placeholder="{{ 'label.otp'|trans }}" value="">
               </div>
             </div>
@@ -178,9 +178,9 @@
         <hr class="gs-login-divider">
         <div class="gs-login-section">
           <h3 class="gs-login-section-title text-center">
-            <span class="glyphicon glyphicon-shield gs-mr-2"></span>Accesso con SPID - CIE - eIDAS
+            {{ include('admin/include/icona.html.twig', {nome: 'shield', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con SPID - CIE - eIDAS
             <a href="#" type="button" class="gs-help-icon" data-toggle="modal" data-target="#gs-spid-info" title="Informazioni">
-              <span class="glyphicon glyphicon-question-sign gs-ml-2"></span>
+              {{ include('admin/include/icona.html.twig', {nome: 'help-circle', stile: 'outline', classe: 'gs-ml-2'}) }}
             </a>
           </h3>
           <div class="help-block text-center"><span class="gs-text-normal">Clicca sul pulsante <strong>"Entra con SPID - CIE - eIDAS"</strong> per accedere utilizzando la tua identità digitale.</span></div>
@@ -198,12 +198,12 @@
         <hr class="gs-login-divider">
         <div class="gs-login-section">
           <h3 class="gs-login-section-title text-center">
-            <span class="glyphicon glyphicon-phone gs-mr-2"></span>Applicazioni Disponibili
+            {{ include('admin/include/icona.html.twig', {nome: 'device-mobile', stile: 'outline', classe: 'gs-mr-2'}) }}Applicazioni Disponibili
           </h3>
           <div class="help-block text-center"><span class="gs-text-normal">Scarica le applicazioni ufficiali per accedere al Registro Elettronico dal tuo dispositivo mobile.</span></div>
           <div class="text-center gs-mt-3">
             <a href="/api/info/app" class="btn btn-primary gs-app-button">
-              <span class="glyphicon glyphicon-phone gs-mr-2"></span><strong>Informazioni App</strong>
+              {{ include('admin/include/icona.html.twig', {nome: 'device-mobile', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Informazioni App</strong>
             </a>
           </div>
         </div>
@@ -215,7 +215,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">
-              <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+              {{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}
               <span class="sr-only">{{ 'label.close'|trans }}</span>
             </button>
             <h3 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Informazioni sulle identità digitali</h3>

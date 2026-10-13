@@ -42,13 +42,13 @@
         <div class="col-sm-10">
     {% if form.voto.vars.value > 0 %}
           <span style="display:inline-block;width:3em;padding:0.6em 0.2em;" class="label {{ form.voto.vars.value >= 6 ? 'label-success' : (form.voto.vars.value < 5 ? 'label-danger' : 'label-warning') }} gs-mr-1 gs-big">--</span>
-          <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi un voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
-          <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
+          <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi un voto">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
+          <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}Cancella</button>
           <div style="display:inline">{{ form_widget(form.voto, {attr: {class: 'slider', 'data-slider-value': form.voto.vars.value}}) }}</div>
     {% else %}
           <span style="display:inline-block;width:3em;padding:0.6em 0.2em;" class="label label-default gs-mr-1 gs-big">--</span>
-          <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi un voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
-          <button style="display:none" class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
+          <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi un voto">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
+          <button style="display:none" class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}Cancella</button>
           <div style="display:none">{{ form_widget(form.voto) }}</div>
     {% endif %}
         </div>

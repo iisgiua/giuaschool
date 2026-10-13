@@ -30,7 +30,7 @@
         {% endfor %}
       {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, intestazione: [intestazione], classi: 'gs-pobs-table'}) }}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ periodo ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_0, intestazione: [intestazione], classi: 'gs-pobs-table'}) }}
   </div>
       {% endif %}
     {% else %}

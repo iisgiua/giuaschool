@@ -31,19 +31,19 @@
     {% for a in lista.lista %}
       <tr>
         <td>
-          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline'}) }}</button>
           <span>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</span>
       {% if a.autorizzaEntrata is not empty %}
-          <button type="button" class="btn btn-xs btn-info gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.autorizzaEntrata }}"><span class="glyphicon glyphicon-time"></span></button>
+          <button type="button" class="btn btn-xs btn-info gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.autorizzaEntrata }}">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline'}) }}</button>
       {% endif %}
       {% if a.autorizzaUscita is not empty %}
-          <button type="button" class="btn btn-xs btn-warning gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.autorizzaUscita }}"><span class="glyphicon glyphicon-time"></span></button>
+          <button type="button" class="btn btn-xs btn-warning gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.autorizzaUscita }}">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline'}) }}</button>
       {% endif %}
           {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a, g: lista.genitori[a.id]}) }}
         </td>
         <td>{{ a.classe }}</td>
         <td>
-          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_deroghe_edit', {alunno: a.id}) }}" role="button" title="Modifica deroghe e annotazioni sull'alunno"><span class="glyphicon glyphicon-edit gs-mr-2" aria-hidden="true"></span>{{ 'label.edit'|trans }}</a>
+          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_deroghe_edit', {alunno: a.id}) }}" role="button" title="Modifica deroghe e annotazioni sull'alunno">{{ include('admin/include/icona.html.twig', {nome: 'pencil', stile: 'outline', classe: 'gs-mr-2'}) }}{{ 'label.edit'|trans }}</a>
         </td>
       </tr>
     {% endfor %}
@@ -91,11 +91,15 @@ $(document).ready(function() {
       if (el.is(':visible')) {
         el.fadeOut();
         $(this).attr('title', 'Apre la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-full gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize');
       } else {
         el.fadeIn();
         $(this).attr('title', 'Chiude la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize');
       }
     });
   });

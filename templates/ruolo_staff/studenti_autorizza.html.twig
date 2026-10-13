@@ -6,9 +6,9 @@
   {% if errore %}
   <div class="row gs-mb-5">
     <div class="col-sm-12">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
-      <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
   </div>
   <div class="alert alert-warning" role="alert">
@@ -31,9 +31,9 @@
   </form>
   <div class="row gs-mb-1">
     <div class="col-sm-6">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
-      <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
       <strong class="gs-big">{{ info.periodo.nome }}</strong>
@@ -50,13 +50,13 @@
       {% for a in dati.lista %}
       <tr>
         <td>
-          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.alunno.cognome }} {{ a.alunno.nome }} ({{ a.alunno.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.alunno.cognome }} {{ a.alunno.nome }} ({{ a.alunno.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline'}) }}</button>
           <span>{{ a.alunno.cognome }} {{ a.alunno.nome }} ({{ a.alunno.dataNascita|date('d/m/Y') }})</span>
         {% if a.alunno.autorizzaEntrata is not empty %}
-          <button type="button" class="btn btn-xs btn-info gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.alunno.autorizzaEntrata }}"><span class="glyphicon glyphicon-time"></span></button>
+          <button type="button" class="btn btn-xs btn-info gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.alunno.autorizzaEntrata }}">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline'}) }}</button>
         {% endif %}
         {% if a.alunno.autorizzaUscita is not empty %}
-          <button type="button" class="btn btn-xs btn-warning gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.alunno.autorizzaUscita }}"><span class="glyphicon glyphicon-time"></span></button>
+          <button type="button" class="btn btn-xs btn-warning gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.alunno.autorizzaUscita }}">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline'}) }}</button>
         {% endif %}
         {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a.alunno, g: dati.genitori[a.alunno.id]}) }}
         </td>
@@ -185,11 +185,15 @@ $(document).ready(function() {
       if (el.is(':visible')) {
         el.fadeOut();
         $(this).attr('title', 'Apre la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-full gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize');
       } else {
         el.fadeIn();
         $(this).attr('title', 'Chiude la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize');
       }
     });
   });

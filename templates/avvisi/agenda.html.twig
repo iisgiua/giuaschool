@@ -16,9 +16,9 @@
 <div class="container-fluid">
   <h1 class="text-center gs-h2 gs-mt-0 gs-mb-2">{{ (info.visualizzazione == 'P' ? 'title.agenda_eventi' : 'title.agenda_verifiche')|trans }}</h1>
   <div class="row text-center gs-mb-3">
-    {% if info.url_prec %}<a class="btn btn-success btn-sm" href="{{ path('avvisi_agenda', {mese: info.url_prec, visualizzazione: info.visualizzazione, classe: info.classeId}) }}" role="button" title="Mese precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
+    {% if info.url_prec %}<a class="btn btn-success btn-sm" href="{{ path('avvisi_agenda', {mese: info.url_prec, visualizzazione: info.visualizzazione, classe: info.classeId}) }}" role="button" title="Mese precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
     <strong class="gs-big gs-mr-4 gs-ml-4">{{ info.nome_mese }}</strong>
-    {% if info.url_succ %}<a class="btn btn-success btn-sm" href="{{ path('avvisi_agenda', {mese: info.url_succ, visualizzazione: info.visualizzazione, classe: info.classeId}) }}" role="button" title="Mese successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+    {% if info.url_succ %}<a class="btn btn-success btn-sm" href="{{ path('avvisi_agenda', {mese: info.url_succ, visualizzazione: info.visualizzazione, classe: info.classeId}) }}" role="button" title="Mese successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
   </div>
   {# Riga con la scelta della visualizzazione e i pulsanti di inserimento: si
      mostra solo ai docenti. Prima usava controllaRuolo('DSP'), che per
@@ -42,8 +42,8 @@
     </div>
     <div class="col-sm-6 text-right">
     {% if dati.azioni.add is defined %}
-      <a class="btn btn-primary gs-mr-3" href="{{ path('avvisi_edit_agenda', {tipo: 'V'}) }}" role="button" title="Aggiungi una nuova verifica"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi verifica</strong></a>
-      <a class="btn btn-default" href="{{ path('avvisi_edit_agenda', {tipo: 'P'}) }}" role="button" title="Aggiungi nuovi compiti per casa"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi compiti</strong></a>
+      <a class="btn btn-primary gs-mr-3" href="{{ path('avvisi_edit_agenda', {tipo: 'V'}) }}" role="button" title="Aggiungi una nuova verifica">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Aggiungi verifica</strong></a>
+      <a class="btn btn-default" href="{{ path('avvisi_edit_agenda', {tipo: 'P'}) }}" role="button" title="Aggiungi nuovi compiti per casa">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Aggiungi compiti</strong></a>
     {% endif %}
     </div>
   </div>
@@ -81,21 +81,21 @@
         {% if info.visualizzazione == 'P' and dati[i] is defined %}
         <div class="gs-calendar-events">
           {% if dati[i].Q is defined %}
-          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza i colloqui previsti in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'Q'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Colloqui</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza i colloqui previsti in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'Q'}) }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Colloqui</strong></button>
           {% endif %}
           {% if dati[i].V is defined %}
-          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'V'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'V'}) }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Verifiche</strong></button>
           {% endif %}
           {% if dati[i].A is defined %}
-          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le attività previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'A'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Attività</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le attività previste in questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'A'}) }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Attività</strong></button>
           {% endif %}
           {% if dati[i].P is defined %}
-          <button class="gs-calendar-event gs-button-remote" type="button" title="Visualizza i compiti per casa assegnati per questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'P'}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Compiti</strong></button>
+          <button class="gs-calendar-event gs-button-remote" type="button" title="Visualizza i compiti per casa assegnati per questa data" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'P'}) }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Compiti</strong></button>
           {% endif %}
         </div>
         {% elseif dati[i] is defined %}
         <div class="gs-calendar-events">
-          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data per la classe indicata" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'S', classe: info.classeId}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span><strong>Verifiche: {{ dati[i] }}</strong></button>
+          <button class="gs-calendar-event gs-calendar-event-primary gs-button-remote" type="button" title="Visualizza le verifiche previste in questa data per la classe indicata" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_dettagli_agenda', {data: info.url_mese ~ '-' ~ ('%02d'|format(i)), tipo: 'S', classe: info.classeId}) }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Verifiche: {{ dati[i] }}</strong></button>
         </div>
         {% endif %}
       </td>

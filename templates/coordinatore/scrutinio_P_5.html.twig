@@ -27,7 +27,7 @@
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ m.cognome }} {{ m.nome }}</strong><br><small>({{ m.dataNascita|date('d/m/Y') }})</small>
               {% if m.bes != 'N' %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_' ~ m.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_' ~ m.bes)|trans }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>
               {% endif %}
           </td>
           <td>
@@ -37,9 +37,9 @@
           </td>
           <td>
               {% if dati.esiti[alunno].debiti is defined and dati.esiti[alunno].debiti %}
-            <button type="button" class="btn btn-sm btn-success gs-button-remote gs-ml-4" title="Modifica la comunicazione dei debiti formativi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_debiti', {alunno: alunno, periodo: periodo}) }}"><strong>COMPILATA</strong></button>
+            {{ include('include/bottone-azione.html.twig', {nome: 'check', etichetta: 'Modifica', titolo: 'Modifica la comunicazione dei debiti formativi', stile: 'success', dimensione: '', classi: 'gs-button-remote gs-ml-4', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_debiti', {alunno: alunno, periodo: periodo})}}) }}
               {% else %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote gs-ml-4" title="Compila la comunicazione dei debiti formativi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_debiti', {alunno: alunno, periodo: periodo}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Compila la comunicazione dei debiti formativi', titolo: 'Compila la comunicazione dei debiti formativi', classi: 'gs-button-remote gs-ml-4', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_debiti', {alunno: alunno, periodo: periodo}) }}) }}
               {% endif %}
           </td>
             {% endif %}
@@ -56,10 +56,10 @@
     {% endif %}
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
-      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '4'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
+      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '4'}) }}" role="button" title="Annulla e torna al passo precedente">{{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Torna al passo precedente</strong></a>
     </div>
     <div class="text-right col-sm-6">
-      <button class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Conferma e vai avanti</strong></button>
+      <button class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting">{{ include('admin/include/icona.html.twig', {nome: 'arrow-right', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma e vai avanti</strong></button>
     </div>
   </div>
     {{ form_end(form) }}

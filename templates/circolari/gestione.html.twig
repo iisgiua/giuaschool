@@ -6,7 +6,7 @@
   <div class="row gs-mb-0">
     <div class="col-sm-offset-6 col-sm-6 text-right">
   {% if dati.azioni.add is defined %}
-      <a class="btn btn-primary btn-sm" href="{{ path('circolari_edit', {circolare: 0}) }}" role="button" title="Inserisci una nuova circolare"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+      <a class="btn btn-primary btn-sm" href="{{ path('circolari_edit', {circolare: 0}) }}" role="button" title="Inserisci una nuova circolare">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</a>
   {% endif %}
     </div>
   </div>
@@ -62,7 +62,7 @@
   <div class="row gs-mt-2">
     <div class="col-sm-offset-6 col-sm-6 text-right">
     {% if dati.azioni.add is defined %}
-      <a class="btn btn-primary btn-sm" href="{{ path('circolari_edit', {circolare: 0}) }}" role="button" title="Inserisci una nuova circolare"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</a>
+      <a class="btn btn-primary btn-sm" href="{{ path('circolari_edit', {circolare: 0}) }}" role="button" title="Inserisci una nuova circolare">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</a>
     {% endif %}
     </div>
   </div>
@@ -75,14 +75,14 @@
           {{ form_label(form.inizio) }}
           <div class="input-group date">
             {{ form_widget(form.inizio, {attr: {widget: false}}) }}
-            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+            <span class="input-group-addon" aria-hidden="true">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline'}) }}</span>
           </div>
         </div>
         <div class="gs-filter-col">
           {{ form_label(form.fine) }}
           <div class="input-group date">
             {{ form_widget(form.fine, {attr: {widget: false}}) }}
-            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+            <span class="input-group-addon" aria-hidden="true">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline'}) }}</span>
           </div>
         </div>
       </div>

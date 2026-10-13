@@ -1,7 +1,7 @@
 {% form_theme form 'bootstrap_3_layout.html.twig' %}
 
 {% if form_success %}
-<div class="has-success"><span class="help-block"><strong><span class="glyphicon glyphicon-ok gs-mr-2" aria-hidden="true"></span>{{ form_success|trans }}</strong></span></div>
+<div class="has-success"><span class="help-block"><strong>{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}{{ form_success|trans }}</strong></span></div>
 {% endif %}
 {% if form_help %}
 <div class="help-block">{{ form_help|trans }}</div>

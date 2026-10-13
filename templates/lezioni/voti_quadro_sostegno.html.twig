@@ -11,7 +11,7 @@
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_medie'|trans }} {{ cattedra.classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno.cognome ~ ' ' ~ info.alunno.nome }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno.cognome ~ ' ' ~ info.alunno.nome }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>{% endif %}</em></h2>
   {# selettore sede/classe per le sostituzioni #}
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   <div class="row gs-mb-1">
@@ -29,11 +29,11 @@
       </div>
     </div>
     <div class="col-sm-4 text-center">
-      <button id="gs-filtro" class="btn btn-default btn-sm" role="button" title="Filtra gli alunni da visualizzare"><span class="glyphicon glyphicon-filter gs-mr-3"></span><strong>Visualizza solo il tuo alunno</strong></button>
+      <button id="gs-filtro" class="btn btn-default btn-sm" role="button" title="Filtra gli alunni da visualizzare">{{ include('admin/include/icona.html.twig', {nome: 'filter', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Visualizza solo il tuo alunno</strong></button>
     </div>
     <div class="col-sm-4 text-right">
     {% if info.periodo %}
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_sostegno') }}" role="button" title="Visualizza i dettagli delle valutazioni"><span class="glyphicon glyphicon-zoom-in gs-mr-3"></span><strong>Dettagli voti</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_sostegno') }}" role="button" title="Visualizza i dettagli delle valutazioni">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Dettagli voti</strong></a>
     {% endif %}
     </div>
   </div>
@@ -52,7 +52,7 @@
   {% for ka, a in dati.alunni %}
         <tr {{ ka == info.alunno.id ? 'id="gs-alunno"' : 'style="display: none;"' }}>
           <td class="gs-col-sticky gs-pt-1 gs-pb-1">
-            <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+            <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline'}) }}</button>
             <span{{ ka == info.alunno.id ? ' style="display: none;"' }}><strong>{{ a.cognome }} {{ a.nome }}</strong> <small>({{ a.dataNascita|date('d/m/Y') }})</small></span>
             {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a, g: dati.genitori[a.id]}) }}
           </td>
@@ -89,11 +89,15 @@ $(document).ready(function() {
       if (el.is(':visible')) {
         el.fadeOut();
         $(this).attr('title', 'Apre la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-full gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize');
       } else {
         el.fadeIn();
         $(this).attr('title', 'Chiude la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize');
       }
     });
   });

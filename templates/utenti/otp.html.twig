@@ -7,13 +7,20 @@
       <div class="panel-title">{{ 'title.procedura_otp'|trans }}</div>
     </div>
     <div class="panel-body">
+      {% form_theme form 'bootstrap_3_layout.html.twig' %}
+      {% if form_success %}
+      <div class="has-success"><span class="help-block"><strong>{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}{{ form_success|trans }}</strong></span></div>
+      {% endif %}
+      {% if form_help %}
+      <div class="help-block">{{ form_help|trans }}</div>
+      {% endif %}
+      {{ form_start(form) }}
   {% if reset %}
       <div class="gs-big gs-pt-3">
         <div class="gs-pb-5">
           <strong>L'OTP è stato già associato all'applicazione.
             Per disattivarlo clicca sul pulsante di CONFERMA.</strong>
         </div>
-        {{ include(('include/form-inline.html.twig')) }}
       </div>
   {% else %}
       <div class="pull-left gs-pl-3 gs-pr-5 gs-pt-3 gs-pb-3">
@@ -27,11 +34,18 @@
           </li>
           <li>Avvia l'app <em>Google Authenticator</em> e inquadra con la fotocamera il <em>QRcode</em> mostrato a lato.</li>
           <li>Inserisci e conferma il codice che verrà visualizzato dall'app:
-            {{ include(('include/form-inline.html.twig')) }}
+            {{ form_row(form.otp) }}
           </li>
         </ol>
       </div>
+      <div class="clearfix"></div>
   {% endif %}
+      {# Annulla e Conferma nello stesso contenitore: il flex li tiene sulla stessa riga #}
+      <div class="gs-otp-azioni">
+        {{ form_widget(form.cancel) }}
+        {{ form_widget(form.submit) }}
+      </div>
+      {{ form_end(form) }}
     </div>
   </div>
 </div>

@@ -41,12 +41,12 @@
         <td>{{ a.classe ? a.classe : 'Non definita' }}</td>
         <td>
       {% for g in lista.genitori[a.id] %}
-          <span class="glyphicon glyphicon-{{ g.spid ? 'ok-circle text-success' : 'ban-circle text-danger' }} gs-big" aria-hidden="true"></span>
+          {{ include('admin/include/icona.html.twig', {nome: (g.spid ? 'check' : 'ban'), stile: 'outline', classe: (g.spid ? 'text-success' : 'text-danger') ~ ' gs-big'}) }}
             Genitore {{ loop.index }}{{ ('#' not in (g.nome ~ g.cognome)) ? (': ' ~ g.nome ~ ' ' ~ g.cognome ~ ' - ' ~ g.codiceFiscale) }}<br>
       {% endfor %}
         </td>
         <td>
-          <a class="btn btn-primary btn-xs" href="{{ path('segreteria_genitori_edit', {alunno: a.id}) }}" role="button" title="Clicca per modificare le impostazioni"><span class="glyphicon glyphicon-edit gs-mr-2" aria-hidden="true"></span><strong>{{ 'label.edit'|trans }}</strong></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'label.edit'|trans, titolo: 'Clicca per modificare le impostazioni', url: path('segreteria_genitori_edit', {alunno: a.id})}) }}
         </td>
       </tr>
     {% endfor %}

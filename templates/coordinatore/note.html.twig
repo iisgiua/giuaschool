@@ -9,9 +9,12 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_note'|trans }} {{ classe }}</h1>
     {% for periodo, v in dati %}
-  <div class="row gs-mb-1">
-    <div class="col-sm-12 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_note', {classe: classe.id, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+  <div class="row gs-mt-4 gs-mb-2">
+    <div class="col-sm-6 text-info">
+      <strong class="gs-big">{{ periodo }}</strong>
+    </div>
+    <div class="col-sm-6 text-right">
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_note', {classe: classe.id, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF">{{ include('admin/include/icona.html.twig', {nome: 'printer', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
   {% set intestazione = [
@@ -43,8 +46,6 @@
       {% endfor %}
     {% endfor %}
     {{ include('include/tabella.html.twig', {
-      didascalia: '<strong>' ~ periodo ~ '</strong>',
-      classi_didascalia: 'text-info text-center gs-big',
       intestazione: [intestazione], corpo: righe
     }) }}
     {% else %}

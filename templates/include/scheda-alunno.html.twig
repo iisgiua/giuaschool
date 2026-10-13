@@ -28,7 +28,7 @@
     {% if a.bes != 'N' %}
   <div class="list-group-item">
     <div class="text-center gs-mb-3">
-      <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Apre la scheda con le informazioni riservate"><strong><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Informazioni riservate</strong></button>
+      <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Apre la scheda con le informazioni riservate"><strong>{{ include('admin/include/icona.html.twig', {nome: 'arrows-maximize', stile: 'outline', classe: 'gs-mr-2'}) }}Informazioni riservate</strong></button>
     </div>
     <div class="list-group-item-text" style="display:none">
       <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>

@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="col-sm-4 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_voti', {classe: info.classe.id, periodo: info.periodo, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_voti', {classe: info.classe.id, periodo: info.periodo, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF">{{ include('admin/include/icona.html.twig', {nome: 'printer', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
   {% set intestazione_grezza_0 %}    <thead>
@@ -42,7 +42,7 @@
     {% for alunno, a in dati.alunni %}
       <tr>
         <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
-          <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2 gs-mt-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Dettagli alunno', titolo: 'Dettagli alunno', stile: 'default', classi: 'pull-left gs-mr-2 gs-mt-2', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-title': a.cognome ~ ' ' ~ a.nome ~ ' (' ~ a.dataNascita|date('d/m/Y') ~ ')', 'data-body': 'alunno-' ~ loop.index}}) }}
           <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
           {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a, g: dati.genitori[a.id]}) }}
         </td>
@@ -91,11 +91,15 @@ $(document).ready(function() {
       if (el.is(':visible')) {
         el.fadeOut();
         $(this).attr('title', 'Apre la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-full gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize');
       } else {
         el.fadeIn();
         $(this).attr('title', 'Chiude la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize');
       }
     });
   });

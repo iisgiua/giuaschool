@@ -109,7 +109,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">
-            <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+            {{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}
             <span class="sr-only">{{ 'label.close'|trans }}</span>
           </button>
           <h3 class="modal-title gs-h3" id="gs-info-richiesta-titolo"></h3>
@@ -193,10 +193,10 @@ $(document).ready(function() {
     }
     $(this).find('#gs-info-richiesta-valori').html(valori);
     var documenti = '<a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="'+$(e.relatedTarget).data('documento')+
-      '" title="Scarica il modulo di richiesta compilato"><span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong></a>';
+      '" title="Scarica il modulo di richiesta compilato"><svg class="icon icon-outline gs-mr-1" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#download"></use></svg><strong>Scarica il modulo compilato</strong></a>';
     for (var i = 1; i <= $(e.relatedTarget).data('allegati'); i++) {
       documenti += '<a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="'+$(e.relatedTarget).data('allegato-'+i)+
-        '" title="Scarica l\'allegato"><span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l\'allegato '+i+
+        '" title="Scarica l\'allegato"><svg class="icon icon-outline gs-mr-1" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#download"></use></svg><strong>Scarica l\'allegato '+i+
         '</strong></a>';
     }
     $(this).find('#gs-info-richiesta-documenti').html(documenti);

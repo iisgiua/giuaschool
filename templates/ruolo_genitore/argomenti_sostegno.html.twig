@@ -39,7 +39,7 @@
       <tr>
             {% if loop.first %}
         <td  style="background: #ffffff" rowspan="{{ v2|length }}">
-          <a class="btn btn-primary btn-xs" href="{{ path('genitori_lezioni', {data: data}) }}" role="button" title="Visualizza le lezioni del giorno"><span class="glyphicon glyphicon-pushpin gs-mr-2"></span><strong>{{ e.data }}</strong></a>
+          <a class="btn btn-primary btn-xs" href="{{ path('genitori_lezioni', {data: data}) }}" role="button" title="Visualizza le lezioni del giorno">{{ include('admin/include/icona.html.twig', {nome: 'pin', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ e.data }}</strong></a>
         </td>
         <td rowspan="{{ v2|length }}"><small>{{ materia }}</small></td>
             {% endif %}
@@ -50,7 +50,7 @@
         {% endfor %}
       {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ periodo ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
     {% endfor %}
   {% endif %}
 </div>

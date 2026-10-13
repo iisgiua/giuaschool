@@ -27,7 +27,7 @@
           {% if a.P.ore > 0 %}{{ 'label.modulo_formativo_tipo_P'|trans }}: {{ a.P.ore }}<br>{% endif %}
         </td>
         <td>
-          <button type="button" class="btn btn-xs btn-primary" title="Dettagli della situazione dell'alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ a.id }}"><strong>{{ 'label.show'|trans }}</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'label.show'|trans, titolo: 'Dettagli della situazione dell\'alunno', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-title': a.cognome ~ ' ' ~ a.nome ~ ' (' ~ a.dataNascita|date('d/m/Y') ~ ')', 'data-body': 'alunno-' ~ a.id}}) }}
           <div id="alunno-{{ a.id }}" style="display:none">
             <h3 class="gs-h3 text-center gs-mt-1 text-primary">Moduli formativi svolti</h3>
       {% if a.O.ore > 0 %}

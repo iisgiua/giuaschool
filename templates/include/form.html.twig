@@ -5,7 +5,7 @@
   <div class="panel-body" >
     {{ form_start(form) }}
     {% if form_success %}
-      <div class="has-success"><span class="help-block gs-big"><strong><span class="glyphicon glyphicon-ok gs-mr-2" aria-hidden="true"></span>{{ form_success|trans|raw }}</strong></span></div>
+      <div class="has-success"><span class="help-block gs-big"><strong>{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}{{ form_success|trans|raw }}</strong></span></div>
     {% endif %}
     {% if form_help %}
       <div class="help-block gs-text-normal"><em>{{ form_help|trans|raw }}</em></div>

@@ -35,7 +35,7 @@
         <label for="avvisi-search-mobile" class="sr-only">Cerca oggetto</label>
         <input type="text" id="avvisi-search-mobile" class="form-control" placeholder="Cerca oggetto...">
         <button type="button" class="btn btn-default gs-avvisi-filters-toggle" id="avvisi-filters-toggle">
-          <span class="glyphicon glyphicon-filter gs-mr-2"></span>Filtri
+          {{ include('admin/include/icona.html.twig', {nome: 'filter', stile: 'outline', classe: 'gs-mr-2'}) }}Filtri
         </button>
       </div>
       <div class="gs-avvisi-filters-mobile-panel" id="avvisi-filters-panel">
@@ -66,19 +66,19 @@
     {% if dati.azioni.add is defined %}
     <div class="gs-avvisi-actions-buttons">
       <a class="btn btn-default btn-sm" href="{{ path('avvisi_edit') }}" role="button" title="Inserisci un nuovo avviso generico">
-        <span class="glyphicon glyphicon-plus mr-1"></span>Generico
+        {{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'mr-1'}) }}Generico
       </a>
       <a class="btn btn-default btn-sm" href="{{ path('avvisi_edit_classi', {tipo: 'E'}) }}" role="button" title="Aggiungi un nuovo avviso per l'ingresso posticipato">
-        <span class="glyphicon glyphicon-plus mr-1"></span>Ingresso
+        {{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'mr-1'}) }}Ingresso
       </a>
       <a class="btn btn-default btn-sm" href="{{ path('avvisi_edit_classi', {tipo: 'U'}) }}" role="button" title="Aggiungi un nuovo avviso per l'uscita anticipata">
-        <span class="glyphicon glyphicon-plus mr-1"></span>Uscita
+        {{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'mr-1'}) }}Uscita
       </a>
       <a class="btn btn-default btn-sm" href="{{ path('avvisi_edit_classi', {tipo: 'A'}) }}" role="button" title="Aggiungi un nuovo avviso per lo svolgimento di attività">
-        <span class="glyphicon glyphicon-plus mr-1"></span>Attività
+        {{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'mr-1'}) }}Attività
       </a>
       <a class="btn btn-default btn-sm" href="{{ path('avvisi_edit_personali') }}" role="button" title="Aggiungi una nuova comunicazione personale per i genitori">
-        <span class="glyphicon glyphicon-plus mr-1"></span>Personale
+        {{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'mr-1'}) }}Personale
       </a>
     </div>
     {% endif %}
@@ -88,7 +88,7 @@
   <div class="gs-avvisi-mobile-actions">
     <div class="dropdown">
       <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-        <span class="glyphicon glyphicon-plus gs-mr-2"></span>Nuovo avviso
+        {{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Nuovo avviso
         <span class="caret gs-ml-2"></span>
       </button>
       <ul class="dropdown-menu">
@@ -173,8 +173,8 @@
       })]) %}
     {% endif %}
     {% set righe = righe|merge([{
-      cells: [
-        {contenuto: '<small>' ~ a.autore.nome ~ ' ' ~ a.autore.cognome ~ '</small>'},
+      celle: [
+        {contenuto: '<small>' ~ a.autore.nome|e ~ ' ' ~ a.autore.cognome|e ~ '</small>'},
         {contenuto: '<small>' ~ ('label.avvisi_tipo_' ~ a.tipo)|trans ~ '</small>'},
         {contenuto: a.data|date('d/m/Y')},
         {contenuto: a.titolo},

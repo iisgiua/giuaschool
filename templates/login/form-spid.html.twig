@@ -8,14 +8,14 @@
       <span class="italia-it-button-text">Entra con SPID - CIE - eIDAS</span>
     </a>
     <a href="#" type="button" class="gs-big gs-ml-2" data-toggle="modal" data-target="#gs-spid-info">
-      <strong class="gs-big"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></strong>
+      <strong class="gs-big">{{ include('admin/include/icona.html.twig', {nome: 'help-circle', stile: 'outline'}) }}</strong>
     </a>
     <div class="modal fade" id="gs-spid-info" tabindex="-1" role="dialog" aria-labelledby="gs-spid-info-title">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">
-              <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+              {{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}
               <span class="sr-only">{{ 'label.close'|trans }}</span>
             </button>
             <h3 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Informazioni sulle identità digitali</h3>

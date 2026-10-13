@@ -16,17 +16,17 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_osservazioni'|trans }} {{ classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>{% endif %}</em></h2>
   {# selettore sede/classe per le sostituzioni #}
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   <div class="row gs-mb-4">
     <div class="col-sm-6">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {cattedra: cattedra.id, classe: classe.id, data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
-      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {cattedra: cattedra.id, classe: classe.id, data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {cattedra: cattedra.id, classe: classe.id, data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {cattedra: cattedra.id, classe: classe.id, data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni_personali') }}" role="button" title="Visualizza il diario personale in cui inserire le proprie osservazioni"><span class="glyphicon glyphicon-book gs-mr-3"></span><strong>Diario personale</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni_personali') }}" role="button" title="Visualizza il diario personale in cui inserire le proprie osservazioni">{{ include('admin/include/icona.html.twig', {nome: 'book', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Diario personale</strong></a>
     </div>
   </div>
     {% if errore %}
@@ -36,13 +36,13 @@
     {% endif %}
     {% for periodo in ['Secondo Quadrimestre', 'Primo Quadrimestre'] %}
       {% if dati.lista[periodo] is defined %}
-  <div class="row gs-mb-1">
+  <div class="row gs-mt-4 gs-mb-2">
     <div class="col-sm-10 text-info">
       <strong class="gs-big">{{ periodo }} - Osservazioni del docente</strong>
     </div>
     <div class="col-sm-2 text-right">
         {% if dati.add is defined %}
-      <a class="btn btn-primary btn-xs" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno"><span class="glyphicon glyphicon-plus gs-mr-2"></span>{{ 'label.add'|trans }}</a>
+      <a class="btn btn-primary btn-xs" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}{{ 'label.add'|trans }}</a>
         {% endif %}
     </div>
   </div>
@@ -59,7 +59,7 @@
           <strong>{{ v1[0].nome }}</strong>
         </td>
         <td class="col-sm-9">
-          <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Apre la scheda con le osservazioni sull'alunno"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Apri visualizzazione</button>
+          <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Apre la scheda con le osservazioni sull'alunno">{{ include('admin/include/icona.html.twig', {nome: 'arrows-maximize', stile: 'outline', classe: 'gs-mr-2'}) }}Apri visualizzazione</button>
           <div class="list-group gs-mb-0" style="display:none">
             {% endif %}
             {% for e in v1 %}
@@ -67,10 +67,10 @@
               <div>
                 <strong>{{ e.data }}</strong> <em>({{ e.materia }})</em>
               {% if e.delete %}
-                <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella l'osservazione sull'alunno" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ e.delete }}" data-text="{{ 'message.cancella_osservazione'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella l\'osservazione sull\'alunno', stile: 'danger', classi: 'pull-right gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': e.delete, 'data-text': 'message.cancella_osservazione'|trans, 'data-csrf': csrf_token('delete')}}) }}
               {% endif %}
               {% if e.edit %}
-                <a class="btn btn-primary btn-xs pull-right gs-mr-2" href="{{ e.edit }}" role="button" title="Modifica l'osservazione sull'alunno"><span class="glyphicon glyphicon-edit"></span></a>
+                {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica l\'osservazione sull\'alunno', classi: 'pull-right gs-mr-2', url: e.edit}) }}
               {% endif %}
               </div>
               <div class="list-group-item-text">
@@ -87,13 +87,13 @@
     {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
       {% endif %}
       {% if dati.sostegno[periodo] is defined %}
-  <div class="row gs-mb-1">
+  <div class="row gs-mt-4 gs-mb-2">
     <div class="col-sm-10 text-info">
       <strong class="gs-big">{{ periodo }} - Osservazioni di altri docenti su {{ info.alunno.cognome }} {{ info.alunno.nome }}</strong>
     </div>
     <div class="col-sm-2 text-right">
         {% if dati.add is defined %}
-      <a class="btn btn-primary btn-xs" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno"><span class="glyphicon glyphicon-plus gs-mr-2"></span>{{ 'label.add'|trans }}</a>
+      <a class="btn btn-primary btn-xs" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}{{ 'label.add'|trans }}</a>
         {% endif %}
     </div>
   </div>
@@ -110,7 +110,7 @@
           <strong>{{ v1[0].materia }}</strong>
         </td>
         <td class="col-sm-9">
-          <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Apre la scheda con le osservazioni sull'alunno"><span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Apri visualizzazione</button>
+          <button type="button" class="btn btn-xs btn-primary gs-show-hide" title="Apre la scheda con le osservazioni sull'alunno">{{ include('admin/include/icona.html.twig', {nome: 'arrows-maximize', stile: 'outline', classe: 'gs-mr-2'}) }}Apri visualizzazione</button>
           <div class="list-group gs-mb-0" style="display:none">
             {% endif %}
             {% for e in v1 %}
@@ -118,10 +118,10 @@
               <div>
                 <strong>{{ e.data }}</strong>
               {% if e.delete %}
-                <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella l'osservazione sull'alunno" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ e.delete }}" data-text="{{ 'message.cancella_osservazione'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella l\'osservazione sull\'alunno', stile: 'danger', classi: 'pull-right gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': e.delete, 'data-text': 'message.cancella_osservazione'|trans, 'data-csrf': csrf_token('delete')}}) }}
               {% endif %}
               {% if e.edit %}
-                <a class="btn btn-primary btn-xs pull-right gs-mr-2" href="{{ e.edit }}" role="button" title="Modifica l'osservazione sull'alunno"><span class="glyphicon glyphicon-edit"></span></a>
+                {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica l\'osservazione sull\'alunno', classi: 'pull-right gs-mr-2', url: e.edit}) }}
               {% endif %}
               </div>
               <div class="list-group-item-text">
@@ -139,7 +139,7 @@
       {% endif %}
     {% endfor %}
     {% if dati.add is defined %}
-  <div><a class="btn btn-primary btn-xs pull-right" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno"><span class="glyphicon glyphicon-plus gs-mr-2"></span>{{ 'label.add'|trans }}</a></div>
+  <div><a class="btn btn-primary btn-xs pull-right" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione su un alunno">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}{{ 'label.add'|trans }}</a></div>
     {% endif %}
     {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_lezione'}) }}
   {% endif %}
@@ -197,11 +197,11 @@ $(document).ready(function() {
     if (el.is(':visible')) {
       el.fadeOut();
       $(this).attr('title', 'Apre la scheda con le osservazioni sull\'alunno');
-      $(this).html('<span class="glyphicon glyphicon-resize-full gs-mr-2"></span>Apri visualizzazione');
+      $(this).html('<svg class="icon icon-outline gs-mr-2" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize"></use></svg>Apri visualizzazione');
     } else {
       el.fadeIn();
       $(this).attr('title', 'Chiude la scheda con le osservazioni sull\'alunno');
-      $(this).html('<span class="glyphicon glyphicon-resize-small gs-mr-2"></span>Chiudi visualizzazione');
+      $(this).html('<svg class="icon icon-outline gs-mr-2" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize"></use></svg>Chiudi visualizzazione');
     }
   });
 });

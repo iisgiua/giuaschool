@@ -37,7 +37,7 @@
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
             <strong>{{ a.cognome }} {{ a.nome }}</strong><br><small>({{ a.dataNascita|date('d/m/Y') }})</small>
       {% if a.bes != 'N' %}
-            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_' ~ a.bes)|trans }}"><span class="glyphicon glyphicon-info-sign"></span></button>
+            <button type="button" class="btn btn-xs btn-default gs-ml-1" title="Informazioni sull'alunno" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ ('label.bes_' ~ a.bes)|trans }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>
       {% endif %}
           </td>
       {% for materia, m in dati.materie %}
@@ -56,13 +56,13 @@
           </td>
           <td>
       {% if dati.esiti[alunno].esito is not defined %}
-            <button type="button" class="btn btn-xs btn-primary gs-button-remote" title="Inserisci l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}"><span class="glyphicon glyphicon-edit"></span></button>
+            {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Inserisci l\'esito', titolo: 'Inserisci l\'esito', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_esito', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}) }}
       {% elseif dati.esiti[alunno].esito == 'A' %}
-            <button type="button" class="btn btn-xs btn-success gs-button-round gs-button-remote" title="AMMESSO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}"><span class="glyphicon glyphicon-ok"></span></button>
+            <button type="button" class="btn btn-xs btn-success gs-button-round gs-button-remote" title="AMMESSO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}">{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline'}) }}</button>
       {% elseif dati.esiti[alunno].esito == 'N' %}
-            <button type="button" class="btn btn-xs btn-danger gs-button-round gs-button-remote" title="NON AMMESSO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}"><span class="glyphicon glyphicon-remove"></span></button>
+            <button type="button" class="btn btn-xs btn-danger gs-button-round gs-button-remote" title="NON AMMESSO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline'}) }}</button>
       {% elseif dati.esiti[alunno].esito == 'X' %}
-            <button type="button" class="btn btn-xs btn-info gs-button-round gs-button-remote" title="SCRUTINIO RINVIATO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}"><span class="glyphicon glyphicon-refresh"></span></button>
+            <button type="button" class="btn btn-xs btn-info gs-button-round gs-button-remote" title="SCRUTINIO RINVIATO - Clicca per modificare l'esito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_esito', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}">{{ include('admin/include/icona.html.twig', {nome: 'refresh', stile: 'outline'}) }}</button>
       {% endif %}
           </td>
         </tr>
@@ -72,10 +72,10 @@
   </div>
   <div class="row gs-mt-5 gs-mb-5">
     <div class="col-sm-6">
-      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '1'}) }}" role="button" title="Annulla e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Torna al passo precedente</strong></a>
+      <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '1'}) }}" role="button" title="Annulla e torna al passo precedente">{{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Torna al passo precedente</strong></a>
     </div>
     <div class="text-right col-sm-6">
-      <button class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting"><span class="glyphicon glyphicon-forward gs-mr-2"></span><strong>Conferma e vai avanti</strong></button>
+      <button class="btn btn-primary" title="Vai al passo successivo" data-toggle="modal" data-target="#gs-modal-waiting">{{ include('admin/include/icona.html.twig', {nome: 'arrow-right', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma e vai avanti</strong></button>
     </div>
   </div>
     {{ form_end(form) }}

@@ -61,7 +61,7 @@
         <div class="col-sm-10">
           <div class="form-group gs-mb-4 gs-mt-2 gs-vertical-center">
             <div class="col-sm-2">{{ form_widget(form.genitori) }}</div>
-            <div class="col-sm-2 text-right"><button type="button" id="gs-pulsanteFiltroGenitori" class="btn btn-primary btn-xs gs-ml-3" style="display:none"><span class="glyphicon glyphicon-edit gs-mr-2"></span>{{ 'label.edit'|trans }}</button></div>
+            <div class="col-sm-2 text-right"><button type="button" id="gs-pulsanteFiltroGenitori" class="btn btn-primary btn-xs gs-ml-3" style="display:none">{{ include('admin/include/icona.html.twig', {nome: 'pencil', stile: 'outline', classe: 'gs-mr-2'}) }}{{ 'label.edit'|trans }}</button></div>
             <div class="col-sm-8 text-info"><strong><em id="gs-filtroGenitori" style="display:none"></em></strong></div>
             {{ form_widget(form.filtroGenitori) }}
           </div>
@@ -184,7 +184,7 @@ $(document).ready(function() {
       $('#gs-modal-alunni-row').data('id', opt);
       $('#gs-modal-alunni-row').data('nomi', $('#avviso_filtroGenitori').data('nomi'));
       $('#gs-filtroGenitori span').each(function(){
-        var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-alunni-selezionati-'+$(this).attr('id')+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><strong>'+$(this).text()+'</strong></div>';
+        var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-alunni-selezionati-'+$(this).attr('id')+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(this)"><svg class="icon icon-outline" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#x"></use></svg></button><strong>'+$(this).text()+'</strong></div>';
         $('#gs-modal-alunni-row').append(s);
       });
     }
@@ -267,7 +267,7 @@ function initFiltro(button) {
 function addUser(element) {
   var id = $(element).attr('id').substr($(element).attr('id').lastIndexOf('-')+1);
   var nome = $(element).parent().text();
-  var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-alunni-selezionati-'+id+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button><strong>'+nome+'</strong></div>';
+  var s='<div class="col-sm-6 gs-mt-1"><button type="button" id="gs-modal-alunni-selezionati-'+id+'" class="btn btn-danger btn-xs gs-mr-2" title="Clicca per rimuovere l\'utente dalla selezione" onClick="removeUser(this)"><svg class="icon icon-outline" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#x"></use></svg></button><strong>'+nome+'</strong></div>';
   var txt = $('#gs-modal-alunni-row').data('nomi');
   txt = (txt == null || txt == '' ? nome : txt+', '+nome);
   $('#gs-modal-alunni-row').data('nomi', txt);
@@ -302,9 +302,9 @@ function alunniSearch(page) {
       var s='';
       $.each(data.lista, function(idx,item){
         if ((','+$('#gs-modal-alunni-row').data('id')+',').indexOf(','+item.id+',') == -1) {
-          s='<div class="gs-mt-1"><button type="button" id="gs-modal-alunni-lista-'+item.id+'" class="btn btn-primary btn-xs gs-mr-2" title="Clicca per selezionare l\'utente" onClick="addUser(this)"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>'+item.nome+'</div>';
+          s='<div class="gs-mt-1"><button type="button" id="gs-modal-alunni-lista-'+item.id+'" class="btn btn-primary btn-xs gs-mr-2" title="Clicca per selezionare l\'utente" onClick="addUser(this)"><svg class="icon icon-outline" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#plus"></use></svg></button>'+item.nome+'</div>';
         } else {
-          s='<div class="gs-mt-1"><button type="button" id="gs-modal-alunni-lista-'+item.id+'" class="btn btn-primary btn-xs gs-mr-2" title="Clicca per selezionare l\'utente" onClick="addUser(this)" style="display:none"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>'+item.nome+'</div>';
+          s='<div class="gs-mt-1"><button type="button" id="gs-modal-alunni-lista-'+item.id+'" class="btn btn-primary btn-xs gs-mr-2" title="Clicca per selezionare l\'utente" onClick="addUser(this)" style="display:none"><svg class="icon icon-outline" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#plus"></use></svg></button>'+item.nome+'</div>';
         }
         if (idx < 10) {
           sl+=s;

@@ -21,7 +21,9 @@
   # corpo:        lista di righe di celle
   # corpo_grezzo: il <tbody> come markup, per le tabelle non ancora descritte
   #   come dati: il componente fornisce l'involucro e le righe passano come sono
-  # didascalia:   testo della <caption>, con classi_didascalia per lo stile
+  # didascalia:   testo della didascalia, stampato sopra la tabella (div
+  #   .gs-table-caption) con classi_didascalia per lo stile; lo stesso testo
+  #   resta nella <caption> sr-only, che non si vede ma da' il nome alla tabella
   # classi:       classi della <table> (default 'table table-bordered ...')
   # classe_intestazione: classi della <thead>; senza default, cosi' una testata
   #   descritta a dati ma non colorata esplicitamente resta senza attributo
@@ -103,9 +105,16 @@
 
 <div class="table-responsive">
 {% if ha_corpo or corpo is not empty or righe_brevi %}
+{# La didascalia sta fuori dalla <table>, come div sopra la cornice. Dentro la
+   cornice la sua altezza porta in cima il bordo arrotondato della tabella e
+   lascia quadrati gli angoli della prima riga (la testata), che invece in basso
+   si vedono tondi. Il <caption> resta comunque, per soli screen reader: senza
+   altezza non allunga la cornice ed e' lui a dare il nome alla tabella. #}
+{% if didascalia %}  <div class="gs-table-caption{% if classi_didascalia %} {{ classi_didascalia }}{% endif %}" aria-hidden="true">{{ didascalia|raw }}</div>
+{% endif %}
   <table{% if id_tabella %} id="{{ id_tabella }}"{% endif %} class="{{ classi_tabella }} gs-table">
 {# la didascalia e' HTML gia' pronto, come le celle: va stampata senza escape #}
-{% if didascalia %}    <caption{% if classi_didascalia %} class="{{ classi_didascalia }}"{% endif %}>{{ didascalia|raw }}</caption>
+{% if didascalia %}    <caption class="sr-only">{{ didascalia|raw }}</caption>
 {% endif %}
 {% if intestazione_grezza|default('') is not empty %}{{ intestazione_grezza|raw }}
 {% elseif intestazione|length > 0 %}    <thead{% if classe_intestazione %} class="{{ classe_intestazione }}"{% endif %}>

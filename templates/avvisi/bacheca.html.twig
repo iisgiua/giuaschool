@@ -65,7 +65,7 @@
         <td><small>{% for s in a.avviso.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
         <td>{{ a.avviso.titolo }}</td>
         <td>
-          <button type="button" class="btn btn-xs btn-primary" title="Visualizza l'avviso" data-toggle="modal" data-target="#gs-modal-info" data-info-date="{{ a.avviso.data|date('j') }} {{ info.mesi[a.avviso.data|date('n')] }} {{ a.avviso.data|date('Y') }}" data-info-title="{{ a.avviso.titolo }}" data-info-id="{{ a.avviso.id }}" data-body="avviso-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span>Visualizza</button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza l\'avviso', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-info-date': a.avviso.data|date('j') ~ ' ' ~ info.mesi[a.avviso.data|date('n')] ~ ' ' ~ a.avviso.data|date('Y'), 'data-info-title': a.avviso.titolo, 'data-info-id': a.avviso.id, 'data-body': 'avviso-' ~ loop.index}}) }}
           <div id="avviso-{{ loop.index }}" style="display:none">
             <div class="alert alert-info gs-mt-0 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
               <div class="gs-text-normal">{{ a.avviso.testoPersonalizzato|raw|nl2br }}</div>
@@ -76,8 +76,8 @@
         {% for n, f in a.avviso.allegati %}
               <div class="gs-mt-3 gs-mb-3">
                 <strong>Allegato {{ n + 1 }}:</strong> {{ f.titolo }}
-                <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('avvisi_download', {avviso: a.avviso.id, allegato: n, tipo: 'D'}) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
-                <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('avvisi_download', {avviso: a.avviso.id, allegato: n, tipo: 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+                {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica l\'allegato', titolo: 'Scarica l\'allegato', url: path('avvisi_download', {avviso: a.avviso.id, allegato: n, tipo: 'D'}), attributi: {download: ''}, classi: 'pull-right gs-ml-3'}) }}
+                {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza l\'allegato', titolo: 'Visualizza l\'allegato', url: path('avvisi_download', {avviso: a.avviso.id, allegato: n, tipo: 'V'}), attributi: {target: '_blank', rel: 'noopener noreferrer'}, classi: 'pull-right'}) }}
               </div>
         {% endfor %}
             </div>

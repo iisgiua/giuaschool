@@ -13,10 +13,10 @@
           <div class="col-sm-10">
     {% if prop.unico.vars.value is not empty %}
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ prop.unico.vars.value < info.valutazioni.med ? 'danger' : (prop.unico.vars.value < info.valutazioni.suff ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ info.valutazioni.lista[prop.unico.vars.value] }}</span>
-            <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+            <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
     {% else %}
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-mr-4 gs-big">--</span>
-            <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+            <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
     {% endif %}
             <div style="display:none">{{ form_widget(prop.unico) }}</div>
           </div>

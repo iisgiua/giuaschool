@@ -12,6 +12,7 @@
       </div>
     </div>
     <div class="panel-body">
+      {% set contenuto_notifiche %}
       {% if is_granted('ROLE_DOCENTE') %}
       {% if dati.richieste > 0 %}
       <div class="alert alert-danger gs-mb-2" role="alert"><strong class="gs-big">{{ dati.richieste == 1 ? 'È presente 1
@@ -139,6 +140,12 @@
             href="{{ path('circolari_bacheca') }}">vai alla pagina delle Circolari per visualizzarl{{ dati.circolari ==
             1 ? 'a' : 'e' }}</a></strong></div>
       {% endif %}
+      {% endif %}
+      {% endset %}
+      {% if contenuto_notifiche|trim is empty %}
+      <p class="gs-mb-0 text-muted">{{ 'message.nessuna_notifica_home'|trans }}</p>
+      {% else %}
+      {{ contenuto_notifiche }}
       {% endif %}
     </div>
   </div>

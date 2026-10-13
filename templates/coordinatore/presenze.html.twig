@@ -23,14 +23,14 @@
           {{ form_label(form[0].inizio, null, {label_attr: {class: 'control-label'}}) }}
           <div class="input-group date">
             {{ form_widget(form[0].inizio, {attr: {widget: false}}) }}
-            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+            <span class="input-group-addon" aria-hidden="true">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline'}) }}</span>
           </div>
         </div>
         <div class="form-group gs-filter-col">
           {{ form_label(form[0].fine, null, {label_attr: {class: 'control-label'}}) }}
           <div class="input-group date">
             {{ form_widget(form[0].fine, {attr: {widget: false}}) }}
-            <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-calendar"></span></span>
+            <span class="input-group-addon" aria-hidden="true">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline'}) }}</span>
           </div>
         </div>
       </div>

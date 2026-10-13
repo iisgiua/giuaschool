@@ -3,30 +3,30 @@
 {% block pagina_contenuto %}
 <div class="container-fluid">
   {% if not cattedra and not classe %}
-  <h1 class="text-center gs-h1 gs-mt-2"><span class="glyphicon glyphicon-eye-close text-danger gs-mr-3" title="Non visibile ai genitori"></span>{{ 'title.lezioni_osservazioni_personali'|trans }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2">{{ include('admin/include/icona.html.twig', {nome: 'eye-off', stile: 'outline', classe: 'text-danger gs-mr-3', titolo: 'Non visibile ai genitori'}) }}{{ 'title.lezioni_osservazioni_personali'|trans }}</h1>
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
   {# selettore sede/classe per le sostituzioni #}
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   {% elseif not cattedra %}
-  <h1 class="text-center gs-h1 gs-mt-2"><span class="glyphicon glyphicon-eye-close text-danger gs-mr-3" title="Non visibile ai genitori"></span>{{ 'title.lezioni_osservazioni_personali'|trans }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2">{{ include('admin/include/icona.html.twig', {nome: 'eye-off', stile: 'outline', classe: 'text-danger gs-mr-3', titolo: 'Non visibile ai genitori'}) }}{{ 'title.lezioni_osservazioni_personali'|trans }}</h1>
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.osservazioni_sostituzione'|trans }}</strong>
   </div>
   {% else %}
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0"><span class="glyphicon glyphicon-eye-close text-danger gs-mr-3" title="Non visibile ai genitori"></span>{{ 'title.lezioni_osservazioni_personali'|trans }} {{ classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ include('admin/include/icona.html.twig', {nome: 'eye-off', stile: 'outline', classe: 'text-danger gs-mr-3', titolo: 'Non visibile ai genitori'}) }}{{ 'title.lezioni_osservazioni_personali'|trans }} {{ classe }}</h1>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>{% endif %}</em></h2>
   {# selettore sede/classe per le sostituzioni #}
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   <div class="row gs-mb-4">
     <div class="col-sm-6">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni_personali', {cattedra: cattedra.id, classe: classe.id, data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
-      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni_personali', {cattedra: cattedra.id, classe: classe.id, data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni_personali', {cattedra: cattedra.id, classe: classe.id, data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni_personali', {cattedra: cattedra.id, classe: classe.id, data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni') }}" role="button" title="Visualizza le osservazioni sugli alunni"><span class="glyphicon glyphicon-hand-left gs-mr-3"></span><strong>Osservazioni sugli alunni</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni') }}" role="button" title="Visualizza le osservazioni sugli alunni">{{ include('admin/include/icona.html.twig', {nome: 'hand-stop', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Osservazioni sugli alunni</strong></a>
     </div>
   </div>
     {% if errore %}
@@ -35,13 +35,13 @@
   </div>
     {% else %}
       {% for periodo, v in dati.lista %}
-  <div class="row gs-mb-1">
+  <div class="row gs-mt-4 gs-mb-2">
     <div class="col-sm-6 text-info">
       <strong class="gs-big">{{ periodo }}</strong>
     </div>
     <div class="col-sm-6 text-right">
         {% if dati.add is defined %}
-      <a class="btn btn-primary btn-xs" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione personale"><span class="glyphicon glyphicon-plus gs-mr-2"></span>{{ 'label.add'|trans }}</a>
+      <a class="btn btn-primary btn-xs" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione personale">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}{{ 'label.add'|trans }}</a>
         {% endif %}
     </div>
   </div>
@@ -58,10 +58,10 @@
         <td><small>{{ e.testo|raw|nl2br }}</small></td>
         <td>
             {% if e.edit %}
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ e.edit }}" role="button" title="Modifica l'osservazione personale"><span class="glyphicon glyphicon-edit"></span></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica l\'osservazione personale', classi: 'gs-mr-2', url: e.edit}) }}
             {% endif %}
             {% if e.delete %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella l'osservazione personale" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ e.delete }}" data-text="{{ 'message.cancella_osservazione'|trans }}" data-csrf="{{ csrf_token('delete') }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella l\'osservazione personale', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': e.delete, 'data-text': 'message.cancella_osservazione'|trans, 'data-csrf': csrf_token('delete')}}) }}
             {% endif %}
         </td>
       </tr>
@@ -71,7 +71,7 @@
     {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
       {% else %}
         {% if dati.add is defined %}
-      <div><a class="btn btn-primary btn-xs pull-right" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione personale"><span class="glyphicon glyphicon-plus gs-mr-2"></span>{{ 'label.add'|trans }}</a></div>
+      <div><a class="btn btn-primary btn-xs pull-right" href="{{ dati.add }}" role="button" title="Aggiungi un'osservazione personale">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}{{ 'label.add'|trans }}</a></div>
         {% endif %}
       {% endfor %}
       {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_lezione'}) }}

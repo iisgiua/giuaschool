@@ -20,6 +20,8 @@
     <link href="{{ asset('vendor/bootstrap/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
     <![endif]-->
     <link href="{{ asset('css/main.css?v=' ~ (filedate('css/main.css')|date('U'))) }}" rel="stylesheet">
+    <link href="{{ asset('css/gs-standard.css?v=' ~ (filedate('css/gs-standard.css')|date('U'))) }}" rel="stylesheet">
+    <link href="{{ asset('css/gs-pages.css?v=' ~ (filedate('css/gs-pages.css')|date('U'))) }}" rel="stylesheet">
 {% block pagina_css %}
 {% endblock %}
     <!--[if lt IE 9]>
@@ -28,25 +30,25 @@
     <![endif]-->
 {% block pagina_js_inizio %}
 {% endblock %}
-    <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('apple-icon-57x57.png') }}">
-    <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('apple-icon-60x60.png') }}">
-    <link rel="apple-touch-icon" sizes="72x72" href="{{ asset('apple-icon-72x72.png') }}">
-    <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('apple-icon-76x76.png') }}">
-    <link rel="apple-touch-icon" sizes="114x114" href="{{ asset('apple-icon-114x114.png') }}">
-    <link rel="apple-touch-icon" sizes="120x120" href="{{ asset('apple-icon-120x120.png') }}">
-    <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('apple-icon-144x144.png') }}">
-    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('apple-icon-152x152.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-icon-180x180.png') }}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('android-icon-192x192.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('favicon-96x96.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('icons/apple-icon-57x57.png') }}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('icons/apple-icon-60x60.png') }}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ asset('icons/apple-icon-72x72.png') }}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('icons/apple-icon-76x76.png') }}">
+    <link rel="apple-touch-icon" sizes="114x114" href="{{ asset('icons/apple-icon-114x114.png') }}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ asset('icons/apple-icon-120x120.png') }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('icons/apple-icon-144x144.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('icons/apple-icon-152x152.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-icon-180x180.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('icons/android-icon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('icons/favicon-96x96.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('icons/favicon-16x16.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('icons/favicon.ico') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="msapplication-TileColor" content="#00a300">
-    <meta name="msapplication-TileImage" content="{{ asset('ms-icon-144x144.png') }}">
+    <meta name="msapplication-TileImage" content="{{ asset('icons/ms-icon-144x144.png') }}">
     <meta name="theme-color" content="#0a2540">
-    <link rel="mask-icon" href="{{ asset('safari-pinned-tab.svg') }}" color="#5bbad5">
+    <link rel="mask-icon" href="{{ asset('icons/safari-pinned-tab.svg') }}" color="#5bbad5">
   </head>
   <body>
     <p class="gs-mb-0">
@@ -61,7 +63,7 @@
       <header id="gs-header" class="gs-hdr">
         <div class="gs-hdr-bar">
           <button type="button" class="gs-hdr-toggle" aria-expanded="false" aria-controls="gs-navbar-collapse-1" aria-label="Apri il menu di navigazione">
-            <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+            {{ include('admin/include/icona.html.twig', {nome: 'menu-2', stile: 'outline'}) }}
           </button>
           <div class="gs-hdr-brand" aria-label="{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }} - anno scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}">
             <strong class="gs-hdr-brand-name">{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}</strong>
@@ -96,7 +98,7 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
             <div class="gs-hdr-account">
               <a class="gs-hdr-profile" href="{{ path('utenti_profilo') }}" title="{{ 'title.modifica_profilo'|trans }}">
-                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                {{ include('admin/include/icona.html.twig', {nome: 'user', stile: 'outline'}) }}
                 <span class="gs-hdr-user">
                   <span class="gs-hdr-user-name">{% if is_granted('ROLE_GENITORE') %}{{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %}</span>
                   <small class="gs-hdr-user-role">{{ ('label.' ~ app.user.roles[0])|trans }}</small>

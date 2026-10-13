@@ -46,15 +46,15 @@
         <td>
       {% for periodo in dati.pagelle[u.id] %}
         {% if periodo[0] == 'G' or periodo[0] == 'R' %}
-          <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Esame giudizio sospeso</strong></a>
+          <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Esame giudizio sospeso</strong></a>
         {% elseif periodo[0] == 'F' %}
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>Scrutinio finale</strong></a>
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Scrutinio finale</strong></a>
         {% elseif periodo[0] == 'S' %}
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>{{ app.session.get('/CONFIG/SCUOLA/periodo2_nome') }}</strong></a>
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ app.session.get('/CONFIG/SCUOLA/periodo2_nome') }}</strong></a>
         {% elseif periodo[0] == 'P' %}
-          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>{{ app.session.get('/CONFIG/SCUOLA/periodo1_nome') }}</strong></a>
+          <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ app.session.get('/CONFIG/SCUOLA/periodo1_nome') }}</strong></a>
         {% elseif periodo[0] == 'A' %}
-          <a class="btn btn-warning btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio"><span class="glyphicon glyphicon-zoom-in gs-mr-2" aria-hidden="true"></span><strong>A.S. precedente</strong></a>
+          <a class="btn btn-warning btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>A.S. precedente</strong></a>
         {% endif %}
       {% endfor %}
         </td>

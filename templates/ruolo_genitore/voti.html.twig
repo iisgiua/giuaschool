@@ -42,7 +42,7 @@
                 {% elseif e.voto > 0 %}
           <button type="button" class="gs-grade-badge gs-grade-badge-{{ e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}">{{ e.voto_str }}</button>
                 {% else %}
-          <button type="button" class="gs-grade-badge gs-grade-badge-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}"><span class="glyphicon glyphicon-asterisk"></span></button>
+          <button type="button" class="gs-grade-badge gs-grade-badge-default" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}">{{ include('admin/include/icona.html.twig', {nome: 'asterisk', stile: 'outline'}) }}</button>
                 {% endif %}
           <div id="voti-{{ e.id }}" style="display:none">
             <div class="list-group-item">
@@ -70,7 +70,7 @@
       </tr>
       {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, intestazione: [intestazione], classi: 'gs-grades-table'}) }}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ periodo ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_0, intestazione: [intestazione], classi: 'gs-grades-table'}) }}
       {{ include('include/modal-info.html.twig') }}
     {% else %}
   <div class="alert alert-info gs-mt-4" role="alert">
