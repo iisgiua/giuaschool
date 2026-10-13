@@ -995,7 +995,8 @@ class VotiController extends BaseController {
       // recupera parametri da sessione
       $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
     }
-    $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+    // controllo cattedra
+    $cattedra = ($cattedra > 0) ? $this->em->getRepository(Cattedra::class)->find($cattedra) : null;
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

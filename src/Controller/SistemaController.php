@@ -1504,6 +1504,10 @@ class SistemaController extends BaseController {
   #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function aggiorna(Request $request, int $step): Response {
+    // controllo dei parametri (i passi validi sono 0, 1 e 2)
+    if ($step < 0 || $step > 2) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // controllo CSRF (il passo 0 effettua solo controlli, gli altri modificano il sistema)
     if ($step > 0 && !$this->isCsrfTokenValid('sistema_aggiorna', $request->query->get('_csrf_token'))) {
       throw $this->createNotFoundException('exception.invalid_params');
@@ -1520,8 +1524,8 @@ class SistemaController extends BaseController {
       case 0:   // controlli iniziali
         // legge ultima versione
         $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/version.yml';
-        $pagina = file_get_contents($url);
-        preg_match('/^tag:\s*([0-9\.]+)$/m', $pagina, $trovati);
+        $pagina = $this->scaricaUrl($url);
+        preg_match('/^tag:\s*([0-9\.]+)$/m', (string) $pagina, $trovati);
         if (count($trovati) != 2) {
           // errore recupero versione
           $info['tipo'] = 'danger';
@@ -1531,8 +1535,8 @@ class SistemaController extends BaseController {
         $nuovaVersione = $trovati[1];
         // legge ultima build
         $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/build.yml';
-        $pagina = file_get_contents($url);
-        preg_match('/^tag:\s*(.*)$/m', $pagina, $trovati);
+        $pagina = $this->scaricaUrl($url);
+        preg_match('/^tag:\s*(.*)$/m', (string) $pagina, $trovati);
         $nuovaBuild = $trovati[1] ?? '0';
         // controlla versione
         $versione = $this->em->getRepository(Configurazione::class)->getParametro('versione', '0');
@@ -1610,8 +1614,9 @@ class SistemaController extends BaseController {
           $nuovaVersione .= '-build';
         }
         $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.'.zip';
-        // scarica file
-        $bytes = file_put_contents($file, file_get_contents($url));
+        // scarica file (timeout più lungo: il pacchetto può essere di diversi MB)
+        $contenuto = $this->scaricaUrl($url, 120);
+        $bytes = ($contenuto === null) ? 0 : file_put_contents($file, $contenuto);
         if ($bytes == 0) {
           $info['tipo'] = 'danger';
           $info['messaggio'] = 'exception.aggiornamento_errore_file';
@@ -1632,13 +1637,33 @@ class SistemaController extends BaseController {
           'build="'.$nuovaBuild.'"'."\n";
         file_put_contents(dirname(__DIR__, 2).'/.gs-updating', $contenuto);
         // reindirizza a pagina di installazione
-        $urlPath = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
-          '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-        $urlPath = substr($urlPath, 0, - strlen('/sistema/aggiorna/2'));
-        return $this->redirect($urlPath."/install/update.php?token=$token&step=1");
+        $urlPath = $request->getSchemeAndHttpHost().$request->getBaseUrl().'/install/update.php';
+        return $this->redirect($urlPath.'?token='.$token.'&step=1');
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'aggiorna', $dati, $info);
+  }
+
+  /**
+   * Scarica il contenuto di una URL esterna
+   *
+   * Il download usa un timeout esplicito e non emette warning: in caso di errore
+   * restituisce null, così il chiamante mostra un messaggio controllato invece di
+   * lasciare che il warning diventi un errore fatale.
+   *
+   * @param string $url URL da scaricare
+   * @param int $timeout Secondi di attesa per ogni lettura
+   *
+   * @return string|null Contenuto scaricato, oppure null in caso di errore
+   *
+   */
+  private function scaricaUrl(string $url, int $timeout = 5): ?string {
+    $contesto = stream_context_create([
+      'http' => ['timeout' => $timeout, 'ignore_errors' => false],
+      'ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
+    $contenuto = @file_get_contents($url, false, $contesto);
+    // restituisce il contenuto, o null in caso di errore
+    return ($contenuto === false) ? null : $contenuto;
   }
 
   /**
