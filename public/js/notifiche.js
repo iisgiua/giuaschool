@@ -96,16 +96,30 @@
     if (!isNaN(y) && y > 0) { posizioneDaRipristinare = y; }
   }
 
+  /* Altezza dell'header che copre il contenuto. Solo su mobile, e solo se
+     l'header e' position: fixed: con uno sticky l'header resta nel flusso e
+     sottrarne l'altezza sposterebbe troppo in alto la pagina. */
+  function offsetHeader() {
+    if (window.innerWidth >= 768) { return 0; }
+    var header = document.querySelector('#gs-header, .gs-hdr');
+    if (!header) { return 0; }
+    var posizione = window.getComputedStyle(header).position;
+    return posizione === 'fixed' ? header.offsetHeight : 0;
+  }
+
   function ripristinaPosizione() {
     leggiPosizione();
     if (posizioneDaRipristinare === null) { return; }
     /* il ripristino automatico del browser riporterebbe comunque la pagina in
        alto: si prende il controllo e si gestisce la posizione da soli */
     if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
-    window.scrollTo(0, posizioneDaRipristinare);
+    /* l'header fisso copre la parte alta: si scala la posizione per non
+       far finire il contenuto sotto di esso */
+    var destinazione = Math.max(0, posizioneDaRipristinare - offsetHeader());
+    window.scrollTo(0, destinazione);
     /* immagini e tabelle possono spostare il layout dopo il primo ripristino */
     window.setTimeout(function () {
-      window.scrollTo(0, posizioneDaRipristinare);
+      window.scrollTo(0, destinazione);
     }, 120);
   }
 
