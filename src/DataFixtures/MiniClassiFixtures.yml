@@ -1,0 +1,31 @@
+####################
+# MiniClassiFixtures - solo 2 classi per il set demo ridotto:
+#   classe_1A (1ª A): la classe PIENA, con alunno, cattedre, assenze, voti, ...
+#   classe_1B (1ª B): la classe VUOTA, senza alunni né cattedre
+#
+# Tutti i riferimenti @classe_1A dei file Mini* restano validi.
+####################
+
+
+include:
+  - SedeFixtures.yml
+  - CorsoFixtures.yml
+
+
+App\Entity\Classe:
+  classe_1A:
+    anno: 1
+    sezione: 'A'
+    oreSettimanali: 33
+    sede: '@sede_1'
+    corso: '@corso_BIN'
+    coordinatore:
+    segretario:
+  classe_1B:
+    anno: 1
+    sezione: 'B'
+    oreSettimanali: 33
+    sede: '@sede_1'
+    corso: '@corso_BIN'
+    coordinatore:
+    segretario:

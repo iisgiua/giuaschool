@@ -1,0 +1,42 @@
+####################
+# MiniCattedraFixtures - un solo docente con 3 cattedre per coprire tutte le sezioni:
+#   curricolare (piani/programmi/relazioni, valutazioni, proposte voto)
+#   sostegno (sezione sostegno, PEI/PDP, botones sostegno attivi)
+#   religione (sezione religione, bottoni religione attivi)
+####################
+
+
+include:
+  - MateriaFixtures.yml
+  - MiniClassiFixtures.yml
+  - MiniUtentiFixtures.yml
+
+
+App\Entity\Cattedra:
+  cattedra_mini_curricolare:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_curricolare_1'
+    docente: '@docente_mini'
+    classe: '@classe_1A'
+    alunno:
+    docenteSupplenza:
+  cattedra_mini_sostegno:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_SOSTEGNO'
+    docente: '@docente_mini'
+    alunno: '@alunno_mini'
+    classe: '<($alunno->getClasse())>'
+    docenteSupplenza:
+  cattedra_mini_religione:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_RELIGIONE'
+    docente: '@docente_mini'
+    classe: '@classe_1A'
+    alunno:
+    docenteSupplenza:

@@ -1,0 +1,261 @@
+####################
+# MiniDatiFixtures - dati minimi per attivare le sezioni non coperte da DemoPopulator:
+# assenze/entrate/uscite (registro assenze), note (registro note),
+# avvisi/circolari (bacheche), compiti/verifiche (sezione compiti).
+# Il resto (lezioni, valutazioni, scrutini, colloqui, presenze, ...) lo crea DemoPopulator.
+####################
+
+
+include:
+  - SedeFixtures.yml
+  - MiniClassiFixtures.yml
+  - MiniUtentiFixtures.yml
+  - MiniCattedraFixtures.yml
+
+
+App\Entity\Avviso:
+  avviso_mini_C:
+    tipo: 'C'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Avviso mini per tutti'
+    data: '<dateTimeBetween("-1 week", "now")>'
+    anno: 0
+    autore: '@staff_mini'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: 'ATC'
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra:
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: 'Testo avviso mini per popolare le bacheche.'
+    sostituzioni: []
+  avviso_mini_A:
+    tipo: 'A'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Prova di evacuazione antincendio mini'
+    data: '<dateTimeBetween("now", "+1 month")>'
+    anno: 0
+    autore: '@staff_mini'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: 'ATC'
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra:
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: 'Prova di evacuazione antincendio: tutte le classi seguono il piano di emergenza ed escono ordinatamente.'
+    sostituzioni: []
+  avviso_mini_E:
+    tipo: 'E'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Ingresso posticipato mini'
+    data: '<dateTimeBetween("now", "+1 month")>'
+    anno: 0
+    autore: '@staff_mini'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra:
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: 'Ingresso posticipato mini per tutte le classi.'
+    sostituzioni: []
+  avviso_mini_U:
+    tipo: 'U'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Uscita anticipata mini'
+    data: '<dateTimeBetween("now", "+1 month")>'
+    anno: 0
+    autore: '@staff_mini'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra:
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: 'Uscita anticipata mini per tutte le classi.'
+    sostituzioni: []
+  avviso_mini_compito:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito mini di italiano'
+    data: '<(new DateTime("+7 days"))>'
+    anno: 0
+    autore: '@docente_mini'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'N'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_mini_curricolare'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: 'Svolgere gli esercizi mini per la prossima lezione.'
+    sostituzioni: []
+
+
+App\Entity\Circolare:
+  circolare_mini:
+    tipo: 'G'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Circolare mini n. 1'
+    data: '<dateTimeBetween("-1 week", "now")>'
+    anno: 0
+    autore: '@staff_mini'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: 'ATC'
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    numero: 1
+
+
+App\Entity\Assenza:
+  assenza_mini:
+    data: '<dateTimeBetween("-1 week", "-1 day")>'
+    giustificato:
+    motivazione: ''
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica:
+    utenteGiustifica:
+
+
+App\Entity\Entrata:
+  entrata_mini:
+    data: '<dateTimeBetween("-1 week", "-1 day")>'
+    ora: '<dateTimeBetween("08:30", "09:30")>'
+    ritardoBreve: false
+    note: ''
+    valido: true
+    motivazione: 'Visita medica'
+    giustificato: '<dateTimeBetween("-1 week", "now")>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica:
+    utenteGiustifica: '@genitore_mini'
+
+
+App\Entity\Uscita:
+  uscita_mini:
+    data: '<dateTimeBetween("-1 week", "now")>'
+    ora: '<dateTimeBetween("10:00", "12:00")>'
+    note: ''
+    valido: true
+    motivazione: 'Motivi familiari'
+    giustificato: '<dateTimeBetween("-1 week", "now")>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica: '@docente_mini'
+    utenteGiustifica: '@genitore_mini'
+
+
+App\Entity\Nota:
+  nota_mini:
+    tipo: 'I'
+    data: '<dateTimeBetween("-1 week", "now")>'
+    testo: 'Nota disciplinare mini per test.'
+    provvedimento: ''
+    annullata:
+    classe: '@classe_1A'
+    docente: '@docente_mini'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_mini)>'

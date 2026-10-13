@@ -1,0 +1,330 @@
+####################
+# MiniRegistroFixtures - storico passato della classe 1A (stile seeder standard)
+#
+# Il Populator copre da pochi giorni fa in poi: qui si aggiungono le giornate
+# precedenti (dal 20/09 all'08/10), così registro, assenze, voti e note non
+# risultano vuoti nelle settimane passate. Tutto riferito alla sola 1A:
+# la 1B resta volutamente vuota.
+####################
+
+
+include:
+  - MiniClassiFixtures.yml
+  - MiniUtentiFixtures.yml
+  - MiniCattedraFixtures.yml
+  - MateriaFixtures.yml
+
+
+App\Entity\Lezione:
+  # ----- ore curricolari passate (prime 2 ore) -----
+  lezione_mini_curricolare_a_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2026-10-08")>'
+    ora: 1
+    classe: '@classe_1A'
+    materia: '@materia_curricolare_1'
+    argomento: 'Lezione mini passata: attività didattica svolta'
+    attivita: 'Lezione frontale ed esercizi in classe'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+  lezione_mini_curricolare_b_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2026-10-08")>'
+    ora: 2
+    classe: '@classe_1A'
+    materia: '@materia_curricolare_1'
+    argomento: 'Lezione mini passata: prosecuzione del programma'
+    attivita: 'Verifica orale e ripasso'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  # ----- ore di religione passate -----
+  lezione_mini_religione_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2026-10-08")>'
+    ora: 6
+    classe: '@classe_1A'
+    materia: '@materia_RELIGIONE'
+    argomento: 'Lezione mini di religione passata'
+    attivita: 'Attività in classe'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  # ----- ore di sostegno passate -----
+  lezione_mini_sostegno_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2026-10-08")>'
+    ora: 7
+    classe: '@classe_1A'
+    materia: '@materia_SOSTEGNO'
+    argomento: 'Lezione mini di sostegno passata'
+    attivita: 'Attività individualizzata'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+  # ----- sabati (giorno di scuola: solo la domenica è festiva) -----
+  # Il Populator salta i weekend: senza queste ore il registro del sabato
+  # risulta vuoto. Ora 3 per non sovrapporsi alle altre (1-2, 6, 7).
+  # Date esplicite: questa versione di alice non accetta funzioni annidate.
+  lezione_mini_sabato_1:
+    data: '<date_create("2026-09-19")>'
+    ora: 3
+    classe: '@classe_1A'
+    materia: '@materia_curricolare_1'
+    argomento: 'Lezione mini del sabato'
+    attivita: 'Attività didattica del sabato'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+  lezione_mini_sabato_2:
+    data: '<date_create("2026-09-26")>'
+    ora: 3
+    classe: '@classe_1A'
+    materia: '@materia_curricolare_1'
+    argomento: 'Lezione mini del sabato'
+    attivita: 'Attività didattica del sabato'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+  lezione_mini_sabato_3:
+    data: '<date_create("2026-10-03")>'
+    ora: 3
+    classe: '@classe_1A'
+    materia: '@materia_curricolare_1'
+    argomento: 'Lezione mini del sabato'
+    attivita: 'Attività didattica del sabato'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+  lezione_mini_sabato_4:
+    data: '<date_create("2026-10-10")>'
+    ora: 3
+    classe: '@classe_1A'
+    materia: '@materia_curricolare_1'
+    argomento: 'Lezione mini del sabato'
+    attivita: 'Attività didattica del sabato'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+  lezione_mini_sabato_5:
+    data: '<date_create("2026-10-17")>'
+    ora: 3
+    classe: '@classe_1A'
+    materia: '@materia_curricolare_1'
+    argomento: 'Lezione mini del sabato'
+    attivita: 'Attività didattica del sabato'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+  lezione_mini_sabato_6:
+    data: '<date_create("2026-10-24")>'
+    ora: 3
+    classe: '@classe_1A'
+    materia: '@materia_curricolare_1'
+    argomento: 'Lezione mini del sabato'
+    attivita: 'Attività didattica del sabato'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+
+App\Entity\Firma:
+  firma_mini_curricolare_a_{1..5}:
+    lezione: '@lezione_mini_curricolare_a_<current()>'
+    docente: '@docente_mini'
+  firma_mini_curricolare_b_{1..5}:
+    lezione: '@lezione_mini_curricolare_b_<current()>'
+    docente: '@docente_mini'
+  firma_mini_religione_{1..5}:
+    lezione: '@lezione_mini_religione_<current()>'
+    docente: '@docente_mini'
+  firma_mini_sabato_{1..6}:
+    lezione: '@lezione_mini_sabato_<current()>'
+    docente: '@docente_mini'
+
+
+App\Entity\FirmaSostegno:
+  firma_sostegno_mini_{1..2}:
+    lezione: '@lezione_mini_sostegno_<current()>'
+    docente: '@docente_mini'
+    argomento: 'Sostegno mini: attività di recupero'
+    attivita: 'Lavoro individualizzato con alunno'
+    alunno: '@alunno_mini'
+
+
+App\Entity\AssenzaLezione:
+  assenza_lezione_mini_{1..4}:
+    alunno: '@alunno_mini'
+    lezione: '@lezione_mini_curricolare_a_<current()>'
+    ore: '<randomElement([1.0, 2.0])>'
+
+
+App\Entity\Assenza:
+  # ----- ingiustificate passate -----
+  assenza_mini_ingiustificata_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-15", "2026-09-20")>'
+    giustificato:
+    motivazione: ''
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica:
+    utenteGiustifica:
+  # ----- giustificate dal genitore, non validate -----
+  assenza_mini_nonvalidata_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-21", "2026-09-27")>'
+    giustificato: '<dateTimeBetween("2026-09-21", "2026-10-03")>'
+    motivazione: 'Influenza'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica:
+    utenteGiustifica: '@genitore_mini'
+  # ----- giustificate e validate dal docente -----
+  assenza_mini_validata_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-28", "2026-10-03")>'
+    giustificato: '<dateTimeBetween("2026-09-28", "2026-10-05")>'
+    motivazione: 'Visita specialistica'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica: '@docente_mini'
+    utenteGiustifica: '@genitore_mini'
+
+
+App\Entity\Entrata:
+  entrata_mini_ingiustificata:
+    data: '<dateTimeBetween("2026-09-15", "2026-09-21")>'
+    ora: '<dateTimeBetween("08:30", "09:30")>'
+    ritardoBreve: false
+    note: ''
+    valido: true
+    motivazione: ''
+    giustificato:
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica:
+    utenteGiustifica:
+  entrata_mini_nonvalidata:
+    data: '<dateTimeBetween("2026-09-22", "2026-09-28")>'
+    ora: '<dateTimeBetween("08:30", "09:30")>'
+    ritardoBreve: true
+    note: ''
+    valido: true
+    motivazione: 'Traffico'
+    giustificato: '<dateTimeBetween("2026-09-22", "2026-10-01")>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica:
+    utenteGiustifica: '@genitore_mini'
+  entrata_mini_validata:
+    data: '<dateTimeBetween("2026-09-29", "2026-10-03")>'
+    ora: '<dateTimeBetween("08:30", "09:00")>'
+    ritardoBreve: true
+    note: ''
+    valido: true
+    motivazione: 'Visita medica'
+    giustificato: '<dateTimeBetween("2026-09-29", "2026-10-05")>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica: '@docente_mini'
+    utenteGiustifica: '@genitore_mini'
+
+
+App\Entity\Uscita:
+  uscita_mini_ingiustificata:
+    data: '<dateTimeBetween("2026-09-15", "2026-09-21")>'
+    ora: '<dateTimeBetween("11:00", "12:00")>'
+    note: ''
+    valido: false
+    motivazione: ''
+    giustificato:
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica:
+    utenteGiustifica:
+  uscita_mini_nonvalidata:
+    data: '<dateTimeBetween("2026-09-22", "2026-09-28")>'
+    ora: '<dateTimeBetween("11:00", "12:00")>'
+    note: ''
+    valido: true
+    motivazione: 'Impegno familiare'
+    giustificato: '<dateTimeBetween("2026-09-22", "2026-10-01")>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica:
+    utenteGiustifica: '@genitore_mini'
+  uscita_mini_validata:
+    data: '<dateTimeBetween("2026-09-29", "2026-10-03")>'
+    ora: '<dateTimeBetween("10:00", "11:00")>'
+    note: ''
+    valido: true
+    motivazione: 'Visita medica'
+    giustificato: '<dateTimeBetween("2026-09-29", "2026-10-05")>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica: '@docente_mini'
+    utenteGiustifica: '@genitore_mini'
+
+
+App\Entity\Nota:
+  nota_mini_classe:
+    tipo: 'C'
+    data: '<dateTimeBetween("2026-09-20", "2026-10-08")>'
+    testo: 'Nota di classe mini: disturbo durante la lezione.'
+    provvedimento: 'Ammonizione del coordinatore'
+    annullata:
+    classe: '@classe_1A'
+    docente: '@docente_mini'
+    docenteProvvedimento: '@staff_mini'
+    alunni: '<collection()>'
+  nota_mini_individuale_2:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2026-10-08")>'
+    testo: 'Nota individuale mini: compiti non svolti.'
+    provvedimento: ''
+    annullata:
+    classe: '@classe_1A'
+    docente: '@docente_mini'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_mini)>'
+
+
+App\Entity\Valutazione:
+  valutazione_mini_voto_{1..2}:
+    tipo: '<randomElement(["S", "O", "P"] )>'
+    visibile: true
+    media: true
+    voto: '<randomElement([5.5, 6, 6.5, 7, 7.5, 8])>'
+    giudizio: ''
+    argomento: 'Valutazione mini del periodo passato'
+    ordine: 0
+    docente: '@docente_mini'
+    alunno: '@alunno_mini'
+    lezione: '@lezione_mini_curricolare_a_*'
+    materia: '<($lezione->getMateria())>'
+  valutazione_mini_giudizio:
+    tipo: 'O'
+    visibile: true
+    media: false
+    voto: 0
+    giudizio: 'Buona esposizione, da consolidare lo scritto'
+    argomento: 'Valutazione mini con giudizio'
+    ordine: 0
+    docente: '@docente_mini'
+    alunno: '@alunno_mini'
+    lezione: '@lezione_mini_curricolare_b_*'
+    materia: '<($lezione->getMateria())>'

@@ -1,0 +1,40 @@
+####################
+# _demoMiniFixtures - dataset demo ridotto: 1 utente per ruolo (8 totali)
+#
+# Mantiene la struttura scolastica essenziale (sedi, corsi, 2 sole classi,
+# materie, definizioni) ma genera un solo utente per categoria:
+# la classe 1A è piena di dati, la 1B resta vuota. Il resto dei dati
+# (lezioni, valutazioni, scrutini, comunicazioni, colloqui, presenze, ...)
+# viene completato automaticamente da DemoPopulator, così ogni sezione
+# risulta popolata e tutti i bottoni restano attivi per quegli 8 utenti.
+#
+# Uso:
+#   php bin/console app:alice:load _demoMini --env=test
+####################
+
+
+include:
+  - ConfigurazioneFixtures.yml
+  - DemoConfigurazioneFixtures.yml
+  - IstitutoFixtures.yml
+  - SedeFixtures.yml
+  - CorsoFixtures.yml
+  - MiniClassiFixtures.yml
+  - MateriaFixtures.yml
+  - MenuFixtures.yml
+  - MenuOpzioneFixtures.yml
+  - DefinizioneConsiglioFixtures.yml
+  - DefinizioneScrutinioFixtures.yml
+  - DefinizioneRichiestaFixtures.yml
+  - DefinizioneConsultazioneFixtures.yml
+  - DefinizioneAutorizzazioneFixtures.yml
+  - FestivitaFixtures.yml
+  - ScansioneOrariaFixtures.yml
+  - OrarioFixtures.yml
+  - ModuloFormativoFixtures.yml
+  - AmministratoreFixtures.yml
+  - PresideFixtures.yml
+  - MiniUtentiFixtures.yml
+  - MiniCattedraFixtures.yml
+  - MiniDatiFixtures.yml
+  - MiniRegistroFixtures.yml

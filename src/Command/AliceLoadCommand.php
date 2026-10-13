@@ -166,7 +166,7 @@ class AliceLoadCommand extends Command {
     $this->em->flush();
     print("---> dati caricati correttamente\n");
     // completa il dataset demo con i dati legati al singolo utente/cattedra
-    if ($fixture === '_demo' && $this->demoPopulator) {
+    if (in_array($fixture, ['_demo', '_demoMini'], true) && $this->demoPopulator) {
       $stats = $this->demoPopulator->populate();
       print("...completamento dati demo: ".json_encode($stats)."\n");
     }
