@@ -109,7 +109,6 @@ class Updater {
     $this->env = [];
     $this->sys = [];
     $this->pdo = null;
-    $this->migrator = null;
     $this->projectPath = dirname($this->publicPath);
     $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
       '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
@@ -147,7 +146,8 @@ class Updater {
       include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
     } catch (Exception $e) {
       // visualizza pagina di errore
-      $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
+      $page['version'] = ($this->sys['version'] ?? 'INSTALL').
+        (($this->sys['build'] ?? '0') == '0' ? '' : '#build');
       $page['step'] = $step.' - Errore';
       $page['title'] = 'Si è verificato un errore';
       $page['danger'] = $e->getMessage();
@@ -205,8 +205,9 @@ class Updater {
    */
   private function readEnv(): void {
     $path = $this->projectPath.'/.env';
-    // legge .env e carica variabili di ambiente
-    $this->env = parse_ini_file($path);
+    // legge .env e carica variabili di ambiente (array vuoto se il file non è leggibile)
+    $dati = parse_ini_file($path);
+    $this->env = is_array($dati) ? $dati : [];
   }
 
   /**
@@ -286,6 +287,8 @@ class Updater {
     // inserisce variabili di sistema
     $newSys = '';
     foreach ($this->sys as $key => $value) {
+      // protezione dei caratteri significativi per il formato del file
+      $value = str_replace(["\\", "'", "\n", "\r"], ["\\\\", "\\'", '', ''], (string) $value);
       $newSys .= $key."='".$value."'\n";
     }
     // scrive la nuova configurazione
@@ -330,7 +333,10 @@ class Updater {
     }
     // converte nomi file per compatibilità
     foreach (glob($this->projectPath.'/src/Install/giuaschool-*-v*.zip') as $file) {
-      preg_match('!/giuaschool-(release|update)-v(.+)\.zip$!', $file, $matches);
+      if (preg_match('!/giuaschool-(release|update)-v(.+)\.zip$!', $file, $matches) !== 1) {
+        // nome file non riconosciuto: non viene rinominato
+        continue;
+      }
       $newFile = $this->projectPath.'/src/Install/v'.$matches[2].
         ($matches[1] == 'update' ? '-build' : '').'.zip';
       rename($file, $newFile);
@@ -583,8 +589,8 @@ class Updater {
           // elimina link
           unlink($this->projectPath.'/'.$zip->getNameIndex($i));
         }
-        // estrae file
-        $success = $zip->extractTo('../..', [$zip->getNameIndex($i)]);
+        // estrae file (percorso assoluto: non dipende dalla directory di lavoro del processo)
+        $success = $zip->extractTo($this->projectPath, [$zip->getNameIndex($i)]);
         if (!$success) {
           // errore
           throw new Exception('Errore nell\'estrazione del file "'.$zip->getNameIndex($i).'"', $step);
@@ -624,11 +630,12 @@ class Updater {
             $dest .= basename($file);
           }
           // crea dir se necessario
-          if (!is_dir(dirname($dest))) {
-            mkdir(dirname($dest), 0777, true);
+          if (!is_dir(dirname($dest)) && !mkdir(dirname($dest), 0777, true) && !is_dir(dirname($dest))) {
+            // errore
+            throw new InstallException('Errore nel creare la directory "'.dirname($dest).'"', $step);
           }
-          // copia file
-          copy($file, $dest);
+          // copia file (l'esito viene controllato subito dopo)
+          $success = copy($file, $dest);
         }
         if (!$success) {
           // errore
@@ -1106,17 +1113,31 @@ class Updater {
     if (!$this->pdo) {
       $this->connectDb();
     }
+    // controlla la presenza dei file SQL (generati con doctrine:schema:create/drop --dump-sql)
+    $fileDrop = $this->projectPath.'/src/Install/drop-db.sql';
+    $fileCreate = $this->projectPath.'/src/Install/create-db.sql';
+    $fileInit = $this->projectPath.'/src/Install/init-db.sql';
+    foreach ([$fileDrop, $fileCreate, $fileInit] as $file) {
+      if (!file_exists($file)) {
+        // errore
+        throw new InstallException('File SQL di installazione non trovato: "'.basename($file).'". '.
+          'Rigenerare i file con doctrine:schema:create --dump-sql e doctrine:schema:drop --dump-sql.', $step);
+      }
+    }
     // ripulisce db
     $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 0;');
-    $sqlCommands = file($this->projectPath.'/src/Install/drop-db.sql', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $sqlCommands = file($fileDrop, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
     foreach ($sqlCommands as $sql) {
       if (str_starts_with($sql, 'DROP TABLE')) {
-        // cancella tabella
-        $this->pdo->exec('DROP TABLE IF EXISTS '.substr($sql, 11));
+        // cancella tabella (riconosce sia "DROP TABLE x" sia "DROP TABLE IF EXISTS x")
+        $tavola = trim((string) preg_replace('/^IF\s+EXISTS\s+/i', '', trim(substr($sql, 11))), "; \t");
+        if (preg_match('/^`?[a-zA-Z0-9_]+`?$/', $tavola)) {
+          $this->pdo->exec('DROP TABLE IF EXISTS '.$tavola);
+        }
       }
     }
     // crea nuovo db
-    $sqlCommands = file($this->projectPath.'/src/Install/create-db.sql', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $sqlCommands = file($fileCreate, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
     foreach ($sqlCommands as $sql) {
       if (!empty($sql)) {
         // crea tabella
@@ -1124,7 +1145,7 @@ class Updater {
       }
     }
     // inizializza db
-    $sql = file_get_contents($this->projectPath.'/src/Install/init-db.sql');
+    $sql = file_get_contents($fileInit);
     $this->pdo->exec($sql);
     $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1;');
     // imposta dati della pagina

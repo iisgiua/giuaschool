@@ -10,26 +10,28 @@
     <title>Installazione giua@school</title>
     <link href="../vendor/bootstrap-italia/css/bootstrap-italia.min.css" rel="stylesheet">
     <link href="../css/main.css" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href="../apple-icon-180x180.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="../apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="../apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="../apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="../apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="../apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="../apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="../apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="57x57" href="../apple-icon-57x57.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="../android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <link href="../css/gs-standard.css" rel="stylesheet">
+    <link href="../css/gs-pages.css" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../icons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../icons/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../icons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../icons/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../icons/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../icons/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../icons/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="../icons/apple-icon-57x57.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../icons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico">
     <link rel="manifest" href="../manifest.json">
     <meta name="msapplication-TileColor" content="#0066CC">
-    <meta name="msapplication-TileImage" content="../ms-icon-144x144.png">
+    <meta name="msapplication-TileImage" content="../icons/ms-icon-144x144.png">
     <meta name="theme-color" content="#0066CC">
     <meta name="msapplication-config" content="../browserconfig.xml">
-    <link rel="mask-icon" href="../safari-pinned-tab.svg" color="#0066CC">
+    <link rel="mask-icon" href="../icons/safari-pinned-tab.svg" color="#0066CC">
   </head>
   <body>
 
@@ -137,27 +139,27 @@
                 <div class="form-row">
                   <div class="form-group col">
                     <label for="install_db_server" class="required active" style="transition: none 0s ease 0s;">Server database</label>
-                    <input type="text" id="install_db_server" name="install[db_server]" required="required" class="form-control" value="<?php echo $page['database']['host']; ?>">
+                    <input type="text" id="install_db_server" name="install[db_server]" required="required" class="form-control" value="<?php echo htmlspecialchars((string) $page['database']['host'], ENT_QUOTES, 'UTF-8'); ?>">
                   </div>
                   <div class="form-group col">
                     <label for="install_db_port" class="required active" style="transition: none 0s ease 0s;">Porta database</label>
-                    <input type="text" id="install_db_port" name="install[db_port]" required="required" class="form-control" value="<?php echo $page['database']['port']; ?>">
+                    <input type="text" id="install_db_port" name="install[db_port]" required="required" class="form-control" value="<?php echo htmlspecialchars((string) $page['database']['port'], ENT_QUOTES, 'UTF-8'); ?>">
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group col">
                     <label for="install_db_user" class="required active" style="transition: none 0s ease 0s;">Utente database</label>
-                    <input type="text" id="install_db_user" name="install[db_user]" required="required" class="form-control" value="<?php echo $page['database']['user']; ?>">
+                    <input type="text" id="install_db_user" name="install[db_user]" required="required" class="form-control" value="<?php echo htmlspecialchars((string) $page['database']['user'], ENT_QUOTES, 'UTF-8'); ?>">
                   </div>
                   <div class="form-group col">
                     <label for="install_db_password" class="required active" style="transition: none 0s ease 0s;">Password database</label>
-                    <input type="text" id="install_db_password" name="install[db_password]" required="required" class="form-control" value="<?php echo $page['database']['pass']; ?>">
+                    <input type="text" id="install_db_password" name="install[db_password]" required="required" class="form-control" value="<?php echo htmlspecialchars((string) $page['database']['pass'], ENT_QUOTES, 'UTF-8'); ?>">
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group col">
                     <label for="install_db_name" class="required active" style="transition: none 0s ease 0s;">Nome database</label>
-                    <input type="text" id="install_db_name" name="install[db_name]" required="required" class="form-control" value="<?php echo substr((string) $page['database']['path'], 1); ?>">
+                    <input type="text" id="install_db_name" name="install[db_name]" required="required" class="form-control" value="<?php echo htmlspecialchars(substr((string) $page['database']['path'], 1), ENT_QUOTES, 'UTF-8'); ?>">
                   </div>
                 </div>
                 <div class="form-group col text-center">
