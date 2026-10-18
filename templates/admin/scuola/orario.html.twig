@@ -4,7 +4,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
+  {# pulsanti di pagina sotto il titolo, non in fondo alla tabella #}
   {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('scuola_orario_edit'), etichetta: 'label.add'|trans, titolo: 'Nuovo orario'}]}) }}
   {{ include('admin/include/flash.html.twig') }}
   {% set colonne = [
@@ -29,7 +29,7 @@
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: "Cancella l'orario", titolo_modale: o.nome,
         contenuto: 'message.cancella_orario'|trans, url: path('scuola_orario_delete', {id: o.id})},
       {tipo: 'link', etichetta: 'label.scansione_oraria'|trans, titolo: 'Modifica la scansione oraria',
-        url: path('scuola_orario_scansione', {id: o.id})}
+        url: path('scuola_orario_scansione', {id: o.id})},
     ] %}
     {% set azioni = azioni|merge([{voci: voci}]) %}
   {% endfor %}
@@ -41,6 +41,5 @@
 {% endblock %}
 
 {% block pagina_js_fine %}
-{{ include('admin/include/thfloat.html.twig') }}
 {{ include('admin/include/tabella-js.html.twig') }}
 {% endblock %}

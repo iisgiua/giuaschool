@@ -4,7 +4,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
+  {# pulsanti di pagina sotto il titolo, non in fondo alla tabella #}
   {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('scuola_sedi_edit'), etichetta: 'label.add'|trans, titolo: 'Nuova sede'}]}) }}
   {{ include('admin/include/flash.html.twig') }}
   {% set colonne = [
@@ -39,6 +39,5 @@
 {% endblock %}
 
 {% block pagina_js_fine %}
-{{ include('admin/include/thfloat.html.twig') }}
 {{ include('admin/include/tabella-js.html.twig') }}
 {% endblock %}

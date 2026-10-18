@@ -15,7 +15,7 @@
     {url: path('alunni_classe_edit', {id: 0, tipo: 'S'}), etichetta: 'label.alunno_cambio_sezione'|trans,
       titolo: 'Nuovo cambio di sezione di un alunno', classe: 'btn btn-primary btn-sm mr-1 mb-1'}
   ] %}
-  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
+  {# pulsanti di pagina sotto il titolo, non in fondo alla tabella #}
   {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: pulsanti}) }}
   {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
   {% set colonne = [
@@ -52,6 +52,5 @@
 {% endblock %}
 
 {% block pagina_js_fine %}
-{{ include('admin/include/thfloat.html.twig') }}
 {{ include('admin/include/tabella-js.html.twig', {url_paginazione: 'alunni_classe'}) }}
 {% endblock %}

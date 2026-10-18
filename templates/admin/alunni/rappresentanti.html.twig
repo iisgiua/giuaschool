@@ -4,7 +4,7 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
+  {# pulsanti di pagina sotto il titolo, non in fondo alla tabella #}
   {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('alunni_rappresentanti_edit', {ruolo: 'A', id: 0}), etichetta: 'label.add'|trans, titolo: 'Aggiungi un nuovo rappresentante'}]}) }}
   {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
   {% set colonne = [
@@ -41,6 +41,5 @@
 {% endblock %}
 
 {% block pagina_js_fine %}
-{{ include('admin/include/thfloat.html.twig') }}
 {{ include('admin/include/tabella-js.html.twig', {url_paginazione: 'alunni_rappresentanti'}) }}
 {% endblock %}

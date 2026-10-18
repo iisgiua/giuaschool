@@ -4,8 +4,8 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
-  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [ {url: path('docenti_cattedre_edit', {id: 0}), etichetta: 'label.add'|trans, titolo: 'Nuova cattedra', classe: 'btn btn-primary btn-sm mr-3'}, {url: path('docenti_cattedre_supplenza'), etichetta: 'Aggiungi supplenza', titolo: 'Nuova cattedra di supplenza'} ]}) }}
+  {# pulsanti di pagina sotto il titolo, non in fondo alla tabella #}
+  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('docenti_cattedre_edit', {id: 0}), etichetta: 'label.add'|trans, titolo: 'Nuova cattedra', classe: 'btn btn-primary btn-sm mr-3'}, {url: path('docenti_cattedre_supplenza'), etichetta: 'Aggiungi supplenza', titolo: 'Nuova cattedra di supplenza'}]}) }}
   {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
   {% set colonne = [
     {titolo: 'label.stato'|trans, chiave: 'attiva', tipo: 'stato',
@@ -50,6 +50,5 @@
 {% endblock %}
 
 {% block pagina_js_fine %}
-{{ include('admin/include/thfloat.html.twig') }}
 {{ include('admin/include/tabella-js.html.twig', {url_paginazione: 'docenti_cattedre'}) }}
 {% endblock %}
