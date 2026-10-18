@@ -24,7 +24,7 @@
         </li>
   {% endfor %}
       </ul>
-      {{ form_start(form) }}
+      {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
       <div class="tab-content">
   {% for tab in tabs %}
         <div class="tab-pane fade {{ loop.first ? ' show active' }}" id="{{ tab[0] }}" role="tabpanel" aria-labelledby="{{ tab[0] }}-tab">

@@ -322,6 +322,10 @@ class RegistroController extends BaseController
       $label['materiaNome'] .= ' ('.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().')';
     }
     $dati = $reg->lezioneOreConsecutive($dataObj, $ora, $this->getUser(), $classe, $materia);
+    if (empty($dati['inizio'])) {
+      // errore: orario non definito per la data indicata
+      throw $this->createNotFoundException('exception.orario_sede_invalido');
+    }
     $label['inizio'] = $dati['inizio'];
     $oraFine = $dati['fine'];
     // lista moduli formativi

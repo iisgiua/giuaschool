@@ -39,6 +39,7 @@ class AlunnoRepository extends BaseRepository {
   public function findAllEnabled($search=null, $page=1, $limit=10): Paginator {
     // crea query base
     $query = $this->createQueryBuilder('a')
+      ->leftJoin('a.classe', 'cl')->addSelect('cl')
       ->where('a.abilitato=:abilitato')
       ->andwhere('a.nome LIKE :nome AND a.cognome LIKE :cognome')
       ->orderBy('a.cognome, a.nome, a.dataNascita', 'ASC')
@@ -46,8 +47,7 @@ class AlunnoRepository extends BaseRepository {
       ->setParameter(':nome', $search['nome'].'%')
       ->setParameter(':cognome', $search['cognome'].'%');
     if ($search['classe'] > 0) {
-      $query->join('a.classe', 'cl')
-        ->andwhere('cl.id=:classe')->setParameter('classe', $search['classe']);
+      $query->andwhere('cl.id=:classe')->setParameter('classe', $search['classe']);
     } elseif ($search['classe'] == -1) {
       $query->andwhere('a.classe IS NULL');
     }

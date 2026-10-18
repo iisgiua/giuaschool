@@ -415,13 +415,17 @@ class CircolariController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db
-    $com->leggeUtente($this->getUser(), $circolare);
-    $this->em->flush();
     // invia il file
     $file = $circolare->getAllegati()[$allegato];
     $dir = $this->getParameter('dir_circolari').($circolare->getStato() == 'A' ? '/'.$circolare->getAnno() : '');
     $nomefile = $dir.'/'.$file->getFile().'.'.$file->getEstensione();
+    if (!file_exists($nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // segna lettura e memorizza su db solo dopo aver verificato il file
+    $com->leggeUtente($this->getUser(), $circolare);
+    $this->em->flush();
     return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
       ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
   }

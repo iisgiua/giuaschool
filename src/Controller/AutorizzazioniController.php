@@ -356,11 +356,29 @@ class AutorizzazioniController extends BaseController {
     $esistenti = $this->em->getRepository(Richiesta::class)->autorizzazioni($modulo,
       $utente->getCodiceRuolo() == 'G' ? $utente->getAlunno() : $utente);
     // controlla se esiste già una risposta dell'utente
+    $orfana = null;
     foreach ($esistenti as $altra) {
       if ($altra->getUtente()->getId() == $utente->getId()) {
+        if ($altra->getStato() === 'I' && $altra->getDocumento() === '') {
+          // autorizzazione incompleta (invio precedente non riuscito): la elimina
+          $orfana = $altra;
+          continue;
+        }
         // errore: esiste già altra risposta
         throw $this->createNotFoundException('exception.not_allowed');
       }
+    }
+    if ($orfana) {
+      // elimina l'autorizzazione incompleta e aggiorna la lista
+      $rimaste = [];
+      foreach ($esistenti as $esistente) {
+        if ($esistente !== $orfana) {
+          $rimaste[] = $esistente;
+        }
+      }
+      $esistenti = $rimaste;
+      $this->em->remove($orfana);
+      $this->em->flush();
     }
     // crea autorizzazione
     $autorizzazione = (new Richiesta())
@@ -391,20 +409,28 @@ class AutorizzazioniController extends BaseController {
         ->setStato('I')
         ->setMessaggio('');
       $this->em->flush();
-      // crea documento PDF
-      if (count($esistenti) == 0) {
-        // crea una nuova autorizzazione
-        $documento = $ric->autorizzazionePdf($modulo, $info['ruolo'], $info['sedi'], $autorizzazione->getId(),
-          $classe, $invio);
-        $msgLog = 'Invio autorizzazione';
-      } else {
-        // firma un'autorizzazione esistente
-        $documento = $ric->firmaAutorizzazionePdf($esistenti[0], $info['ruolo'], $info['sedi'], $autorizzazione->getId(), $classe, $invio);
-        $msgLog = 'Firma autorizzazione';
+      try {
+        // crea documento PDF
+        if (count($esistenti) == 0) {
+          // crea una nuova autorizzazione
+          $documento = $ric->autorizzazionePdf($modulo, $info['ruolo'], $info['sedi'], $autorizzazione->getId(),
+            $classe, $invio);
+          $msgLog = 'Invio autorizzazione';
+        } else {
+          // firma un'autorizzazione esistente
+          $documento = $ric->firmaAutorizzazionePdf($esistenti[0], $info['ruolo'], $info['sedi'], $autorizzazione->getId(), $classe, $invio);
+          $msgLog = 'Firma autorizzazione';
+        }
+      } catch (\Exception $e) {
+        // errore: elimina l'autorizzazione incompleta per non bloccare un nuovo invio
+        $this->em->remove($autorizzazione);
+        $this->em->flush();
+        throw $e;
       }
       // ok: memorizzazione e log
       $autorizzazione
         ->setDocumento($documento);
+      $this->em->flush();
       $dblogger->logAzione('AUTORIZZAZIONI', $msgLog);
       // redirezione
       return $this->redirectToRoute('richieste_lista');

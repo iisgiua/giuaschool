@@ -159,43 +159,51 @@ class FileController extends BaseController {
     switch ($tipo) {
       case 'V':
         // verbale scrutinio finale
-        $file = new File($percorso.$storico->getClasse().'-scrutinio-finale-verbale.pdf');
+        $nomefile = $percorso.$storico->getClasse().'-scrutinio-finale-verbale.pdf';
         break;
       case 'VS':
         // verbale esame sospesi
-        $file = new File($percorso.$storico->getClasse().'-scrutinio-sospesi-verbale.pdf');
+        $nomefile = $percorso.$storico->getClasse().'-scrutinio-sospesi-verbale.pdf';
         break;
       case 'VX':
         // verbale scrutinio rinviato
-        $file = new File($percorso.$storico->getClasse().'-scrutinio-rinviato-verbale.pdf');
+        $nomefile = $percorso.$storico->getClasse().'-scrutinio-rinviato-verbale.pdf';
         break;
       case 'R':
         // riepilogo voti scrutinio finale
-        $file = new File($percorso.$storico->getClasse().'-scrutinio-finale-riepilogo-voti.pdf');
+        $nomefile = $percorso.$storico->getClasse().'-scrutinio-finale-riepilogo-voti.pdf';
         break;
       case 'RS':
-        // riepilogo voti scrutinio esame sospesi
-        $file = new File($percorso.$storico->getClasse().'-scrutinio-sospesi-riepilogo-voti.pdf');
+        // riepilogo voti esame sospesi
+        $nomefile = $percorso.$storico->getClasse().'-scrutinio-sospesi-riepilogo-voti.pdf';
         break;
       case 'RX':
         // riepilogo voti scrutinio rinviato
-        $file = new File($percorso.$storico->getClasse().'-scrutinio-rinviato-riepilogo-voti.pdf');
+        $nomefile = $percorso.$storico->getClasse().'-scrutinio-rinviato-riepilogo-voti.pdf';
         break;
       case 'C':
         // certificazioni scrutinio finale
-        $file = new File($percorso.$storico->getClasse().'-scrutinio-finale-certificazioni.pdf');
+        $nomefile = $percorso.$storico->getClasse().'-scrutinio-finale-certificazioni.pdf';
         break;
       case 'CS':
         // certificazioni scrutinio esame sospesi
-        $file = new File($percorso.$storico->getClasse().'-scrutinio-sospesi-certificazioni.pdf');
+        $nomefile = $percorso.$storico->getClasse().'-scrutinio-sospesi-certificazioni.pdf';
         break;
       case 'CX':
         // certificazioni scrutinio rinviato
-        $file = new File($percorso.$storico->getClasse().'-scrutinio-rinviato-certificazioni.pdf');
+        $nomefile = $percorso.$storico->getClasse().'-scrutinio-rinviato-certificazioni.pdf';
         break;
+      default:
+        // tipo non gestito
+        throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo esistenza file: evita l'errore 500 di BinaryFileResponse
+    if (!file_exists($nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
     }
     // invia il documento
-    return $this->file($file);
+    return $this->file(new File($nomefile));
   }
 
 }

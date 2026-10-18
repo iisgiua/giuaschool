@@ -46,7 +46,7 @@
         {contenuto: '<span class="gs-big">' ~ r.data|format_date('full')|title
           ~ ' dalle ' ~ r.inizio|date('G:i') ~ ' alle ' ~ r.fine|date('G:i') ~ '</span>'},
         {contenuto: '<span class="gs-big">' ~ ('label.tipo_colloquio_' ~ r.tipo)|trans ~ ': '
-          ~ r.luogo ~ '</span>'}
+          ~ r.luogo|e ~ '</span>'},
       ]}]) %}
     {% endfor %}
     {{ include('include/tabella.html.twig', {

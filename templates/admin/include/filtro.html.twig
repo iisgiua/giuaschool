@@ -4,6 +4,7 @@
 
 {{ include('admin/include/flash.html.twig') }}
 {{ form_start(form, {attr: {class: 'mr-1'}}) }}
+{{ form_errors(form) }}
 <div id="{{ form.vars.id }}" class="form-row">
   {% for child in form|filter(child => not child.rendered) %}
     {{ form_row(child, {inline: true}) }}

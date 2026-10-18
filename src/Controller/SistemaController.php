@@ -39,6 +39,7 @@ use App\Util\TelegramManager;
 use DateTime;
 use Doctrine\DBAL\ArrayParameterType;
 use Exception;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -308,11 +309,13 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    */
   #[Route(path: '/sistema/alias/exit', name: 'sistema_alias_exit', methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
   public function aliasExit(LogHandler $dblogger): Response  {
     // log azione
+    $utente = $this->getUser();
     $dblogger->logAzione('ACCESSO', 'Alias Exit', [
-      'Username' => $this->getUser()->getUserIdentifier(),
-      'Ruolo' => $this->getUser()->getRoles()[0],
+      'Username' => $utente ? $utente->getUserIdentifier() : '---',
+      'Ruolo' => $utente ? ($utente->getRoles()[0] ?? '---') : '---',
       'Username reale' => $this->reqstack->getSession()->get('/APP/UTENTE/username_reale'),
       'Ruolo reale' => $this->reqstack->getSession()->get('/APP/UTENTE/ruolo_reale'),
       'ID reale' => $this->reqstack->getSession()->get('/APP/UTENTE/id_reale')]);
@@ -1503,7 +1506,7 @@ class SistemaController extends BaseController {
    */
   #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function aggiorna(Request $request, int $step): Response {
+  public function aggiorna(Request $request, CacheItemPoolInterface $cache, int $step): Response {
     // controllo dei parametri (i passi validi sono 0, 1 e 2)
     if ($step < 0 || $step > 2) {
       throw $this->createNotFoundException('exception.invalid_params');
@@ -1523,9 +1526,10 @@ class SistemaController extends BaseController {
     $info['prossimo'] = 0;
     switch($step) {
       case 0:   // controlli iniziali
-        // legge ultima versione
+        // legge ultima versione (il risultato resta in cache per pochi minuti,
+        // per non ripetere il download ad ogni apertura della pagina)
         $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/version.yml';
-        $pagina = $this->scaricaUrl($url);
+        $pagina = $this->scaricaUrlCache($cache, 'sistema_aggiorna_version', $url);
         preg_match('/^tag:\s*([0-9\.]+)$/m', (string) $pagina, $trovati);
         if (count($trovati) != 2) {
           // errore recupero versione
@@ -1536,7 +1540,7 @@ class SistemaController extends BaseController {
         $nuovaVersione = $trovati[1];
         // legge ultima build
         $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/build.yml';
-        $pagina = $this->scaricaUrl($url);
+        $pagina = $this->scaricaUrlCache($cache, 'sistema_aggiorna_build', $url);
         preg_match('/^tag:\s*(.*)$/m', (string) $pagina, $trovati);
         $nuovaBuild = $trovati[1] ?? '0';
         // controlla versione
@@ -1665,6 +1669,42 @@ class SistemaController extends BaseController {
     $contenuto = @file_get_contents($url, false, $contesto);
     // restituisce il contenuto, o null in caso di errore
     return ($contenuto === false) ? null : $contenuto;
+  }
+
+  /**
+   * Scarica il contenuto di una URL esterna, memorizzandolo per pochi minuti in cache.
+   *
+   * Usato per il controllo della versione: il download non deve rallentare ogni
+   * apertura della pagina, ma un errore di rete non viene memorizzato in cache.
+   *
+   * @param CacheItemPoolInterface $cache Gestore della cache dell'applicazione
+   * @param string $chiave Chiave di memorizzazione in cache
+   * @param string $url URL da scaricare
+   *
+   * @return string|null Contenuto scaricato, oppure null in caso di errore
+   *
+   */
+  private function scaricaUrlCache(CacheItemPoolInterface $cache, string $chiave, string $url): ?string {
+    try {
+      $item = $cache->getItem($chiave);
+      if (!$item->isHit()) {
+        // scarica il contenuto
+        $contenuto = $this->scaricaUrl($url);
+        if ($contenuto === null) {
+          // errore di rete: non memorizza il fallimento
+          return null;
+        }
+        // memorizza per pochi minuti
+        $item->set($contenuto);
+        $item->expiresAfter(300);
+        $cache->save($item);
+      }
+      // restituisce il contenuto
+      return $item->get();
+    } catch (\Throwable) {
+      // errore della cache: scarica direttamente
+      return $this->scaricaUrl($url);
+    }
   }
 
   /**

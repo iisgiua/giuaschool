@@ -404,14 +404,19 @@ class AtaController extends BaseController {
           // modifica
           $utente = $form->get('utente')->getData();
         }
-        // imposta tipo rappresentante
-        $utente->setRappresentante($nuoviTipi);
-        // memorizza dati
-        $this->em->flush();
-        // messaggio
-        $this->addFlash('success', 'message.update_ok');
-        // redirect
-        return $this->redirectToRoute('ata_rappresentanti');
+        if (!$utente) {
+          // utente selezionato non valido: errore di compilazione e non di sistema
+          $form->addError(new FormError($trans->trans('exception.invalid_user')));
+        } else {
+          // imposta tipo rappresentante
+          $utente->setRappresentante($nuoviTipi);
+          // memorizza dati
+          $this->em->flush();
+          // messaggio
+          $this->addFlash('success', 'message.update_ok');
+          // redirect
+          return $this->redirectToRoute('ata_rappresentanti');
+        }
       }
     }
     // mostra la pagina di risposta

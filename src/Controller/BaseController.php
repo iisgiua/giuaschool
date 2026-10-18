@@ -8,7 +8,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Docente;
 use App\Entity\MenuOpzione;
+use App\Entity\Staff;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -37,6 +41,31 @@ class BaseController extends AbstractController {
     protected EntityManagerInterface $em,
     protected RequestStack $reqstack)
   {
+  }
+
+  /**
+   * Controlla se il docente può operare sulla classe indicata.
+   *
+   * L'accesso è consentito ai membri dello staff, ai docenti titolari di una
+   * cattedra attiva nella classe e ai docenti che stanno operando sulla classe
+   * in regime di sostituzione (classe selezionata nella sessione corrente).
+   *
+   * @param Docente $docente Docente di cui controllare l'accesso
+   * @param Classe $classe Classe di riferimento
+   *
+   * @return bool Vero se l'accesso alla classe è consentito
+   */
+  protected function accessoClasse(Docente $docente, Classe $classe): bool {
+    // membri dello staff: accesso completo
+    if ($docente instanceof Staff) {
+      return true;
+    }
+    // cattedra attiva nella classe
+    if ($this->em->getRepository(Cattedra::class)->docenteClasse($docente, $classe)) {
+      return true;
+    }
+    // sostituzione: la classe è quella selezionata nella sessione corrente
+    return (int) $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione', 0) === $classe->getId();
   }
 
   /**

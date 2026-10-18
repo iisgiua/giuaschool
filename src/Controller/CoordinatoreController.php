@@ -533,15 +533,22 @@ class CoordinatoreController extends BaseController {
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
         // imposta criteri di ricerca
-        $criteri['alunno'] = (is_object($form->get('alunno')->getData()) ?
-          $form->get('alunno')->getData()->getId() : 0);
-        $criteri['inizio'] = $form->get('inizio')->getData()->format('Y-m-d');
-        $criteri['fine'] = $form->get('fine')->getData()->format('Y-m-d');
-        $pagina = 1;
-        $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/alunno', $criteri['alunno']);
-        $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/inizio', $criteri['inizio']);
-        $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/fine', $criteri['fine']);
-        $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/pagina', $pagina);
+        $inizioData = $form->get('inizio')->getData();
+        $fineData = $form->get('fine')->getData();
+        if ($inizioData === null || $fineData === null) {
+          // date non valide: i criteri restano quelli correnti e si avvisa l'utente
+          $this->addFlash('warning', 'exception.invalid_params');
+        } else {
+          $criteri['alunno'] = (is_object($form->get('alunno')->getData()) ?
+            $form->get('alunno')->getData()->getId() : 0);
+          $criteri['inizio'] = $inizioData->format('Y-m-d');
+          $criteri['fine'] = $fineData->format('Y-m-d');
+          $pagina = 1;
+          $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/alunno', $criteri['alunno']);
+          $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/inizio', $criteri['inizio']);
+          $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/fine', $criteri['fine']);
+          $this->reqstack->getSession()->set('/APP/ROUTE/coordinatore_presenze/pagina', $pagina);
+        }
       }
       // lista fuori classe
       $dati = $this->em->getRepository(Presenza::class)->fuoriClasse($classe, $criteri, $pagina);

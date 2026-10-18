@@ -264,6 +264,10 @@ class StaffController extends BaseController {
     }
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
+    if (empty($orario)) {
+      // errore: orario non definito per la data indicata
+      throw $this->createNotFoundException('exception.orario_sede_invalido');
+    }
     // controlla entrata
     $entrata = $this->em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($entrata) {
@@ -428,6 +432,10 @@ class StaffController extends BaseController {
     }
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
+    if (empty($orario)) {
+      // errore: orario non definito per la data indicata
+      throw $this->createNotFoundException('exception.orario_sede_invalido');
+    }
     // controlla uscita
     $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($uscita) {

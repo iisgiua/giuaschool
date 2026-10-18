@@ -365,19 +365,23 @@ class AvvisiController extends BaseController {
       // azione edit
       $edit = true;
       $tipo = $avviso->getTipo();
+      if (!in_array($tipo, ['E', 'U', 'A'], true)) {
+        // errore: tipo di avviso non gestibile da questa pagina
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
       switch ($tipo) {
         case 'E':
-          $valori['ora'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{ora}']);
-          $valori['note'] = $avviso->getSostituzioni()['{note}'];
-          break;
         case 'U':
-          $valori['ora'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{ora}']);
-          $valori['note'] = $avviso->getSostituzioni()['{note}'];
+          $valori['ora'] = !empty($avviso->getSostituzioni()['{ora}']) ?
+            DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{ora}']) : null;
+          $valori['note'] = $avviso->getSostituzioni()['{note}'] ?? '';
           break;
         case 'A':
-          $valori['inizio'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{inizio}']);
-          $valori['fine'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{fine}']);
-          $valori['attivita'] = $avviso->getSostituzioni()['{attivita}'];
+          $valori['inizio'] = !empty($avviso->getSostituzioni()['{inizio}']) ?
+            DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{inizio}']) : null;
+          $valori['fine'] = !empty($avviso->getSostituzioni()['{fine}']) ?
+            DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{fine}']) : null;
+          $valori['attivita'] = $avviso->getSostituzioni()['{attivita}'] ?? '';
           break;
       }
     } else {
@@ -847,13 +851,17 @@ class AvvisiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db
-    $com->leggeUtente($this->getUser(), $avviso);
-    $this->em->flush();
     // invia il file
     $file = $avviso->getAllegati()[$allegato];
     $dir = $this->getParameter('dir_avvisi').($avviso->getStato() == 'A' ? '/'.$avviso->getAnno() : '');
     $nomefile = $dir.'/'.$file->getFile().'.'.$file->getEstensione();
+    if (!file_exists($nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // segna lettura e memorizza su db solo dopo aver verificato il file
+    $com->leggeUtente($this->getUser(), $avviso);
+    $this->em->flush();
     return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
       ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
   }
