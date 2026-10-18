@@ -19,25 +19,6 @@ use App\Entity\Preside;
 class StaffRepository extends BaseRepository {
 
   /**
-   * Restituisce gli utenti staff secondo il filtro di sede
-   *
-   * @param array $sedi Lista di ID delle sedi
-   *
-   * @return array Lista di ID degli utenti staff
-   */
-  public function getIdStaff($sedi) {
-    $staff = $this->createQueryBuilder('s')
-      ->select('DISTINCT s.id')
-      ->where('s.abilitato=1 AND NOT s INSTANCE OF '.Preside::class)
-      ->andWhere('s.sede IS NULL OR s.sede IN (:sedi)')
-      ->setParameter('sedi', $sedi)
-      ->getQuery()
-      ->getArrayResult();
-    // restituisce la lista degli ID
-    return array_column($staff, 'id');
-  }
-
-  /**
    * Restituisce la lista dello staff secondo i criteri di ricerca indicati
    *
    * @param array $criteri Lista dei criteri di ricerca

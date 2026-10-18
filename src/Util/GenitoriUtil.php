@@ -807,38 +807,6 @@ class GenitoriUtil {
   }
 
   /**
-   * Restituisce lo scrutinio visibile più recente o controlla se nel periodo indicato è visibile
-   *
-   * @param Classe $classe Classe di cui leggere i dati dello scrutinio
-   * @param string $periodo Se specificato, indica il periodo dello scrutinio da controllare
-   *
-   * @return array Dati formattati come un array associativo
-   */
-  public function scrutinioVisibile(Classe $classe, $periodo=null) {
-    // legge periodi per classe
-    $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
-      ->select('s.periodo,s.stato')
-      ->where('s.classe=:classe AND s.stato=:stato AND s.visibile<=:ora')
-			->setParameter('classe', $classe)
-			->setParameter('stato', 'C')
-			->setParameter('ora', (new DateTime())->format('Y-m-d H:i:00'))
-      ->orderBy('s.data', 'DESC')
-      ->setMaxResults(1);
-    if ($periodo) {
-      // controlla solo il periodo indicato
-      $scrutinio = $scrutinio
-        ->andWhere('s.periodo=:periodo')
-        ->setParameter('periodo', $periodo);
-    }
-    // esegue query
-    $scrutinio = $scrutinio
-      ->getQuery()
-      ->getOneOrNullResult();
-    // restituisce valori
-    return $scrutinio;
-  }
-
-  /**
    * Restituisce pagella e altre comunicazioni dello scrutinio dell'alunno indicato.
    *
    * @param Classe $classe Classe dell'alunno
@@ -969,38 +937,6 @@ class GenitoriUtil {
     // restituisce dati
     return $dati;
   }
-
-  /**
-   * Restituisce le materie che il docente insegna nella classe.
-   *
-   * @param Docente $docente Docente di cui si vogliono sapere le materie insegnate
-   * @param Classe $classe Classe desiderata
-   * @param Alunno $alunno Alunno per la cattedra di sostegno
-   *
-   * @return array Dati restituiti come array associativo
-   */
-  public function materieDocente(Docente $docente, Classe $classe, Alunno $alunno) {
-    $dati = [];
-    // cattedra
-    $materie = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
-      ->select('m.id,m.nomeBreve,m.tipo,(c.alunno) AS alunno')
-      ->join('c.materia', 'm')
-      ->where('c.docente=:docente AND c.classe=:classe AND c.attiva=:attiva')
-      ->orderBy('m.ordinamento,m.nomeBreve', 'ASC')
-			->setParameter('docente', $docente)
-			->setParameter('classe', $classe)
-			->setParameter('attiva', 1)
-      ->getQuery()
-      ->getArrayResult();
-    foreach ($materie as $m) {
-      if ($m['tipo'] != 'S' || !$alunno || ($alunno->getBes() == 'H' && $m['alunno'] == $alunno->getId())) {
-        // aggiunge materie
-        $dati[$m['id']]= $m;
-      }
-    }
-    // restituisce dati
-    return $dati;
-    }
 
   /**
    * Restituisce la lista delle pagelle esistenti per l'alunno indicato
@@ -1276,63 +1212,6 @@ class GenitoriUtil {
     // restituisce dati come array associativo
     $dati = [];
     $dati['gruppi'] = $gruppi;
-    $dati['evidenza'] = $da_giustificare;
-    $dati['num_assenze'] = count($assenze);
-    return $dati;
-  }
-
-  /**
-   * Raggruppa le assenze orarie di un alunno
-   *
-   * @param Alunno $alunno Alunno di cui leggere le assenze
-   *
-   * @return array Dati restituiti come array associativo
-   */
-  public function raggruppaAssenzeOre(Alunno $alunno) {
-    // init
-    $dati_periodo = [];
-    $da_giustificare = ['assenza' => []];
-    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    $periodi = $this->regUtil->infoPeriodi();
-    // legge assenze
-    $assenze = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
-      ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
-      ->join(Assenza::class, 'ass', 'WITH', 'ass.alunno=a.id')
-      ->where('a.id=:alunno AND a.classe=:classe')
-      ->orderBy('ass.data', 'DESC')
-			->setParameter('alunno', $alunno)
-			->setParameter('classe', $alunno->getClasse())
-      ->getQuery()
-      ->getArrayResult();
-    // imposta array associativo per assenze
-    foreach ($assenze as $a) {
-      $data = $a['data']->format('Y-m-d');
-      $numperiodo = ($data <= $periodi[1]['fine'] ? 1 : ($data <= $periodi[2]['fine'] ? 2 : 3));
-      $data_str = intval(substr((string) $data, 8)).' '.$mesi[intval(substr((string) $data, 5, 2))].' '.substr((string) $data, 0, 4);
-      $dati_periodo[$numperiodo][$data]['assenza']['data'] = $data_str;
-      $dati_periodo[$numperiodo][$data]['assenza']['data_fine'] = $data_str;
-      $dati_periodo[$numperiodo][$data]['assenza']['giorni'] = 1;
-      $dati_periodo[$numperiodo][$data]['assenza']['giustificato'] =
-        ($a['giustificato'] ? ($a['docenteGiustifica'] ? 'D' : 'G') : null);
-      $dati_periodo[$numperiodo][$data]['assenza']['motivazione'] = $a['motivazione'];
-      $dati_periodo[$numperiodo][$data]['assenza']['dichiarazione'] =
-        empty($a['dichiarazione']) ? [] : $a['dichiarazione'];
-      $dati_periodo[$numperiodo][$data]['assenza']['certificati'] =
-        empty($a['certificati']) ? [] : $a['certificati'];
-      $dati_periodo[$numperiodo][$data]['assenza']['id'] = $a['id'];
-      $dati_periodo[$numperiodo][$data]['assenza']['ids'] = $a['id'];
-      $dati_periodo[$numperiodo][$data]['assenza']['permesso'] = $this->azioneGiustifica($a['data'], $alunno);
-      $dati_periodo[$numperiodo][$data]['assenza']['ore'] =
-        $this->em->getRepository(AssenzaLezione::class)->alunnoOreAssenze($alunno, $a['data']);
-      if (!$a['giustificato'] && count($da_giustificare['assenza']) < 10 &&
-          $dati_periodo[$numperiodo][$data]['assenza']['permesso']) {
-        // assenza da giustificare in evidenza (le prime dieci)
-        $da_giustificare['assenza'][] = $dati_periodo[$numperiodo][$data]['assenza'];
-      }
-    }
-    // restituisce dati come array associativo
-    $dati = [];
-    $dati['gruppi'] = $dati_periodo;
     $dati['evidenza'] = $da_giustificare;
     $dati['num_assenze'] = count($assenze);
     return $dati;

@@ -23,29 +23,6 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 class DocenteRepository extends BaseRepository {
 
   /**
-   * Restituisce la lista dei docenti abilitati, secondo i criteri di ricerca indicati
-   *
-   * @param array $search Lista dei criteri di ricerca
-   * @param int $page Pagina corrente
-   * @param int $limit Numero di elementi per pagina
-   *
-   * @return Paginator Oggetto Paginator
-   */
-  public function findEnabled($search=null, $page=1, $limit=10): Paginator {
-    // crea query
-    $query = $this->createQueryBuilder('d')
-      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside) AND d.abilitato=:abilitato')
-      ->orderBy('d.cognome, d.nome, d.username', 'ASC')
-      ->setParameter('nome', $search['nome'].'%')
-      ->setParameter('cognome', $search['cognome'].'%')
-      ->setParameter('abilitato', 1)
-      ->getQuery();
-    // crea lista con pagine
-    $res = $this->paginazione($query, $page);
-    return $res['lista'];
-  }
-
-  /**
    * Restituisce la lista degli ID di docenti corretti o l'errore nell'apposito parametro
    *
    * @param array $sedi Lista di ID delle sedi

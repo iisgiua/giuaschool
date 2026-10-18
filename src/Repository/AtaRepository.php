@@ -58,27 +58,6 @@ class AtaRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce gli utenti ATA per le sedi indicate
-   *
-   * @param array $sedi Sedi di servizio (lista ID di Sede)
-   *
-   * @return array Lista di ID degli utenti ATA
-   */
-  public function getIdAta($sedi): array {
-    $ata = $this->createQueryBuilder('a')
-      ->select('a.id')
-      ->where('a.abilitato=:abilitato')
-      ->andWhere('a.tipo!=:dsga AND (a.sede IS NULL OR a.sede IN (:sedi))')
-      ->setParameter('dsga', 'D')
-      ->setParameter('abilitato', 1)
-      ->setParameter('sedi', $sedi)
-      ->getQuery()
-      ->getArrayResult();
-    // restituisce la lista degli ID
-    return array_column($ata, 'id');
-  }
-
-  /**
    * Restituisce gli utenti ATA per le sedi indicate, in base alle categorie scelte
    *
    * @param array $categorie Categorie personale ATA
