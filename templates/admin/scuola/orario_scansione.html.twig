@@ -1,66 +1,242 @@
 {% extends 'admin/layout-sidebar.html.twig' %}
 
+{##
+ # Scansione oraria settimanale: una scheda (tab) per ogni giorno.
+ #
+ # Il controller passa 'form' come array [vista del form, messaggio da mostrare]:
+ # il tema 'admin/scuola/orario_scansione_theme.html.twig' estende il tema
+ # generale dell'applicazione e rende inizio/fine come input time nativi, adatti
+ # a una tabella con una riga per ora (niente timepicker a rotelle).
+ #
+ # Le ore di ogni giorno sono renderizzate a mano, senza form_row globale, cosi'
+ # l'intestazione (Ora | Inizio | Fine | Durata | Azioni) compare una volta sola
+ # per giorno e non a ogni riga.
+ #
+ # Il repository prepara 10 slot per giorno: quelli con ora=0 sono liberi e
+ # restano nascosti finche' non si usa "Aggiungi ora". Lo stato di ogni slot
+ # viaggia nel campo nascosto 'visibile' (0 = non usato), che il controller legge
+ # per sapere quante ore ha il giorno (le ore usate sono sempre le prime).
+ #}
+{% form_theme form[0] with 'admin/scuola/orario_scansione_theme.html.twig' %}
+
 {% block pagina_contenuto %}
+{% set formView = form[0] %}
+
 <div class="container">
   <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
-  {{ include('admin/include/form.html.twig', {form: form[0], form_help: form[1]}) }}
+
+  {# messaggi di esito: quelli flash hanno la precedenza, come nelle altre pagine #}
+  {% if app.session.flashbag.peekAll() is not empty %}
+    {{ include('admin/include/flash.html.twig') }}
+  {% elseif formView.vars.submitted and formView.vars.valid %}
+    {{ include('admin/include/flash.html.twig', {tipo: 'success', messaggio: 'message.update_ok'}) }}
+  {% elseif formView.vars.submitted and not formView.vars.valid and formView.vars.errors|length == 0 %}
+    {{ include('admin/include/flash.html.twig', {tipo: 'danger', messaggio: 'exception.update_errors'}) }}
+  {% endif %}
+
+  <div class="card-wrapper card-space">
+    <div class="card gs-card-orario border rounded card-bg">
+      {% if form[1] %}
+        <div class="card-header bg-secondary text-white">{{ form[1]|trans|raw }}</div>
+      {% endif %}
+
+      {{ form_errors(formView) }}
+
+      <div class="card-body gs-scansione-oraria">
+        <ul class="nav nav-tabs" id="gs-orario-tabs" role="tablist">
+          {% for giorno in 1..6 %}
+            {% set nome_giorno = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato'][giorno - 1] %}
+            <li class="nav-item">
+              <a class="nav-link{{ giorno == 1 ? ' active' }}" id="gs-orario-tab-{{ giorno }}"
+                 data-toggle="tab" href="#gs-orario-giorno-{{ giorno }}" role="tab"
+                 aria-controls="gs-orario-giorno-{{ giorno }}" aria-selected="{{ giorno == 1 ? 'true' : 'false' }}">
+                {{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-1'}, false) }}
+                <strong>{{ ('label.' ~ nome_giorno)|trans }}</strong>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+
+        {{ form_start(formView) }}
+
+        <div class="tab-content">
+          {% for giorno in 1..6 %}
+            <div class="tab-pane fade{{ giorno == 1 ? ' show active' }}" id="gs-orario-giorno-{{ giorno }}"
+                 role="tabpanel" aria-labelledby="gs-orario-tab-{{ giorno }}">
+              <div class="table-responsive">
+                <table class="table gs-orario-righe mb-0">
+                  <thead>
+                    <tr>
+                      <th class="gs-col-ora" scope="col">{{ 'label.ora'|trans }}</th>
+                      <th scope="col">{{ 'label.ora_inizio'|trans }}</th>
+                      <th scope="col">{{ 'label.ora_fine'|trans }}</th>
+                      <th scope="col">{{ 'label.durata'|trans }}</th>
+                      <th class="gs-col-azioni" scope="col">Azioni</th>
+                    </tr>
+                  </thead>
+                  <tbody class="gs-giorno" data-giorno="{{ giorno }}">
+                    {% for entry in formView.children['giorno_' ~ giorno] %}
+                      <tr class="gs-ora-riga" data-giorno="{{ giorno }}">
+                        <td class="gs-col-ora">
+                          {# campi di servizio: 'visibile' dice se lo slot e' usato, 'ora' e' il numero d'ordine (disabilitato) #}
+                          {{ form_widget(entry.visibile, {attr: {class: 'gs-visibile'}}) }}
+                          {{ form_widget(entry.ora, {attr: {class: 'gs-ora'}}) }}
+                        </td>
+                        <td>
+                          {{ form_widget(entry.inizio, {attr: {class: 'gs-inizio form-control-sm',
+                            'aria-label': 'label.ora_inizio'|trans}}) }}
+                          {{ form_errors(entry.inizio) }}
+                        </td>
+                        <td>
+                          {{ form_widget(entry.fine, {attr: {class: 'gs-fine form-control-sm',
+                            'aria-label': 'label.ora_fine'|trans}}) }}
+                          {{ form_errors(entry.fine) }}
+                        </td>
+                        <td>
+                          {{ form_widget(entry.durata, {attr: {class: 'gs-durata form-control-sm',
+                            'aria-label': 'label.durata'|trans}}) }}
+                          {{ form_errors(entry.durata) }}
+                        </td>
+                        <td class="gs-col-azioni">
+                          <button type="button" class="btn btn-outline-danger btn-sm gs-rimuovi-ora"
+                                  title="{{ 'label.cancella_elemento'|trans }}">
+                            <span class="sr-only">{{ 'label.cancella_elemento'|trans }}</span>
+                            {{ include('admin/include/icona.html.twig', {nome: 'trash', stile: 'outline'}, false) }}
+                          </button>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="text-right mt-3">
+                <button type="button" class="btn btn-outline-primary btn-sm gs-aggiungi-ora"
+                        data-giorno="{{ giorno }}">
+                  {{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-1'}, false) }}
+                  {{ 'label.aggiungi_ora'|trans }}
+                </button>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        {# pulsanti a tutta larghezza: Annulla a sinistra, Conferma a destra #}
+        <div class="form-row mt-4">
+          <div class="col-6">
+            {{ form_widget(formView.cancel, {attr: {class: 'btn btn-outline-secondary btn-block'}}) }}
+          </div>
+          <div class="col-6">
+            {{ form_widget(formView.submit, {attr: {class: 'btn btn-primary btn-block'}}) }}
+          </div>
+        </div>
+
+        {# campi di servizio del form (es. il token) che nessuno ha reso finora:
+           il form_end sotto non li rende da solo perche' altrimenti rimetterebbe
+           in pagina le collection dei giorni, gia' iterare a mano qui sopra #}
+        {% for item in formView.children %}
+          {% if not item.children and not item.rendered %}
+            {{ form_row(item) }}
+          {% endif %}
+        {% endfor %}
+
+        {{ form_end(formView, {render_rest: false}) }}
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block pagina_js_fine %}
 <script>
-$(document).ready(function() {
-  $('.gs-giorno').on('click', 'button.gs-remove-item', function() {
-    var form = $(this).closest('.gs-giorno');
-    var formId = $(form).attr('id');
-    var el = $(this).closest('fieldset');
-    var idx = parseInt($(el).find('input[disabled="disabled"]').val());
-    var idxLast = parseInt($(form).find('input[disabled="disabled"][value!="0"]').last().val());
-    for (; idx < idxLast; idx++) {
-      $(form).find('#'+formId+'_'+idx+'_inizio').val($(form).find('#'+formId+'_'+(idx + 1)+'_inizio').val());
-      $(form).find('#'+formId+'_'+idx+'_fine').val($(form).find('#'+formId+'_'+(idx + 1)+'_fine').val());
-      $(form).find('#'+formId+'_'+idx+'_durata').val($(form).find('#'+formId+'_'+(idx + 1)+'_durata').val());
-    }
-    $(form).find('#'+formId+'_'+idxLast+'_ora').attr('value', 0);
-    $(form).find('#'+formId+'_'+idxLast+'_visibile').val(0);
-    $(form).find('#'+formId+'_'+idxLast).closest('fieldset').hide();
-  });
-  $('.gs-giorno').on('click', 'button.gs-add-item', function() {
-    var form = $(this).closest('.gs-giorno');
-    var formId = $(form).attr('id');
-    var idx = parseInt($(form).find('input[disabled="disabled"][value!="0"]').last().val());
-    idx = (idx > 0 ? (idx + 1) : 1);
-    var el = $(form).find('#'+formId+'_'+idx).closest('fieldset');
-    $(el).find('#'+formId+'_'+idx+'_ora').attr('value', idx);
-    $(el).find('#'+formId+'_'+idx+'_inizio').val('08:30');
-    $(el).find('#'+formId+'_'+idx+'_fine').val('09:30');
-    $(el).find('#'+formId+'_'+idx+'_durata').val('1');
-    $(el).find('#'+formId+'_'+idx+'_visibile').val(1);
-    $(el).show();
-  });
-  // init
-  var button = '<div class="w-100 text-right" style="margin-top:-2.5rem;position:relative"><button class="btn btn-success btn-sm gs-add-item" type="button" title="{{ 'label.aggiunge_elemento'|trans }}"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#plus"></use></svg></button></div>';
-  $('.gs-giorno').append(button);
-  $('.gs-giorno button.gs-remove-item').html('<svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#minus') }}"></use></svg>');
-  $('input[disabled="disabled"]').each(function() {
-    var o = $(this).val();
-    var v = $('#'+$(this).attr('id').slice(0, -3)+'visibile');
-    if ($(v).val() === "") {
-      if (o === "0") {
-        $(v).val(0);
-        $(this).closest('fieldset').hide();
-      } else {
-        $(v).val(1);
+  $(document).ready(function() {
+    // stato iniziale: le ore con numero 0 sono slot liberi, quindi restano nascosti
+    $('.gs-giorno').each(function() {
+      avviaGiorno($(this));
+    });
+
+    // aggiunge un'ora: mostra il primo slot libero con un orario che segue l'ultima ora
+    $('.gs-aggiungi-ora').on('click', function() {
+      var $giorno = $('.gs-giorno[data-giorno="' + $(this).data('giorno') + '"]');
+      var $libero = slotLiberi($giorno).first();
+      if ($libero.length === 0) {
+        return;
       }
-    } else if ($(v).val() === "0") {
-      $(this).attr('value', 0);
-      $(this).closest('fieldset').hide();
-    } else if (o === "0") {
-      var idx = parseInt($(this).closest('.gs-giorno').find('input[disabled="disabled"][value!="0"]').last().val());
-      idx = (idx > 0 ? (idx + 1) : 1);
-      $(this).attr('value', idx);
+      var $usate = slotUsati($giorno);
+      var inizio = $usate.length > 0 ? $usate.last().find('.gs-fine').val() : '';
+      if (!/^\d{2}:\d{2}$/.test(inizio)) {
+        inizio = '08:30';
+      }
+      $libero.find('.gs-inizio').val(inizio);
+      $libero.find('.gs-fine').val(piuMinuti(inizio, 60));
+      $libero.find('.gs-durata').val('1');
+      $libero.find('.gs-visibile').val('1');
+      $libero.show();
+      aggiornaPulsante($giorno);
+      $libero.find('.gs-inizio').trigger('focus');
+    });
+
+    // cancella un'ora: i valori scorrono verso l'alto e l'ultima ora usata si libera,
+    // cosi' le ore di ogni giorno restano sempre le prime della tabella
+    $('.gs-rimuovi-ora').on('click', function() {
+      var $riga = $(this).closest('.gs-ora-riga');
+      var $giorno = $riga.closest('.gs-giorno');
+      var $usate = slotUsati($giorno);
+      var posizione = $usate.index($riga);
+      if (posizione < 0) {
+        return;
+      }
+      $usate.each(function(indice) {
+        if (indice < posizione) {
+          return;
+        }
+        var $dopo = $usate.eq(indice + 1);
+        if ($dopo.length > 0) {
+          $(this).find('.gs-inizio').val($dopo.find('.gs-inizio').val());
+          $(this).find('.gs-fine').val($dopo.find('.gs-fine').val());
+          $(this).find('.gs-durata').val($dopo.find('.gs-durata').val());
+        }
+      });
+      var $ultima = $usate.last();
+      $ultima.find('.gs-visibile').val('0');
+      $ultima.hide();
+      aggiornaPulsante($giorno);
+    });
+
+    // imposta stato e visibilita' di ogni slot leggendo il numero d'ordine del campo 'ora'
+    function avviaGiorno($giorno) {
+      $giorno.find('.gs-ora-riga').each(function() {
+        var $riga = $(this);
+        var usato = parseInt($riga.find('.gs-ora').val(), 10) > 0;
+        $riga.find('.gs-visibile').val(usato ? '1' : '0');
+        $riga.toggle(usato);
+      });
+      aggiornaPulsante($giorno);
+    }
+
+    function slotUsati($giorno) {
+      return $giorno.find('.gs-ora-riga').filter(function() {
+        return $(this).find('.gs-visibile').val() === '1';
+      });
+    }
+
+    function slotLiberi($giorno) {
+      return $giorno.find('.gs-ora-riga').filter(function() {
+        return $(this).find('.gs-visibile').val() !== '1';
+      });
+    }
+
+    // l'aggiunta si disattiva quando non ci sono piu' slot liberi nel giorno
+    function aggiornaPulsante($giorno) {
+      $('.gs-aggiungi-ora[data-giorno="' + $giorno.data('giorno') + '"]')
+        .prop('disabled', slotLiberi($giorno).length === 0);
+    }
+
+    function piuMinuti(orario, minuti) {
+      var pezzi = orario.split(':');
+      var totale = (parseInt(pezzi[0], 10) * 60 + parseInt(pezzi[1], 10) + minuti) % 1440;
+      return ('0' + Math.floor(totale / 60)).slice(-2) + ':' + ('0' + (totale % 60)).slice(-2);
     }
   });
-});
 </script>
 {% endblock %}
