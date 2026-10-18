@@ -703,7 +703,6 @@ body .modal-content {
 }
 body .modal-header {
   padding: 16px 24px;
-  border-bottom: 1px solid var(--gs-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -713,7 +712,6 @@ body .modal-body {
 }
 body .modal-footer {
   padding: 16px 24px;
-  border-top: 1px solid var(--gs-border);
   display: flex;
   justify-content: flex-end;
   align-items: center;

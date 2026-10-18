@@ -188,8 +188,26 @@ code {
 }
 
 *:focus {
-  outline: 2px solid #0d6efd;
   outline-offset: 2px;
+}
+
+/* Bootstrap Italia crea un blocco ::after per .clearfix: i contenitori dell'app
+   (main e corpo pagina) non hanno elementi flottanti da ripulire, quindi quel
+   blocco vuoto non deve comparire. Fuori da quei due contenitori .clearfix
+   torna a chiudere i float di Bootstrap 3 come sempre (es. QRcode e istruzioni
+   che stanno a lato dei pulsanti nella pagina utenti/otp). */
+.gs-main-container.clearfix::after,
+#gs-main.clearfix::after {
+  display: none;
+  content: none;
+}
+
+/* Bootstrap Italia disegna con .border-bottom una riga da 1px (intestazione dei
+   modali e schede di admin/include/form-tab.html.twig): nella grafica dell'app
+   non deve mai comparire. Stessa specificita' e stesso !important del vendor,
+   quindi vince perche' questo file e' caricato dopo bootstrap-italia. */
+.border-bottom {
+  border-bottom: 0 !important;
 }
 
 .skiplinks {
@@ -579,6 +597,20 @@ body .dropdown:has(> .btn.dropdown-toggle) {
 .bootstrap-select-wrapper .dropdown.bootstrap-select>.dropdown-menu,
 .bootstrap-select-wrapper .dropdown.bootstrap-select>.dropdown-menu>.inner {
   min-height: 0 !important;
+}
+
+/* A larghezze ridotte le voci lunghe andavano a capo dentro righe alte 36px,
+   uscendo sopra e sotto e sovrapponendosi tra loro: restano su una sola riga
+   (come previsto in gs-standard.css) e vengono troncate con ellissi. */
+.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu .dropdown-item,
+.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu .dropdown-item .text {
+  white-space: nowrap;
+}
+
+.bootstrap-select-wrapper .dropdown.bootstrap-select .dropdown-menu .dropdown-item .text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .gs-menu-select>.dropdown-menu {
@@ -1236,7 +1268,7 @@ html.gs-admin .gs-footer-legal a {
   border-collapse: separate;
   border-spacing: 0;
   background-color: #fff;
-  border: 1px solid #dee2e6;
+  border: 1px solid #dee2e6 !important;
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 0;
@@ -1833,7 +1865,6 @@ body.modal-open {
 }
 
 .modal-header {
-  border-bottom: 1px solid #dee2e6;
   padding: 1.5rem;
   border-radius: 12px 12px 0 0;
 }

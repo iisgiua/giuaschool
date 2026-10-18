@@ -8,6 +8,23 @@
    esterno, quindi lo chiudiamo qui. Gli id dei campi arrivano come secondo
    argomento degli eventi ab.datepicker.opened/closed. */
 $(document).ready(function () {
+  // gestisce il pulsante mostra/nascondi password dei campi password
+  $(document).on('click', '.password-icon', function () {
+    var input = $(this).prev('input');
+    var visibile = $(this).find('.password-icon-visible');
+    var invisibile = $(this).find('.password-icon-invisible');
+
+    if (input.attr('type') === 'password') {
+      input.attr('type', 'text');
+      visibile.addClass('d-none');
+      invisibile.removeClass('d-none');
+    } else {
+      input.attr('type', 'password');
+      visibile.removeClass('d-none');
+      invisibile.addClass('d-none');
+    }
+  });
+
   // chiude tutti gli spinner orari aperti usando il pulsante orario di BI,
   // cosi' il valore impostato viene riportato nel campo prima della chiusura
   function chiudiSpinner() {
