@@ -22,19 +22,26 @@
 {{ form_end(form, {render_rest: false}) }}
 
 <script>
-$(document).ready(function() {
-  $('#giustifica_uscita_tipo').change(function () {
-    if ($(this).val() == 0) {
-      $('#giustifica_uscita_motivazione').val('');
-    } else if ($(this).val() == 9) {
-      $('#giustifica_uscita_motivazione').val('').focus();
-    } else {
-      $('#giustifica_uscita_motivazione').val($("#giustifica_uscita_tipo option:selected").text());
-    }
-  });
-  $('#giustifica_uscita_delete').click(function () {
-    $('#giustifica_uscita_motivazione').attr('required', false);
-    return true;
-  });
-});
+(function () {
+  var tipo = document.getElementById('giustifica_uscita_tipo');
+  var motivazione = document.getElementById('giustifica_uscita_motivazione');
+  if (tipo && motivazione) {
+    tipo.addEventListener('change', function () {
+      if (tipo.value === '' || tipo.value === '0') {
+        motivazione.value = '';
+      } else if (tipo.value === '9') {
+        motivazione.value = '';
+        motivazione.focus();
+      } else {
+        motivazione.value = tipo.options[tipo.selectedIndex].text;
+      }
+    });
+  }
+  var elimina = document.getElementById('giustifica_uscita_delete');
+  if (elimina && motivazione) {
+    elimina.addEventListener('click', function () {
+      motivazione.removeAttribute('required');
+    });
+  }
+})();
 </script>
