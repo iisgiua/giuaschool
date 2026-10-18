@@ -108,7 +108,7 @@
     },
     "require-dev": {
         "dmore/chrome-mink-driver": "^2.8",
-        "doctrine/doctrine-fixtures-bundle": "^3.4",
+        "doctrine/doctrine-fixtures-bundle": "^4.3",
         "fakerphp/faker": "^1.15",
         "friends-of-behat/mink": "^1.9",
         "friends-of-behat/mink-browserkit-driver": "^1.5",

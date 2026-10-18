@@ -170,9 +170,22 @@ App\Entity\AssenzaLezione:
 
 
 App\Entity\Assenza:
+  # Date fisse (senza orario): evitano collisioni sul vincolo univoco
+  # (data, alunno), perché dateTimeBetween genera orari diversi nello
+  # stesso giorno e la colonna DATE li tronca alla sola data.
   # ----- ingiustificate passate -----
-  assenza_mini_ingiustificata_{1..2}:
-    data (unique): '<dateTimeBetween("2026-09-15", "2026-09-20")>'
+  assenza_mini_ingiustificata_1:
+    data: '<dataFissa("16/09/2026")>'
+    giustificato:
+    motivazione: ''
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica:
+    utenteGiustifica:
+  assenza_mini_ingiustificata_2:
+    data: '<dataFissa("18/09/2026")>'
     giustificato:
     motivazione: ''
     dichiarazione: '<(array())>'
@@ -182,9 +195,19 @@ App\Entity\Assenza:
     docenteGiustifica:
     utenteGiustifica:
   # ----- giustificate dal genitore, non validate -----
-  assenza_mini_nonvalidata_{1..2}:
-    data (unique): '<dateTimeBetween("2026-09-21", "2026-09-27")>'
-    giustificato: '<dateTimeBetween("2026-09-21", "2026-10-03")>'
+  assenza_mini_nonvalidata_1:
+    data: '<dataFissa("22/09/2026")>'
+    giustificato: '<dataFissa("26/09/2026")>'
+    motivazione: 'Influenza'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica:
+    utenteGiustifica: '@genitore_mini'
+  assenza_mini_nonvalidata_2:
+    data: '<dataFissa("24/09/2026")>'
+    giustificato: '<dataFissa("28/09/2026")>'
     motivazione: 'Influenza'
     dichiarazione: '<(array())>'
     certificati: '<(array())>'
@@ -193,9 +216,19 @@ App\Entity\Assenza:
     docenteGiustifica:
     utenteGiustifica: '@genitore_mini'
   # ----- giustificate e validate dal docente -----
-  assenza_mini_validata_{1..2}:
-    data (unique): '<dateTimeBetween("2026-09-28", "2026-10-03")>'
-    giustificato: '<dateTimeBetween("2026-09-28", "2026-10-05")>'
+  assenza_mini_validata_1:
+    data: '<dataFissa("29/09/2026")>'
+    giustificato: '<dataFissa("30/09/2026")>'
+    motivazione: 'Visita specialistica'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_mini'
+    docente: '@docente_mini'
+    docenteGiustifica: '@docente_mini'
+    utenteGiustifica: '@genitore_mini'
+  assenza_mini_validata_2:
+    data: '<dataFissa("01/10/2026")>'
+    giustificato: '<dataFissa("03/10/2026")>'
     motivazione: 'Visita specialistica'
     dichiarazione: '<(array())>'
     certificati: '<(array())>'
