@@ -49,6 +49,18 @@ class RichiesteUtil {
   }
 
   /**
+   * Verifica che il template personalizzato (in PERSONAL/data) di un modulo sia disponibile.
+   *
+   * @param string $tipo Tipo di modulo: moduli, consultazioni, autorizzazioni
+   * @param string|null $modulo Nome del file del template personalizzato
+   *
+   * @return bool Vero se il template è disponibile
+   */
+  public function esisteTemplate(string $tipo, ?string $modulo): bool {
+    return !empty($modulo) && is_file($this->dirProgetto.'/PERSONAL/data/'.$tipo.'/'.$modulo);
+  }
+
+  /**
    * Crea il documento PDF a partire dal modulo di richiesta e lo salva nell'archivio dei documenti di classe.
    *
    * @param DefinizioneRichiesta $definizioneRichiesta Definizione del modulo di richiesta
@@ -67,7 +79,12 @@ class RichiesteUtil {
     $fs = new FileSystem();
     // crea template per il documento
     $percorso = $this->dirProgetto.'/PERSONAL/data/moduli/';
-    $template = file_get_contents($percorso.$definizioneRichiesta->getModulo());
+    $nomeTemplate = $percorso.$definizioneRichiesta->getModulo();
+    if (!is_file($nomeTemplate)) {
+      // errore: template del modulo non disponibile
+      throw new \RuntimeException('Template del modulo non trovato: '.$definizioneRichiesta->getModulo());
+    }
+    $template = file_get_contents($nomeTemplate);
     foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
       $template = match ($campo[0]) {
         // tipo testo su più righe
@@ -176,7 +193,12 @@ class RichiesteUtil {
     $fs = new FileSystem();
     // crea template per il documento
     $percorso = $this->dirProgetto.'/PERSONAL/data/consultazioni/';
-    $template = file_get_contents($percorso.$consultazione->getModulo());
+    $nomeTemplate = $percorso.$consultazione->getModulo();
+    if (!is_file($nomeTemplate)) {
+      // errore: template della consultazione non disponibile
+      throw new \RuntimeException('Template della consultazione non trovato: '.$consultazione->getModulo());
+    }
+    $template = file_get_contents($nomeTemplate);
     foreach ($consultazione->getCampi() as $nome => $campo) {
       $template = match ($campo[0]) {
         // tipo testo su più righe
@@ -250,7 +272,12 @@ class RichiesteUtil {
     $fs = new FileSystem();
     // crea template per il documento
     $percorso = $this->dirProgetto.'/PERSONAL/data/autorizzazioni/';
-    $template = file_get_contents($percorso.$modulo->getModulo());
+    $nomeTemplate = $percorso.$modulo->getModulo();
+    if (!is_file($nomeTemplate)) {
+      // errore: template dell'autorizzazione non disponibile
+      throw new \RuntimeException('Template dell\'autorizzazione non trovato: '.$modulo->getModulo());
+    }
+    $template = file_get_contents($nomeTemplate);
     // aggiunge header e footer
     $header = $fs->exists($this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_intestazione.html.twig') ?
       $this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_intestazione.html.twig' :
@@ -314,7 +341,13 @@ class RichiesteUtil {
     $fs = new FileSystem();
     // crea template per il documento
     $percorso = $this->dirProgetto.'/PERSONAL/data/autorizzazioni/';
-    $template = file_get_contents($percorso.$esistente->getDefinizioneRichiesta()->getModulo());
+    $nomeTemplate = $percorso.$esistente->getDefinizioneRichiesta()->getModulo();
+    if (!is_file($nomeTemplate)) {
+      // errore: template dell'autorizzazione non disponibile
+      throw new \RuntimeException('Template dell\'autorizzazione non trovato: '.
+        $esistente->getDefinizioneRichiesta()->getModulo());
+    }
+    $template = file_get_contents($nomeTemplate);
     // aggiunge header e footer
     $header = $fs->exists($this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_intestazione.html.twig') ?
       $this->dirProgetto.'/PERSONAL/templates/autorizzazioni/_intestazione.html.twig' :

@@ -183,6 +183,10 @@ class RichiesteController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.modulo_allegati_mancanti')));
         $this->reqstack->getSession()->remove($varSessione);
       }
+      if (!$ric->esisteTemplate('moduli', $definizioneRichiesta->getModulo())) {
+        // errore: template del modulo non disponibile
+        $form->addError(new FormError($trans->trans('exception.modulo_template_mancante')));
+      }
       if ($form->isValid()) {
         // data richiesta
         $data = $definizioneRichiesta->getUnica() ? null : $form->get('data')->getData();
@@ -195,16 +199,24 @@ class RichiesteController extends BaseController {
           ->setStato('I')
           ->setMessaggio('');
         $this->em->flush();
-        // crea documento PDF
-        [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
-          $utente->getClasse(), $valori, $data, $invio);
-        // imposta eventuali allegati
-        $allegati = $ric->impostaAllegati($utente, $utente->getClasse(), $documentoId, $allegatiTemp);
+        try {
+          // crea documento PDF
+          [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
+            $utente->getClasse(), $valori, $data, $invio);
+          // imposta eventuali allegati
+          $allegati = $ric->impostaAllegati($utente, $utente->getClasse(), $documentoId, $allegatiTemp);
+        } catch (\Exception $e) {
+          // errore: elimina la richiesta incompleta per non bloccare un nuovo invio
+          $this->em->remove($richiesta);
+          $this->em->flush();
+          throw $e;
+        }
         $this->reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
         $richiesta
           ->setDocumento($documento)
           ->setAllegati($allegati);
+        $this->em->flush();
         $dblogger->logAzione('RICHIESTE', 'Invio richiesta');
         // redirezione
         return $this->redirectToRoute('richieste_lista');
@@ -386,6 +398,10 @@ class RichiesteController extends BaseController {
     }
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data, $alunno->getClasse()->getSede());
+    if (empty($orario)) {
+      // errore: orario non definito per la data indicata
+      throw $this->createNotFoundException('exception.orario_sede_invalido');
+    }
     // controlla uscita
     $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno,
       'data' => $data]);
@@ -898,6 +914,12 @@ class RichiesteController extends BaseController {
       // controlla se esiste già una richiesta
       $altraRichiesta = $this->em->getRepository(Richiesta::class)->findOneBy([
         'definizioneRichiesta' => $modulo, 'classe' => $classe, 'stato' => ['I', 'G']]);
+      if ($altraRichiesta && $altraRichiesta->getStato() === 'I' && $altraRichiesta->getDocumento() === '') {
+        // richiesta incompleta (invio precedente non riuscito): la elimina per permettere il nuovo invio
+        $this->em->remove($altraRichiesta);
+        $this->em->flush();
+        $altraRichiesta = null;
+      }
       if ($altraRichiesta) {
         // errore: esiste già altra richiesta
         throw $this->createNotFoundException('exception.not_allowed');
@@ -924,6 +946,10 @@ class RichiesteController extends BaseController {
       $valori = [];
       // controllo errori
       foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
+        // un tipo di campo non gestito da RichiestaType non crea il campo nel form
+        if (!$form->has($nome)) {
+          continue;
+        }
         if ($form->get($nome)->getData() === null && $campo[1]) {
           // campo obbligatorio vuoto
           $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
@@ -968,6 +994,10 @@ class RichiesteController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.modulo_allegati_mancanti')));
         $this->reqstack->getSession()->remove($varSessione);
       }
+      if (!$ric->esisteTemplate('moduli', $definizioneRichiesta->getModulo())) {
+        // errore: template del modulo non disponibile
+        $form->addError(new FormError($trans->trans('exception.modulo_template_mancante')));
+      }
       if ($form->isValid()) {
         // data richiesta
         $data = $definizioneRichiesta->getUnica() ? null : $form->get('data')->getData();
@@ -980,16 +1010,24 @@ class RichiesteController extends BaseController {
           ->setStato('I')
           ->setMessaggio('');
         $this->em->flush();
-        // crea documento PDF
-        [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
-          $classe, $valori, $data, $invio);
-        // imposta eventuali allegati
-        $allegati = $ric->impostaAllegati($utente, $classe, $documentoId, $allegatiTemp);
+        try {
+          // crea documento PDF
+          [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
+            $classe, $valori, $data, $invio);
+          // imposta eventuali allegati
+          $allegati = $ric->impostaAllegati($utente, $classe, $documentoId, $allegatiTemp);
+        } catch (\Exception $e) {
+          // errore: elimina la richiesta incompleta per non bloccare un nuovo invio
+          $this->em->remove($richiesta);
+          $this->em->flush();
+          throw $e;
+        }
         $this->reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
         $richiesta
           ->setDocumento($documento)
           ->setAllegati($allegati);
+        $this->em->flush();
         $dblogger->logAzione('RICHIESTE', 'Invio modulo evacuazione');
         // redirezione
         return $this->redirectToRoute('richieste_classe', ['classe'=> $classe->getId()]);
@@ -1249,6 +1287,12 @@ class RichiesteController extends BaseController {
     // controlla se esiste già una risposta
     $altra = $this->em->getRepository(Richiesta::class)->findOneBy(['definizioneRichiesta' => $modulo,
       'utente' => $utente, 'stato' => ['I', 'G']]);
+    if ($altra && $altra->getStato() === 'I' && $altra->getDocumento() === '') {
+      // risposta incompleta (invio precedente non riuscito): la elimina per permettere il nuovo invio
+      $this->em->remove($altra);
+      $this->em->flush();
+      $altra = null;
+    }
     if ($altra) {
       // errore: esiste già altra risposta
       throw $this->createNotFoundException('exception.not_allowed');
@@ -1271,6 +1315,10 @@ class RichiesteController extends BaseController {
       $valori = [];
       // controllo errori
       foreach ($consultazione->getCampi() as $nome => $campo) {
+        // un tipo di campo non gestito da RichiestaType non crea il campo nel form
+        if (!$form->has($nome)) {
+          continue;
+        }
         if ($form->get($nome)->getData() === null && $campo[1]) {
           // campo obbligatorio vuoto
           $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
@@ -1278,6 +1326,10 @@ class RichiesteController extends BaseController {
           // memorizza valore
           $valori[$nome] = $form->get($nome)->getData();
         }
+      }
+      if (!$ric->esisteTemplate('consultazioni', $consultazione->getModulo())) {
+        // errore: template della consultazione non disponibile
+        $form->addError(new FormError($trans->trans('exception.consultazione_template_mancante')));
       }
       if ($form->isValid()) {
         // memorizza risposta
@@ -1288,13 +1340,21 @@ class RichiesteController extends BaseController {
           ->setStato('I')
           ->setMessaggio('');
         $this->em->flush();
-        // crea documento PDF
-        $documento = $ric->rispostaPdf($consultazione, $utente->getId(), $risposta->getId(), $classe,
-          $valori, $invio);
+        try {
+          // crea documento PDF
+          $documento = $ric->rispostaPdf($consultazione, $utente->getId(), $risposta->getId(), $classe,
+            $valori, $invio);
+        } catch (\Exception $e) {
+          // errore: elimina la risposta incompleta per non bloccare un nuovo invio
+          $this->em->remove($risposta);
+          $this->em->flush();
+          throw $e;
+        }
         // ok: memorizzazione e log
         $risposta
           ->setDocumento($documento)
           ->setInviata($invio);
+        $this->em->flush();
         $dblogger->logAzione('CONSULTAZIONI', 'Invio risposta');
         // redirezione
         return $this->redirectToRoute('richieste_lista');
@@ -1414,7 +1474,58 @@ class RichiesteController extends BaseController {
   }
 
   /**
-   * Crea un nuovo modulo per il coordinatore di classe
+   * Crea l'archivio ZIP con i moduli di evacuazione delle richieste indicate
+   *
+   * @param array $dati Dati delle richieste selezionate
+   *
+   * @return Response|null Pagina di risposta con l'archivio, null se non è stato creato
+   */
+  private function archivioEvacuazione(array $dati): ?Response {
+    $zipPath = $this->getParameter('kernel.project_dir').'/FILES/tmp/evacuazione-'.uniqid().'.zip';
+    $zip = new ZipArchive();
+    if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
+      // errore
+      $this->addFlash('danger', 'exception.impossibile_creare_zip');
+      return null;
+    }
+    // aggiunta dei file
+    $aggiunti = 0;
+    foreach ($dati['lista'] as $richiesta) {
+      $nomeClasse = $richiesta->getClasse()->getAnno().$richiesta->getClasse()->getSezione().
+        $richiesta->getClasse()->getGruppo();
+      $file = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$nomeClasse.'/documenti/'.
+        $richiesta->getDocumento();
+      if (file_exists($file) && $zip->addFile($file, $nomeClasse.'/'.$richiesta->getDocumento())) {
+        $aggiunti++;
+      }
+    }
+    // chiusura del file ZIP
+    $zip->close();
+    if ($aggiunti == 0) {
+      // nessun file aggiunto: elimina l'eventuale archivio vuoto
+      if (file_exists($zipPath)) {
+        unlink($zipPath);
+      }
+      $this->addFlash('warning', 'exception.nessun_allegato_archivio');
+      return null;
+    }
+    if (!file_exists($zipPath)) {
+      // errore: archivio non creato
+      $this->addFlash('danger', 'exception.impossibile_creare_zip');
+      return null;
+    }
+    // invia il documento
+    $nomefile = 'prove-evacuazione.zip';
+    $response = new BinaryFileResponse($zipPath);
+    $response->deleteFileAfterSend(true);
+    $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
+    $response->headers->set('Content-Disposition', $disposition);
+    $response->headers->set('Content-Type', 'application/zip');
+    return $response;
+  }
+
+  /**
+   * Verifica che il modulo di richiesta esista e che l'utente sia autorizzato a utilizzarlo
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
@@ -1469,33 +1580,51 @@ class RichiesteController extends BaseController {
         throw $this->createNotFoundException('exception.not_allowed');
       }
     }
-    // crea richiesta
-    $richiesta = (new Richiesta())
-      ->setDefinizioneRichiesta($definizioneRichiesta)
-      ->setUtente($utente)
-      ->setClasse($classe);
-    $this->em->persist($richiesta);
-    // informazioni per la visualizzazione
-    $info['modulo'] = '@data/moduli/'.$definizioneRichiesta->getModulo();
-    $info['allegati'] = $definizioneRichiesta->getAllegati();
-    $info['classe'] = $classe;
-    $info['valore_classe'] = $classe.' - '.$classe->getSede()->getNomeBreve();
-    $info['valore_data'] = (new DateTime())->format('Y-m-d');
-    // form di inserimento
-    $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
-      'values' => [$definizioneRichiesta->getCampi(), $definizioneRichiesta->getUnica()]]);
-    $form->handleRequest($request);
-    if ($form->isSubmitted()) {
-      $invio = new DateTime();
-      $valori = [];
-      // controllo errori
-      foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
-        if ($form->get($nome)->getData() === null && $campo[1]) {
-          // campo obbligatorio vuoto
-          $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
-        } else {
-          // memorizza valore
-          $valori[$nome] = $form->get($nome)->getData();
+    return $definizioneRichiesta;
+  }
+
+  /**
+   * Controlla i dati inseriti nel modulo di richiesta, aggiungendo al form gli eventuali errori
+   *
+   * @param FormInterface $form Form di inserimento della richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param mixed $definizioneRichiesta Definizione del modulo di richiesta
+   * @param int $modulo Identificativo del modulo di richiesta
+   * @param mixed $utente Utente che sta effettuando la richiesta
+   * @param mixed $invio Data e ora di invio della richiesta
+   *
+   * @return array Valori inseriti nel modulo
+   */
+  private function controllaCampiModulo(FormInterface $form, TranslatorInterface $trans, mixed $definizioneRichiesta,
+                                        int $modulo, mixed $utente, mixed $invio): array {
+    $valori = [];
+    foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
+      // un tipo di campo non gestito da RichiestaType non crea il campo nel form:
+      // senza il controllo si otterrebbe un errore fatale di Form::get()
+      if (!$form->has($nome)) {
+        continue;
+      }
+      if ($form->get($nome)->getData() === null && $campo[1]) {
+        // campo obbligatorio vuoto
+        $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
+      } else {
+        // memorizza valore
+        $valori[$nome] = $form->get($nome)->getData();
+      }
+    }
+    if (!$definizioneRichiesta->getUnica()) {
+      // controllo data
+      if ($form->get('data')->getData() === null) {
+        // campo data vuoto
+        $form->addError(new FormError($trans->trans('exception.campo_data_vuoto')));
+      } else {
+        // controlla se richiesta esiste già per la data
+        $altra = $this->em->getRepository(Richiesta::class)->findOneBy([
+          'definizioneRichiesta' => $modulo, 'utente' => $utente, 'stato' => ['I', 'G'],
+          'data' => $form->get('data')->getData()]);
+        if ($altra) {
+          // richiesta già presente
+          $form->addError(new FormError($trans->trans('exception.richiesta_esistente')));
         }
       }
       if (!$definizioneRichiesta->getUnica()) {
