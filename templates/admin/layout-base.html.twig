@@ -69,9 +69,7 @@
                   onkeydown="if (event.key === ' ' || event.key === 'Spacebar') { event.preventDefault(); this.click(); }"
                   title="{{ app.session.get('/CONFIG/MENU/help').descrizione }}">
                   <span class="font-weight-bold">{{ app.session.get('/CONFIG/MENU/help').nome }}</span>
-                  <svg class="icon icon-xs d-none d-xl-block ml-0" aria-hidden="true">
-                    <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#caret-down"></use>
-                  </svg>
+                  {{ include('admin/include/icona.html.twig', {nome: 'caret-down', classe: 'icon-xs d-none d-xl-block ml-0'}) }}
                 </a>
                 <div class="dropdown-menu">
                   <div class="row">
@@ -94,9 +92,7 @@
                 <a class="btn btn-default btn-icon rounded-0 border-right border-left"
                   href="{{ path('utenti_profilo') }}" title="{{ 'title.modifica_profilo'|trans }}">
                   <span class="rounded-icon">
-                    <svg class="icon icon-xs icon-secondary" aria-hidden="true">
-                      <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#user"></use>
-                    </svg>
+                    {{ include('admin/include/icona.html.twig', {nome: 'user', classe: 'icon-xs icon-secondary'}) }}
                   </span>
                   <span class="d-none d-lg-block">{% if is_granted('ROLE_GENITORE') %}{{ app.user.alunno.nome }} {{
                     app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %} <small>({{
@@ -147,9 +143,7 @@
   {## # link TornaSu # ##}
     <a class="back-to-top back-to-top-small shadow" href="#" data-attribute="back-to-top"
       title="Vai a inizio pagina" aria-label="Vai a inizio pagina">
-      <svg class="icon icon-light" aria-hidden="true">
-        <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#arrow-up"></use>
-      </svg>
+      {{ include('admin/include/icona.html.twig', {nome: 'arrow-big-up', classe: 'icon-light'}) }}
     </a>
   {## # FINE link TornaSu # ##}
   {## # caricamento javascript # ##}

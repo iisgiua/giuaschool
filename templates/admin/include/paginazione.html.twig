@@ -6,13 +6,14 @@
   {% if pagina > 1 %}
       <li class="page-item">
         <a class="page-link" href="{{ path(url, {pagina: pagina - 1}) }}" title="{{ 'label.pagina_precedente'|trans }}">
-          <svg class="icon icon-primary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-left') }}"></use></svg>
+          {# fleccia a tratti: il colore arriva da stroke/currentColor, non dal fill #}
+          <svg class="icon icon-outline primary-color" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#chevron-left"></use></svg>
         </a>
       </li>
   {% else %}
       <li class="page-item disabled">
         <span class="page-link" title="{{ 'label.pagina_precedente'|trans }}">
-          <svg class="icon icon-secondary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-left') }}"></use></svg>
+          <svg class="icon icon-outline" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#chevron-left"></use></svg>
         </span>
       </li>
   {% endif %}
@@ -25,13 +26,14 @@
   {% if pagina < maxPagine %}
       <li class="page-item">
         <a class="page-link" href="{{ path(url, {pagina: pagina + 1}) }}" title="{{ 'label.pagina_successiva'|trans }}">
-          <svg class="icon icon-primary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-right') }}"></use></svg>
+          {# freccia a tratti: il colore arriva da stroke/currentColor, non dal fill #}
+          <svg class="icon icon-outline primary-color" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#chevron-right"></use></svg>
         </a>
       </li>
   {% else %}
       <li class="page-item disabled">
         <span class="page-link" title="{{ 'label.pagina_successiva'|trans }}">
-          <svg class="icon icon-secondary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-right') }}"></use></svg>
+          <svg class="icon icon-outline" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#chevron-right"></use></svg>
         </span>
       </li>
   {% endif %}
@@ -49,13 +51,14 @@
   {% if pagina > 1 %}
       <li class="page-item">
         <a class="page-link" href="{{ path(url, {pagina: pagina - 1}) }}" title="{{ 'label.pagina_precedente'|trans }}">
-          <svg class="icon icon-primary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-left') }}"></use></svg>
+          {# fleccia a tratti: il colore arriva da stroke/currentColor, non dal fill #}
+          <svg class="icon icon-outline primary-color" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#chevron-left"></use></svg>
         </a>
       </li>
   {% else %}
       <li class="page-item disabled">
         <span class="page-link" title="{{ 'label.pagina_precedente'|trans }}">
-          <svg class="icon icon-secondary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-left') }}"></use></svg>
+          <svg class="icon icon-outline" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#chevron-left"></use></svg>
         </span>
       </li>
   {% endif %}
@@ -73,13 +76,14 @@
   {% if pagina < maxPagine %}
       <li class="page-item">
         <a class="page-link" href="{{ path(url, {pagina: pagina + 1}) }}" title="{{ 'label.pagina_successiva'|trans }}">
-          <svg class="icon icon-primary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-right') }}"></use></svg>
+          {# freccia a tratti: il colore arriva da stroke/currentColor, non dal fill #}
+          <svg class="icon icon-outline primary-color" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#chevron-right"></use></svg>
         </a>
       </li>
   {% else %}
       <li class="page-item disabled">
         <span class="page-link" title="{{ 'label.pagina_successiva'|trans }}">
-          <svg class="icon icon-secondary" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#angle-right') }}"></use></svg>
+          <svg class="icon icon-outline" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#chevron-right"></use></svg>
         </span>
       </li>
   {% endif %}

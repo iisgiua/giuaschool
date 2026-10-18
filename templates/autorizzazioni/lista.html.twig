@@ -98,7 +98,7 @@ $(document).ready(function() {
     var url = $(event.relatedTarget).data('href');
     var tipo = $(event.relatedTarget).data('tipo');
     var nome = $(event.relatedTarget).data('nome');
-    var html = '<div class="modal-header"><button type="button" class="close" data-dismiss="modal">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}<span class="sr-only">Chiudi</span></button><h3 class="modal-title gs-h3">'+nome+'</h3><h4 class="modal-title gs-h4">'+tipo+'</h4></div><div class="modal-body bg-info"></div><div class="modal-footer gs-pb-2 gs-pt-0 gs-pr-2 gs-pl-2"><div class="text-center gs-pt-2 gs-pb-2"><button type="button" class="btn btn-default gs-mb-3" data-dismiss="modal"><strong>Chiudi</strong></button></div></div>';
+    var html = '<div class="modal-header"><button type="button" class="close" data-dismiss="modal"><svg class="icon icon-outline gs-mr-2" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#x"></use></svg><span class="sr-only">Chiudi</span></button><h3 class="modal-title gs-h3">'+nome+'</h3><h4 class="modal-title gs-h4">'+tipo+'</h4></div><div class="modal-body bg-info"></div><div class="modal-footer gs-pb-2 gs-pt-0 gs-pr-2 gs-pl-2"><div class="text-center gs-pt-2 gs-pb-2"><button type="button" class="btn btn-default gs-mb-3" data-dismiss="modal"><strong>Chiudi</strong></button></div></div>';
     $('#gs-modal-remote-content').html(html);
     $(this).find('#gs-modal-remote-content .modal-body').load(url);
   });

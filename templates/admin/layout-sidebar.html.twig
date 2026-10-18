@@ -109,12 +109,12 @@
           {# Tabler Icons, set filled (sprite SVG, MIT): nomi dei <symbol> in #}
           {# public/icons/tabler-sprite-filled.svg #}
           {% set icone_menu = {
-            'Home':     'home',
-            'Sistema':  'settings',
-            'Scuola':   'school',
-            'ATA':      'briefcase',
-            'Docenti':  'book',
-            'Alunni':   'user'
+            Home: 'home',
+            Sistema: 'settings',
+            Scuola: 'school',
+            ATA: 'briefcase',
+            Docenti: 'book',
+            Alunni: 'user',
           } %}
           <ul class="nav navbar-nav gs-navbar-nav">
             {% for opt in app.session.get('/CONFIG/MENU/main').opzioni %}

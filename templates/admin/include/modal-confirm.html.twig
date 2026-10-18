@@ -8,7 +8,7 @@
       <div class="modal-header border-bottom">
         <h5 class="modal-title" id="gs-modal-confirm-titolo">{{ 'label.confirm'|trans }}</h5>
         <button type="button" class="close p-0" data-dismiss="modal" aria-label="{{ 'label.close'|trans }}">
-          <svg class="icon" aria-hidden="true"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg#times') }}"></use></svg>
+          {{ include('admin/include/icona.html.twig', {nome: 'x'}) }}
         </button>
       </div>
       <div class="modal-body" id="gs-modal-confirm-contenuto"></div>

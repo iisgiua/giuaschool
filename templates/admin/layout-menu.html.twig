@@ -1,7 +1,20 @@
 {## # menu # ##}
 {% set page_route = app.request.attributes.get('_route') %}
 
-{% macro opzione(opt, route) %}
+{## # icone delle voci del menu orizzontale # ##}
+{# Tabler Icons, set filled (sprite SVG, MIT): le chiavi sono i vecchi nomi
+   FontAwesome salvati in gs_menu_opzione.icona, i valori sono i nomi dei
+   <symbol> di public/icons/tabler-sprite-filled.svg (gli stessi usati dalla
+   barra laterale per le stesse voci del menu). #}
+{% set icone_menu = {
+  cog: 'settings',
+  school: 'school',
+  'user-tie': 'briefcase',
+  'user-graduate': 'book',
+  child: 'user',
+} %}
+
+{% macro opzione(opt, route, icone) %}
   {% if opt.nome == '__SEPARATORE__' %}
     <li role="none"><span class="divider"></span></li>
   {% else %}
@@ -11,10 +24,8 @@
     {% else %}
       <span class="nav-link px-3 disabled" role="menuitem" title="{{ opt.descrizione|raw }}" aria-disabled="true">
     {% endif %}
-    {% if opt.icona %}
-        <svg class="icon icon-xs icon-{{ route == opt.url ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
-          <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#{{ opt.icona }}"></use>
-        </svg>
+    {% if icone[opt.icona] is defined %}
+        {{ include('admin/include/icona.html.twig', {nome: icone[opt.icona], classe: 'icon-xs ' ~ (route == opt.url ? 'icon-primary' : 'icon-white') ~ ' d-none d-lg-block mr-1'}) }}
     {% endif %}
         <span>{{ opt.nome|raw }}</span>{% if route == opt.url %}<span class="sr-only"> attivo</span>{% endif %}
     {% if opt.abilitato %}
@@ -46,25 +57,21 @@
   {% endif %}
 {% endmacro %}
 
-{% macro menu(opt, route) %}
+{% macro menu(opt, route, icone) %}
   <li class="nav-item dropdown" role="none">
     <a class="nav-link dropdown-toggle px-3{{ not opt.abilitato ? ' disabled' }}{{ route in opt.listaurl ? ' active' }}" role="menuitem" href="#" title="{{ opt.descrizione|raw }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{{ not opt.abilitato ? ' aria-disabled="true"' }}>
-  {% if opt.icona %}
-      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
-        <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#{{ opt.icona }}"></use>
-      </svg>
+  {% if icone[opt.icona] is defined %}
+      {{ include('admin/include/icona.html.twig', {nome: icone[opt.icona], classe: 'icon-xs ' ~ (route in opt.listaurl ? 'icon-primary' : 'icon-white') ~ ' d-none d-lg-block mr-1'}) }}
   {% endif %}
       <span>{{ opt.nome|raw }}</span>
-      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-xl-block" aria-hidden="true">
-        <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#caret-down"></use>
-      </svg>{% if route in opt.listaurl %}<span class="sr-only"> attivo</span>{% endif %}
+      {{ include('admin/include/icona.html.twig', {nome: 'caret-down', classe: 'icon-xs ' ~ (route in opt.listaurl ? 'icon-primary' : 'icon-white') ~ ' d-none d-xl-block'}) }}{% if route in opt.listaurl %}<span class="sr-only"> attivo</span>{% endif %}
     </a>
     <div class="dropdown-menu">
       <div class="link-list-wrapper">
         <ul class="link-list" role="menu" aria-label="{{ opt.descrizione|raw }}">
   {% for subopt in opt.sottomenu %}
     {% if subopt.sottomenu %}
-      {{ _self.menu(subopt, route) }}
+      {{ _self.menu(subopt, route, icone) }}
     {% else %}
       {{ _self.subopzione(subopt, route) }}
     {% endif %}
@@ -75,18 +82,14 @@
   </li>
 {% endmacro %}
 
-{% macro megamenu(opt, route) %}
+{% macro megamenu(opt, route, icone) %}
   <li class="nav-item dropdown megamenu" role="none">
     <a class="nav-link dropdown-toggle px-3{{ not opt.abilitato ? ' disabled' }}{{ route in opt.listaurl ? ' active' }}" role="menuitem" href="#" title="{{ opt.descrizione|raw }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{{ not opt.abilitato ? ' aria-disabled="true"' }}>
-  {% if opt.icona %}
-      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-lg-block mr-1" aria-hidden="true">
-        <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#{{ opt.icona }}"></use>
-      </svg>
+  {% if icone[opt.icona] is defined %}
+      {{ include('admin/include/icona.html.twig', {nome: icone[opt.icona], classe: 'icon-xs ' ~ (route in opt.listaurl ? 'icon-primary' : 'icon-white') ~ ' d-none d-lg-block mr-1'}) }}
   {% endif %}
       <span>{{ opt.nome|raw }}</span>
-      <svg class="icon icon-xs icon-{{ route in opt.listaurl ? 'primary' : 'white' }} d-none d-xl-block" aria-hidden="true">
-        <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#caret-down"></use>
-      </svg>{% if route in opt.listaurl %}<span class="sr-only"> attivo</span>{% endif %}
+      {{ include('admin/include/icona.html.twig', {nome: 'caret-down', classe: 'icon-xs ' ~ (route in opt.listaurl ? 'icon-primary' : 'icon-white') ~ ' d-none d-xl-block'}) }}{% if route in opt.listaurl %}<span class="sr-only"> attivo</span>{% endif %}
     </a>
     <div class="dropdown-menu">
       <div class="row">
@@ -116,9 +119,7 @@
         <div class="col-12 px-0">
           <nav class="navbar navbar-expand-lg{{ app.session.get('/CONFIG/MENU/main').megamenu ? ' has-megamenu' }} pl-0" aria-label="{{ app.session.get('/CONFIG/MENU/main').nome|raw }}">
             <button class="custom-navbar-toggler bg-primary" type="button" aria-controls="gs-mainmenu" aria-expanded="false" aria-label="{{ app.session.get('/CONFIG/MENU/main').descrizione|raw }}" data-target="#gs-mainmenu">
-              <svg class="icon" aria-hidden="true">
-                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#bars"></use>
-              </svg>
+              {{ include('admin/include/icona.html.twig', {nome: 'menu-2'}) }}
             </button>
             <div id="gs-mainmenu" class="navbar-collapsable" style="display:none;">
               <div class="overlay" style="display:none;"></div>
@@ -129,11 +130,11 @@
                 <ul class="navbar-nav" role="menubar" aria-label="{{ app.session.get('/CONFIG/MENU/main').nome|raw }}">
   {% for opt in app.session.get('/CONFIG/MENU/main').opzioni %}
     {% if opt.megamenu and opt.sottomenu %}
-                  {{ _self.megamenu(opt, page_route) }}
+                  {{ _self.megamenu(opt, page_route, icone_menu) }}
     {% elseif opt.sottomenu %}
-                  {{ _self.menu(opt, page_route) }}
+                  {{ _self.menu(opt, page_route, icone_menu) }}
     {% else %}
-                  {{ _self.opzione(opt, page_route) }}
+                  {{ _self.opzione(opt, page_route, icone_menu) }}
     {% endif %}
   {% endfor %}
                 </ul>

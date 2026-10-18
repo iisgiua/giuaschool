@@ -275,12 +275,8 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
   {%- set attr = attr|merge({class: (attr.class|default('') ~ ' form-control password-field')|trim}) -%}
   <input type="password" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %} />
   <button type="button" class="password-icon" aria-label="{{ 'label.toggle_password'|trans }}">
-    <svg class="password-icon-visible icon icon-sm" aria-hidden="true">
-      <use xlink:href="{{ asset('vendor/fontawesome/sprites/regular.svg') }}#eye"></use>
-    </svg>
-    <svg class="password-icon-invisible icon icon-sm d-none" aria-hidden="true">
-      <use xlink:href="{{ asset('vendor/fontawesome/sprites/regular.svg') }}#eye-slash"></use>
-    </svg>
+    {{ include('admin/include/icona.html.twig', {nome: 'eye', classe: 'password-icon-visible icon-sm'}) }}
+    {{ include('admin/include/icona.html.twig', {nome: 'eye-off', stile: 'outline', classe: 'password-icon-invisible icon-sm d-none'}) }}
   </button>
   {%- endblock password_widget -%}
 
@@ -606,9 +602,7 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
                       {{ block('form_label') }}
                       <button type="button" class="btn-time" id="{{ id }}_btnTime"
                         aria-label="Fare clic o premere il tasto Invio o la barra spaziatrice per aprire la finestra di inserimento dell'orario">
-                        <svg class="icon">
-                          <use xlink:href="{{ asset('vendor/fontawesome/sprites/regular.svg') }}#clock">
-                        </svg>
+                        {{ include('admin/include/icona.html.twig', {nome: 'clock'}) }}
                       </button>
                       <input class="form-control txtTime" id="{{ id }}" name="{{ full_name }}" type="text"
                         placeholder="{{ 'label.form_time_placeholder'|trans }}" {% if value is not empty %}
@@ -688,26 +682,20 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
         <div class="fallback"></div>
         <div class="dz-message"></div>
         <button type="button" class="dz-clickable btn btn-success btn-sm">
-          <svg class="icon icon-white icon-xs mr-1" aria-hidden="true">
-            <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#arrow-circle-up"></use>
-          </svg>
+          {{ include('admin/include/icona.html.twig', {nome: 'circle-arrow-up', classe: 'icon-white icon-xs mr-1'}) }}
           <span>{{ translation_domain is same as(false) ? label : label|trans(label_translation_parameters,
             translation_domain) }}</span>
         </button>
         <ul class="upload-file-list dropzone-previews" id="{{ id }}_dzpreviews">
           <li id="{{ id }}_dztemplate" class="upload-file uploading">
-            <svg class="icon icon-sm" aria-hidden="true">
-              <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#file-alt"></use>
-            </svg>
+            {{ include('admin/include/icona.html.twig', {nome: 'file-text', classe: 'icon-sm'}) }}
             <p>
               <span class="sr-only">Caricamento file:</span>
               <span data-dz-name></span>
               <span class="upload-file-weight" data-dz-size></span>
             </p>
             <button type="button" title="Annulla caricamento file" data-dz-remove>
-              <svg class="icon icon-sm" aria-hidden="true">
-                <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#times-circle"></use>
-              </svg>
+              {{ include('admin/include/icona.html.twig', {nome: 'circle-x', classe: 'icon-sm'}) }}
             </button>
             <div class="progress">
               {# NOSONAR Web:S6819 - role="progressbar" non ha equivalente nativo: #}

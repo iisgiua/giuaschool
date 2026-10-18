@@ -232,8 +232,8 @@
                 <ul class="footer-list link-list">
                   <li>
                     <a class="list-item" href="https://github.com/iisgiua/giuaschool" target="_blank" title="Vai al progetto su GitHub">
-                      <svg class="icon icon-sm icon-light mr-2" aria-hidden="true">
-                        <use xlink:href="../vendor/fontawesome/sprites/brands.svg#github"></use>
+                      <svg class="icon icon-outline icon-sm icon-light mr-2" aria-hidden="true">
+                        <use xlink:href="../icons/tabler-sprite.svg#brand-github"></use>
                       </svg><span class="text-white">Codice sorgente su GitHub</span>
                     </a>
                   </li>
@@ -265,8 +265,8 @@
 
     <!-- link TornaSu  -->
     <a class="back-to-top back-to-top-small shadow" href="#" data-attribute="back-to-top" title="Vai a inizio pagina" aria-label="Vai a inizio pagina">
-      <svg class="icon icon-light" aria-hidden="true">
-        <use xlink:href="../vendor/fontawesome/sprites/solid.svg#arrow-up"></use>
+      <svg class="icon icon-outline icon-light" aria-hidden="true">
+        <use xlink:href="../icons/tabler-sprite.svg#arrow-big-up"></use>
       </svg>
     </a>
     <!-- FINE link TornaSu  -->

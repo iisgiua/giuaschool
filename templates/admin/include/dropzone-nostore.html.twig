@@ -48,7 +48,7 @@ $(document).ready(function() {
         $(id_previews+" li.dz-error button").hide();
         $(id_previews+" li.dz-error .progress").hide();
         $(id_previews+" li.dz-error").attr("title","Errore: "+msg);
-        $(id_previews+" li.dz-error svg use").attr("xlink:href", "{{ asset('vendor/fontawesome/sprites/solid.svg') }}#exclamation-triangle");
+        $(id_previews+" li.dz-error svg use").attr("xlink:href", "{{ asset('icons/tabler-sprite-filled.svg') }}#alert-triangle");
         $(id_previews+" li.dz-error").removeClass("dz-error uploading").addClass("error");
       });
       this.on("removedfile", function(file) {

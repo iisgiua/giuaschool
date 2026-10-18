@@ -15,7 +15,7 @@ $(document).ready(function() {
   });
   $('.gs-lista-campi').on('click', 'button.gs-add-item', function() {
     var html = $('#definizione_richiesta_campi').data('prototype');
-    html = html.replace(/>\s*-\s*<\/button>/, '><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#minus"></use></svg></button>');
+    html = html.replace(/>\s*-\s*<\/button>/, '><svg class="icon icon-outline icon-white icon-xs"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#minus"></use></svg></button>');
     var idNum = $('#definizione_richiesta_campi fieldset').last().find('div').attr('id');
     var reNum = /\d+$/;
     var resNum = reNum.exec(idNum);
@@ -24,8 +24,8 @@ $(document).ready(function() {
     $('#definizione_richiesta_campi').append(html);
   });
   // init
-  var button = '<div class="w-100 text-right" style="margin-top:-2.5rem;position:relative"><button class="btn btn-success btn-sm gs-add-item" type="button" title="{{ 'label.aggiunge_elemento'|trans }}"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#plus"></use></svg></button></div>';
-  $('#definizione_richiesta_campi fieldset button.gs-remove-item').html('<svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#minus"></use></svg>')
+  var button = '<div class="w-100 text-right" style="margin-top:-2.5rem;position:relative"><button class="btn btn-success btn-sm gs-add-item" type="button" title="{{ 'label.aggiunge_elemento'|trans }}"><svg class="icon icon-white icon-xs"><use xlink:href="{{ asset('icons/tabler-sprite-filled.svg') }}#plus"></use></svg></button></div>';
+  $('#definizione_richiesta_campi fieldset button.gs-remove-item').html('<svg class="icon icon-outline icon-white icon-xs"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#minus"></use></svg>')
   $('.gs-lista-campi').append(button);
 });
 </script>

@@ -9,9 +9,7 @@
     <div class="btn-group gs-menu-select">
       <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         {{ info.listaPeriodi[info.periodo] }}
-        <svg class="icon icon-xs icon-white" aria-hidden="true">
-          <use xlink:href="{{ asset('vendor/fontawesome/sprites/solid.svg') }}#caret-down"></use>
-        </svg>
+        {{ include('admin/include/icona.html.twig', {nome: 'caret-down', classe: 'icon-xs'}) }}
         <span class="sr-only"> attivo</span>
       </button>
       <div class="dropdown-menu">
