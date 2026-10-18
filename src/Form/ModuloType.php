@@ -188,7 +188,7 @@ class ModuloType extends AbstractType {
           'data' => $options['values'][0],
           'choices' => $options['values'][1],
           'choice_label' => fn($obj) => $obj instanceOf Alunno ? $obj.' - '.$obj->getClasse() :
-            ($obj instanceOf Genitore ? $obj.' - '.$obj->getAlunno().' - '.$obj->getAlunno()->getClasse() :
+            ($obj instanceOf Genitore ? $obj.' - '.$obj->getAlunno().' - '.($obj->getAlunno()?->getClasse() ?? '---') :
             ($obj instanceOf Docente ? $obj.' ('.$obj->getUsername().')' :
             $obj)),
           'choice_value' => fn($obj) => is_object($obj) ? $obj->getId() : $obj,

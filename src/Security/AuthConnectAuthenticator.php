@@ -17,6 +17,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -199,6 +200,11 @@ class AuthConnectAuthenticator extends AbstractAuthenticator {
    * @return Response|null Pagina di risposta o null per continuare la richiesta della pagina senza autenticazione
    */
   public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
+    // richiesta API: risposta in formato JSON
+    if ($request->attributes->get('_route') === 'api_authConnect') {
+      return new JsonResponse(['error' => 'exception.api_auth.richiesta_invalida'],
+        Response::HTTP_UNAUTHORIZED);
+    }
     // messaggio di errore
     $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login

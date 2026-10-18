@@ -206,7 +206,7 @@ class LoginController extends BaseController {
                 $spid == 'O' ||
                 (in_array($spid, ['A', 'M']) && !$utente->controllaRuolo('A')) ||
                 ($spid == 'M' && $utente->controllaRuoloFunzione('AM'))) {
-        // errore: niente recupero password se SPID/CIE obbligatorio
+        // niente recupero password se SPID/CIE obbligatorio: risposta generica
         $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
           'email' => $email,
           'ip' => $request->getClientIp()]);
@@ -388,6 +388,24 @@ class LoginController extends BaseController {
     return $this->render('login/profilo.html.twig', [
       'pagina_titolo' => 'page.login_profilo',
       'form' => $form->createView()]);
+  }
+
+  /**
+   * Esegue il login tramite token
+   *
+   */
+  //@TODO rimuovere
+  #[Route(path: '/login/token/', name: 'login_token', methods: ['POST'])]
+  public function token(): void {
+  }
+
+  /**
+   * Connette utente tramite token OTP, dopo aver eseguito la procedura di autenticazione con token
+   *
+   */
+  //@TODO rimuovere
+  #[Route(path: '/login/connect/{token}', name: 'login_connect', methods: ['GET'])]
+  public function connect(): void {
   }
 
   /**

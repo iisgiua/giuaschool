@@ -34,7 +34,7 @@
       </div>
       <div class="panel-body">
         {# --- SPID/CIE obbligatorio --- #}
-        {% if app.session.get('/CONFIG/ACCESSO/spid') == 'obbligatorio' %}
+        {% if app.session.get('/CONFIG/ACCESSO/spid') in ['O', 'A', 'M'] %}
           {# --- GOOGLE attivo --- #}
           {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
         <div class="gs-login-section gs-mb-4">
@@ -117,7 +117,7 @@
           </form>
         </div>
             {# --- SPID/CIE --- #}
-            {% if app.session.get('/CONFIG/ACCESSO/spid') == 'si' %}
+            {% if app.session.get('/CONFIG/ACCESSO/spid') == 'S' %}
         <hr class="gs-login-divider">
         <div class="gs-login-section">
           <h3 class="gs-login-section-title text-center">
@@ -174,7 +174,7 @@
           </form>
         </div>
             {# --- SPID/CIE --- #}
-            {% if app.session.get('/CONFIG/ACCESSO/spid') == 'si' %}
+            {% if app.session.get('/CONFIG/ACCESSO/spid') == 'S' %}
         <hr class="gs-login-divider">
         <div class="gs-login-section">
           <h3 class="gs-login-section-title text-center">
