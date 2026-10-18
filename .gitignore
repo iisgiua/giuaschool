@@ -48,6 +48,7 @@
 /.env.local
 /.env.local.php
 /last_deploy.date
+/.gs-updating
 client_secret_*.json
 
 ###> vincentlanglet/twig-cs-fixer ###
@@ -63,7 +64,12 @@ client_secret_*.json
 /PIANO_SICUREZZA.md
 /PIANO_COMMIT.md
 /audit_qa.py
+/gen_fixtures.py
+/security_qa.py
+/semgrep.json
 /routes.json
+/fixtures_ids.json
+/graifcbug.txt
 /report_qa/
 /tools/
 /var/server_dev.log
