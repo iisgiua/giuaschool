@@ -1501,7 +1501,7 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET'])]
+  #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function aggiorna(Request $request, int $step): Response {
     // controllo dei parametri (i passi validi sono 0, 1 e 2)
@@ -1509,7 +1509,8 @@ class SistemaController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controllo CSRF (il passo 0 effettua solo controlli, gli altri modificano il sistema)
-    if ($step > 0 && !$this->isCsrfTokenValid('sistema_aggiorna', $request->query->get('_csrf_token'))) {
+    if ($step > 0 && (!$request->isMethod('POST') ||
+        !$this->isCsrfTokenValid('sistema_aggiorna', $request->request->get('_csrf_token')))) {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // inizializza

@@ -271,12 +271,16 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/docenti/password/{id}/{tipo}', name: 'docenti_password', requirements: ['id' => '\d+', 'tipo' => 'E|P'], methods: ['GET'])]
+  #[Route(path: '/docenti/password/{id}/{tipo}', name: 'docenti_password', requirements: ['id' => '\d+', 'tipo' => 'E|P'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function password(Request $request, UserPasswordHasherInterface $hasher,
                            PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
                            LoggerInterface $logger, LogHandler $dblogger, int $id,
                            string $tipo): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('password', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // controlla docente
     $docente = $this->em->getRepository(Docente::class)->find($id);
     if (!$docente) {

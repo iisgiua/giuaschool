@@ -1,0 +1,31 @@
+{##
+  # post-azione: invia in POST le azioni di modifica con il token CSRF nel
+  # corpo della richiesta, evitando che il token finisca nella URL (log,
+  # cronologia del browser, referer).
+  #
+  # Si attiva sugli elementi con classe "gs-post" che hanno:
+  #   href o data-href  URL dell'azione
+  #   data-csrf         token CSRF da inviare nel campo _csrf_token
+  # #}
+<script>
+(function () {
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('.gs-post') : null;
+    if (!el) { return; }
+    var url = el.getAttribute('href') || el.getAttribute('data-href');
+    if (!url || url === '#') { return; }
+    e.preventDefault();
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = url;
+    form.style.display = 'none';
+    var token = document.createElement('input');
+    token.type = 'hidden';
+    token.name = '_csrf_token';
+    token.value = el.getAttribute('data-csrf') || '';
+    form.appendChild(token);
+    document.body.appendChild(form);
+    form.submit();
+  });
+})();
+</script>

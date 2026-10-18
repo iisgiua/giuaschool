@@ -128,7 +128,7 @@
             <button type="button" class="{{ classe_bottone }}" title="{{ titolo_bottone }}"{% for nome, valore in voce.attributi|default({}) %} {{ nome }}="{{ valore }}"{% endfor %}>{{ etichetta|raw }}</button>
           {%- else -%}
             {# NOSONAR Web:S6819 - role="button" richiesto dall'a11y su un <a> con classe .btn #}
-            <a class="{{ classe_bottone }}" href="{{ voce.url }}" role="button" title="{{ titolo_bottone }}">{{ etichetta|raw }}</a>
+            <a class="{{ classe_bottone }}" href="{{ voce.url }}" role="button" title="{{ titolo_bottone }}"{% for nome, valore in voce.attributi|default({}) %} {{ nome }}="{{ valore }}"{% endfor %}>{{ etichetta|raw }}</a>
           {%- endif -%}
         {%- endif -%}
       {% endfor %}

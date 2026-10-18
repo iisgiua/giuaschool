@@ -8,7 +8,10 @@
   </div>
   {% if info.prossimo > info.step %}
   <div class="text-center">
-    <a class="btn btn-primary" href="{{ path('sistema_aggiorna', {step: info.prossimo}) }}" role="button" title="Continua la procedura di aggiornamento"><strong>{{ 'label.continua'|trans }}</strong></a>
+    <form method="post" action="{{ path('sistema_aggiorna', {step: info.prossimo}) }}" class="d-inline-block">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token('sistema_aggiorna') }}">
+      <button type="submit" class="btn btn-primary" title="Continua la procedura di aggiornamento"><strong>{{ 'label.continua'|trans }}</strong></button>
+    </form>
   </div>
   {% endif %}
 </div>

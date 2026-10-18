@@ -31,10 +31,12 @@
         ])},
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: "Modifica i dati dell'utente",
         url: path('docenti_modifica_edit', {docente: u.id})},
-      {tipo: 'link', etichetta: 'label.email_password'|trans, titolo: "Genera una nuova password e la invia all'utente tramite email",
-        url: path('docenti_password', {id: u.id, tipo: 'E'})},
-      {tipo: 'link', etichetta: 'label.pdf_password'|trans, titolo: 'Genera una nuova password e la scarica come documento PDF',
-        url: path('docenti_password', {id: u.id, tipo: 'P'})}
+      {tipo: 'link', classi: 'gs-post', etichetta: 'label.email_password'|trans, titolo: "Genera una nuova password e la invia all'utente tramite email",
+        url: path('docenti_password', {id: u.id, tipo: 'E'}),
+        attributi: {'data-csrf': csrf_token('password')}},
+      {tipo: 'link', classi: 'gs-post', etichetta: 'label.pdf_password'|trans, titolo: 'Genera una nuova password e la scarica come documento PDF',
+        url: path('docenti_password', {id: u.id, tipo: 'P'}),
+        attributi: {'data-csrf': csrf_token('password')}},
     ] %}
     {% if app.session.get('/CONFIG/ACCESSO/id_provider') is empty and u.otp %}
       {% set voci = voci|merge([{tipo: 'conferma', stile: 'danger', etichetta: 'label.reset_otp'|trans,

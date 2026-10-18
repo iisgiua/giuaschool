@@ -4,8 +4,8 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid" style="padding-top: 1rem;">
-  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
-  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [ {url: path('alunni_modifica_edit'), etichetta: 'label.add'|trans, titolo: 'Nuovo utente'}, {url: path('alunni_passwordFiltro', {genitore: 0}), etichetta: 'label.pdf_password'|trans, titolo: 'Genera le nuove password per gli alunni selezionati e le scarica come documento PDF'}, {url: path('alunni_passwordFiltro', {genitore: 1}), etichetta: 'label.pdf_password_genitore'|trans, titolo: 'Genera le nuove password per i genitori degli alunni selezionati e le scarica come documento PDF'} ]}) }}
+  {# pulsanti di pagina sotto il titolo, non in fondo alla tabella #}
+  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('alunni_modifica_edit'), etichetta: 'label.add'|trans, titolo: 'Nuovo utente'}, {url: path('alunni_passwordFiltro', {genitore: 0}), etichetta: 'label.pdf_password'|trans, titolo: 'Genera le nuove password per gli alunni selezionati e le scarica come documento PDF', classe: 'btn btn-primary btn-sm gs-post', attributi: {'data-csrf': csrf_token('password')}}, {url: path('alunni_passwordFiltro', {genitore: 1}), etichetta: 'label.pdf_password_genitore'|trans, titolo: 'Genera le nuove password per i genitori degli alunni selezionati e le scarica come documento PDF', classe: 'btn btn-primary btn-sm gs-post', attributi: {'data-csrf': csrf_token('password')}}]}) }}
   {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
   {% set colonne = [
     {titolo: 'label.stato'|trans, chiave: 'abilitato', tipo: 'stato',
@@ -77,12 +77,14 @@
         ])},
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: "Modifica i dati dell'utente",
         url: path('alunni_modifica_edit', {id: a.id})},
-      {tipo: 'link', etichetta: 'label.email_password'|trans,
+      {tipo: 'link', classi: 'gs-post', etichetta: 'label.email_password'|trans,
         titolo: "Genera una nuova password per l'alunno e la invia tramite email",
-        url: path('alunni_password', {username: a.username, tipo: 'E'})},
-      {tipo: 'link', etichetta: 'label.pdf_password'|trans,
+        url: path('alunni_password', {username: a.username, tipo: 'E'}),
+        attributi: {'data-csrf': csrf_token('password')}},
+      {tipo: 'link', classi: 'gs-post', etichetta: 'label.pdf_password'|trans,
         titolo: "Genera una nuova password per l'alunno e la scarica come documento PDF",
-        url: path('alunni_password', {username: a.username, tipo: 'P'})}
+        url: path('alunni_password', {username: a.username, tipo: 'P'}),
+        attributi: {'data-csrf': csrf_token('password')}},
     ] %}
     {% if a.abilitato %}
       {% set voci = voci|merge([{tipo: 'conferma', stile: 'danger', etichetta: 'label.disable'|trans,
@@ -106,7 +108,7 @@
           'data-button2': (genitore2.email and genitore2.email[-6:] != '.local') ? 'Invia' : '',
           'data-gen2': genitore2.nome ~ ' ' ~ genitore2.cognome ~ ' (' ~ genitore2.username ~ ')',
           'data-email2': (genitore2.email and genitore2.email[-6:] != '.local') ? (': ' ~ genitore2.email) : '',
-          'data-href2': genitore2.username ? path('alunni_password', {username: genitore2.username, tipo: 'E'}) : '#'
+          'data-href2': genitore2.username ? path('alunni_password', {username: genitore2.username, tipo: 'E'}) : '#',
         }},
       {tipo: 'personalizzato', stile: 'primary', etichetta: 'label.pdf_password_genitore'|trans,
         titolo: 'Genera una nuova password per il genitore e la scarica come documento PDF',
@@ -120,8 +122,8 @@
           'data-button2': 'Scarica',
           'data-gen2': genitore2.nome ~ ' ' ~ genitore2.cognome ~ ' (' ~ genitore2.username ~ ')',
           'data-email2': '',
-          'data-href2': genitore2.username ? path('alunni_password', {username: genitore2.username, tipo: 'P'}) : '#'
-        }}
+          'data-href2': genitore2.username ? path('alunni_password', {username: genitore2.username, tipo: 'P'}) : '#',
+        }},
     ]) %}
     {% set azioni = azioni|merge([{voci: voci}]) %}
   {% endfor %}
@@ -135,7 +137,7 @@
   <div class="modal fade" id="gs-scelta-genitore" tabindex="-1" role="dialog" aria-labelledby="gs-scelta-genitore-titolo">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header border-bottom">
           <h5 class="modal-title" id="gs-scelta-genitore-titolo"></h5>
           <button type="button" class="close p-0" data-dismiss="modal" aria-label="{{ 'label.close'|trans }}">
             {{ include('admin/include/icona.html.twig', {nome: 'x'}) }}
@@ -149,7 +151,7 @@
             <div class="col-sm-2"><a id="gs-scelta-genitore-2-href" class="btn btn-primary btn-xs gs-post" href="" role="button" data-csrf="{{ csrf_token('password') }}"><strong></strong></a></div>
           </div>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer mx-auto">
           <button type="button" class="btn btn-secondary btn-xs mx-auto" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
         </div>
       </div>

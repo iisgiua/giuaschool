@@ -27,7 +27,7 @@
   </div>
     {% else %}
       {% if avvisi + (circolari|length) > 0 %}
-  <div class="alert alert-danger text-center gs-big gs-mb-5 gs-pt-2 gs-pb-2" role="alert">
+  <div class="alert alert-warning text-center gs-big gs-mb-5 gs-pt-2 gs-pb-2" role="alert">
     <strong>{{ 'message.presenti_comunicazioni'|trans }}</strong><br>
         {% if avvisi > 0 %}
     <button id="gs-leggi-avvisi" class="btn btn-xs btn-primary gs-button-remote gs-ml-3" type="button" title="Visualizza il contenuto degli avvisi" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('avvisi_classe', {classe: classe.id}) }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ avvisi }} {{ 'message.num_avvisi'|trans({num: avvisi}) }}</strong></button>
@@ -61,7 +61,7 @@
               {% endfor %}
             {% endif %}
           <div class="text-center gs-mt-4">
-            <a class="btn btn-success" href="{{ path('circolari_firma_classe', {classe: classe.id, circolare: c.id, _csrf_token: csrf_token('circolari_firma')}) }}" role="button" title="Conferma la lettura della circolare alla classe">{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma lettura alla classe</strong></a>
+            <a class="btn btn-success gs-post" href="{{ path('circolari_firma_classe', {classe: classe.id, circolare: c.id}) }}" role="button" data-csrf="{{ csrf_token('circolari_firma') }}" title="Conferma la lettura della circolare alla classe">{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma lettura alla classe</strong></a>
           </div>
         </div>
       </div>
@@ -70,7 +70,7 @@
         <div class="list-group-item-text">
           <div class="text-center gs-mt-3 gs-mb-3">
           {% if circolari|length > 1 %}
-            <a class="btn btn-success gs-mr-4" href="{{ path('circolari_firma_classe', {classe: classe.id, circolare: 0, _csrf_token: csrf_token('circolari_firma')}) }}" role="button" title="Conferma la lettura di tutte le circolari alla classe">{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma lettura di tutto</strong></a>
+            <a class="btn btn-success gs-mr-4 gs-post" href="{{ path('circolari_firma_classe', {classe: classe.id, circolare: 0}) }}" role="button" data-csrf="{{ csrf_token('circolari_firma') }}" title="Conferma la lettura di tutte le circolari alla classe">{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma lettura di tutto</strong></a>
           {% endif %}
             <button type="button" class="btn btn-danger" data-dismiss="modal">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Annulla</strong></button>
           </div>

@@ -39,14 +39,14 @@
     </div>
   </div>
   <div class="text-center gs-mt-2">
-    <a class="btn btn-success" href="{{ path('avvisi_classe_firma', {classe: info.classe.id, avviso: a.id, _csrf_token: csrf_token('avvisi_classe_firma')}) }}" role="button" title="Conferma la lettura dell'avviso alla classe">{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma lettura alla classe</strong></a>
+    <a class="btn btn-success gs-post" href="{{ path('avvisi_classe_firma', {classe: info.classe.id, avviso: a.id}) }}" role="button" data-csrf="{{ csrf_token('avvisi_classe_firma') }}" title="Conferma la lettura dell'avviso alla classe">{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma lettura alla classe</strong></a>
   </div>
 </div>
 <hr class="gs-hr gs-mb-0">
 {% endfor %}
 <div class="gs-mt-2 gs-mb-3 text-center">
 {% if dati|length > 1 %}
-  <a class="btn btn-success gs-mr-4" href="{{ path('avvisi_classe_firma', {classe: info.classe.id, _csrf_token: csrf_token('avvisi_classe_firma')}) }}" role="button" title="Conferma la lettura di tutti gli avvisi alla classe">{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma lettura di tutto</strong></a>
+  <a class="btn btn-success gs-mr-4 gs-post" href="{{ path('avvisi_classe_firma', {classe: info.classe.id}) }}" role="button" data-csrf="{{ csrf_token('avvisi_classe_firma') }}" title="Conferma la lettura di tutti gli avvisi alla classe">{{ include('admin/include/icona.html.twig', {nome: 'check', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Conferma lettura di tutto</strong></a>
 {% endif %}
   <button type="button" class="btn btn-danger" data-dismiss="modal">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Annulla</strong></button>
 </div>

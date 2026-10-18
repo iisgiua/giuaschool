@@ -105,7 +105,7 @@
         {% else %}
                 <div>
                   <em>La circolare non è stata ancora letta.</em>
-                  {{ include('include/bottone-azione.html.twig', {nome: 'check', etichetta: 'Conferma lettura', titolo: 'Conferma la lettura della circolare', stile: 'success', url: path('circolari_firma', {circolare: c.circolare.id, _csrf_token: csrf_token('circolari_firma')}), classi: 'pull-right gs-ml-3'}) }}
+                  {{ include('include/bottone-azione.html.twig', {nome: 'check', etichetta: 'Conferma lettura', titolo: 'Conferma la lettura della circolare', stile: 'success', url: path('circolari_firma', {circolare: c.circolare.id}), classi: 'pull-right gs-ml-3 gs-post', attributi: {'data-csrf': csrf_token('circolari_firma')}}) }}
                 </div>
         {% endif %}
       {% else %}

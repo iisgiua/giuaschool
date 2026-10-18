@@ -782,17 +782,28 @@ class AvvisiController extends BaseController {
   /**
    * Conferma la lettura dell'avviso destinato alla classe
    *
+   * @param Request $request Pagina richiesta
    * @param Classe $classe Classe di riferimento
    * @param Avviso|null $avviso Avviso per lettura di un singolo avviso o valore nullo per tutti gli avvisi della classe
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/avvisi/classe/firma/{classe}/{avviso}', name: 'avvisi_classe_firma', requirements: ['classe' => '\d+', 'avviso' => '\d+'], defaults: ['avviso' => 0], methods: ['GET'])]
+  #[Route(path: '/avvisi/classe/firma/{classe}/{avviso}', name: 'avvisi_classe_firma', requirements: ['classe' => '\d+', 'avviso' => '\d+'], defaults: ['avviso' => 0], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classeFirma(
+  public function classeFirma(Request $request,
                               #[MapEntity] Classe $classe,
                               #[MapEntity] ?Avviso $avviso=null
                               ): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('avvisi_classe_firma', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // inizializza
     $lista = [];
     // controlla avvisi da firmare
@@ -850,15 +861,26 @@ class AvvisiController extends BaseController {
   /**
    * Conferma la lettura dell'avviso da parte dell'utente
    *
+   * @param Request $request Pagina richiesta
    * @param Avviso $avviso Avviso in lettura
    *
    * @return JsonResponse Informazioni di risposta
    */
-  #[Route(path: '/avvisi/legge/{avviso}', name: 'avvisi_legge', requirements: ['avviso' => '\d+'], defaults: ['avviso' => '0'], methods: ['GET'])]
+  #[Route(path: '/avvisi/legge/{avviso}', name: 'avvisi_legge', requirements: ['avviso' => '\d+'], defaults: ['avviso' => '0'], methods: ['POST'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function legge(
+  public function legge(Request $request,
                         #[MapEntity] ?Avviso $avviso=null
                         ): JsonResponse {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('avvisi_legge', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla avviso
+    if (!$avviso) {
+      // errore: avviso non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // firma
     $this->em->getRepository(ComunicazioneUtente::class)->legge($avviso, $this->getUser());
     // restituisce dati
