@@ -1063,6 +1063,7 @@ class Updater {
       }
 
       // salva configurazione
+      // nosemgrep: php.lang.security.injection.tainted-url-host.tainted-url-host -- server validato dall'allowlist, nessun carattere di URL; procedura protetta da token
       $this->env['DATABASE_URL'] = 'mysql://'.urlencode($dbUser).':'.
         urlencode($dbPassword).'@'.$dbServer.':'.
         $dbPort.'/'.$dbName;
@@ -1071,6 +1072,7 @@ class Updater {
       // connessione di test al db (solo server, senza schema)
       $this->connectDb(true);
       // crea schema
+      // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string -- nome database validato dall'allowlist: nessun metacarattere SQL
       $sql = "CREATE DATABASE IF NOT EXISTS `".$dbName."` CHARACTER SET utf8;";
       $this->pdo->exec($sql);
       // imposta dati della pagina
@@ -1287,6 +1289,7 @@ class Updater {
       $step++;
       unset($subStep);
     }
+    // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string -- falso positivo: "update" è parte della URL, il valore è convertito in intero
     $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.$step.(isset($subStep) ? '&sub='.$subStep : '');
     include($this->publicPath.'/install/update_page.php');
   }
