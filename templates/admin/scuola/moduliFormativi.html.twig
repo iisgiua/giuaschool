@@ -10,7 +10,7 @@
   {% set colonne = [
     {titolo: 'label.nome'|trans, chiave: 'nome_breve'},
     {titolo: 'label.tipo'|trans, chiave: 'tipo'},
-    {titolo: 'label.classi'|trans, chiave: 'classi'}
+    {titolo: 'label.classi'|trans, chiave: 'classi'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -22,7 +22,7 @@
     {% set righe = righe|merge([{
       nome_breve: m.nomeBreve,
       tipo: ('label.modulo_formativo_tipo_' ~ m.tipo)|trans,
-      classi: classi|join(', ')
+      classi: classi|join(', '),
     }]) %}
     {% set azioni = azioni|merge([{voci: [
       {tipo: 'info', etichetta: 'label.show'|trans, titolo: 'Mostra i dettagli del modulo formativo', titolo_modale: m.nome,
@@ -31,17 +31,17 @@
           {etichetta: 'label.nome_breve'|trans, valore: m.nomeBreve, classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-9'},
           {etichetta: 'label.tipo'|trans, valore: ('label.modulo_formativo_tipo_' ~ m.tipo)|trans,
             classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-9'},
-          {etichetta: 'label.classi'|trans, valore: classi|join(', '), classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-9'}
+          {etichetta: 'label.classi'|trans, valore: classi|join(', '), classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-9'},
         ])},
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del modulo formativo',
         url: path('scuola_moduliFormativi_edit', {id: m.id})},
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Cancella il modulo formativo', titolo_modale: m.nome,
-        contenuto: 'message.cancella_moduloFormativo'|trans, url: path('scuola_moduliFormativi_delete', {id: m.id})}
+        contenuto: 'message.cancella_moduloFormativo'|trans, url: path('scuola_moduliFormativi_delete', {id: m.id})},
     ]}]) %}
   {% endfor %}
   {{ t.tabella(colonne, righe, {
     vuoto: 'Nessun modulo formativo trovato',
-    azioni: azioni
+    azioni: azioni,
   }) }}
 </div>
 {% endblock %}

@@ -46,7 +46,7 @@
       {contenuto: 'Alunno', classi: 'col-sm-3', scope: 'col'},
       {contenuto: 'Data', classi: 'col-sm-3', scope: 'col'},
       {contenuto: 'Attività', classi: 'col-sm-3', scope: 'col'},
-      {contenuto: 'label.action'|trans, classi: 'col-sm-3', scope: 'col'}
+      {contenuto: 'label.action'|trans, classi: 'col-sm-3', scope: 'col'},
     ] %}
     {% set corpo_grezzo_0 %}
     {% for p in dati.lista %}
@@ -57,7 +57,7 @@
         <td>
       {% if p.data > info.oggi %}
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_presenze_edit', {id: p.id, classe: info.classe.id}) }}" role="button" title="Modifica i dati della presenza fuori classe"><strong>{{ 'label.edit'|trans }}</strong></a>
-          <a class="btn btn-danger btn-xs" href="{{ path('coordinatore_presenze_delete', {id: p.id, classe: info.classe.id}) }}" role="button" title="Rimuove la presenza fuori classe"><strong>{{ 'label.delete'|trans }}</strong></a>
+          <button type="button" class="btn btn-danger btn-xs gs-modal-confirm-button" title="Rimuove la presenza fuori classe" data-toggle="modal" data-target="#gs-modal-confirm" data-titolo="{{ p.alunno }}" data-contenuto="{{ 'message.cancella_presenza'|trans }}" data-href="{{ path('coordinatore_presenze_delete', {id: p.id, classe: info.classe.id}) }}" data-csrf="{{ csrf_token('delete') }}"><strong>{{ 'label.delete'|trans }}</strong></button>
       {% endif %}
         </td>
       </tr>
@@ -65,6 +65,7 @@
     {% endset %}
     {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'coordinatore_presenze'}) }}
+  {{ include('admin/include/modal-confirm.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}
@@ -92,6 +93,16 @@ $(document).ready(function() {
     autoclose: true,
     language: "it",
     zIndexOffset: 1200
+  });
+  $('#gs-modal-confirm').on('show.bs.modal', function(e) {
+    var href = $(e.relatedTarget).data('href');
+    var csrf = $(e.relatedTarget).data('csrf');
+    var titolo = $(e.relatedTarget).data('titolo');
+    var contenuto = $(e.relatedTarget).data('contenuto');
+    $(this).find('#gs-modal-confirm-titolo').html(titolo);
+    $(this).find('#gs-modal-confirm-contenuto').html(contenuto);
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
   });
 });
 </script>

@@ -16,7 +16,7 @@
     {contenuto: 'label.numero'|trans, classi: 'col-sm-1', scope: 'col'},
     {contenuto: 'label.sede'|trans, classi: 'col-sm-2', scope: 'col'},
     {contenuto: 'label.oggetto'|trans, classi: 'col-sm-6', scope: 'col'},
-    {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'}
+    {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'},
   ] %}
   {% set righe = [] %}
   {% for k, c in dati.bozza %}
@@ -34,6 +34,7 @@
     {% if dati.azioni['unpublish-' ~ k].publish is defined %}
       {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
         nome: 'book', etichetta: 'Pubblica', titolo: 'Pubblica la circolare indicata', stile: 'success',
+        classi: 'gs-post', attributi: {'data-csrf': csrf_token('circolari_publish')},
         url: path('circolari_publish', {circolare: c.id, pubblica: 1})})]) %}
     {% endif %}
     {% if dati.azioni['unpublish-' ~ k].delete is defined %}
@@ -48,16 +49,16 @@
     {% set righe = righe|merge([{celle: [
       {contenuto: c.data|date('d/m/Y')},
       {contenuto: c.numero},
-      {contenuto: '<small>' ~ c.sedi|map(s => s.citta|upper)|join(', ') ~ '</small>'},
-      {contenuto: '<small>' ~ c.titolo ~ '</small>'},
-      {contenuto: pulsanti}
+      {contenuto: '<small>' ~ c.sedi|map(s => s.citta|upper|e)|join(', ') ~ '</small>'},
+      {contenuto: '<small>' ~ c.titolo|e ~ '</small>'},
+      {contenuto: pulsanti},
     ]}]) %}
   {% endfor %}
   {{ include('include/tabella.html.twig', {
     didascalia: 'Circolari in stato di bozza',
     classi_didascalia: 'text-center text-warning gs-pb-0',
     intestazione: [intestazione], corpo: righe,
-    classe_intestazione: 'bg-warning'
+    classe_intestazione: 'bg-warning',
   }) }}
   <div class="row gs-mt-2">
     <div class="col-sm-offset-6 col-sm-6 text-right">
@@ -102,7 +103,7 @@
     {contenuto: 'label.numero'|trans, classi: 'col-sm-1', scope: 'col'},
     {contenuto: 'label.sede'|trans, classi: 'col-sm-2', scope: 'col'},
     {contenuto: 'label.oggetto'|trans, classi: 'col-sm-6', scope: 'col'},
-    {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'}
+    {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'},
   ] %}
   {% set righe = [] %}
   {% for k, c in dati.pubblicate.lista %}
@@ -116,14 +117,15 @@
       {% set pulsanti = pulsanti|merge([include('include/bottone-azione.html.twig', {
         nome: 'square-x', etichetta: 'Annulla pubblicazione',
         titolo: 'Rimuove la pubblicazione della circolare indicata', stile: 'warning',
+        classi: 'gs-post', attributi: {'data-csrf': csrf_token('circolari_publish')},
         url: path('circolari_publish', {circolare: c.id, pubblica: 0})})]) %}
     {% endif %}
     {% set righe = righe|merge([{celle: [
       {contenuto: c.data|date('d/m/Y')},
       {contenuto: c.numero},
-      {contenuto: '<small>' ~ c.sedi|map(s => s.nomeBreve|upper)|join(', ') ~ '</small>'},
-      {contenuto: '<small>' ~ c.titolo ~ '</small>'},
-      {contenuto: pulsanti}
+      {contenuto: '<small>' ~ c.sedi|map(s => s.nomeBreve|upper|e)|join(', ') ~ '</small>'},
+      {contenuto: '<small>' ~ c.titolo|e ~ '</small>'},
+      {contenuto: pulsanti},
     ]}]) %}
   {% endfor %}
   {{ include('include/tabella.html.twig', {intestazione: [intestazione], corpo: righe}) }}

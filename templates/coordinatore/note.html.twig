@@ -4,11 +4,11 @@
 <div class="container-fluid">
   {% if not classe %}
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context: false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_note'|trans }} {{ classe }}</h1>
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id, gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id, gruppo: false}, with_context: false) }}
     {% for periodo, v in dati %}
   <div class="gs-periodo-testa gs-mt-4 gs-mb-2">
     <div class="gs-periodo-titolo text-info">
@@ -22,7 +22,7 @@
       {contenuto: 'Data', classi: 'col-sm-1', scope: 'col'},
       {contenuto: 'Destinatari', classi: 'col-sm-3', scope: 'col'},
       {contenuto: 'Nota', classi: 'col-sm-5', scope: 'col'},
-      {contenuto: 'Provvedimento', classi: 'col-sm-3', scope: 'col'}
+      {contenuto: 'Provvedimento', classi: 'col-sm-3', scope: 'col'},
     ] %}
     {% set righe = [] %}
     {% for data, v1 in v %}
@@ -40,14 +40,14 @@
           {% set righe = righe|merge([{celle: [
             {contenuto: '<strong>' ~ e.data ~ '</strong>'},
             {contenuto: destinatari},
-            {contenuto: '<small>' ~ e.nota|raw|nl2br ~ '<br><em>(' ~ e.nota_doc ~ ')</em></small>'},
-            {contenuto: '<small>' ~ (e.provvedimento|raw|nl2br ? (e.provvedimento ~ '<br><em>(' ~ e.provvedimento_doc ~ ')</em>')|raw) ~ '</small>'}
+            {contenuto: '<small>' ~ e.nota|raw|nl2br ~ '<br><em>(' ~ e.nota_doc|e ~ ')</em></small>'},
+            {contenuto: '<small>' ~ (e.provvedimento|raw|nl2br ? (e.provvedimento ~ '<br><em>(' ~ e.provvedimento_doc|e ~ ')</em>')|raw) ~ '</small>'},
           ]}]) %}
         {% endfor %}
       {% endfor %}
     {% endfor %}
     {{ include('include/tabella.html.twig', {
-      intestazione: [intestazione], corpo: righe
+      intestazione: [intestazione], corpo: righe,
     }) }}
     {% else %}
   <div class="alert alert-info" role="alert">

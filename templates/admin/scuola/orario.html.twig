@@ -10,7 +10,7 @@
   {% set colonne = [
     {titolo: 'label.nome_orario'|trans, chiave: 'nome'},
     {titolo: 'label.data_inizio'|trans, chiave: 'inizio'},
-    {titolo: 'label.sede'|trans, chiave: 'sede'}
+    {titolo: 'label.sede'|trans, chiave: 'sede'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -22,7 +22,7 @@
           {etichetta: 'label.nome_orario'|trans, valore: o.nome, classi_valore: 'col-sm-10'},
           {etichetta: 'label.data_inizio'|trans, valore: o.inizio|date('d/m/Y'), classi_valore: 'col-sm-4'},
           {etichetta: 'label.data_fine'|trans, valore: o.fine|date('d/m/Y'), classi_valore: 'col-sm-4'},
-          {etichetta: 'label.sede'|trans, valore: o.sede.nome, classi_valore: 'col-sm-10'}
+          {etichetta: 'label.sede'|trans, valore: o.sede.nome, classi_valore: 'col-sm-10'},
         ])},
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: "Modifica i dati dell'orario",
         url: path('scuola_orario_edit', {id: o.id})},
@@ -35,7 +35,7 @@
   {% endfor %}
   {{ t.tabella(colonne, righe, {
     vuoto: 'Nessun orario trovato',
-    azioni: azioni
+    azioni: azioni,
       }) }}
 </div>
 {% endblock %}

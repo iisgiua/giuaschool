@@ -31,7 +31,7 @@
     {contenuto: 'label.numero'|trans, classi: 'col-sm-2', scope: 'col'},
     {contenuto: 'label.data'|trans, classi: 'col-sm-2', scope: 'col'},
     {contenuto: 'label.oggetto'|trans, classi: 'col-sm-6', scope: 'col'},
-    {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'}
+    {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'},
   ] %}
   {% set righe = [] %}
   {% for c in dati.lista %}
@@ -44,13 +44,13 @@
     {% set righe = righe|merge([{celle: [
       {contenuto: c.circolare.numero},
       {contenuto: c.circolare.data|date('d/m/Y')},
-      {contenuto: '<small>' ~ c.circolare.titolo ~ '</small>'},
-      {contenuto: pulsanti}
+      {contenuto: '<small>' ~ c.circolare.titolo|e ~ '</small>'},
+      {contenuto: pulsanti},
     ]}]) %}
   {% endfor %}
   {{ include('include/tabella.html.twig', {
     intestazione: [intestazione], corpo: righe,
-    classi: 'table table-bordered table-hover table-striped gs-mb-4'
+    classi: 'table table-bordered table-hover table-striped gs-mb-4',
   }) }}
   {% else %}
   <div class="alert alert-info" role="alert">

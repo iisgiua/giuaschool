@@ -112,7 +112,7 @@
     {contenuto: 'label.oggetto'|trans, classi: 'col-auto', scope: 'col'},
     {contenuto: 'label.sede'|trans, classi: 'col-auto', scope: 'col'},
     {contenuto: 'label.destinatari'|trans, classi: 'col-auto', scope: 'col'},
-    {contenuto: 'label.action'|trans, classi: 'col-auto', scope: 'col'}
+    {contenuto: 'label.action'|trans, classi: 'col-auto', scope: 'col'},
   ] %}
   {% set righe = [] %}
   {% for k, a in dati.lista %}
@@ -153,13 +153,13 @@
       nome: 'eye', etichetta: 'Visualizza', titolo: 'Visualizza i dettagli dell\'avviso',
       classi: 'gs-button-remote',
       attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote',
-                  'data-href': path('avvisi_dettagli_gestione', {avviso: a.id})}
+                  'data-href': path('avvisi_dettagli_gestione', {avviso: a.id})},
     })]) %}
     {% if dati.azioni[k].edit is defined %}
       {% set url_edit = a.tipo() in ['E', 'U', 'A'] ? path('avvisi_edit_classi', {tipo: a.tipo, avviso: a.id})
           : (a.tipo() == 'I' ? path('avvisi_edit_personali', {avviso: a.id}) : path('avvisi_edit', {avviso: a.id})) %}
       {% set buttons = buttons|merge([include('include/bottone-azione.html.twig', {
-        nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica l\'avviso indicato', url: url_edit
+        nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica l\'avviso indicato', url: url_edit,
       })]) %}
     {% endif %}
     {% if dati.azioni[k].delete is defined %}
@@ -169,7 +169,7 @@
         attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm',
                     'data-href': path('avvisi_delete', {avviso: a.id}),
                     'data-text': 'message.cancella_avviso'|trans,
-                    'data-csrf': csrf_token('delete')}
+                    'data-csrf': csrf_token('delete')},
       })]) %}
     {% endif %}
     {% set righe = righe|merge([{
@@ -180,15 +180,15 @@
         {contenuto: a.titolo},
         {contenuto: sedi},
         {contenuto: destinatari},
-        {contenuto: buttons}
-      ]
+        {contenuto: buttons},
+      ],
     }]) %}
   {% endfor %}
   {{ include('include/tabella.html.twig', {
     id: 'avvisi-table',
         intestazione: [intestazione],
     corpo: righe,
-    vuoto: 'Nessun avviso trovato'
+    vuoto: 'Nessun avviso trovato',
   }) }}
   {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'avvisi_gestione'}) }}
   {{ include('include/modal-remote.html.twig') }}

@@ -4,11 +4,11 @@
 <div class="container-fluid">
   {% if not classe %}
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context: false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio per gli esami degli studenti con sospensione del giudizio<br>della classe {{ classe }}</h1>
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id, gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id, gruppo: false}, with_context: false) }}
   {% if dati.periodo is defined and dati.periodo != 'G' %}<h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Sessione supplettiva</h2>{% endif %}
     {{ include('include/modal-error.html.twig') }}
     {{ form_start(form) }}
@@ -47,7 +47,7 @@
         {% if dati.esiti[alunno].dati.certificazione is defined and dati.esiti[alunno].dati.certificazione %}
             {{ include('include/bottone-azione.html.twig', {nome: 'check', etichetta: 'Modifica', titolo: 'Modifica la certificazione', stile: 'success', dimensione: '', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_certificazione', {alunno: alunno, periodo: dati.periodo, classe: classe.id})}}) }}
         {% else %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Compila la certificazione', titolo: 'Compila la certificazione', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_certificazione', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}) }}
+            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Compila la certificazione', titolo: 'Compila la certificazione', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_certificazione', {alunno: alunno, periodo: dati.periodo, classe: classe.id})}}) }}
         {% endif %}
           </td>
         </tr>
@@ -93,7 +93,7 @@
         {% if dati.esiti[alunno].credito %}
             <button type="button" class="btn btn-xs btn-{{ dati.esiti[alunno].credito == dati.esiti[alunno].dati.creditoMinimo ? 'info' : 'success' }} gs-button-remote" title="Modifica il credito" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_credito', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}"><strong class="gs-big gs-pl-2 gs-pr-2">{{ dati.esiti[alunno].credito }}</strong></button>
         {% else %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Inserisci il credito', titolo: 'Inserisci il credito', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_credito', {alunno: alunno, periodo: dati.periodo, classe: classe.id}) }}) }}
+            {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Inserisci il credito', titolo: 'Inserisci il credito', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_credito', {alunno: alunno, periodo: dati.periodo, classe: classe.id})}}) }}
         {% endif %}
           </td>
         </tr>

@@ -71,8 +71,8 @@
 
 {%- block choice_widget_collapsed -%}
 {%- if required and placeholder is none and not placeholder_in_choices and not multiple and (attr.size is not defined or
-attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|merge({class: (attr.class|default('')
-  ~ ' form-control' )|trim}) -%} <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple" {% endif
+attr.size <= 1) -%} {%- set required = false -%} {%- endif -%} {%- set attr = attr|merge({class: (attr.class|default('')
+  ~ ' form-control')|trim}) -%} <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple" {% endif
   %}>
   {%- if placeholder is not none -%}
   <option value="" {% if required and value is empty %} selected="selected" {% endif %}>{{ placeholder != '' ?
@@ -478,7 +478,7 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
       {%- set widget_attr = {attr: {'aria-describedby': id ~ '_help'}} -%}
       {%- endif -%}
       <{{ element|default('div') }}{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group' ~
-        (inline is defined and inline ? ' col' ))|trim})} %}{{ block('attributes') }}{% endwith %}>
+        (inline is defined and inline ? ' col'))|trim})} %}{{ block('attributes') }}{% endwith %}>
         {{ form_label(form) }}
         {{ form_widget(form, widget_attr) }}
         {%- if errors|length > 0 -%}
@@ -507,7 +507,7 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
     mr-3')})}) }}
     {%- else -%}
     <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group' ~ (inline is not defined or
-      not inline ? ' text-center' : '' ))|trim})} %}{{ block('attributes') }}{% endwith %}>
+      not inline ? ' text-center' : ''))|trim})} %}{{ block('attributes') }}{% endwith %}>
       {{ form_widget(form) }}
       </div>
       {% endif %}
@@ -529,7 +529,7 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
         {%- set widget_attr = {attr: {'aria-describedby': id ~ '_help'}} -%}
         {%- endif -%}
         <div {% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group' ~ (inline is defined and
-          inline ? ' col' ))|trim})} %}{{ block('attributes') }}{% endwith %}>
+          inline ? ' col'))|trim})} %}{{ block('attributes') }}{% endwith %}>
           {%- if not expanded -%}
           <div class="bootstrap-select-wrapper">
             {%- if attr.widget is defined and attr.widget == 'search' -%}
@@ -596,7 +596,7 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
               <fieldset>
                 <legend><span class="sr-only">Orario</span></legend>
                 <div>
-                  <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group' )|trim})} %}{{
+                  <div{% with {attr: row_attr|merge({class: (row_attr.class|default('') ~ ' form-group')|trim})} %}{{
                     block('attributes') }}{% endwith %}>
                     <div class="calendar-input-container">
                       {{ block('form_label') }}
@@ -607,7 +607,7 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
                       <input class="form-control txtTime" id="{{ id }}" name="{{ full_name }}" type="text"
                         placeholder="{{ 'label.form_time_placeholder'|trans }}" {% if value is not empty %}
                         value="{{ value }}" {% endif %}{% if required %} required="required" {% endif %}{% if help is
-                        not empty or errors|length> 0 %} aria-describedby="{{ id }}_help"{% endif %} />
+                        not empty or errors|length > 0 %} aria-describedby="{{ id }}_help"{% endif %} />
                     </div>
                     {%- if errors|length > 0 -%}
                     {{ form_errors(form) }}
@@ -724,7 +724,7 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
       {%- else -%}
       {%- set form_method = 'POST' -%}
       {%- endif -%}
-      <form{% if name !='' %} name="{{ name }}" {% endif %} method="{{ form_method|lower }}" {% if action !='' %}
+      <form{% if name != '' %} name="{{ name }}" {% endif %} method="{{ form_method|lower }}" {% if action != '' %}
         action="{{ action }}" {% endif %}{{ block('attributes') }}{% if multipart %} enctype="multipart/form-data" {%
         endif %}>
         {%- if form_method != method -%}

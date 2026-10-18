@@ -10,7 +10,7 @@
   {% set colonne = [
     {titolo: 'label.classe'|trans, chiave: 'classe'},
     {titolo: 'label.rappresentante'|trans, chiave: 'rappresentante'},
-    {titolo: 'label.tipo'|trans, chiave: 'tipo'}
+    {titolo: 'label.tipo'|trans, chiave: 'tipo'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -22,20 +22,20 @@
     {% set righe = righe|merge([{
       classe: u.alunno.classe,
       rappresentante: u ~ ' - ' ~ u.alunno,
-      tipo: tipi|join(', ')
+      tipo: tipi|join(', '),
     }]) %}
     {% set azioni = azioni|merge([{voci: [
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del rappresentante',
         url: path('alunni_rappresentanti_edit', {ruolo: 'G', id: u.id})},
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Elimina il rappresentante',
         titolo_modale: u ~ ' - ' ~ u.alunno, contenuto: 'message.cancella_rappresentante_genitori'|trans,
-        url: path('alunni_rappresentanti_delete', {ruolo: 'G', id: u.id})}
+        url: path('alunni_rappresentanti_delete', {ruolo: 'G', id: u.id})},
     ]}]) %}
   {% endfor %}
   {{ t.tabella(colonne, righe, {
     vuoto: 'Nessun rappresentante genitore trovato',
     azioni: azioni,
-    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_rappresentantiGenitori'}
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_rappresentantiGenitori'},
   }) }}
 </div>
 {% endblock %}

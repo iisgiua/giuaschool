@@ -12,7 +12,7 @@
       titolo_vero: 'label.utente_attivo'|trans, titolo_falso: 'label.utente_disabilitato'|trans},
     {titolo: 'label.cognome'|trans, chiave: 'cognome'},
     {titolo: 'label.nome'|trans, chiave: 'nome'},
-    {titolo: 'label.username'|trans, chiave: 'username'}
+    {titolo: 'label.username'|trans, chiave: 'username'},
   ] %}
   {% set azioni = [] %}
   {% for u in dati.lista %}
@@ -27,7 +27,7 @@
           {etichetta: 'label.spid'|trans, valore: (u.spid ? 'label.si' : 'label.no')|trans},
           {etichetta: 'label.username'|trans, valore: u.username},
           {etichetta: 'label.email'|trans, valore: u.email},
-          {etichetta: 'label.ultimo_accesso'|trans, valore: u.ultimoAccesso ? u.ultimoAccesso|date('d/m/Y H:i:s') : '', vuoto: 'NESSUNO'}
+          {etichetta: 'label.ultimo_accesso'|trans, valore: u.ultimoAccesso ? u.ultimoAccesso|date('d/m/Y H:i:s') : '', vuoto: 'NESSUNO'},
         ])},
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: "Modifica i dati dell'utente",
         url: path('docenti_modifica_edit', {docente: u.id})},
@@ -58,7 +58,7 @@
     vuoto: 'Nessun docente trovato',
     mappa: {chiave: 'abilitato', valori: {1: '', 0: 'table-danger'}},
     azioni: azioni,
-    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_modifica'}
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_modifica'},
   }) }}
 </div>
 {% endblock %}

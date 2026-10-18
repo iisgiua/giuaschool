@@ -4,11 +4,11 @@
 <div class="container-fluid">
   {% if not classe %}
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context: false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_assenze'|trans }} {{ classe }}</h1>
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id, gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id, gruppo: false}, with_context: false) }}
   <div class="row gs-mb-1">
     <div class="col-sm-6 text-info">
       <strong class="gs-big">Alunni della classe</strong>
@@ -24,7 +24,7 @@
       {contenuto: 'Conteggio<br>Ritardi', classi: 'col-sm-1', scope: 'col'},
       {contenuto: 'Uscite', classi: 'col-sm-1', scope: 'col'},
       {contenuto: 'Conteggio<br>Uscite', classi: 'col-sm-1', scope: 'col'},
-      {contenuto: 'Ore totali<br>e % su {{ dati.monte }}', classi: 'col-sm-2', scope: 'col'}
+      {contenuto: 'Ore totali<br>e % su {{ dati.monte }}', classi: 'col-sm-2', scope: 'col'},
     ] %}
     {% set corpo_grezzo_0 %}
     {% for alunno, a in dati.alunni %}
@@ -95,7 +95,7 @@
     {% if dati.trasferiti|length > 0 %}
   {% set intestazione = [
       {contenuto: 'Alunno', classi: 'col-sm-5', scope: 'col'},
-      {contenuto: 'Situazione', classi: 'col-sm-7', scope: 'col'}
+      {contenuto: 'Situazione', classi: 'col-sm-7', scope: 'col'},
     ] %}
     {% set corpo_grezzo_1 %}
     {% for alunno, a in dati.trasferiti %}

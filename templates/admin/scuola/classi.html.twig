@@ -10,7 +10,7 @@
   {% set colonne = [
     {titolo: 'label.classe'|trans, chiave: 'classe'},
     {titolo: 'label.corso'|trans, chiave: 'corso'},
-    {titolo: 'label.sede'|trans, chiave: 'sede'}
+    {titolo: 'label.sede'|trans, chiave: 'sede'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -28,19 +28,19 @@
           {etichetta: 'label.corso'|trans, valore: c.corso.nome},
           {etichetta: 'label.sede'|trans, valore: c.sede.nome},
           {etichetta: 'label.coordinatore'|trans, valore: c.coordinatore ? c.coordinatore.nome ~ ' ' ~ c.coordinatore.cognome : ''},
-          {etichetta: 'label.segretario'|trans, valore: c.segretario ? c.segretario.nome ~ ' ' ~ c.segretario.cognome : ''}
+          {etichetta: 'label.segretario'|trans, valore: c.segretario ? c.segretario.nome ~ ' ' ~ c.segretario.cognome : ''},
         ])},
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati della classe',
         url: path('scuola_classi_edit', {id: c.id})},
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Cancella la classe',
         titolo_modale: nome_classe ~ ' - ' ~ c.sede.nomeBreve, contenuto: 'message.cancella_classe'|trans,
-        url: path('scuola_classi_delete', {id: c.id})}
+        url: path('scuola_classi_delete', {id: c.id})},
     ] %}
     {% set azioni = azioni|merge([{voci: voci}]) %}
   {% endfor %}
   {{ t.tabella(colonne, righe, {
     vuoto: 'Nessuna classe trovata',
-    azioni: azioni
+    azioni: azioni,
       }) }}
   {{ include('admin/include/paginazione.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'scuola_classi'}) }}
 </div>

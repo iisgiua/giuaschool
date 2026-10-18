@@ -43,7 +43,7 @@
     {contenuto: 'label.data'|trans, classi: 'col-sm-1', scope: 'col'},
     {contenuto: 'label.oggetto'|trans, classi: 'col-sm-5', scope: 'col'},
     {contenuto: 'label.destinatari'|trans, classi: 'col-sm-3', scope: 'col'},
-    {contenuto: 'label.action'|trans, classi: 'col-sm-1', scope: 'col'}
+    {contenuto: 'label.action'|trans, classi: 'col-sm-1', scope: 'col'},
   ] %}
   {% set righe = [] %}
   {% for k, a in dati.lista %}
@@ -73,7 +73,7 @@
             nome: 'eye', etichetta: 'Visualizza', titolo: 'Visualizza i dettagli dell\'avviso',
             classi: 'gs-button-remote',
             attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote',
-                        'data-href': path('avvisi_dettagli_gestione', {avviso: a.id})}
+                        'data-href': path('avvisi_dettagli_gestione', {avviso: a.id})},
           }) }}
     {% endset %}
     {% set righe = righe|merge([{celle: [
@@ -82,7 +82,7 @@
       {contenuto: a.data|date('d/m/Y')},
       {contenuto: a.titolo},
       {contenuto: destinatari},
-      {contenuto: [pulsante]}
+      {contenuto: [pulsante]},
     ]}]) %}
   {% endfor %}
   {{ include('include/tabella.html.twig', {intestazione: [intestazione], corpo: righe}) }}

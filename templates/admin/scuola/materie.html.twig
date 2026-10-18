@@ -9,7 +9,7 @@
   {{ include('admin/include/flash.html.twig') }}
   {% set colonne = [
     {titolo: 'label.nome_materia'|trans, chiave: 'nome'},
-    {titolo: 'label.tipo'|trans, chiave: 'tipo'}
+    {titolo: 'label.tipo'|trans, chiave: 'tipo'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -26,17 +26,17 @@
             classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-3'},
           {etichetta: 'label.media_materia'|trans, valore: (m.media ? 'label.si' : 'label.no')|trans,
             classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-3'},
-          {etichetta: 'label.ordinamento'|trans, valore: m.ordinamento, classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-3'}
+          {etichetta: 'label.ordinamento'|trans, valore: m.ordinamento, classi_etichetta: 'col-sm-3 text-right', classi_valore: 'col-sm-3'},
         ])},
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati della materia',
         url: path('scuola_materie_edit', {id: m.id})},
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Cancella la materia', titolo_modale: m.nome,
-        contenuto: 'message.cancella_materia'|trans, url: path('scuola_materie_delete', {id: m.id})}
+        contenuto: 'message.cancella_materia'|trans, url: path('scuola_materie_delete', {id: m.id})},
     ]}]) %}
   {% endfor %}
   {{ t.tabella(colonne, righe, {
     vuoto: 'Nessuna materia trovata',
-    azioni: azioni
+    azioni: azioni,
       }) }}
 </div>
 {% endblock %}

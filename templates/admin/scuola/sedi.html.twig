@@ -10,7 +10,7 @@
   {% set colonne = [
     {titolo: 'label.nome_sede'|trans, chiave: 'nome'},
     {titolo: 'label.citta'|trans, chiave: 'citta'},
-    {titolo: 'label.indirizzo'|trans, chiave: 'indirizzo'}
+    {titolo: 'label.indirizzo'|trans, chiave: 'indirizzo'},
   ] %}
   {% set azioni = [] %}
   {% for s in dati %}
@@ -23,17 +23,17 @@
           {etichetta: 'label.indirizzo'|trans, valore: s.indirizzo1},
           {etichetta: 'label.indirizzo_cap'|trans, valore: s.indirizzo2},
           {etichetta: 'label.telefono'|trans, valore: s.telefono},
-          {etichetta: 'label.ordinamento'|trans, valore: s.ordinamento}
+          {etichetta: 'label.ordinamento'|trans, valore: s.ordinamento},
         ], 'row', 'col-sm-3 text-right', 'col-sm-9')},
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati della sede',
         url: path('scuola_sedi_edit', {id: s.id})},
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Cancella la sede', titolo_modale: s.nome,
-        contenuto: 'message.cancella_sede'|trans, url: path('scuola_sedi_delete', {id: s.id})}
+        contenuto: 'message.cancella_sede'|trans, url: path('scuola_sedi_delete', {id: s.id})},
     ]}]) %}
   {% endfor %}
   {{ t.tabella(colonne, dati, {
     vuoto: 'Nessuna sede trovata',
-    azioni: azioni
+    azioni: azioni,
       }) }}
 </div>
 {% endblock %}

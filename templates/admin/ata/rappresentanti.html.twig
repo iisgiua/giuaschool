@@ -10,7 +10,7 @@
   {% set colonne = [
     {titolo: 'label.rappresentante'|trans, chiave: 'rappresentante'},
     {titolo: 'label.sede'|trans, chiave: 'sede'},
-    {titolo: 'label.tipo'|trans, chiave: 'tipo'}
+    {titolo: 'label.tipo'|trans, chiave: 'tipo'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -22,20 +22,20 @@
     {% set righe = righe|merge([{
       rappresentante: u,
       sede: u.sede ? u.sede.citta : '',
-      tipo: tipi|join(', ')
+      tipo: tipi|join(', '),
     }]) %}
     {% set azioni = azioni|merge([{voci: [
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del rappresentante',
         url: path('ata_rappresentanti_edit', {id: u.id})},
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Elimina il rappresentante',
         titolo_modale: u, contenuto: 'message.cancella_rappresentante_ata'|trans,
-        url: path('ata_rappresentanti_delete', {id: u.id})}
+        url: path('ata_rappresentanti_delete', {id: u.id})},
     ]}]) %}
   {% endfor %}
   {{ t.tabella(colonne, righe, {
     vuoto: 'Nessun rappresentante trovato',
     azioni: azioni,
-    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'ata_rappresentanti'}
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'ata_rappresentanti'},
   }) }}
 </div>
 {% endblock %}

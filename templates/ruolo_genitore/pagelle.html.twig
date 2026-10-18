@@ -60,7 +60,7 @@
         {% if dati.voti|length > 0 and dati.esitoRinviato is empty %}
   {% set intestazione = [
       {contenuto: 'Materia', classi: 'col-sm-8', scope: 'col'},
-      {contenuto: 'Voto', classi: 'col-sm-4', scope: 'col'}
+      {contenuto: 'Voto', classi: 'col-sm-4', scope: 'col'},
     ] %}
     {% set corpo_grezzo_0 %}
           {% for v in dati.voti %}
@@ -76,7 +76,7 @@
         {% elseif dati.votiRinviato is defined %}
   {% set intestazione = [
       {contenuto: 'Materia', classi: 'col-sm-8', scope: 'col'},
-      {contenuto: 'Voto', classi: 'col-sm-4', scope: 'col'}
+      {contenuto: 'Voto', classi: 'col-sm-4', scope: 'col'},
     ] %}
     {% set corpo_grezzo_1 %}
           {% for v in dati.votiRinviato %}
@@ -93,7 +93,7 @@
         {% if dati.carenze|length > 0 and (dati.esito.esito == 'A' or (dati.esitoRinviato and dati.esitoRinviato.esito == 'A')) %}
   {% set intestazione = [
       {contenuto: 'Materia', classi: 'col-sm-6', scope: 'col'},
-      {contenuto: 'Argomenti da recuperare', classi: 'col-sm-6', scope: 'col'}
+      {contenuto: 'Argomenti da recuperare', classi: 'col-sm-6', scope: 'col'},
     ] %}
     {% set corpo_grezzo_2 %}
           {% for v in dati.carenze %}
@@ -114,7 +114,7 @@
   {% set intestazione = [
       {contenuto: 'Materia', classi: 'col-sm-6', scope: 'col'},
       {contenuto: 'Voto', classi: 'col-sm-2', scope: 'col'},
-      {contenuto: 'Ore di assenza', classi: 'col-sm-4', scope: 'col'}
+      {contenuto: 'Ore di assenza', classi: 'col-sm-4', scope: 'col'},
     ] %}
     {% set corpo_grezzo_3 %}
           {% for materia, m in dati.materie %}
@@ -135,7 +135,7 @@
   {% set intestazione = [
       {contenuto: 'Materia', classi: 'col-sm-4', scope: 'col'},
       {contenuto: 'Argomenti da recuperare', classi: 'col-sm-6', scope: 'col'},
-      {contenuto: 'Modalità di recupero', classi: 'col-sm-2', scope: 'col'}
+      {contenuto: 'Modalità di recupero', classi: 'col-sm-2', scope: 'col'},
     ] %}
     {% set corpo_grezzo_4 %}
             {% for materia, d in dati.debiti %}
@@ -235,7 +235,7 @@
   {% set intestazione = [
       {contenuto: 'Materia', classi: 'col-sm-6', scope: 'col'},
       {contenuto: 'Voto', classi: 'col-sm-2', scope: 'col'},
-      {contenuto: 'Ore di assenza', classi: 'col-sm-4', scope: 'col'}
+      {contenuto: 'Ore di assenza', classi: 'col-sm-4', scope: 'col'},
     ] %}
     {% set corpo_grezzo_5 %}
           {% for materia, m in dati.materie %}
@@ -329,7 +329,7 @@
   {% set intestazione = [
       {contenuto: 'Materia', classi: 'col-sm-6', scope: 'col'},
       {contenuto: 'Voto', classi: 'col-sm-2', scope: 'col'},
-      {contenuto: 'Ore di assenza', classi: 'col-sm-4', scope: 'col'}
+      {contenuto: 'Ore di assenza', classi: 'col-sm-4', scope: 'col'},
     ] %}
     {% set corpo_grezzo_6 %}
           {% for materia, m in dati.materie %}

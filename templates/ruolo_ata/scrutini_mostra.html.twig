@@ -40,7 +40,7 @@
       {% endif %}
   {% set intestazione = [
       {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
-      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'},
     ] %}
     {% set corpo_grezzo_0 %}
       {% for d in dati.documenti %}
@@ -70,7 +70,7 @@
     {% elseif periodo == 'P' or periodo == 'S' %}
   {% set intestazione = [
       {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
-      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'},
     ] %}
     {% set corpo_grezzo_1 %}
       <tr>
@@ -107,7 +107,7 @@
   <div class="text-center text-info"><strong class="gs-big">Scrutinio finale del {{ scrutinio.data|date('d/m/Y') }}</strong></div>
   {% set intestazione = [
       {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
-      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'},
     ] %}
     {% set corpo_grezzo_2 %}
       <tr>
@@ -142,7 +142,7 @@
     {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_2, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
   {% set intestazione = [
       {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
-      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'},
     ] %}
     {% set corpo_grezzo_3 %}
       {% if periodo == 'F' and dati.cittadinanza is defined and dati.cittadinanza %}
@@ -219,7 +219,7 @@
       {% endif %}
   {% set intestazione = [
       {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
-      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'},
     ] %}
     {% set corpo_grezzo_4 %}
       <tr>
@@ -288,7 +288,7 @@
     {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_4, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
   {% set intestazione = [
       {contenuto: 'Documento', classi: 'col-sm-6', scope: 'col'},
-      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'}
+      {contenuto: 'Azioni', classi: 'col-sm-6', scope: 'col'},
     ] %}
     {% set corpo_grezzo_5 %}
       {% if dati.esito.esito == 'A' or (dati.esito.esito == 'X' and dati.rinviato.esito is defined and dati.rinviato.esito.esito == 'A') %}

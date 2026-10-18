@@ -9,7 +9,7 @@
   {{ include('admin/include/flash.html.twig') }}
   {% set colonne = [
     {titolo: 'label.data'|trans, chiave: 'data'},
-    {titolo: 'label.descrizione'|trans, chiave: 'descrizione'}
+    {titolo: 'label.descrizione'|trans, chiave: 'descrizione'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -20,18 +20,18 @@
       {tipo: 'info', etichetta: 'label.show'|trans, titolo: 'Mostra i dettagli della festività', titolo_modale: data,
         contenuto: t.info([
           {etichetta: 'label.data'|trans, valore: data, classi_valore: 'col-sm-10'},
-          {etichetta: 'label.descrizione'|trans, valore: f.descrizione, classi_valore: 'col-sm-10'}
+          {etichetta: 'label.descrizione'|trans, valore: f.descrizione, classi_valore: 'col-sm-10'},
         ])},
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati della festività',
         url: path('scuola_festivita_edit', {id: f.id})},
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Cancella la festività', titolo_modale: data,
-        contenuto: 'message.cancella_festivita'|trans, url: path('scuola_festivita_delete', {id: f.id})}
+        contenuto: 'message.cancella_festivita'|trans, url: path('scuola_festivita_delete', {id: f.id})},
     ]}]) %}
   {% endfor %}
   {{ t.tabella(colonne, righe, {
     vuoto: 'Nessuna festività trovata',
     azioni: azioni,
-    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'scuola_festivita'}
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'scuola_festivita'},
   }) }}
 </div>
 {% endblock %}

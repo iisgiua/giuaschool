@@ -32,7 +32,7 @@
   # ##}
 <div class="dropdown gs-azioni-dropdown {{ classi|default('') }}">
   <button type="button" class="btn btn-xs gs-btn-icona" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{{ titolo|default('Azioni') }}">
-    <span class="sr-only">{{ titolo|default('Azioni') }}</span>{{ include('admin/include/icona.html.twig', {nome: 'dots-vertical', stile: 'outline'}, with_context = false) }}
+    <span class="sr-only">{{ titolo|default('Azioni') }}</span>{{ include('admin/include/icona.html.twig', {nome: 'dots-vertical', stile: 'outline'}, with_context: false) }}
   </button>
   <ul class="dropdown-menu dropdown-menu-right">
 {% for voce in voci %}

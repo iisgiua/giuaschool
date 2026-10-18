@@ -5,7 +5,7 @@
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_riepilogo'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>{% endif %}</em></h2>
   {# selettore sede/classe per le sostituzioni #}
-  {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   <div class="row gs-mb-1">
     <div class="col-sm-6">
       {% if data_prec %}<a class="btn btn-default btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {cattedra: (cattedra ? cattedra.id : 0), data: data_prec|date('Y-m-d')}) }}" role="button" title="Mese precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}

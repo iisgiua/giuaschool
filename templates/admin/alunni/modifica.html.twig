@@ -14,7 +14,7 @@
     {titolo: 'label.nome'|trans, chiave: 'nome'},
     {titolo: 'label.data_nascita'|trans, chiave: 'data_nascita', classe: 'd-none d-md-table-cell', classe_cella: 'd-none d-md-table-cell'},
     {titolo: 'label.bes'|trans, chiave: 'bes', classe: 'd-none d-lg-table-cell', classe_cella: 'd-none d-lg-table-cell'},
-    {titolo: 'label.classe'|trans, chiave: 'classe', classe: 'd-none d-xl-table-cell', classe_cella: 'd-none d-xl-table-cell'}
+    {titolo: 'label.classe'|trans, chiave: 'classe', classe: 'd-none d-xl-table-cell', classe_cella: 'd-none d-xl-table-cell'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -28,7 +28,7 @@
       nome: a.nome,
       data_nascita: a.dataNascita|date('d/m/Y'),
       bes: ('label.bes_' ~ a.bes)|trans,
-      classe: a.classe
+      classe: a.classe,
     }]) %}
     {% set voci = [
       {tipo: 'info', etichetta: 'label.show'|trans, titolo_modale: a.cognome ~ ' ' ~ a.nome,

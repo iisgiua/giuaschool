@@ -11,7 +11,7 @@
     {titolo: 'label.cognome'|trans, chiave: 'cognome'},
     {titolo: 'label.nome'|trans, chiave: 'nome'},
     {titolo: 'label.username'|trans, chiave: 'username', classe: 'd-none d-md-table-cell', classe_cella: 'd-none d-md-table-cell'},
-    {titolo: 'label.sede'|trans, chiave: 'sede', classe: 'd-none d-lg-table-cell', classe_cella: 'd-none d-lg-table-cell'}
+    {titolo: 'label.sede'|trans, chiave: 'sede', classe: 'd-none d-lg-table-cell', classe_cella: 'd-none d-lg-table-cell'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -20,19 +20,19 @@
       cognome: u.cognome,
       nome: u.nome,
       username: u.username,
-      sede: u.responsabileBesSede ? u.responsabileBesSede.citta : 'Tutte'
+      sede: u.responsabileBesSede ? u.responsabileBesSede.citta : 'Tutte',
     }]) %}
     {% set azioni = azioni|merge([{voci: [
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del responsabile BES',
         url: path('docenti_responsabiliBes_edit', {id: u.id})},
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Elimina il responabile BES',
         titolo_modale: u.cognome ~ ' ' ~ u.nome, contenuto: 'message.cancella_responsabileBes'|trans,
-        url: path('docenti_responsabiliBes_delete', {id: u.id})}
+        url: path('docenti_responsabiliBes_delete', {id: u.id})},
     ]}]) %}
   {% endfor %}
   {{ t.tabella(colonne, righe, {
     vuoto: 'Nessun responsabile BES trovato',
-    azioni: azioni
+    azioni: azioni,
       }) }}
 </div>
 {% endblock %}

@@ -38,7 +38,7 @@
     </div>
     {% set intestazione = [
       {contenuto: 'Ricevimento', classi: 'col-sm-2', scope: 'col'},
-      {contenuto: 'Modalità', classi: 'col-sm-2', scope: 'col'}
+      {contenuto: 'Modalità', classi: 'col-sm-2', scope: 'col'},
     ] %}
     {% set righe = [] %}
     {% for r in dati %}
@@ -51,7 +51,7 @@
     {% endfor %}
     {{ include('include/tabella.html.twig', {
       intestazione: [intestazione], corpo: righe,
-      classi: 'table table-bordered table-hover', classe_intestazione: 'bg-info'
+      classi: 'table table-bordered table-hover', classe_intestazione: 'bg-info',
     }) }}
   </div>
   {% endif %}

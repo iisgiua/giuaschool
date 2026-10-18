@@ -4,11 +4,11 @@
 <div class="container-fluid">
   {% if not classe %}
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context: false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe }}</h1>
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id, gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id, gruppo: false}, with_context: false) }}
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Voto di Educazione civica</h2>
   <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-1"><em>Clicca sul pulsante di modifica per inserire tutte le valutazioni di Ed. civica, o su un voto per modificare solo quello indicato.</em></h2>
     {{ include('include/modal-error.html.twig') }}
@@ -20,7 +20,7 @@
     {% for materia, m in dati.materie %}
           <th class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
       {% if m.tipo == 'E' %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Inserisci le valutazioni per Ed. civica', titolo: 'Inserisci le valutazioni per Ed. civica', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_edcivica', {classe: classe.id, periodo: periodo, alunno: 0}) }}) }}
+            {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Inserisci le valutazioni per Ed. civica', titolo: 'Inserisci le valutazioni per Ed. civica', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_edcivica', {classe: classe.id, periodo: periodo, alunno: 0})}}) }}
             <br>
       {% endif %}
             <small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ m.nome }}">{{ m.nomeBreve }}</span></small>
@@ -45,7 +45,7 @@
           <td class="gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2">
         {% if m.tipo == 'E' %}
           {% if dati.voti[alunno][materia].unico is not defined or dati.voti[alunno][materia].unico is empty %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Inserisci la valutazione di Ed. Civica', titolo: 'Inserisci la valutazione di Ed. Civica', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_edcivica', {classe: classe.id, periodo: periodo, alunno: alunno}) }}) }}
+            {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Inserisci la valutazione di Ed. Civica', titolo: 'Inserisci la valutazione di Ed. Civica', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_edcivica', {classe: classe.id, periodo: periodo, alunno: alunno})}}) }}
           {% else %}
             <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione di Ed. Civica" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_edcivica', {classe: classe.id, periodo: periodo, alunno: alunno}) }}"><strong>{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</strong></button>
           {% endif %}

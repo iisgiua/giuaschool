@@ -9,7 +9,7 @@
   {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
   {% set colonne = [
     {titolo: 'label.rappresentante'|trans, chiave: 'rappresentante'},
-    {titolo: 'label.tipo'|trans, chiave: 'tipo'}
+    {titolo: 'label.tipo'|trans, chiave: 'tipo'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -24,13 +24,13 @@
         url: path('docenti_rappresentanti_edit', {id: u.id})},
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Elimina il rappresentante',
         titolo_modale: u, contenuto: 'message.cancella_rappresentante_docenti'|trans,
-        url: path('docenti_rappresentanti_delete', {id: u.id})}
+        url: path('docenti_rappresentanti_delete', {id: u.id})},
     ]}]) %}
   {% endfor %}
   {{ t.tabella(colonne, righe, {
     vuoto: 'Nessun rappresentante trovato',
     azioni: azioni,
-    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_rappresentanti'}
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_rappresentanti'},
   }) }}
 </div>
 {% endblock %}

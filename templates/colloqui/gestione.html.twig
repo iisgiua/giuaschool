@@ -13,7 +13,7 @@
     {contenuto: 'label.tipo'|trans, scope: 'col'},
     {contenuto: 'label.colloquio_luogo'|trans, scope: 'col'},
     {contenuto: 'label.colloquio_durata'|trans, scope: 'col'},
-    {contenuto: 'label.action'|trans, scope: 'col'}
+    {contenuto: 'label.action'|trans, scope: 'col'},
   ] %}
   {% set righe = [] %}
   {% for d in dati %}
@@ -68,7 +68,7 @@
         {contenuto: apri ~ ('label.tipo_colloquio_' ~ d.ricevimento.tipo)|trans ~ chiudi},
         {contenuto: apri ~ '<small>' ~ d.ricevimento.luogo ~ '</small>' ~ chiudi},
         {contenuto: apri ~ d.ricevimento.durata ~ ' minuti (' ~ d.ricevimento.numero ~ ' colloqui)' ~ chiudi},
-        {contenuto: pulsanti}
+        {contenuto: pulsanti},
       ]}]) %}
   {% endfor %}
   {{ include('include/tabella.html.twig', {intestazione: [intestazione], corpo: righe}) }}

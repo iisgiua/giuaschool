@@ -58,12 +58,12 @@
       {contenuto: 'label.giovedi'|trans, classi: 'text-center col-sm-2', scope: 'col'},
       {contenuto: 'label.venerdi'|trans, classi: 'text-center col-sm-2', scope: 'col'},
       {contenuto: 'label.sabato'|trans, classi: 'text-center col-sm-2', scope: 'col'},
-      {contenuto: 'label.domenica'|trans, classi: 'text-center col-sm-2', scope: 'col'}
+      {contenuto: 'label.domenica'|trans, classi: 'text-center col-sm-2', scope: 'col'},
     ] %}
     {% set corpo_grezzo_0 %}
       <tr>
   {% for i in (1 - info.inizio)..info.ultimo_giorno %}
-{#  la griglia e' di 7 colonne (lunedi..domenica): la riga si chiude PRIMA di
+{# la griglia e' di 7 colonne (lunedi..domenica): la riga si chiude PRIMA di
     stampare l'ottava cella. Prima il salto era dentro l'if che decideva il
     contenuto della cella, quindi consumava la cella stessa e le domeniche del
     mese non venivano disegnate. #}

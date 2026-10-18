@@ -13,7 +13,7 @@
     {url: path('alunni_classe_edit', {id: 0, tipo: 'T'}), etichetta: 'label.alunno_trasferito'|trans,
       titolo: 'Nuovo trasferimento di un alunno', classe: 'btn btn-primary btn-sm mr-1 mb-1'},
     {url: path('alunni_classe_edit', {id: 0, tipo: 'S'}), etichetta: 'label.alunno_cambio_sezione'|trans,
-      titolo: 'Nuovo cambio di sezione di un alunno', classe: 'btn btn-primary btn-sm mr-1 mb-1'}
+      titolo: 'Nuovo cambio di sezione di un alunno', classe: 'btn btn-primary btn-sm mr-1 mb-1'},
   ] %}
   {# pulsanti di pagina sotto il titolo, non in fondo alla tabella #}
   {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: pulsanti}) }}
@@ -23,7 +23,7 @@
     {titolo: 'label.classe'|trans, chiave: 'classe'},
     {titolo: 'label.data_inizio'|trans, chiave: 'data_inizio'},
     {titolo: 'label.data_fine'|trans, chiave: 'data_fine'},
-    {titolo: 'label.note'|trans, chiave: 'note'}
+    {titolo: 'label.note'|trans, chiave: 'note'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -33,20 +33,20 @@
       classe: c.anno ? c.anno ~ 'ª ' ~ c.sezione ~ (c.gruppo ? ('-' ~ c.gruppo) : ''),
       data_inizio: c.cambio.inizio|date('d/m/Y'),
       data_fine: c.cambio.fine|date('d/m/Y'),
-      note: c.cambio.note
+      note: c.cambio.note,
     }]) %}
     {% set azioni = azioni|merge([{voci: [
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del cambio classe',
         url: path('alunni_classe_edit', {id: c.cambio.id})},
       {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Cancella i dati del cambio classe',
         titolo_modale: c.cognome ~ ' ' ~ c.nome, contenuto: 'message.cancella_cambio_classe'|trans,
-        url: path('alunni_classe_delete', {id: c.cambio.id})}
+        url: path('alunni_classe_delete', {id: c.cambio.id})},
     ]}]) %}
   {% endfor %}
   {{ t.tabella(colonne, righe, {
     vuoto: 'Nessun cambio classe trovato',
     azioni: azioni,
-    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_classe'}
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_classe'},
   }) }}
 </div>
 {% endblock %}

@@ -38,7 +38,7 @@
       {contenuto: 'label.tipo'|trans, classi: 'col-sm-1', scope: 'col'},
       {contenuto: 'label.data'|trans, classi: 'col-sm-1', scope: 'col'},
       {contenuto: 'label.nome'|trans, classi: 'col-sm-3', scope: 'col'},
-      {contenuto: 'label.action'|trans, classi: 'col-sm-3', scope: 'col'}
+      {contenuto: 'label.action'|trans, classi: 'col-sm-3', scope: 'col'},
     ] %}
     {% set corpo_grezzo_0 %}
     {% for a in dati.lista %}
@@ -53,7 +53,7 @@
           {% set voci_azioni = [
             {etichetta: 'Anteprima', titolo: 'Visualizza l\'anteprima del modulo di autorizzazione', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('autorizzazioni_anteprima', {autorizzazione: a.id}), 'data-tipo': ('label.tipo_attivita_' ~ a.tipo)|trans, 'data-nome': a.nome}, classi: 'gs-button-remote'},
             {etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del modulo di autorizzazione', url: path('autorizzazioni_edit', {autorizzazione: a.id})},
-            {etichetta: 'label.show'|trans, titolo: 'Dettagli delle autorizzazioni inviate', url: path('autorizzazioni_dettagli', {modulo: a.id})}
+            {etichetta: 'label.show'|trans, titolo: 'Dettagli delle autorizzazioni inviate', url: path('autorizzazioni_dettagli', {modulo: a.id})},
           ] %}
       {% if a.abilitata %}
           {% set voci_azioni = voci_azioni|merge([{etichetta: 'label.disable'|trans, titolo: 'Disabilita il modulo di autorizzazione', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-titolo': a.nome, 'data-contenuto': 'message.disabilita_autorizzazione'|trans, 'data-href': path('autorizzazioni_abilita', {autorizzazione: a.id, abilita: 0}), 'data-csrf': csrf_token('delete')}, classi: 'gs-modal-confirm-button text-danger'}]) %}

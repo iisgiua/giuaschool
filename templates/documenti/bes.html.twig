@@ -41,7 +41,7 @@
       {contenuto: 'label.classe'|trans, classi: 'col-sm-3', scope: 'col'},
       {contenuto: 'label.alunno'|trans, classi: 'col-sm-3', scope: 'col'},
       {contenuto: 'label.documento'|trans, classi: 'col-sm-3', scope: 'col'},
-      {contenuto: 'label.action'|trans, classi: 'col-sm-3', scope: 'col'}
+      {contenuto: 'label.action'|trans, classi: 'col-sm-3', scope: 'col'},
     ] %}
     {% set corpo_grezzo_0 %}
       {% for i, alu in dati.lista %}
@@ -102,7 +102,7 @@
       </li>
       {% endif %}
       {% for i in 1..dati.maxPagine %}
-      <li {{ info.pagina==i ? 'class="active"' }}><a href="{{ path('documenti_bes', {pagina: i}) }}">{{ i }}</a></li>
+      <li {{ info.pagina == i ? 'class="active"' }}><a href="{{ path('documenti_bes', {pagina: i}) }}">{{ i }}</a></li>
       {% endfor %}
       {% if info.pagina < dati.maxPagine %} <li><a href="{{ path('documenti_bes', {pagina: info.pagina + 1}) }}"
           title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>

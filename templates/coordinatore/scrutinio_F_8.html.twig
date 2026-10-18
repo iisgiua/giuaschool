@@ -4,11 +4,11 @@
 <div class="container-fluid">
   {% if not classe %}
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id|default(0), gruppo: false}, with_context: false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.coordinatore_scrutinio'|trans }} {{ classe }}</h1>
   {# selettore sede/classe #}
-  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id, gruppo: false}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: classe.id, gruppo: false}, with_context: false) }}
     {{ include('include/modal-error.html.twig') }}
     {{ form_start(form) }}
     {% if classe.anno != 5 %}
@@ -19,7 +19,7 @@
     {% set intestazione = [
       {contenuto: '<small>Alunno</small>', classi: 'col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
       {contenuto: '<small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Materie con debito formativo">Materie</span></small>', classi: 'col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
-      {contenuto: '<small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Comunicazione dei debiti formativi">Comunicazione</span></small>', classi: 'col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'}
+      {contenuto: '<small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Comunicazione dei debiti formativi">Comunicazione</span></small>', classi: 'col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
     ] %}
     {% set corpo_grezzo_0 %}
         {% for alunno, a in dati.debiti %}
@@ -41,7 +41,7 @@
               {% if dati.esiti[alunno].dati.debiti is defined and dati.esiti[alunno].dati.debiti %}
             {{ include('include/bottone-azione.html.twig', {nome: 'check', etichetta: 'Modifica', titolo: 'Modifica la comunicazione dei debiti formativi', stile: 'success', dimensione: '', classi: 'gs-button-remote gs-ml-4', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_debiti', {alunno: alunno, periodo: 'F'})}}) }}
               {% else %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Compila la comunicazione dei debiti formativi', titolo: 'Compila la comunicazione dei debiti formativi', classi: 'gs-button-remote gs-ml-4', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_debiti', {alunno: alunno, periodo: 'F'}) }}) }}
+            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Compila la comunicazione dei debiti formativi', titolo: 'Compila la comunicazione dei debiti formativi', classi: 'gs-button-remote gs-ml-4', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_debiti', {alunno: alunno, periodo: 'F'})}}) }}
               {% endif %}
           </td>
             {% endif %}
@@ -61,7 +61,7 @@
     {% set intestazione = [
       {contenuto: '<small>Alunno</small>', classi: 'col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
       {contenuto: '<small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Materie con carenze">Materie</span></small>', classi: 'col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
-      {contenuto: '<small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Comunicazione delle carenze">Comunicazione</span></small>', classi: 'col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'}
+      {contenuto: '<small><span data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="Comunicazione delle carenze">Comunicazione</span></small>', classi: 'col-sm-4 gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
     ] %}
     {% set corpo_grezzo_1 %}
         {% for alunno, a in dati.carenze %}
@@ -92,7 +92,7 @@
                 {% endfor %}
             </div>
               {% else %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Compila la comunicazione delle carenze', titolo: 'Compila la comunicazione delle carenze', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_carenze', {alunno: alunno, periodo: 'F'}) }}) }}
+            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Compila la comunicazione delle carenze', titolo: 'Compila la comunicazione delle carenze', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_carenze', {alunno: alunno, periodo: 'F'})}}) }}
               {% endif %}
           </td>
             {% endif %}
@@ -113,7 +113,7 @@
   <h3 class="text-center text-info gs-h3 gs-mt-0 gs-mb-3"><em>Clicca sul pulsante di modifica per inserire o modificare le comunicazioni.</em></h3>
   {% set intestazione = [
       {contenuto: 'Alunno', classi: 'col-sm-6 gs-big gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
-      {contenuto: 'Comunicazione argomento, tempi e modalità di consegna', classi: 'col-sm-6 gs-big gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'}
+      {contenuto: 'Comunicazione argomento, tempi e modalità di consegna', classi: 'col-sm-6 gs-big gs-pt-1 gs-pb-1 gs-pl-2 gs-pr-2', scope: 'col'},
     ] %}
     {% set corpo_grezzo_2 %}
       {% for alunno, a in dati.cittadinanza.cittadinanza %}
@@ -126,7 +126,7 @@
         </td>
         <td>
         {% if dati.cittadinanza.esiti[alunno].dati.cittadinanza.argomento is not defined or dati.cittadinanza.esiti[alunno].dati.cittadinanza.argomento is empty or dati.cittadinanza.esiti[alunno].dati.cittadinanza.modalita is not defined or dati.cittadinanza.esiti[alunno].dati.cittadinanza.modalita is empty %}
-          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Compila la comunicazione', titolo: 'Compila la comunicazione', classi: 'gs-button-remote gs-ml-4', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_cittadinanza', {alunno: alunno, periodo: 'F'}) }}) }}
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Compila la comunicazione', titolo: 'Compila la comunicazione', classi: 'gs-button-remote gs-ml-4', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_cittadinanza', {alunno: alunno, periodo: 'F'})}}) }}
         {% else %}
           {{ include('include/bottone-azione.html.twig', {nome: 'check', etichetta: 'Modifica', titolo: 'Modifica la comunicazione', stile: 'success', dimensione: '', classi: 'gs-button-remote gs-ml-4', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_cittadinanza', {alunno: alunno, periodo: 'F'})}}) }}
         {% endif %}

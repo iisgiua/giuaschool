@@ -13,7 +13,7 @@
     {titolo: 'label.classe'|trans, chiave: 'classe'},
     {titolo: 'label.materia'|trans, chiave: 'materia'},
     {titolo: 'label.docente'|trans, chiave: 'docente'},
-    {titolo: 'label.tipo'|trans, chiave: 'tipo'}
+    {titolo: 'label.tipo'|trans, chiave: 'tipo'},
   ] %}
   {% set righe = [] %}
   {% set azioni = [] %}
@@ -23,11 +23,11 @@
       classe: c.classe,
       materia: c.materia.nomeBreve,
       docente: c.docente.cognome ~ ' ' ~ c.docente.nome ~ ' (' ~ c.docente.username ~ ')',
-      tipo: ('label.tipo_' ~ c.tipo)|trans ~ (c.docenteSupplenza ? ' (supplente di ' ~ c.docenteSupplenza.cognome ~ ' ' ~ c.docenteSupplenza.nome ~ ')' : '')
+      tipo: ('label.tipo_' ~ c.tipo)|trans ~ (c.docenteSupplenza ? ' (supplente di ' ~ c.docenteSupplenza.cognome ~ ' ' ~ c.docenteSupplenza.nome ~ ')' : ''),
     }]) %}
     {% set voci = [
       {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati della cattedra',
-        url: path('docenti_cattedre_edit', {id: c.id})}
+        url: path('docenti_cattedre_edit', {id: c.id})},
     ] %}
     {% if c.attiva %}
       {% set voci = voci|merge([{tipo: 'conferma', stile: 'danger', etichetta: 'label.disable'|trans, titolo: 'Disabilita la cattedra',
@@ -44,7 +44,7 @@
     vuoto: 'Nessuna cattedra trovata',
     mappa: {chiave: 'attiva', valori: {1: '', 0: 'table-danger'}},
     azioni: azioni,
-    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_cattedre'}
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_cattedre'},
   }) }}
 </div>
 {% endblock %}
