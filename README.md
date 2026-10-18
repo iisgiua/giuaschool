@@ -45,7 +45,7 @@ Per l'architettura, il modello di dominio e i flussi interni vedi **[docs/ARCHIT
 | Linguaggio | PHP | >= 8.2 |
 | Framework | Symfony | 6.4.* |
 | ORM | Doctrine ORM | ^3.3 |
-| Database | MySQL / MariaDB (InnoDB, `utf8` / `utf8_unicode_ci`) | — |
+| Database | MySQL / MariaDB (InnoDB, `utf8mb4` / `utf8mb4_unicode_ci`) | — |
 | Template engine | Twig | ^3.0 |
 | Code styling | twig-cs-fixer | ^4.1 |
 | Analisi statica | Psalm (errorLevel 5) | ^6.19 |
@@ -155,7 +155,10 @@ php bin/console cache:clear
 
 ## Variabili d'ambiente
 
-Tutte in `.env` (vedi `config/services.yaml` e i vari `config/packages/*.yaml` per gli usi).
+`.env` è il modello versionato e **non contiene credenziali**; i valori della macchina (connessione
+al database, chiavi, credenziali esterne) stanno in `.env.local`, ignorato da git, che viene
+creato dall'installazione o dal primo avvio (vedi `config/services.yaml` e i vari
+`config/packages/*.yaml` per gli usi).
 
 | Variabile | Uso | Obbligatoria |
 |---|---|---|
@@ -170,9 +173,11 @@ Tutte in `.env` (vedi `config/services.yaml` e i vari `config/packages/*.yaml` p
 | `MIMSPID_CLIENT_ID`, `MIMSPID_CLIENT_SECRET` | Login SPID/CIE tramite gateway MIM | no |
 
 `APP_SECRET` ha un doppio ruolo: firma la sessione Symfony **e** è la chiave AES usata da
-`App\Security\Encryptor` per cifrare i campi marcati `EncryptedStringType`. Cambiarlo in un
-database popolato rende illeggibili i dati cifrati. Vedi
-[docs/ARCHITETTURA.md](docs/ARCHITETTURA.md#dati-cifrati).
+`App\Security\Encryptor` per cifrare i campi marcati `EncryptedStringType`. Il valore distribuito
+con l'applicazione non è un segreto: l'installazione ne genera uno casuale in `.env.local`. Per
+sostituirlo in un'installazione già popolata bisogna **ricifrare** i dati, cosa che fa
+`php bin/console app:sicurezza:ruota-segreto` (vedi
+[docs/ARCHITETTURA.md](docs/ARCHITETTURA.md#cifratura-dei-dati)).
 
 I file di credenziali esterne (es. `config/secrets/registro-elettronico-utenti-gsuite.json`) non
 sono versionati: `config/secrets/` contiene solo `.gitkeep` e va popolato al deploy.
@@ -193,6 +198,8 @@ php bin/console doctrine:schema:validate               # verifica la sincronizza
 php bin/console doctrine:schema:update --dump-sql      # SQL che verrà applicato
 php bin/console doctrine:mapping:info                  # entità mappate
 php bin/console dbal:run-sql "SELECT ..."              # query dirette
+php bin/console app:database:utf8mb4                   # converte a utf8mb4 le tabelle in utf8mb3
+php bin/console app:database:utf8mb4 --dry-run         # mostra la conversione senza eseguirla
 
 # --- dati di prova (Alice) ---
 php bin/console app:alice:load _giuaschool              # set minimo
@@ -200,6 +207,10 @@ php bin/console app:alice:load                         # tutte le fixture
 php bin/console app:alice:load Alunno --append         # aggiunge senza cancellare
 php bin/console app:alice:load tests/features/_avvisiFixtures.yml
 php bin/console app:alice:load _giuaschool --dump dump # esporta SQL + mappa oggetti
+
+# --- sicurezza ---
+php bin/console app:sicurezza:ruota-segreto --dry-run  # mostra la rotazione di APP_SECRET
+php bin/console app:sicurezza:ruota-segreto --conferma # ruota APP_SECRET ricifrando i dati
 
 # --- provisioning su sistemi esterni ---
 php bin/console app:provisioning:esegue
@@ -209,14 +220,18 @@ php bin/console messenger:consume notifica avviso evento circolare --time-limit=
 
 # --- qualità del codice ---
 vendor/bin/psalm                    # analisi statica (errorLevel 5)
-vendor/bin/rector --dry-run         # propose refactoring (config quasi tutto commentato)
-vendor/bin/twig-cs-fixer fix       # stile dei template (vedi nota)
+vendor/bin/rector --dry-run         # proposte di refactoring (regole attive)
+vendor/bin/twig-cs-fixer lint       # stile dei template (config nel repo)
+typos                               # controllo ortografico (binario esterno, vedi nota)
 ```
 
-> **Nota su twig-cs-fixer**: il pacchetto è installato ma non c'è un file di configurazione
-> `.twig-cs-fixer.dist.yaml` nel repository (rimane solo la cache). Prima di usarlo in CI va
-> creato il file di configurazione; lanciarlo alla cieca riformatterebbero i template con
-> impostazioni di default diverse da quelle storiche del progetto.
+> **Nota su twig-cs-fixer**: nel repository c'è `.twig-cs-fixer.dist.php` (standard
+> `TwigCsFixer` sui soli template in `templates/`): `vendor/bin/twig-cs-fixer lint` è pulito e
+> `vendor/bin/twig-cs-fixer fix` applica le correzioni.
+
+> **Nota su typos**: è un binario esterno, non installato da Composer (release GitHub
+> `crate-ci/typos`). `typos.toml` esclude le librerie di terze parti in `public/vendor/`, i file
+> `.map` e il logo SVG, e completa il dizionario con il vocabolario italiano del progetto.
 
 ---
 
@@ -569,5 +584,5 @@ Va aggiornato almeno a ogni rilascio.
 AGPL-3.0-or-later. Vedi [LICENSE](LICENSE).
 
 Il progetto include asset con licenze proprie: `public/vendor/bootstrap-slider/LICENSE.md`,
-`public/vendor/fontawesome/LICENSE.txt`, `public/vendor/tabler-icons/LICENSE` (MIT, generato da
+`public/icons/LICENSE` (Tabler Icons, MIT: gli sprite in `public/icons/` sono generati da
 `tools/tabler_icons.py`) e i font in `public/vendor/bootstrap-italia/fonts/`.

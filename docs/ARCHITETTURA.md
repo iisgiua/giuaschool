@@ -574,11 +574,23 @@ L'integrazione con Doctrine è `App\Doctrine\EncryptedStringType`, un tipo `Type
 private ?string $noteBes = '';
 ```
 
-**Attenzione alla chiave**: la chiave è `APP_SECRET`. Ruotare `APP_SECRET` in un database
-popolato rende illeggibili tutti i dati cifrati, senza lasciare traccia nel DB. Se serve una
-rotazione, va fatta con una procedura che rilegga e riscriva ogni campo.
+**Attenzione alla chiave**: la chiave è `APP_SECRET`. Per compatibilità in lettura `decrypt()`
+accetta anche il segnaposto distribuito con le versioni precedenti (`CHIAVI_STORICHE`): un
+aggiornamento del codice non rende illeggibili i dati delle installazioni esistenti, anche se
+il segreto in uso cambia, e non serve ricifrare il database. Ruotare `APP_SECRET` verso un
+valore diverso dal segnaposto rende invece illeggibili i dati cifrati con le chiavi precedenti:
+la rotazione completa va fatta con una procedura che rilegga e riscriva ogni campo.
 
-Cifrati oggi: note BES degli alunni, e i documenti BES cifrati come PDF.
+Lo fa `app:sicurezza:ruota-segreto`, che decifra i campi protetti con la chiave in uso, li
+ricifra con la nuova (verificando riga per riga la corrispondenza del testo) e scrive il nuovo
+valore in `.env.local`; senza `--conferma` si limita a mostrare il piano, e avvisa se `APP_SECRET`
+è vuoto o è ancora il segnaposto distribuito. Dopo la rotazione va svuotata la cache.
+
+La lettura dei campi protetti passa da `tryDecrypt()`: un valore non decifrabile non blocca
+l'applicazione — il campo risulta vuoto e l'errore finisce nel log — così una singola riga
+cifrata con una chiave sconosciuta non manda in errore le pagine.
+
+Cifrati oggi: le note BES degli alunni (`gs_utente.note_bes`, tipo `EncryptedStringType`).
 
 ### Esportazione CSV
 
@@ -692,6 +704,18 @@ Lo stato corrente è in `.gs-updating` (token, versione, build) e nei parametri 
 `versione_build` del database. Il confronto con la nuova versione è fatto da
 `SistemaController::aggiorna()`, che poi delega a `update.php`.
 
+Le variabili di ambiente sono gestite da `App\Util\EnvFile`: `Updater::writeEnv()` scrive il
+modello senza credenziali in `.env` e i valori della macchina in `.env.local` (non versionato),
+generando un `APP_SECRET` casuale alla prima installazione. Nella procedura di aggiornamento il
+valore esistente non viene mai sostituito d'ufficio; anche quando il segreto cambia, i dati
+cifrati in precedenza restano leggibili grazie alla compatibilità in lettura (vedi
+[cifratura dei dati](#cifratura-dei-dati)).
+
+Il database usa `utf8mb4` / `utf8mb4_unicode_ci` (in MySQL `utf8` è un alias di `utf8mb3` e non
+gestisce i caratteri a 4 byte, come le emoji). Le installazioni create prima di questa versione
+hanno le tabelle in `utf8mb3`: `php bin/console app:database:utf8mb4` le converte, è idempotente e
+con `--dry-run` mostra soltanto il piano.
+
 La procedura di passaggio all'anno scolastico seguente è separata e sta in
 `SistemaController::nuovo()`.
 
@@ -738,8 +762,8 @@ Punti verificati nel codice, elencati per priorità. I dettagli e i piani di int
   **rimosso**: le procedure sono ora closure validate con `instanceof \Closure` in
   `procedureUpdate()`. Resta da valutare un allowlist dei metodi del migrator richiamati.
 - `AccountProvisioning::inizializzaGsuite()` usa `sha1($password)` per un requisito della Google
-  Directory API. Il commento nel codice lo dichiara; va rimosso finché lo stato dell'integrazione
-  non è verificato nell'ambiente di esecuzione.
+  Directory API. Il commento "non modificabile" è stato rimosso; resta da verificare
+  nell'ambiente di esecuzione se l'integrazione è ancora attiva.
 
 **Codice incompleto**
 
@@ -749,10 +773,23 @@ Punti verificati nel codice, elencati per priorità. I dettagli e i piani di int
 
 **Configurazione**
 
-- `rector.php` ha tutte le regole commentate: è uno scheletro, non una configurazione attiva.
-- twig-cs-fixer è installato senza file di configurazione.
+- `rector.php` è attivo (set PHP 8.2, Symfony 6.4, Doctrine, PHPUnit e Twig): `vendor/bin/rector
+  --dry-run` propone ~52 file di refactoring, da applicare in una finestra dedicata.
+- twig-cs-fixer usa la configurazione di progetto `.twig-cs-fixer.dist.php`: `lint` è pulito su
+  419 template.
+- `typos.toml` esclude le librerie di terze parti in `public/vendor/`, i file `.map` e il logo
+  SVG, e integra il vocabolario italiano; il binario `typos` non è gestito da Composer.
 - Psalm a `errorLevel 5` con `findUnusedCode` non è pulito e non gira in CI. Va usato come
   strumento di osservazione del debito, non come gate.
+
+**Dipendenze**
+
+- Symfony 6.4 LTS: fine della manutenzione a **11/2026** → pianificare il salto a 7.x entro il 2027.
+- Diversi pacchetti diretti hanno aggiornamenti patch/minor disponibili e alcune major (`phpword`
+  1.x, `dbal` 4.x, `rector` 2.x, `monolog-bundle` 4.x, `oauth2-google` 5.x): aggiornamenti
+  **deliberatamente non applicati** in blocco, da valutare singolarmente con i test.
+- I pacchetti Behat abbandonati (`friends-of-behat/mink`, `friends-of-behat/mink-browserkit-driver`)
+  sono stati sostituiti con gli upstream `behat/mink` (~1.11.0) e `behat/mink-browserkit-driver` (^2.2).
 
 **Test**
 
