@@ -53,7 +53,7 @@ class ModuloFormativoTest extends EntityTestCase {
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
       $this->assertTrue($obj->{'get'.ucfirst($field)}() === null || $obj->{'get'.ucfirst($field)}() !== null,
-        $this->entity.' - Initializated');
+        $this->entity.' - Initialized');
     }
   }
 

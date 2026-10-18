@@ -629,7 +629,7 @@ class BrowserContext extends BaseContext implements Context {
 
   /**
    * Carica un file tramite dropzone
-   *  $testoParam: nome del file presente nella direcotry tests/data (con parrametri)
+   *  $testoParam: nome del file presente nella directory tests/data (con parametri)
    *  $dz: percors CSS per la dropzone
    *
    * @When alleghi file :testoParam a dropzone

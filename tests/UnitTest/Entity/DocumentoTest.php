@@ -59,7 +59,7 @@ class DocumentoTest extends EntityTestCase {
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
       $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
-        $this->entity.' - Initializated');
+        $this->entity.' - Initialized');
     }
   }
 
