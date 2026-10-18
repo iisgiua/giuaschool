@@ -216,12 +216,6 @@ class ScrutinioController extends BaseController {
                 // corregge voto max
                 $form->get('lista')->getData()[$key]->setUnico($info['valutazioni']['max']);
               }
-              // if (!empty($elenco['sospesi'][$key]) && $prop->getUnico() < $elenco['sospesi'][$key]->getUnico()) {
-              //   // voto inferiore a quello dello scrutinio di giugno: non lo memorizza
-              //   $errori[1] = 'exception.proposta_sospeso_inferiore_a_finale';
-              //   $this->em->detach($prop);
-              //   continue;
-              // }
               if ($prop->getUnico() < $info['valutazioni']['suff'] && $prop->getRecupero() === null && !isset($opzioni['attr']['no_recupero'])) {
                 // manca tipo recupero
                 $errori[2] = 'exception.no_recupero';
@@ -531,14 +525,6 @@ class ScrutinioController extends BaseController {
           $this->em->detach($prop);
           continue;
         }
-        // if (!empty($elenco['sospesi'][$key]) && $prop->getUnico() !== null &&
-        //     $prop->getUnico() < $elenco['sospesi'][$key]->getUnico()) {
-        //   // voto inferiore a quello dello scrutinio finale
-        //   $this->addFlash('errore', $trans->trans('exception.proposta_sospeso_inferiore_a_finale'));
-        //   $this->em->detach($prop);
-        //   continue;
-        // }
-        // rimuove info debito
         $prop->setDebito(null);
         // info log
         if ($proposte_prec[$key]->getUnico() === null && $prop->getUnico() !== null) {
