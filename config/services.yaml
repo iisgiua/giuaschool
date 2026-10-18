@@ -49,6 +49,11 @@ services:
       - { name: console.command }
       - { name: monolog.logger, channel: command }
 
+  # necessario per passare il segreto in uso al comando di rotazione
+  App\Command\AppSecretCommand:
+    arguments:
+      $appSecret: '%env(APP_SECRET)%'
+
   # necessario per specificare il renderer predefinito degli errori del framework
   App\Controller\ErrorController:
     arguments:

@@ -8,6 +8,7 @@
 
 namespace App\Security;
 
+use App\Util\EnvFile;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
@@ -25,6 +26,11 @@ class Encryptor {
    * @var string ENCRYPTION_PREFIX Prefisso per identificare i dati cifrati
    */
   private const ENCRYPTION_PREFIX = '__GS-ENC-v1__';
+
+  /**
+   * @var string[] CHIAVI_STORICHE Chiavi di cifratura delle versioni precedenti (compatibilità in lettura)
+   */
+  private const CHIAVI_STORICHE = [EnvFile::APP_SECRET_PLACEHOLDER];
 
 
   //==================== ATTRIBUTI DELLA CLASSE ====================
@@ -75,6 +81,8 @@ class Encryptor {
   /**
    * Decifra i dati indicati
    *
+   * Per compatibilità in lettura prova anche le chiavi delle versioni precedenti.
+   *
    * @param string $data Dati da decifrare in formato base64
    *
    * @return string Dati decifrati
@@ -91,16 +99,36 @@ class Encryptor {
     $iv = substr($raw, 0, $ivLength);
     // ricava il tag
     $tag = substr($raw, $ivLength, 16);
-    // decifra i dati
-    $text = openssl_decrypt(substr($raw, $ivLength + 16), $this->cypher, $this->key,
-      OPENSSL_RAW_DATA, $iv, $tag);
-    if ($text === false) {
-      // errore di decifratura
-      $this->logger->error('Impossibile decifrare dato', ['dato' => $data]);
-      throw new RuntimeException('Errore di sistema [ENC02]');
+    // dati cifrati
+    $ciphertext = substr($raw, $ivLength + 16);
+    // prova la chiave in uso e, per compatibilità, quelle delle versioni precedenti
+    foreach (array_unique(array_merge([$this->key], self::CHIAVI_STORICHE)) as $key) {
+      $text = openssl_decrypt($ciphertext, $this->cypher, $key, OPENSSL_RAW_DATA, $iv, $tag);
+      if ($text !== false) {
+        // restituisce i dati decifrati
+        return $text;
+      }
     }
-    // restituisce i dati decifrati
-    return $text;
+    // errore di decifratura
+    $this->logger->error('Impossibile decifrare dato', ['dato' => $data]);
+    throw new RuntimeException('Errore di sistema [ENC02]');
+  }
+
+  /**
+   * Decifra i dati indicati senza bloccare l'applicazione in caso di errore
+   *
+   * @param string $data Dati da decifrare in formato base64
+   *
+   * @return string|null Dati decifrati o null se il dato non è decifrabile
+   */
+  public function tryDecrypt(string $data): ?string {
+    try {
+      // prova a decifrare i dati
+      return $this->decrypt($data);
+    } catch (RuntimeException) {
+      // un valore non decifrabile non deve bloccare l'applicazione: viene restituito null
+      return null;
+    }
   }
 
 }
