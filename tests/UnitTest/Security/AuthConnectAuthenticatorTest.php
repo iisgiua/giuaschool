@@ -17,14 +17,15 @@ use DateTime;
 use DateTimeImmutable;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
-use Symfony\Component\Security\Http\SecurityRequestAttributes;
 
 
 /**
@@ -82,11 +83,6 @@ class AuthConnectAuthenticatorTest extends DatabaseTestCase {
    */
   private $mockedSession;
 
-  /**
-   * @var $mockedValidator Validazione dell'ID token ricevuto dal gateway MIM (mocked)
-   */
-  private $mockedValidator;
-
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -133,7 +129,7 @@ class AuthConnectAuthenticatorTest extends DatabaseTestCase {
     // session: inserisce in coda session
     $this->mockedSession = $this->createMock(Session::class);
     $this->mockedSession->method('get')->willReturnCallback(
-      function($key, $default=null) { return $this->session[$key] ?? $default; });
+      fn($key, $default=null) => $this->session[$key] ?? $default);
     $this->mockedSession->method('set')->willReturnCallback(
       function($key, $val) { $this->session[$key] = $val; });
     $this->mockedSession->method('remove')->willReturnCallback(
@@ -573,9 +569,12 @@ class AuthConnectAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(0, $this->logs);
     $this->assertCount(0, $this->dbLogs);
     $this->assertFalse($this->conf);
-    $this->assertCount(1, $this->session);
-    $this->assertSame($exc, $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]);
-    $this->assertSame('login_form', $res->getTargetUrl());
+    $this->assertCount(0, $this->session);
+    $this->assertInstanceOf(JsonResponse::class, $res);
+    $this->assertSame(Response::HTTP_UNAUTHORIZED, $res->getStatusCode(), $res->getContent());
+    $this->assertSame('application/json', $res->headers->get('content-type'));
+    $dati = json_decode((string) $res->getContent(), true);
+    $this->assertSame('exception.api_auth.richiesta_invalida', $dati['error']);
   }
 
 }

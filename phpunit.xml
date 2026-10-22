@@ -33,6 +33,9 @@
     <testsuite name="security">
       <directory>./tests/UnitTest/Security</directory>
     </testsuite>
+    <testsuite name="util">
+      <directory>./tests/UnitTest/Util</directory>
+    </testsuite>
   </testsuites>
   <source>
     <include>
