@@ -6,6 +6,10 @@
   <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-filters gs-mb-3">
     <div id="{{ form.vars.id }}">
       <div class="gs-filters-row">
+        <div class="form-group gs-filter-col" title="{{ form.tipo.vars.label|trans }}">
+          {{ form_label(form.tipo, null, {label_attr: {class: 'control-label'}}) }}
+          {{ form_widget(form.tipo) }}
+        </div>
         <div class="form-group gs-filter-col" title="{{ form.classe.vars.label|trans }}">
           {{ form_label(form.classe, null, {label_attr: {class: 'control-label'}}) }}
           {{ form_widget(form.classe) }}
