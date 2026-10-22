@@ -1690,13 +1690,20 @@ class RegistroUtil {
     return $dati;
   }
 
-  /**
-   * Restituisce le informazioni sui periodi dell'anno scolastico
-   *
-   * @return array Informazioni sui periodi come valori di array associativo
-   */
   public function infoPeriodi() {
     $dati = [];
+    // legge e valida una data di configurazione
+    $dataConfig = function (string $chiave): ?DateTime {
+      $valore = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.$chiave);
+      if (!is_string($valore) || $valore === '') {
+        return null;
+      }
+      $data = DateTime::createFromFormat('!Y-m-d', $valore);
+      if (!$data || $data->format('Y-m-d') !== $valore) {
+        return null;
+      }
+      return $data;
+    };
     // primo periodo
     $dati[1]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome');
     $dati[1]['inizio'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio');
@@ -1704,25 +1711,27 @@ class RegistroUtil {
     $dati[1]['scrutinio'] = 'P';
     // secondo periodo
     $dati[2]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome');
-    $data = DateTime::createFromFormat('Y-m-d H:i', $dati[1]['fine'].' 00:00');
-    $data->modify('+1 day');
-    $dati[2]['inizio'] = $data->format('Y-m-d');
+    $finePrimo = $dataConfig('periodo1_fine');
+    $dati[2]['inizio'] = $finePrimo ? $finePrimo->modify('+1 day')->format('Y-m-d') : '';
     $dati[2]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine');
     $dati[2]['scrutinio'] = 'F';
     // terzo periodo
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
-      $dati[3]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
-      $data = DateTime::createFromFormat('Y-m-d H:i', $dati[2]['fine'].' 00:00');
-      $data->modify('+1 day');
-      $dati[3]['inizio'] = $data->format('Y-m-d');
+    $nomeTerzo = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
+    if ($nomeTerzo !== null && $nomeTerzo !== '') {
+      // tre periodi: il secondo periodo è uno scrutinio intermedio
       $dati[2]['scrutinio'] = 'S';
+      $dati[3]['nome'] = $nomeTerzo;
+      $fineSecondo = $dataConfig('periodo2_fine');
+      $dati[3]['inizio'] = $fineSecondo ? $fineSecondo->modify('+1 day')->format('Y-m-d') : '';
+      $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
       $dati[3]['scrutinio'] = 'F';
     } else {
+      // due periodi: il terzo periodo non è usato
       $dati[3]['nome'] = '';
       $dati[3]['inizio'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
+      $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
       $dati[3]['scrutinio'] = '';
     }
-    $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     // restituisce dati
     return $dati;
   }

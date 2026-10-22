@@ -586,11 +586,13 @@ class DocentiController extends BaseController {
       }
       $docente = $classe->getCoordinatore();
       $classe_old = $classe->getId();
-      $docente_old = $docente->getId();
+      $docente_old = $docente?->getId();
     } else {
       // azione add
       $classe = null;
       $docente = null;
+      $classe_old = null;
+      $docente_old = null;
     }
     // form
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(null, false);
@@ -604,7 +606,7 @@ class DocentiController extends BaseController {
       $docente = $form->get('docente')->getData();
       $classe->setCoordinatore($docente);
       // provisioning
-      if (!$id) {
+      if (!$id || $docente_old === null) {
         // aggiunge coordinatore
         $provisioning = (new Provisioning())
           ->setUtente($docente)
@@ -651,8 +653,12 @@ class DocentiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // toglie coordinatore
+    // toglie coordinatore (se presente)
     $docente_old = $classe->getCoordinatore();
+    if (!$docente_old) {
+      // nessun coordinatore da rimuovere
+      return $this->redirectToRoute('docenti_coordinatori');
+    }
     $classe->setCoordinatore(null);
     // provisioning
     $provisioning = (new Provisioning())
@@ -740,11 +746,13 @@ class DocentiController extends BaseController {
       }
       $docente = $classe->getSegretario();
       $classe_old = $classe->getId();
-      $docente_old = $docente->getId();
+      $docente_old = $docente?->getId();
     } else {
       // azione add
       $classe = null;
       $docente = null;
+      $classe_old = null;
+      $docente_old = null;
     }
     // form
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(null, false);
@@ -758,8 +766,8 @@ class DocentiController extends BaseController {
       $docente = $form->get('docente')->getData();
       $classe->setSegretario($docente);
       // provisioning
-      if (!$id) {
-        // aggiunge coordinatore
+      if (!$id || $docente_old === null) {
+        // aggiunge segretario
         $provisioning = (new Provisioning())
           ->setUtente($docente)
           ->setFunzione('aggiungeCoordinatore')
@@ -805,8 +813,12 @@ class DocentiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // toglie coordinatore
+    // toglie segretario (se presente)
     $docente_old = $classe->getSegretario();
+    if (!$docente_old) {
+      // nessun segretario da rimuovere
+      return $this->redirectToRoute('docenti_segretari');
+    }
     $classe->setSegretario(null);
     // provisioning
     $provisioning = (new Provisioning())

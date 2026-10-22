@@ -20,6 +20,7 @@ use App\Entity\Docente;
 use App\Entity\Festivita;
 use App\Entity\Materia;
 use App\Entity\Orario;
+use App\Entity\Preside;
 use App\Entity\ScansioneOraria;
 use App\Entity\Sede;
 use App\Entity\Staff;

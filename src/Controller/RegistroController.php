@@ -354,7 +354,7 @@ class RegistroController extends BaseController
       $form = $form
         ->add('materia', ChoiceType::class, ['label' => 'label.materia',
           'data' => count($lezioni) > 0 ? $lezioni[0]->getMateria() : $materia,
-          'choices' => array_merge([$materia->getNome() => $materia], $materie),
+          'choices' => array_merge([($materia->getNome() ?? '') => $materia], $materie),
           'choice_value' => 'id',
           'choice_attr' => fn(): array => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
@@ -436,6 +436,10 @@ class RegistroController extends BaseController
                 ->getQuery()
                 ->setMaxResults(1)
                 ->getOneOrNullResult();
+            }
+            if (!$classeComune) {
+              // dati di classe incompleti: manca la classe comune del gruppo
+              throw $this->createNotFoundException('exception.invalid_params');
             }
             $lezione
               ->setClasse($classeComune)

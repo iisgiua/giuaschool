@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Exception;
 use App\Entity\Classe;
 use App\Entity\DefinizioneAutorizzazione;
 use App\Entity\Richiesta;
@@ -295,6 +296,10 @@ class AutorizzazioniController extends BaseController {
                             ): Response {
     // legge template
     $percorso = $this->getParameter('kernel.project_dir').'/PERSONAL/data/autorizzazioni/';
+    if (!is_file($percorso.$autorizzazione->getModulo())) {
+      // errore: template del modulo non disponibile
+      throw $this->createNotFoundException('exception.modulo_template_mancante');
+    }
     $template = file_get_contents($percorso.$autorizzazione->getModulo());
     // toglie dati personali
     $template = preg_replace('/\{\{\s*app\.[^\}]*\}\}/', '<strong>***</strong>', $template);
@@ -323,6 +328,7 @@ class AutorizzazioniController extends BaseController {
   #[Route(path: '/autorizzazioni/autorizza/{modulo}', name: 'autorizzazioni_autorizza', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
   public function autorizza(Request $request, RichiesteUtil $ric, LogHandler $dblogger,
+                            TranslatorInterface $trans,
                             #[MapEntity] DefinizioneAutorizzazione $modulo
                             ): Response {
     // inizializza
@@ -395,11 +401,14 @@ class AutorizzazioniController extends BaseController {
     $info['autorizzazione'] = $modulo;
     $info['sedi'] = $this->em->getRepository(Sede::class)->lista();
     $info['modulo_sconosciuto'] = !file_exists($percorsoModulo);
-    $info['modulo_sconosciuto'] = !file_exists($percorsoModulo);
     // form di inserimento
     $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
       'values' => [$modulo->getCampi(), $modulo->getUnica()]]);
     $form->handleRequest($request);
+    if ($form->isSubmitted() && !$ric->esisteTemplate('autorizzazioni', $modulo->getModulo())) {
+      // il template del modulo non è disponibile: evita un errore 500 in fase di invio
+      $form->addError(new FormError($trans->trans('exception.modulo_template_mancante')));
+    }
     if ($form->isSubmitted() && $form->isValid()) {
       $invio = new DateTime();
       // memorizza risposta
@@ -421,7 +430,7 @@ class AutorizzazioniController extends BaseController {
           $documento = $ric->firmaAutorizzazionePdf($esistenti[0], $info['ruolo'], $info['sedi'], $autorizzazione->getId(), $classe, $invio);
           $msgLog = 'Firma autorizzazione';
         }
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         // errore: elimina l'autorizzazione incompleta per non bloccare un nuovo invio
         $this->em->remove($autorizzazione);
         $this->em->flush();
