@@ -155,10 +155,21 @@ php bin/console cache:clear
 
 ## Variabili d'ambiente
 
-`.env` è il modello versionato e **non contiene credenziali**; i valori della macchina (connessione
-al database, chiavi, credenziali esterne) stanno in `.env.local`, ignorato da git, che viene
-creato dall'installazione o dal primo avvio (vedi `config/services.yaml` e i vari
-`config/packages/*.yaml` per gli usi).
+Sono previsti due tipi di file:
+
+- `.env.example`: modello versionato e documentazione della configurazione di produzione. Non
+  contiene credenziali e viene caricato come base.
+- `.env.local`: configurazione della macchina (connessione al database, chiavi, credenziali
+  esterne), ignorata da git. Ha la precedenza sul modello. In sviluppo si crea copiando
+  `.env.example`; in produzione la genera l'installer (o `tests/docker/entrypoint.sh` per
+  l'immagine Docker) con `APP_ENV=prod`, un `APP_SECRET` casuale e i parametri del database.
+- `.env.test`: variante per i test, versionata. Viene caricata quando `APP_ENV=test` e sostituisce
+  `.env.local`, così i test sono riproducibili; non va usata in produzione.
+
+La precedenza è: variabili reali dell'ambiente (Docker/Apache) → `.env.local` o `.env.test` →
+`.env.example`. Il vecchio `.env` viene letto solo per compatibilità con le installazioni
+esistenti: le procedure di installazione e aggiornamento ne copiano i valori in `.env.local`.
+Vedi `config/services.yaml` e i vari `config/packages/*.yaml` per gli usi.
 
 | Variabile | Uso | Obbligatoria |
 |---|---|---|

@@ -44,9 +44,11 @@
 !var/sessions/.gitkeep
 /vendor/*
 !/vendor/.gitkeep
+/.env
 /.env.*.local
 /.env.local
 /.env.local.php
+/.env-dist
 /last_deploy.date
 /.gs-updating
 client_secret_*.json

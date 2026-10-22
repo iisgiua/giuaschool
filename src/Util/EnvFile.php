@@ -12,8 +12,12 @@ namespace App\Util;
 /**
  * EnvFile - lettura e scrittura dei file di configurazione dell'ambiente
  *
- * I valori specifici della macchina (credenziali e chiavi) stanno in ".env.local", che non è
- * versionato: ".env" è il modello distribuito e non deve contenere segreti.
+ * ".env.example" è il modello versionato e la documentazione della configurazione: non deve
+ * contenere segreti. I valori specifici della macchina (credenziali e chiavi) stanno in
+ * ".env.local", che non è versionato. L'ambiente di test usa ".env.test".
+ *
+ * Il vecchio ".env" viene letto solo per compatibilità con le installazioni esistenti: le
+ * procedure di installazione e aggiornamento copiano i suoi valori in ".env.local".
  *
  * @author Antonello Dessì
  */
@@ -22,17 +26,32 @@ class EnvFile {
   //==================== ATTRIBUTI DELLA CLASSE ====================
 
   /**
+   * @var string ENV_EXAMPLE Modello versionato della configurazione, senza credenziali
+   */
+  public const ENV_EXAMPLE = '.env.example';
+
+  /**
+   * @var string ENV_LEGACY Vecchio file di configurazione, letto solo per compatibilità
+   */
+  public const ENV_LEGACY = '.env';
+
+  /**
    * @var string ENV_LOCAL Configurazione della macchina, non versionata
    */
   public const ENV_LOCAL = '.env.local';
 
   /**
-   * @var array ENV_FILES File di configurazione, in ordine di precedenza crescente
+   * @var string ENV_TEST Configurazione dell'ambiente di test, versionata
    */
-  public const ENV_FILES = ['.env', self::ENV_LOCAL];
+  public const ENV_TEST = '.env.test';
 
   /**
-   * @var string APP_SECRET_PLACEHOLDER Segnaposto distribuito nel modello ".env": non è un segreto
+   * @var array ENV_FILES File di configurazione, in ordine di precedenza crescente
+   */
+  public const ENV_FILES = [self::ENV_EXAMPLE, self::ENV_LEGACY, self::ENV_LOCAL];
+
+  /**
+   * @var string APP_SECRET_PLACEHOLDER Segnaposto distribuito nel modello ".env.example": non è un segreto
    */
   public const APP_SECRET_PLACEHOLDER = 'CodiceDaCambiareConUnoPiùComplesso';
 
@@ -64,8 +83,96 @@ class EnvFile {
    */
   public static function leggi(string $projectPath): array {
     // legge i file in ordine di precedenza crescente
+    return self::leggiFiles($projectPath, self::ENV_FILES);
+  }
+
+  /**
+   * Legge solo i valori della macchina, senza il modello ".env.example"
+   *
+   * @param string $projectPath Percorso della directory principale del progetto
+   *
+   * @return array Variabili della macchina
+   */
+  public static function leggiMacchina(string $projectPath): array {
+    // il vecchio .env ha precedenza minore rispetto a .env.local
+    return self::leggiFiles($projectPath, [self::ENV_LEGACY, self::ENV_LOCAL]);
+  }
+
+  /**
+   * Legge solo ".env.local", senza il modello e senza il vecchio ".env"
+   *
+   * @param string $projectPath Percorso della directory principale del progetto
+   *
+   * @return array Variabili salvate nella configurazione della macchina
+   */
+  public static function leggiLocale(string $projectPath): array {
+    return self::leggiFiles($projectPath, [self::ENV_LOCAL]);
+  }
+
+  /**
+   * Carica i file di configurazione nelle variabili di ambiente di PHP
+   *
+   * L'ordine è ".env.example", il vecchio ".env" (solo se presente) e ".env.local"; in test
+   * si usano ".env.example" e ".env.test", ignorando la configurazione locale. Le variabili
+   * già presenti nell'ambiente reale (Docker, Apache, riga di comando) non vengono sovrascritte.
+   *
+   * @param string $projectPath Percorso della directory principale del progetto
+   */
+  public static function carica(string $projectPath): void {
+    // l'opzione della riga di comando ha la precedenza sui file
+    $envArgomento = self::envDaArgomenti();
+    // l'ambiente reale (Docker/Apache) ha la precedenza sui file; getenv() vede anche
+    // le variabili che Apache non copia in $_SERVER
+    $envReale = getenv('APP_ENV');
+    if (!is_string($envReale) || $envReale === '') {
+      $envReale = $_SERVER['APP_ENV'] ?? $_ENV['APP_ENV'] ?? null;
+    }
+    $env = $envArgomento ?? $envReale ?? 'dev';
+    // costruisce l'elenco dei file in ordine di precedenza crescente
+    $files = [self::ENV_EXAMPLE];
+    if ($env === 'test') {
+      // in test non si usa la configurazione locale: i test devono essere riproducibili
+      $files[] = self::ENV_TEST;
+    } else {
+      // il vecchio .env serve solo alle installazioni che non sono ancora state aggiornate
+      $files[] = self::ENV_LEGACY;
+      $files[] = self::ENV_LOCAL;
+    }
+    // legge i valori e li applica solo se non sono già definiti nell'ambiente reale
+    $variabili = self::leggiFiles($projectPath, $files);
+    foreach ($variabili as $nome => $valore) {
+      if (!isset($_SERVER[$nome]) && !isset($_ENV[$nome]) && getenv($nome) === false) {
+        $_SERVER[$nome] = $_ENV[$nome] = $valore;
+      }
+    }
+    // imposta l'ambiente (opzione della riga di comando, ambiente reale o file)
+    if ($envArgomento !== null) {
+      $_SERVER['APP_ENV'] = $_ENV['APP_ENV'] = $envArgomento;
+    } elseif ($envReale !== null) {
+      $_SERVER['APP_ENV'] = $_ENV['APP_ENV'] = $envReale;
+    } else {
+      $_SERVER['APP_ENV'] ??= $_ENV['APP_ENV'] ?? $env;
+      $_ENV['APP_ENV'] ??= $_SERVER['APP_ENV'];
+    }
+    // imposta il debug in base all'ambiente, se non è già configurato
+    if (!isset($_SERVER['APP_DEBUG']) && !isset($_ENV['APP_DEBUG']) && getenv('APP_DEBUG') === false) {
+      $debug = !in_array($_SERVER['APP_ENV'], ['prod'], true);
+      $_SERVER['APP_DEBUG'] = $_ENV['APP_DEBUG'] = $debug ? '1' : '0';
+    }
+  }
+
+  /**
+   * Legge un elenco di file di configurazione, con i file successivi che sovrascrivono i precedenti
+   *
+   * @param string $projectPath Percorso della directory principale del progetto
+   * @param array $files Nomi dei file da leggere, in ordine di precedenza crescente
+   *
+   * @return array Variabili di ambiente
+   */
+  private static function leggiFiles(string $projectPath, array $files): array {
+    // legge i file in ordine di precedenza crescente
     $variabili = [];
-    foreach (self::ENV_FILES as $file) {
+    foreach ($files as $file) {
       $percorso = $projectPath.'/'.$file;
       if (!is_file($percorso) || !is_readable($percorso)) {
         // file non presente: niente da leggere
@@ -80,6 +187,39 @@ class EnvFile {
     }
     // restituisce le variabili
     return $variabili;
+  }
+
+  /**
+   * Legge l'ambiente dalle opzioni "--env" o "-e" della riga di comando
+   *
+   * @return string|null Ambiente richiesto, o null se non indicato
+   */
+  private static function envDaArgomenti(): ?string {
+    // analizza solo gli argomenti della riga di comando
+    $argomenti = $_SERVER['argv'] ?? [];
+    foreach ($argomenti as $indice => $argomento) {
+      if (!is_string($argomento)) {
+        // argomento non valido
+        continue;
+      }
+      if ($argomento === '--env' || $argomento === '-e') {
+        // valore nell'argomento successivo
+        $valore = $argomenti[$indice + 1] ?? null;
+        return is_string($valore) && $valore !== '' ? $valore : null;
+      }
+      if (str_starts_with($argomento, '--env=')) {
+        // valore nello stesso argomento
+        $valore = substr($argomento, 6);
+        return $valore !== '' ? $valore : null;
+      }
+      if (str_starts_with($argomento, '-e=')) {
+        // valore nello stesso argomento
+        $valore = substr($argomento, 3);
+        return $valore !== '' ? $valore : null;
+      }
+    }
+    // nessuna opzione
+    return null;
   }
 
   /**
@@ -136,6 +276,10 @@ class EnvFile {
     }
     // scrive il file
     self::scrivi($percorso, implode('', $righe));
+    // il file della macchina contiene credenziali: accessibile solo al proprietario
+    if (basename($percorso) === self::ENV_LOCAL) {
+      @chmod($percorso, 0600);
+    }
   }
 
   /**

@@ -704,12 +704,18 @@ Lo stato corrente è in `.gs-updating` (token, versione, build) e nei parametri 
 `versione_build` del database. Il confronto con la nuova versione è fatto da
 `SistemaController::aggiorna()`, che poi delega a `update.php`.
 
-Le variabili di ambiente sono gestite da `App\Util\EnvFile`: `Updater::writeEnv()` scrive il
-modello senza credenziali in `.env` e i valori della macchina in `.env.local` (non versionato),
-generando un `APP_SECRET` casuale alla prima installazione. Nella procedura di aggiornamento il
-valore esistente non viene mai sostituito d'ufficio; anche quando il segreto cambia, i dati
-cifrati in precedenza restano leggibili grazie alla compatibilità in lettura (vedi
-[cifratura dei dati](#cifratura-dei-dati)).
+Le variabili di ambiente sono gestite da `App\Util\EnvFile`: `.env.example` è il modello
+versionato e la documentazione della configurazione di produzione, `.env.local` contiene i valori
+della macchina (non versionato) e `.env.test` quelli dell'ambiente di test. `Updater::writeEnv()`
+scrive `.env.local`, generando un `APP_SECRET` casuale alla prima installazione; il vecchio `.env`
+viene letto solo per compatibilità e migrato automaticamente in `.env.local`. `config/bootstrap.php`
+carica i file prima del kernel: in test usa `.env.example` e `.env.test`, ignorando `.env.local`.
+Il bootstrap disabilita il caricamento automatico di Dotenv (`disable_dotenv`), quindi il comando
+Symfony `debug:dotenv` non è utilizzabile: i valori effettivi si leggono da `EnvFile::leggi()` o
+direttamente dai tre file.
+Nella procedura di aggiornamento il segreto esistente non viene mai sostituito d'ufficio; anche
+quando il segreto cambia, i dati cifrati in precedenza restano leggibili grazie alla compatibilità
+in lettura (vedi [cifratura dei dati](#cifratura-dei-dati)).
 
 Il database usa `utf8mb4` / `utf8mb4_unicode_ci` (in MySQL `utf8` è un alias di `utf8mb3` e non
 gestisce i caratteri a 4 byte, come le emoji). Le installazioni create prima di questa versione

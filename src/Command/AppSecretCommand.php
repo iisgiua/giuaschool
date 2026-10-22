@@ -30,7 +30,8 @@ use Throwable;
  * operazioni insieme, verificando per ogni riga la corrispondenza tra testo prima e dopo la
  * ricifratura. Il nuovo valore è scritto in ".env.local", che non è versionato.
  *
- * Uso tipico (installazioni che hanno ancora il segnaposto pubblico in ".env"):
+ * Uso tipico (installazioni che hanno ancora il segnaposto pubblico in ".env.example" o nel
+ * vecchio ".env"):
  *   php bin/console app:sicurezza:ruota-segreto --dry-run
  *   php bin/console app:sicurezza:ruota-segreto --conferma
  *
@@ -151,7 +152,7 @@ class AppSecretCommand extends Command {
       return Command::FAILURE;
     }
     // scrive il nuovo codice segreto
-    $percorso = $this->dirProgetto.'/.env.local';
+    $percorso = $this->dirProgetto.'/'.EnvFile::ENV_LOCAL;
     try {
       EnvFile::imposta($percorso, ['APP_SECRET' => $segreto]);
     } catch (Throwable $e) {
