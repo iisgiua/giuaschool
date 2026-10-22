@@ -58,11 +58,11 @@
       {contenuto: 'label.stato'|trans, classi: 'col-sm-1', scope: 'col'},
       {contenuto: 'label.riferimento'|trans, classi: 'col-sm-4', scope: 'col'},
       {contenuto: 'label.documento'|trans, classi: 'col-sm-6', scope: 'col'},
-      {contenuto: 'label.action'|trans, classi: 'col-sm-1', scope: 'col'}
+      {contenuto: 'label.action'|trans, classi: 'col-sm-1', scope: 'col'},
     ] %}
     {% set corpo_grezzo_0 %}
     {% for k, d in dati.lista %}
-    {# righe del documento: con nessun allegato resta una riga sola (#}
+    {# righe del documento: con nessun allegato resta una riga sola ( #}
     {# rowspan="0" farebbe span su tutto il corpo e rompe la tabella) #}
     {% set sc_allegati = d.documento.allegati %}
     {% set sc_num = sc_allegati|length %}
