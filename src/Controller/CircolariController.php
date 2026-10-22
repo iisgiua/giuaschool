@@ -226,8 +226,8 @@ class CircolariController extends BaseController {
       } else {
         // nome allegati
         $prefisso = 'Circolare n. '.$circolare->getNumero().' - Allegato ';
-        $nomefile = str_starts_with($allegato->getTitolo(), $prefisso) ?
-          trim(substr($allegato->getTitolo(), strlen($prefisso))) : $allegato->getTitolo();
+        $nomefile = str_starts_with((string) $allegato->getTitolo(), $prefisso) ?
+          trim(substr((string) $allegato->getTitolo(), strlen($prefisso))) : $allegato->getTitolo();
         $allegato->setTitolo($prefisso.$nomefile);
         $allegato->setNome($com->normalizzaNome('Circolare-'.$circolare->getNumero().'-Allegato-'.$nomefile));
       }
