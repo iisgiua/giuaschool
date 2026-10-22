@@ -8,6 +8,7 @@ use Rector\Symfony\Set\SymfonySetList;
 use Rector\Doctrine\Set\DoctrineSetList;
 use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Symfony\Set\TwigSetList;
+use Rector\Symfony\Symfony34\Rector\Closure\ContainerGetNameToTypeInTestsRector;
 
 
 
@@ -28,6 +29,13 @@ return RectorConfig::configure()
     ->withPaths([
         __DIR__ . '/src',
         __DIR__ . '/tests',
+    ])
+
+    // Il container di test non espone i servizi per nome classe:
+    // get(Registry::class) e get(UserPasswordHasher::class) fallirebbero.
+    // In DatabaseTestCase restano gli id 'doctrine' e 'security.user_password_hasher'.
+    ->withSkip([
+        ContainerGetNameToTypeInTestsRector::class,
     ])
 
   //--- PHP
