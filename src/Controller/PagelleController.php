@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
 use Symfony\Component\ExpressionLanguage\Expression;
@@ -278,7 +279,7 @@ class PagelleController extends BaseController {
    *
    * @param Classe $classe Classe a cui si vuole accedere
    *
-   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException Se l'utente non è autorizzato ad accedere alla classe
+   * @throws NotFoundHttpException Se l'utente non è autorizzato ad accedere alla classe
    */
   private function controllaAccessoClasse(Classe $classe): void {
     if (($this->getUser() instanceOf Ata) && !$this->getUser()->getSegreteria()) {

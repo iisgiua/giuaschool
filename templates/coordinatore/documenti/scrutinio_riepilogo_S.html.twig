@@ -16,7 +16,7 @@
 {% for id, alu in dati.alunni %}
   <tr nobr="true">
     <td align="center"><span style="line-height:24pt;">{{ loop.index }}</span></td>
-    <td style="width:45mm;border-right-color:white;border-top-color:black;border-bottom-color:black">&nbsp;{{ alu.cognome|upper }} {{ alu.nome|upper }}
+    <td style="width:45mm;border-right-color:white;border-top-color:black;border-bottom-color:black">&nbsp;<span style="font-size:{{ (alu.cognome|length + alu.nome|length) > 24 ? '6pt' : '8pt' }}">{{ alu.cognome|upper }} {{ alu.nome|upper }}</span>
       <br>&nbsp;{{ alu.dataNascita|date('d/m/Y') }}</td>
     <td align="center" style="width:5mm;border-left-color:white;border-right-color:black;border-top-color:black;border-bottom-color:black;"><span style="font-size:6pt;line-height:10pt;">Voto</span>
       <br><span style="font-size:6pt;line-height:10pt;">Ass.</span></td>

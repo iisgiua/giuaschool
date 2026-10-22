@@ -127,7 +127,7 @@
           </td>
         </tr>
       {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, didascalia: 'Scrutinio finale', classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
     {% if dati.precedente %}
   <div class="row text-center gs-mt-5 gs-mb-5">
     <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '9'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente">{{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Riapri lo scrutinio</strong></a>

@@ -4,7 +4,7 @@
 <div class="container-fluid">
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_pagelle'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome ~ ' ' ~ alunno.cognome }}</h1>
   {% if errore %}
-  <div class="alert alert-info" role="alert">
+  <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
@@ -130,7 +130,7 @@
       </tr>
           {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_3, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_3, didascalia: '<strong>Scrutinio del ' ~ (periodo == 'P' ? app.session.get('/CONFIG/SCUOLA/periodo1_nome') : app.session.get('/CONFIG/SCUOLA/periodo2_nome')) ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', id: 'gs-pagella-voti', classi: 'table table-bordered table-hover table-striped'}) }}
           {% if dati.debiti is defined %}
   {% set intestazione = [
       {contenuto: 'Materia', classi: 'col-sm-4', scope: 'col'},
@@ -146,8 +146,25 @@
       </tr>
             {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_4, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_4, didascalia: '<strong>Recupero dei debiti formativi</strong>', classi_didascalia: 'text-info text-center gs-big', id: 'gs-pagella-debiti', classi: 'table table-bordered table-hover table-striped'}) }}
           {% endif %}
+  <div class="text-info text-center gs-big gs-pb-2">
+    <strong>Comunicazioni</strong>
+  </div>
+  <table class="table table-bordered table-hover table-striped">
+    <tbody>
+      <tr class="gs-big">
+        <td class="col-sm-6"><strong>Comunicazione dei voti</strong></td>
+        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {classe: classe.id, alunno: alunno.id, tipo: 'P', periodo: periodo}) }}" role="button" title="Scarica la comunicazione con i voti dello scrutinio">{{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Comunicazione dei voti</strong></a></td>
+      </tr>
+          {% if dati.debiti is defined %}
+      <tr class="gs-big">
+        <td class="col-sm-6"><strong>Comunicazione dei debiti</strong></td>
+        <td class="col-sm-6"><a class="btn btn-primary btn" href="{{ path('pagelle_alunno', {classe: classe.id, alunno: alunno.id, tipo: 'D', periodo: periodo}) }}" role="button" title="Scarica la comunicazione con le indicazioni del recupero">{{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Comunicazione dei debiti</strong></a></td>
+      </tr>
+          {% endif %}
+    </tbody>
+  </table>
         {% endif %}
       {% elseif periodo == 'F' %}
   <div class="text-info text-center gs-big gs-pb-2">
