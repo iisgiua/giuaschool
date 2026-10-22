@@ -1,0 +1,7 @@
+# Tuning MariaDB per gli ambienti di sviluppo e test (non incluso in produzione)
+# Gli script di test ricaricano i dati di scenario a ogni feature: il fsync
+# per ogni INSERT è il collo di bottiglia sull'overlayfs del container.
+[mysqld]
+skip_name_resolve = 1
+innodb_flush_log_at_trx_commit = 2
+innodb_buffer_pool_size = 256M

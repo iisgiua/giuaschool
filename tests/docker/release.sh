@@ -10,8 +10,8 @@ mkdir -p var/cache/prod
 mkdir -p var/sessions/prod
 chown -R www-data:www-data var
 
-# Rename .env to avoid overwriting on update
-mv .env .env-dist
+# La configurazione della macchina e quella di test non devono finire nell'archivio
+rm -f .env .env.local .env.local.php .env.test .env-dist
 
 # Create archive
 zip -q -r -9 ../giuaschool-release.zip ./
