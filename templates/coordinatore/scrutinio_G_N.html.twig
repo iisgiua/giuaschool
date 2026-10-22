@@ -15,7 +15,7 @@
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio per gli esami degli studenti con sospensione del giudizio<br>della classe {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">{% if dati.periodo == 'G' %}Alunni con giudizio sospeso{% else %}Sessione supplettiva per gli alunni con giudizio sospeso{% endif %}</h2>
     {{ include('include/modal-error.html.twig') }}
-    {{ include('admin/include/flash.html.twig') }}
+    {{ include('admin/include/flash.html.twig', {salta_errore: true}) }}
     {{ form_start(form) }}
   <div id="gs-fixed-header">
   {% set intestazione_grezza_0 %}      <thead>

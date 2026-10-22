@@ -44,7 +44,8 @@ $(document).ready(function() {
     var html = 'Clicca sul pulsante CONTINUA per inviare la mail di prova all\'indirizzo <strong>{{ info.email }}<strong>';
     $(this).find('#gs-modal-confirm-contenuto').html(html);
   });
-  $('#gs-modal-confirm-yes').click(function() {
+  $('#gs-modal-confirm-form').on('submit', function(event) {
+    event.preventDefault();
     $('form[name="modulo"]').submit();
   });
   $('#gs-modal-confirm').on('hide.bs.modal', function (event) {
