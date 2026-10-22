@@ -520,16 +520,14 @@ log, il listener non ci sarà.
 
 ### Autenticazione
 
-Un solo firewall (`main`), `lazy: true`, con sei autenticatori. Ognuno dichiara le route su cui
+Un solo firewall (`main`), `lazy: true`, con quattro autenticatori. Ognuno dichiara le route su cui
 agisce in `supports()`, quindi sono mutuamente esclusivi:
 
-| Autenticatoro | Route | Metodo |
+| Autenticatore | Route | Metodo |
 |---|---|---|
 | `FormAuthenticator` | `login_form`, `login_utente` | POST |
 | `MimSpidAuthenticator` | `login_mimspid_check` | GET |
 | `GSuiteAuthenticator` | `login_gsuite_check` | GET |
-| `TokenAuthenticator` | `login_token` | POST |
-| `TokenConnectAuthenticator` | `login_connect` | GET |
 | `AuthConnectAuthenticator` | `api_authConnect` | GET |
 
 `AuthenticationEntryPoint` gestisce il redirect alla pagina di login quando serve.
@@ -540,18 +538,36 @@ agisce in `supports()`, quindi sono mutuamente esclusivi:
   l'amministratore
 - `controllaProfili()` — risolve i profili multipli come descritto sopra
 
-**Gli hash deboli sono intenzionali.** `TokenAuthenticator` e `TokenConnectAuthenticator` usano
-`sha1`/`md5` per il binding del token OTP all'IP. Non sono vulnerabilità: sono hashing di
-identificatori, non di segreti, e i file portano un commento che lo spiega. **Non "correggere"
-queste occorrenze** senza aver letto il commento e senza aver verificato cosa ne segue.
+**Accesso tramite app.** L'app non usa più un token OTP: l'autenticazione avviene con una
+challenge/risposta crittografica legata al dispositivo.
+
+1. Al primo accesso, dopo il login web, l'app chiama `POST /api/auth/register` con la propria
+   chiave pubblica. Il server memorizza `dispositivoId`, `dispositivoChiave` e
+   `dispositivoRegistrato` sull'utente. La registrazione resta valida per
+   `durata_registrazione_dispositivo` giorni.
+2. `POST /api/auth/request` invia il `dispositivoId` e riceve un identificativo pubblico e una
+   sequenza casuale (challenge), valida per 60 secondi.
+3. L'app firma `protocollo_app\nid\ncasuale` con la chiave privata e invia la firma a
+   `POST /api/auth/validate`. Il server verifica la firma con la chiave pubblica registrata e
+   restituisce un token monouso valido per 30 secondi. `protocollo_app` è un parametro di
+   configurazione (default `GS-AUTH-v1`).
+4. L'app apre nel browser `GET /api/auth/connect?code=...`: `AuthConnectAuthenticator` consuma il
+   token, controlla che il dispositivo non sia scaduto o revocato, applica manutenzione e profili,
+   crea la sessione e redirige alla pagina iniziale.
+
+Il dispositivo può essere revocato con `POST /api/auth/revoke`. I vecchi endpoint
+`/app/device`, `login_token` e `login_connect`, insieme ai relativi autenticatori, sono stati
+rimossi.
 
 **La modalità manutenzione** è una finestra temporale in configurazione, non un flag booleano:
 `manutenzione_inizio` e `manutenzione_fine`. Il check è in `controllaManutenzione()`.
 
 **Le API per l'app mobile** hanno un proprio ciclo di vita, in `ApiController`:
-`authRegister` → `authRequest` → `authValidate` → `authConnect`, con `AutenticazioneDispositivo`
-come entità di stato. L'header `X-Giuaschool-Token` autentica le richieste. `/api/info/docente`
-verifica anche che l'IP chiamante corrisponda a quello configurato per il servizio.
+`api_authRegister` → `api_authRequest` → `api_authValidate` → `api_authConnect`, con
+`AutenticazioneDispositivo` come entità di stato. Le prime tre sono chiamate JSON; l'ultima è la
+GET intercettata da `AuthConnectAuthenticator`. L'header `X-Giuaschool-Token` resta riservato alle
+API di servizio, come `/api/info/docente`, che verifica anche che l'IP chiamante corrisponda a
+quello configurato per il servizio.
 
 ### Cifratura dei dati
 
