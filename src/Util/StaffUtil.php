@@ -16,9 +16,6 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Query\Parameter;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use App\Util\RegistroUtil;
 use App\Util\GenitoriUtil;
 use App\Entity\Classe;
@@ -49,18 +46,12 @@ class StaffUtil {
   /**
    * Costruttore
    *
-   * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
    * @param GenitoriUtil $genUtil Funzioni di utilità per i genitori
    */
   public function __construct(
-      private readonly RouterInterface $router,
       private readonly EntityManagerInterface $em,
-      private readonly TranslatorInterface $trans,
-      private readonly RequestStack $reqstack,
       private readonly RegistroUtil $regUtil,
       private readonly GenitoriUtil $genUtil)
   {

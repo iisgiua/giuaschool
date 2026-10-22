@@ -1102,7 +1102,7 @@ class DocumentiController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla alunno
-    $codiceFiscale = trim(substr($documento->getTitolo(), strpos($documento->getTitolo(), '- C.F. ') + 7));
+    $codiceFiscale = trim(substr((string) $documento->getTitolo(), strpos((string) $documento->getTitolo(), '- C.F. ') + 7));
     $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['codiceFiscale' => $codiceFiscale,
       'abilitato' => 1]);
     if (!$alunno) {
@@ -1203,7 +1203,7 @@ class DocumentiController extends BaseController {
       ->setStato('A')
       ->setTitolo($vecchioAlunno->getCognome().' '.$vecchioAlunno->getNome().' - C.F. '.
         $vecchioAlunno->getCodiceFiscale())
-      ->setAnno((int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4));
+      ->setAnno((int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4));
     // cancella lista destinatari
     $com->cancellaDestinatari($documento);
     // ok: memorizzazione e log

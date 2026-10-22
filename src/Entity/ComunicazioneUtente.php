@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use DateTimeInterface;
 use App\Repository\ComunicazioneUtenteRepository;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
@@ -40,13 +41,13 @@ class ComunicazioneUtente implements Stringable {
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
@@ -66,13 +67,13 @@ class ComunicazioneUtente implements Stringable {
   private ?Utente $utente = null;
 
   /**
-   * @var DateTime|null $letto Data e ora di lettura della comunicazione
+   * @var DateTimeInterface|null $letto Data e ora di lettura della comunicazione
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
   private ?DateTime $letto = null;
 
   /**
-   * @var DateTime|null $firmato Data e ora di firma per presa visione della comunicazione
+   * @var DateTimeInterface|null $firmato Data e ora di firma per presa visione della comunicazione
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
   private ?DateTime $firmato = null;

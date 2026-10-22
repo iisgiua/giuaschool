@@ -90,7 +90,7 @@ class Cattedra implements Stringable {
    * @var Classe|null $classe Classe della cattedra
    */
   #[ORM\JoinColumn(nullable: false)]
-  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[ORM\ManyToOne(targetEntity: Classe::class)]
   #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 

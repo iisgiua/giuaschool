@@ -10,8 +10,6 @@ namespace App\Repository;
 
 use App\Entity\Cattedra;
 use App\Entity\Classe;
-use App\Entity\Sede;
-use App\Entity\Docente;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 

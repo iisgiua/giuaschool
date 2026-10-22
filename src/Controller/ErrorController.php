@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Throwable;
 use App\Util\ConfigLoader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ErrorHandler\ErrorRenderer\ErrorRendererInterface;
@@ -48,11 +49,11 @@ class ErrorController extends AbstractController {
   /**
    * Gestisce l'eccezione sollevata durante la gestione della richiesta.
    *
-   * @param \Throwable $exception Eccezione da gestire
+   * @param Throwable $exception Eccezione da gestire
    *
    * @return Response Pagina di risposta
    */
-  public function __invoke(\Throwable $exception): Response {
+  public function __invoke(Throwable $exception): Response {
     // appiattisce l'eccezione per ricavarne lo stato HTTP
     $flattened = FlattenException::createFromThrowable($exception);
     // errori diversi da 'non trovato': delega al renderer predefinito del framework
@@ -65,7 +66,7 @@ class ErrorController extends AbstractController {
     // quindi un ricaricamento sovrascriverebbe tema e menu della sessione autenticata
     try {
       $this->config->caricaSeNecessario();
-    } catch (\Throwable $e) {
+    } catch (Throwable) {
       // la configurazione non e' disponibile: la pagina viene mostrata senza intestazione
     }
     // usa il messaggio dell'errore solo se corrisponde ad un messaggio del progetto

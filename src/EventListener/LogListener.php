@@ -88,9 +88,9 @@ class LogListener {
    * @param TokenStorageInterface $token Gestore dei dati di autenticazione
    */
   public function __construct(
-      private EntityManagerInterface $em,
-      private RequestStack $request,
-      private TokenStorageInterface $token) {
+      private readonly EntityManagerInterface $em,
+      private readonly RequestStack $request,
+      private readonly TokenStorageInterface $token) {
   }
 
   /**
@@ -109,7 +109,7 @@ class LogListener {
     // inserimento nuovi dati
     foreach ($uow->getScheduledEntityInsertions() as $oggetto) {
       // esclude entità non rilevanti
-      $nome = get_class($oggetto);
+      $nome = $oggetto::class;
       if (isset(self::ENTITA_ESCLUSE[$nome])) {
         continue;
       }
@@ -120,7 +120,7 @@ class LogListener {
     // modifiche dati esistenti
     foreach ($uow->getScheduledEntityUpdates() as $oggetto) {
       // esclude entità non rilevanti
-      $nome = get_class($oggetto);
+      $nome = $oggetto::class;
       if (isset(self::ENTITA_ESCLUSE[$nome])) {
         continue;
       }
@@ -135,7 +135,7 @@ class LogListener {
     // cancellazione dati esistenti
     foreach ($uow->getScheduledEntityDeletions() as $oggetto) {
       // esclude entità non rilevanti
-      $nome = get_class($oggetto);
+      $nome = $oggetto::class;
       if (isset(self::ENTITA_ESCLUSE[$nome])) {
         continue;
       }
@@ -178,7 +178,7 @@ class LogListener {
     // processa gli oggetti nella lista
     $metadataCache = [];
     foreach ($this->codaPost as [$nome, $oggetto]) {
-      $metadata = ($metadataCache[$nome] = $metadataCache[$nome] ?? $this->em->getClassMetadata($nome));
+      $metadata = ($metadataCache[$nome] ??= $this->em->getClassMetadata($nome));
       // prende solo campi rilevanti
       $lista = [...$metadata->getFieldNames(), ...$metadata->getAssociationNames()];
       $campi = array_diff($lista, self::CAMPI_ESCLUSI);

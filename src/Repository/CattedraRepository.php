@@ -8,12 +8,9 @@
 
 namespace App\Repository;
 
-use App\Entity\ScansioneOraria;
-use DateTime;
 use App\Entity\Docente;
 use App\Entity\Classe;
 use App\Entity\FirmaSostegno;
-use App\Entity\OrarioDocente;
 use App\Entity\Materia;
 
 

@@ -41,9 +41,9 @@ class SelettoreClasseExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('gs_classi_selettore', [$this, 'classiSelettore']),
-            new TwigFunction('gs_classi_coordinatore', [$this, 'classiCoordinatore']),
-            new TwigFunction('gs_scelta_selettore', [$this, 'sceltaSelettore']),
+            new TwigFunction('gs_classi_selettore', $this->classiSelettore(...)),
+            new TwigFunction('gs_classi_coordinatore', $this->classiCoordinatore(...)),
+            new TwigFunction('gs_scelta_selettore', $this->sceltaSelettore(...)),
         ];
     }
 

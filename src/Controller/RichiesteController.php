@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Exception;
 use App\Entity\Alunno;
 use App\Entity\Assenza;
 use App\Entity\Classe;
@@ -143,7 +144,7 @@ class RichiesteController extends BaseController {
             $utente->getClasse(), $valori, $data, $invio);
           // imposta eventuali allegati
           $allegati = $ric->impostaAllegati($utente, $utente->getClasse(), $documentoId, $allegatiTemp);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
           // errore: elimina la richiesta incompleta per non bloccare un nuovo invio
           $this->em->remove($richiesta);
           $this->em->flush();
@@ -919,7 +920,7 @@ class RichiesteController extends BaseController {
             $classe, $valori, $data, $invio);
           // imposta eventuali allegati
           $allegati = $ric->impostaAllegati($utente, $classe, $documentoId, $allegatiTemp);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
           // errore: elimina la richiesta incompleta per non bloccare un nuovo invio
           $this->em->remove($richiesta);
           $this->em->flush();
@@ -1202,7 +1203,7 @@ class RichiesteController extends BaseController {
           // crea documento PDF
           $documento = $ric->rispostaPdf($consultazione, $utente->getId(), $risposta->getId(), $classe,
             $valori, $invio);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
           // errore: elimina la risposta incompleta per non bloccare un nuovo invio
           $this->em->remove($risposta);
           $this->em->flush();

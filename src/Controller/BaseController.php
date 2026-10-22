@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use finfo;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\Docente;
@@ -167,7 +168,7 @@ class BaseController extends AbstractController {
     }
     $tipo = '';
     if (class_exists('finfo')) {
-      $finfo = new \finfo(FILEINFO_MIME_TYPE);
+      $finfo = new finfo(FILEINFO_MIME_TYPE);
       $tipo = (string) $finfo->file($nomefile);
     } else {
       $tipo = (string) @mime_content_type($nomefile);

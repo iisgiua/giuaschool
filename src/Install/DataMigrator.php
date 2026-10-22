@@ -20,16 +20,6 @@ use PDO;
 class DataMigrator {
 
 
-  //==================== ATTRIBUTI DELLA CLASSE  ====================
-
-  /**
-   * Conserva la connessione al database come istanza PDO
-   *
-   * @var PDO $pdo Connessione al database
-   */
-  private ?PDO $pdo = null;
-
-
   //==================== METODI PUBBLICI ====================
 
   /**
@@ -37,8 +27,13 @@ class DataMigrator {
    *
    * @param PDO $pdo Connessione al database
    */
-  public function __construct(PDO $pdo) {
-    $this->pdo = $pdo;
+  public function __construct(
+    /**
+     * Conserva la connessione al database come istanza PDO
+     */
+    private readonly ?PDO $pdo
+  )
+  {
   }
 
   /**
@@ -216,7 +211,7 @@ class DataMigrator {
     $sql = "SELECT valore FROM gs_configurazione WHERE parametro='anno_scolastico'";
     $stm = $this->pdo->prepare($sql);
     $stm->execute();
-    $annoAttuale = substr($stm->fetch()['valore'], 0, 4);
+    $annoAttuale = substr((string) $stm->fetch()['valore'], 0, 4);
     $stm->closeCursor();
     $sql = "SELECT id FROM gs_utente WHERE ruolo='PRE'";
     $stm = $this->pdo->prepare($sql);
@@ -232,7 +227,7 @@ class DataMigrator {
     foreach ($circolari as $c) {
       $ata = '';
       foreach (['A', 'T', 'C'] as $a) {
-        if (str_contains($c['destinatari_ata'], $a) ) {
+        if (str_contains((string) $c['destinatari_ata'], $a) ) {
           $ata .= $a;
         }
       }
@@ -280,7 +275,7 @@ class DataMigrator {
       ]);
       $mappaCircolare[$c['id']] = $this->pdo->lastInsertId();
       // aggiunge documento principale
-      $file = pathinfo($c['documento']);
+      $file = pathinfo((string) $c['documento']);
       $sql = "INSERT INTO gs_allegato (comunicazione_id, creato, modificato, titolo, nome, estensione, dimensione,
         file) VALUES (:comunicazione_id, :creato, :modificato, :titolo, :nome, :estensione, :dimensione, :file)";
       $stm = $this->pdo->prepare($sql);
@@ -299,7 +294,7 @@ class DataMigrator {
       $cnt = 1;
       if (!empty($allegati)) {
         foreach ($allegati as $allegato) {
-          $file = pathinfo($allegato);
+          $file = pathinfo((string) $allegato);
           $sql = "INSERT INTO gs_allegato (comunicazione_id, creato, modificato, titolo, nome, estensione, dimensione,
             file) VALUES (:comunicazione_id, :creato, :modificato, :titolo, :nome, :estensione, :dimensione, :file)";
           $stm = $this->pdo->prepare($sql);
@@ -382,24 +377,24 @@ class DataMigrator {
     foreach ($avvisi as $a) {
       // destinatari speciali
       $speciali = '';
-      if (str_contains($a['destinatari_ata'], 'D')) {
+      if (str_contains((string) $a['destinatari_ata'], 'D')) {
         $speciali .= 'D';
       }
-      if (str_contains($a['destinatari_speciali'], 'S')) {
+      if (str_contains((string) $a['destinatari_speciali'], 'S')) {
         $speciali .= 'S';
       }
       foreach (['R', 'I', 'P'] as $val) {
-        if (str_contains($a['destinatari'], $val) ) {
+        if (str_contains((string) $a['destinatari'], $val) ) {
           $speciali .= $val;
         }
       }
       // destinatari ATA
       $ata = '';
-      if (str_contains($a['destinatari_ata'], 'A')) {
+      if (str_contains((string) $a['destinatari_ata'], 'A')) {
         $ata = 'ATC';
       } else {
         foreach (['M', 'T', 'C'] as $val) {
-          if (str_contains($a['destinatari_ata'], $val) ) {
+          if (str_contains((string) $a['destinatari_ata'], $val) ) {
             $ata .= ($val == 'M' ? 'A' : $val);
           }
         }
@@ -441,18 +436,18 @@ class DataMigrator {
         'anno' => $a['anno'],
         'speciali' => $speciali,
         'ata' => $ata,
-        'coordinatori' => str_contains($a['destinatari'], 'C') ? $a['filtro_tipo'] : 'N',
-        'filtro_coordinatori' => str_contains($a['destinatari'], 'C') ? $a['filtro'] : null,
-        'docenti' => str_contains($a['destinatari'], 'D') ? $a['filtro_tipo'] : 'N',
-        'filtro_docenti' => str_contains($a['destinatari'], 'D') ? $a['filtro'] : null,
-        'genitori' => str_contains($a['destinatari'], 'G') ? $a['filtro_tipo'] : 'N',
-        'filtro_genitori' => str_contains($a['destinatari'], 'G') ? $a['filtro'] : null,
-        'rappresentanti_genitori' => str_contains($a['destinatari'], 'L') ? $a['filtro_tipo'] : 'N',
-        'filtro_rappresentanti_genitori' => str_contains($a['destinatari'], 'L') ? $a['filtro'] : null,
-        'alunni' => str_contains($a['destinatari'], 'A') ? $a['filtro_tipo'] : 'N',
-        'filtro_alunni' => str_contains($a['destinatari'], 'A') ? $a['filtro'] : null,
-        'rappresentanti_alunni' => str_contains($a['destinatari'], 'S') ? $a['filtro_tipo'] : 'N',
-        'filtro_rappresentanti_alunni' => str_contains($a['destinatari'], 'S') ? $a['filtro'] : null,
+        'coordinatori' => str_contains((string) $a['destinatari'], 'C') ? $a['filtro_tipo'] : 'N',
+        'filtro_coordinatori' => str_contains((string) $a['destinatari'], 'C') ? $a['filtro'] : null,
+        'docenti' => str_contains((string) $a['destinatari'], 'D') ? $a['filtro_tipo'] : 'N',
+        'filtro_docenti' => str_contains((string) $a['destinatari'], 'D') ? $a['filtro'] : null,
+        'genitori' => str_contains((string) $a['destinatari'], 'G') ? $a['filtro_tipo'] : 'N',
+        'filtro_genitori' => str_contains((string) $a['destinatari'], 'G') ? $a['filtro'] : null,
+        'rappresentanti_genitori' => str_contains((string) $a['destinatari'], 'L') ? $a['filtro_tipo'] : 'N',
+        'filtro_rappresentanti_genitori' => str_contains((string) $a['destinatari'], 'L') ? $a['filtro'] : null,
+        'alunni' => str_contains((string) $a['destinatari'], 'A') ? $a['filtro_tipo'] : 'N',
+        'filtro_alunni' => str_contains((string) $a['destinatari'], 'A') ? $a['filtro'] : null,
+        'rappresentanti_alunni' => str_contains((string) $a['destinatari'], 'S') ? $a['filtro_tipo'] : 'N',
+        'filtro_rappresentanti_alunni' => str_contains((string) $a['destinatari'], 'S') ? $a['filtro'] : null,
         'esterni' => null,
         'categoria' => 'A',
         'testo' => $a['testo'],
@@ -464,7 +459,7 @@ class DataMigrator {
       $cnt = 1;
       if (!empty($allegati)) {
         foreach ($allegati as $allegato) {
-          $file = pathinfo($allegato);
+          $file = pathinfo((string) $allegato);
           $sql = "INSERT INTO gs_allegato (comunicazione_id, creato, modificato, titolo, nome, estensione, dimensione,
              file) VALUES (:comunicazione_id, :creato, :modificato, :titolo, :nome, :estensione, :dimensione, :file)";
           $stm = $this->pdo->prepare($sql);

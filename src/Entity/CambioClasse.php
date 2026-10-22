@@ -80,7 +80,7 @@ class CambioClasse implements Stringable {
    * @var Classe|null $classe Classe dell'alunno nel periodo indicato (null=altra scuola)
    */
   #[ORM\JoinColumn(nullable: true)]
-  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[ORM\ManyToOne(targetEntity: Classe::class)]
   private ?Classe $classe = null;
 
   /**

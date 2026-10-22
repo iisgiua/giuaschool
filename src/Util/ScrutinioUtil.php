@@ -13,11 +13,6 @@ use App\Entity\Cattedra;
 use App\Entity\Configurazione;
 use App\Entity\AssenzaLezione;
 use App\Entity\CambioClasse;
-use App\Entity\Festivita;
-use App\Entity\Assenza;
-use App\Entity\Nota;
-use App\Entity\Entrata;
-use App\Entity\Uscita;
 use App\Entity\StoricoEsito;
 use App\Entity\StoricoVoto;
 use App\Entity\Alunno;
@@ -4939,7 +4934,7 @@ class ScrutinioUtil {
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Request $request Pagina richiesta
    * @param Scrutinio $scrutinio Scrutinio in corso
-   * @param FormBuilder $form Form per l'inserimento
+   * @param Form $form Form per l'inserimento
    * @param int $step Passo della struttura del verbale da modificare
    * @param array $args Argomenti aggiuntivi (array associativo)
    */
@@ -4979,7 +4974,6 @@ class ScrutinioUtil {
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
    * @param Classe $classe Classe relativa alle proposte di voto
-   * @param string $periodo Periodo relativo allo scrutinio
    *
    * @return array Dati formattati come un array associativo
    */

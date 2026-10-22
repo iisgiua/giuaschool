@@ -8,13 +8,13 @@
 
 namespace App\Util;
 
+use RuntimeException;
 use App\Entity\Classe;
 use App\Entity\DefinizioneAutorizzazione;
 use App\Entity\DefinizioneConsultazione;
 use App\Entity\DefinizioneRichiesta;
 use App\Entity\Richiesta;
 use App\Entity\Utente;
-use ContainerFT0ZQNx\getDefinizioneAutorizzazioneTypeService;
 use DateTime;
 use Exception;
 use Symfony\Component\Filesystem\Filesystem;
@@ -82,7 +82,7 @@ class RichiesteUtil {
     $nomeTemplate = $percorso.$definizioneRichiesta->getModulo();
     if (!is_file($nomeTemplate)) {
       // errore: template del modulo non disponibile
-      throw new \RuntimeException('Template del modulo non trovato: '.$definizioneRichiesta->getModulo());
+      throw new RuntimeException('Template del modulo non trovato: '.$definizioneRichiesta->getModulo());
     }
     $template = file_get_contents($nomeTemplate);
     foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
@@ -196,7 +196,7 @@ class RichiesteUtil {
     $nomeTemplate = $percorso.$consultazione->getModulo();
     if (!is_file($nomeTemplate)) {
       // errore: template della consultazione non disponibile
-      throw new \RuntimeException('Template della consultazione non trovato: '.$consultazione->getModulo());
+      throw new RuntimeException('Template della consultazione non trovato: '.$consultazione->getModulo());
     }
     $template = file_get_contents($nomeTemplate);
     foreach ($consultazione->getCampi() as $nome => $campo) {
@@ -275,7 +275,7 @@ class RichiesteUtil {
     $nomeTemplate = $percorso.$modulo->getModulo();
     if (!is_file($nomeTemplate)) {
       // errore: template dell'autorizzazione non disponibile
-      throw new \RuntimeException('Template dell\'autorizzazione non trovato: '.$modulo->getModulo());
+      throw new RuntimeException('Template dell\'autorizzazione non trovato: '.$modulo->getModulo());
     }
     $template = file_get_contents($nomeTemplate);
     // aggiunge header e footer
@@ -344,7 +344,7 @@ class RichiesteUtil {
     $nomeTemplate = $percorso.$esistente->getDefinizioneRichiesta()->getModulo();
     if (!is_file($nomeTemplate)) {
       // errore: template dell'autorizzazione non disponibile
-      throw new \RuntimeException('Template dell\'autorizzazione non trovato: '.
+      throw new RuntimeException('Template dell\'autorizzazione non trovato: '.
         $esistente->getDefinizioneRichiesta()->getModulo());
     }
     $template = file_get_contents($nomeTemplate);

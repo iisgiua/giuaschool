@@ -50,8 +50,8 @@ class Encryptor {
    * @param string $key Chiave di cifratura
    */
   public function __construct(
-    private LoggerInterface $logger,
-    private string $key)
+    private readonly LoggerInterface $logger,
+    private readonly string $key)
   {
   }
 

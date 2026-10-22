@@ -19,7 +19,6 @@ use App\Entity\Esito;
 use App\Entity\Alunno;
 use App\Entity\Scrutinio;
 use App\Entity\StoricoEsito;
-use App\Util\RegistroUtil;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Filesystem\Filesystem;
@@ -41,13 +40,11 @@ class SegreteriaUtil {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
-   * @param RegistroUtil $regUtil Funzioni di utilità per il registro
    * @param string $dirProgetto Percorso per i file dell'applicazione
    */
   public function __construct(
       private readonly EntityManagerInterface $em,
       private readonly RequestStack $reqstack,
-      private readonly RegistroUtil $regUtil,
       private $dirProgetto)
   {
   }

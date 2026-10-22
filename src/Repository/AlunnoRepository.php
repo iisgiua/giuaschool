@@ -170,7 +170,7 @@ class AlunnoRepository extends BaseRepository {
     $lista_alunni = array_map(
       fn($a) => '<span id=\"'.htmlspecialchars($attr.$a['id'], ENT_QUOTES).'\">'.
         htmlspecialchars($a['cognome'].' '.$a['nome'].' ('.$a['dataNascita'].') '.$a['anno'].'ª '.$a['sezione'],
-          ENT_QUOTES).($a['gruppo'] ? '-'.htmlspecialchars($a['gruppo'], ENT_QUOTES) : '').'</span>', $alunni);
+          ENT_QUOTES).($a['gruppo'] ? '-'.htmlspecialchars((string) $a['gruppo'], ENT_QUOTES) : '').'</span>', $alunni);
     // restituisce lista
     return implode(', ', $lista_alunni);
   }

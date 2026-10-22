@@ -26,7 +26,7 @@ class UtenteCreatoEvent {
    * @param Utente $utente Nuovo utente creato
    */
   public function __construct(
-      private Utente $utente) {
+      private readonly Utente $utente) {
   }
 
   /**

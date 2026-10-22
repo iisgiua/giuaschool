@@ -37,12 +37,12 @@ class MimSpidValidator {
   /**
    * @var CachedKeySet $keySet Gestore delle chiavi pubbliche
    */
-  private CachedKeySet $keySet;
+  private readonly CachedKeySet $keySet;
 
   /**
    * @var MimSpidProvider $provider Service provider per il MIM-SPID tramite gateway
    */
-  private MimSpidProvider $provider;
+  private readonly MimSpidProvider $provider;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -54,8 +54,8 @@ class MimSpidValidator {
    * @param ClientRegistry $clientRegistry Gestore dei client OIDC
    */
   public function __construct(
-      private CacheItemPoolInterface $cache,
-      private ClientRegistry $clientRegistry) {
+      private readonly CacheItemPoolInterface $cache,
+      private readonly ClientRegistry $clientRegistry) {
     // inizializza il provider MIM-SPID gateway
     $this->provider = $this->clientRegistry->getClient('mimspid')->getOAuth2Provider();
     // inizializza il gestore delle chiavi pubbliche con cache e client HTPP

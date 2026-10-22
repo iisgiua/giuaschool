@@ -280,7 +280,7 @@ class DefinizioneRichiesta implements Stringable {
    * @return string Nome del file del modulo di richiesta da compilare da parte del richiedente
    */
   public function getModulo(): string {
-    return $this->modulo;
+    return $this->modulo ?? '';
   }
 
   /**

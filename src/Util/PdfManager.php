@@ -8,6 +8,8 @@
 
 namespace App\Util;
 
+use Throwable;
+use RuntimeException;
 use TCPDF;
 use Exception;
 use Qipsius\TCPDFBundle\Controller\TCPDFController;
@@ -66,17 +68,17 @@ class PdfManager {
    *
    * @param string $html Il testo in HTML da convertire
    *
-   * @throws \RuntimeException Se la conversione HTML a PDF fallisce
+   * @throws RuntimeException Se la conversione HTML a PDF fallisce
    */
   public function createFromHtml(string $html): void {
     // trasforma in PDF
     $this->pdf->AddPage();
     try {
       $this->pdf->writeHTML($html);
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
       // alcuni ambienti senza GD o Imagick segnalano errori critici
       // sulla gestione di immagini PNG con canale alpha.
-      throw new \RuntimeException('Impossibile generare il PDF: '.$e->getMessage(), 0, $e);
+      throw new RuntimeException('Impossibile generare il PDF: '.$e->getMessage(), 0, $e);
     }
   }
 

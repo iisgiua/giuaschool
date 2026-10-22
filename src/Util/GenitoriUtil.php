@@ -15,7 +15,6 @@ use App\Entity\AssenzaLezione;
 use App\Entity\CambioClasse;
 use App\Entity\Cattedra;
 use App\Entity\Classe;
-use App\Entity\Docente;
 use App\Entity\Entrata;
 use App\Entity\Esito;
 use App\Entity\Festivita;
@@ -36,8 +35,6 @@ use App\Entity\Valutazione;
 use App\Entity\VotoScrutinio;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
@@ -54,20 +51,14 @@ class GenitoriUtil {
   /**
    * Costruttore
    *
-   * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
-   * @param string $dirProgetto Percorso per i file dell'applicazione
    */
   public function __construct(
-      private readonly RouterInterface $router,
       private readonly EntityManagerInterface $em,
       private readonly TranslatorInterface $trans,
-      private readonly RequestStack $reqstack,
-      private readonly RegistroUtil $regUtil,
-      private readonly string $dirProgetto)
+      private readonly RegistroUtil $regUtil)
   {
   }
 

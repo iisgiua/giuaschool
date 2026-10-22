@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use DateTimeInterface;
 use App\Repository\LogRepository;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
@@ -36,7 +37,7 @@ class Log implements Stringable {
   private ?int $id = null;
 
   /**
-   * @var DateTime $creato Data e ora della creazione dell'istanza
+   * @var DateTimeInterface $creato Data e ora della creazione dell'istanza
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private DateTime $creato;
@@ -357,7 +358,7 @@ class Log implements Stringable {
   /**
    * Modifica l'ID del record (se tipo creazione/modifica/cancellazione)
    *
-   * @param string|null $dEntita ID del record
+   * @param string|null $idEntita ID del record
    *
    * @return self Oggetto modificato
    */

@@ -80,7 +80,7 @@ class LogProcessor {
     $risultato = preg_replace('~(/login/connect/|/command/notify/)[^/?\s]+~i', '$1'.$osc,
       $risultato ?? $testo);
     // restituisce il testo modificato (in caso di errore l'originale)
-    return ($risultato === null) ? $testo : $risultato;
+    return $risultato ?? $testo;
   }
 
 }

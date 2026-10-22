@@ -37,7 +37,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
   public function statistiche(Comunicazione $comunicazione): array {
     $dati = [];
     // speciali
-    if (str_contains($comunicazione->getSpeciali(), 'D')) {
+    if (str_contains((string) $comunicazione->getSpeciali(), 'D')) {
       // dati DSGA
       $utente = $this->createQueryBuilder('cu')
         ->select('ata.cognome,ata.nome,ata.username,cu.letto')
@@ -54,7 +54,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
           'elenco' => $utente['letto'] ? [$utente] : []];
       }
     }
-    if (str_contains($comunicazione->getSpeciali(), 'S')) {
+    if (str_contains((string) $comunicazione->getSpeciali(), 'S')) {
       // dati RSPP
       $utente = $this->createQueryBuilder('cu')
         ->select('d.cognome,d.nome,d.username,cu.letto')
@@ -71,7 +71,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
           'elenco' => $utente['letto'] ? [$utente] : []];
       }
     }
-    if (str_contains($comunicazione->getSpeciali(), 'R')) {
+    if (str_contains((string) $comunicazione->getSpeciali(), 'R')) {
       // dati RSU
       $utenti = $this->createQueryBuilder('cu')
         ->select('u.cognome,u.nome,u.username,cu.letto')
@@ -91,7 +91,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
           'elenco' => $elenco];
       }
     }
-    if (str_contains($comunicazione->getSpeciali(), 'I')) {
+    if (str_contains((string) $comunicazione->getSpeciali(), 'I')) {
       // dati rappresentanti di Istituto
       $utenti = $this->createQueryBuilder('cu')
         ->select('u.cognome,u.nome,u.username,cu.letto')
@@ -111,7 +111,7 @@ class ComunicazioneUtenteRepository extends BaseRepository {
           'elenco' => $elenco];
       }
     }
-    if (str_contains($comunicazione->getSpeciali(), 'P')) {
+    if (str_contains((string) $comunicazione->getSpeciali(), 'P')) {
       // dati rappresentanti Consulta Provinciale
       $utenti = $this->createQueryBuilder('cu')
         ->select('u.cognome,u.nome,u.username,cu.letto')
@@ -132,17 +132,17 @@ class ComunicazioneUtenteRepository extends BaseRepository {
       }
     }
     // ata
-    if (!empty(array_intersect(str_split($comunicazione->getAta()), ['A', 'T', 'C']))) {
+    if (!empty(array_intersect(str_split((string) $comunicazione->getAta()), ['A', 'T', 'C']))) {
       $utenti = $this->createQueryBuilder('cu')
         ->select('ata.cognome,ata.nome,ata.username,ata.tipo,cu.letto')
         ->join(Ata::class, 'ata', 'WITH', 'ata.id=cu.utente')
         ->where("cu.comunicazione=:comunicazione AND ata.tipo IN (:tipi)")
         ->setParameter('comunicazione', $comunicazione)
-        ->setParameter('tipi', str_split($comunicazione->getAta()))
+        ->setParameter('tipi', str_split((string) $comunicazione->getAta()))
         ->orderBy('ata.cognome,ata.nome', 'ASC')
         ->getQuery()
         ->getArrayResult();
-      foreach (str_split($comunicazione->getAta()) as $tipo) {
+      foreach (str_split((string) $comunicazione->getAta()) as $tipo) {
         $elenco = array_filter($utenti, fn($u) => $u['tipo'] == $tipo && $u['letto']);
         $letti = count($elenco);
         $totali = count(array_filter($utenti, fn($u) => $u['tipo'] == $tipo));

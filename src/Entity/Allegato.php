@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use DateTimeInterface;
 use App\Repository\AllegatoRepository;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
@@ -38,13 +39,13 @@ class Allegato implements Stringable {
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;

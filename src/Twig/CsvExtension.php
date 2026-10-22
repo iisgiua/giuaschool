@@ -32,7 +32,7 @@ class CsvExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('csv', [$this, 'csvEscape'], ['is_safe' => ['html']]),
+            new TwigFilter('csv', $this->csvEscape(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -43,7 +43,7 @@ class CsvExtension extends AbstractExtension
      *
      * @return string Valore escapato, pronto per il CSV
      */
-    public function csvEscape($value): string
+    public function csvEscape(mixed $value): string
     {
         $v = (string) ($value ?? '');
 

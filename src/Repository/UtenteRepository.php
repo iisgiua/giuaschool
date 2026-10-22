@@ -97,28 +97,28 @@ class UtenteRepository extends EntityRepository {
         // può essercene solo uno
         $dati['ATA'][] = $profilo->getId();
         $numDati++;
-        $utente = $utente ?? $profilo;
+        $utente ??= $profilo;
       } elseif (($profilo instanceOf Docente) && !isset($dati['DOCENTE'])) {
         // comprende anche STAFF e PRESIDE
         // può essercene solo uno
         $dati['DOCENTE'][] = $profilo->getId();
         $numDati++;
-        $utente = $utente ?? $profilo;
+        $utente ??= $profilo;
       } elseif ($profilo instanceOf Genitore) {
         // ce ne possono essere più di uno (più figli nella stessa scuola)
         $dati['GENITORE'][] = $profilo->getId();
         $numDati++;
-        $utente = $utente ?? $profilo;
+        $utente ??= $profilo;
       } elseif (($profilo instanceOf Alunno) && !isset($dati['ALUNNO'])) {
         // può essercene solo uno
         $dati['ALUNNO'][] = $profilo->getId();
         $numDati++;
-        $utente = $utente ?? $profilo;
+        $utente ??= $profilo;
       } elseif (($profilo instanceOf Amministratore) && !isset($dati['AMMINISTRATORE'])) {
         // può essercene solo uno
         $dati['AMMINISTRATORE'][] = $profilo->getId();
         $numDati++;
-        $utente = $utente ?? $profilo;
+        $utente ??= $profilo;
       }
     }
     return ['dati' => $dati, 'numDati' => $numDati, 'utente' => $utente];

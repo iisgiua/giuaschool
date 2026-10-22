@@ -207,7 +207,7 @@ class Colloquio implements Stringable {
   /**
    * Modifica la sede relativa al colloquio
    *
-   * @param Sede $Sede Sede relativa al colloquio
+   * @param Sede $sede Sede relativa al colloquio
    *
    * @return self Oggetto modificato
    */

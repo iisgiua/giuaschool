@@ -136,7 +136,7 @@ class AuthConnectAuthenticator extends AbstractAuthenticator {
       $this->em->flush();
       // fine transazione
       $this->em->commit();
-    } catch (Exception $e) {
+    } catch (Exception) {
       // elimina eventuali modifiche
       $this->em->rollback();
       throw new CustomUserMessageAuthenticationException('exception.api_auth.richiesta_invalida');

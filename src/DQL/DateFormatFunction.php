@@ -30,7 +30,7 @@ class DateFormatFunction extends FunctionNode {
   public $date = null;
 
   /**
-   * @var string $format Il formato da attribuire alla data
+   * @var Node $format Il formato da attribuire alla data
    */
   public $format = null;
 

@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use DateTimeInterface;
 use App\Repository\ComunicazioneRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -45,13 +46,13 @@ abstract class Comunicazione implements Stringable {
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
@@ -91,7 +92,7 @@ abstract class Comunicazione implements Stringable {
   private ?string $titolo = '';
 
   /**
-   * @var DateTime|null $data Data della comunicazione
+   * @var DateTimeInterface|null $data Data della comunicazione
    */
   #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
   #[Assert\NotBlank(message: 'field.notblank')]
@@ -112,13 +113,13 @@ abstract class Comunicazione implements Stringable {
   private ?Docente $autore = null;
 
   /**
-   * @var Collection $allegati Lista dei file allegati alla comunicazione
+   * @var Collection<int, Allegato> $allegati Lista dei file allegati alla comunicazione
    */
   #[ORM\OneToMany(targetEntity: Allegato::class, mappedBy: 'comunicazione', orphanRemoval: true)]
   private Collection $allegati;
 
   /**
-   * @var Collection $sedi Sedi scolastiche di destinazione (usato come filtro principale)
+   * @var Collection<int, Sede> $sedi Sedi scolastiche di destinazione (usato come filtro principale)
    */
   #[ORM\ManyToMany(targetEntity: Sede::class)]
   #[ORM\JoinTable(name: 'gs_comunicazione_sede')]

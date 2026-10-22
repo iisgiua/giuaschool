@@ -22,9 +22,6 @@ use App\Entity\Staff;
 use App\Entity\Utente;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -40,16 +37,10 @@ class NotificheUtil {
   /**
    * Costruttore
    *
-   * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    */
   public function __construct(
-      private readonly RouterInterface $router,
-      private readonly EntityManagerInterface $em,
-      private readonly TranslatorInterface $trans,
-      private readonly RequestStack $reqstack)
+      private readonly EntityManagerInterface $em)
   {
   }
 

@@ -128,7 +128,7 @@ class Alunno extends Utente {
    * @var Classe $classe Classe attuale dell'alunno (se esiste)
    */
   #[ORM\JoinColumn(nullable: true)]
-  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[ORM\ManyToOne(targetEntity: Classe::class)]
   private ?Classe $classe = null;
 
   /**

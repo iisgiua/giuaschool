@@ -31,7 +31,7 @@ class AuthenticationEntryPoint implements AuthenticationEntryPointInterface {
   * @param RouterInterface $router Gestore delle URL
   */
   public function __construct(
-    private RouterInterface $router) {
+    private readonly RouterInterface $router) {
   }
 
   /**

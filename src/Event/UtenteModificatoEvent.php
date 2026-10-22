@@ -52,9 +52,9 @@ class UtenteModificatoEvent {
    * @param Utente|null $vecchioUtente Utente prima della modifica
    */
   public function __construct(
-      private Utente $utente,
-      private int $azione,
-      private ?Utente $vecchioUtente=null) {
+      private readonly Utente $utente,
+      private readonly int $azione,
+      private readonly ?Utente $vecchioUtente=null) {
   }
 
   /**

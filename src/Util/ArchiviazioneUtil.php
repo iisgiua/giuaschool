@@ -40,7 +40,6 @@ use App\Entity\Classe;
 use App\Entity\Docente;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
@@ -1363,7 +1362,7 @@ class ArchiviazioneUtil {
             (array_key_first($lez['materia']) == 'R:S' ? 'Gruppo: Religione<br>' :
             (array_key_first($lez['materia']) == 'R:N' ? 'Gruppo: N.A.<br>' :
             (array_key_first($lez['materia']) == 'R:A' ? 'Gruppo: Mat. Alt.<br>' :
-            (array_key_first($lez['materia']) && array_key_first($lez['materia'])[0] == 'C' ? ('Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.substr(array_key_first($lez['materia']), 2).'<br>') : '')))).
+            (str_starts_with((string) array_key_first($lez['materia']), 'C') ? ('Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.substr(array_key_first($lez['materia']), 2).'<br>') : '')))).
             '</b>'.$lez['materia'][array_key_first($lez['materia'])];
         }
         $html .= '<td align="left">'.$testo.'</td>';
@@ -2233,7 +2232,7 @@ class ArchiviazioneUtil {
             (array_key_first($lez['materia']) == 'R:S' ? 'Gruppo: Religione<br>' :
             (array_key_first($lez['materia']) == 'R:N' ? 'Gruppo: N.A.<br>' :
             (array_key_first($lez['materia']) == 'R:A' ? 'Gruppo: Mat. Alt.<br>' :
-            (array_key_first($lez['materia']) && array_key_first($lez['materia'])[0] == 'C' ? ('Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.substr(array_key_first($lez['materia']), 2).'<br>') : '')))).
+            (str_starts_with((string) array_key_first($lez['materia']), 'C') ? ('Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.substr(array_key_first($lez['materia']), 2).'<br>') : '')))).
             '</b>'.$lez['materia'][array_key_first($lez['materia'])];
         }
         $html .= '<td align="left">'.$testo.'</td>';

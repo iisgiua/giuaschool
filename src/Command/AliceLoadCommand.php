@@ -60,7 +60,7 @@ class AliceLoadCommand extends Command {
       protected PurgerLoader $alice,
       private readonly string $dirProgetto,
       #[AutowireLocator([LogListener::class => '?'.LogListener::class])]
-      private ContainerInterface $locator,
+      private readonly ContainerInterface $locator,
       protected ?CustomProvider $customProvider = null,
       protected ?DemoPopulator $demoPopulator = null) {
     parent::__construct();

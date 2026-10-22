@@ -538,7 +538,6 @@ class AlunniController extends BaseController {
     if ($form->isSubmitted() && $form->isValid()) {
       // validazione
       $anni = $this->anniScolastici();
-      $anno_inizio = $anni['inizio'];
       $anno_fine = $anni['fine'];
       if ($id == 0) {
         // solo nuovi dati
@@ -552,10 +551,10 @@ class AlunniController extends BaseController {
           $cambioDati = $this->validaInserimentoClasse($form, $trans, $cambio);
         } elseif ($tipo == 'T') {
           // trasferimento alunno
-          $cambioDati = $this->validaTrasferimentoClasse($form, $trans, $cambio, $anno_inizio, $anno_fine);
+          $cambioDati = $this->validaTrasferimentoClasse($form, $trans, $cambio);
         } elseif ($tipo == 'S') {
           // cambio sezione alunno
-          $cambioDati = $this->validaSezioneClasse($form, $trans, $cambio, $anno_inizio, $anno_fine);
+          $cambioDati = $this->validaSezioneClasse($form, $trans, $cambio);
         }
         $data = $cambioDati['data'];
         $inizio = $cambioDati['inizio'];

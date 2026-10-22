@@ -72,7 +72,7 @@ class Lezione implements Stringable {
    *
    */
   #[ORM\JoinColumn(nullable: false)]
-  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[ORM\ManyToOne(targetEntity: Classe::class)]
   #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 
