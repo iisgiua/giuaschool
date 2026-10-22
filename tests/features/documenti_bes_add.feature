@@ -34,8 +34,8 @@ Scenario: visualizza pagina inserimento documento BES di nuovo alunno
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "P.D.P."
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "P.E.I."
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(4) label" contiene "Documento"
-  E la sezione "#gs-main .panel-body form button:nth-of-type(1)" contiene "Conferma"
-  E la sezione "#gs-main .panel-body form button:nth-of-type(2)" contiene "Annulla"
+  E la sezione "#gs-main .panel-body form button#documento_submit" contiene "Conferma"
+  E la sezione "#gs-main .panel-body form button#documento_cancel" contiene "Annulla"
 
 Schema dello scenario: visualizza pagina inserimento nuovo documento BES di alunno con altro documento
   Data ricerca istanze di tipo "Classe":
@@ -61,8 +61,8 @@ Schema dello scenario: visualizza pagina inserimento nuovo documento BES di alun
   Ma la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" non contiene "<opzione4>"
   Ma la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" non contiene "<opzione5>"
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(2) label" contiene "Documento"
-  E la sezione "#gs-main .panel-body form button:nth-of-type(1)" contiene "Conferma"
-  E la sezione "#gs-main .panel-body form button:nth-of-type(2)" contiene "Annulla"
+  E la sezione "#gs-main .panel-body form button#documento_submit" contiene "Conferma"
+  E la sezione "#gs-main .panel-body form button#documento_cancel" contiene "Annulla"
   Ma la sezione "#gs-main .panel-body form label" non contiene "Classe"
   Ma la sezione "#gs-main .panel-body form label" non contiene "Alunno"
   Esempi:

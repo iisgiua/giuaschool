@@ -100,6 +100,37 @@ class BrowserContext extends BaseContext implements Context {
   }
 
   /**
+   * Invia una richiesta POST alla pagina indicata (senza token CSRF)
+   *  $pagina: nome della pagina
+   *  $tabella: tabella con nomi dei campi ed i valori da assegnare
+   *
+   * @When invio una richiesta POST alla pagina :pagina
+   * @When invio una richiesta POST alla pagina :pagina con parametri:
+   */
+  public function invioPostAllaPagina($pagina, TableNode $tabella=null): void {
+    $parametri = [];
+    if ($tabella) {
+      foreach ($tabella->getHash() as $row) {
+        foreach ($row as $key=>$val) {
+          $parametri[$key] = $this->convertText($val);
+        }
+      }
+    }
+    $url = $this->getMinkParameter('base_url').$this->router->generate($pagina, $parametri);
+    // invia il POST tramite un form, come fa l'applicazione per le azioni di modifica
+    $script = "var form=document.createElement('form');".
+      "form.method='POST';form.action=".json_encode($url).";".
+      "document.body.appendChild(form);form.submit();";
+    try {
+      $this->session->executeScript($script);
+    } catch (Exception) {
+      // la navigazione può interrompere l'esecuzione dello script
+    }
+    $this->waitForPage();
+    $this->log('POST', 'Pagina: '.$pagina);
+  }
+
+  /**
    * Esegue il login dell'utente indicato (sceglie il primo profilo se più di uno)
    *  $username: nome utente
    *  $password: password dell'utente o null per password uguale alla username
@@ -342,7 +373,11 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediRigheNellaTabella($numero, $indice=1): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
+    if (!isset($tabelle[$indice - 1])) {
+      // una pagina senza tabella equivale a zero righe
+      $this->assertEquals(0, $numero, 'Tabella non trovata');
+      return;
+    }
     $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
     $this->assertEquals($numero, count($righe));
   }
@@ -359,7 +394,11 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediAlmenoRigheNellaTabella($numero, $indice=1): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
+    if (!isset($tabelle[$indice - 1])) {
+      // una pagina senza tabella equivale a zero righe
+      $this->assertTrue($numero <= 0, 'Tabella non trovata');
+      return;
+    }
     $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
     $this->assertTrue($numero <= count($righe));
   }
@@ -376,7 +415,11 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediAlMassimoRigheNellaTabella($numero, $indice=1): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
+    if (!isset($tabelle[$indice - 1])) {
+      // una pagina senza tabella equivale a zero righe
+      $this->assertTrue($numero >= 0, 'Tabella non trovata');
+      return;
+    }
     $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
     $this->assertTrue($numero >= count($righe));
   }
@@ -403,8 +446,9 @@ class BrowserContext extends BaseContext implements Context {
     $this->assertNotEmpty($tabelle[$indice - 1]);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
     $this->assertEquals(count($intestazioni), count($colonne->getRow(0)));
+    $intestazioniTesto = $this->parseTableRow($intestazioni);
     foreach ($colonne->getRow(0) as $key=>$val) {
-      $this->assertEquals(strtolower(trim((string) $val)), strtolower(trim($intestazioni[$key]->getText())));
+      $this->assertEquals(strtolower(trim((string) $val)), strtolower(trim((string) $intestazioniTesto[$key])));
     }
   }
 
@@ -894,6 +938,7 @@ class BrowserContext extends BaseContext implements Context {
     $option->click();
     // attesa per completare le modifiche sulla pagina
     sleep(1);
+    $this->waitForPage();
   }
 
   /**
@@ -974,6 +1019,34 @@ class BrowserContext extends BaseContext implements Context {
     $this->assertNotEmpty($field);
     $option = $field->find('named', ['option', $valore]);
     $this->assertTrue($option && $option->isSelected());
+  }
+
+  /**
+   * Controlla se l'opzione è presente in lista di scelta tramite SELECT
+   *  $valore: testo o valore dell'opzione
+   *  $testoParam: lista identifica tramite attributo id|name
+   *
+   * @Then la lista :testoParam contiene l'opzione :valore
+   */
+  public function laListaContieneOpzione($testoParam, $valore): void {
+    $field = $this->session->getPage()->findField($testoParam);
+    if (!$field || !$field->isVisible()) {
+      $field = null;
+      $labels = $this->session->getPage()->findAll('css', 'label:contains("'.$testoParam.'")');
+      foreach ($labels as $lab) {
+        if (!$lab->isVisible()) {
+          continue;
+        }
+        $id = $lab->getAttribute('for');
+        $field = $this->session->getPage()->find('css', 'SELECT[id="'.$id.'"]');
+        if ($field) {
+          break;
+        }
+      }
+    }
+    $this->assertNotEmpty($field);
+    $option = $field->find('named', ['option', $valore]);
+    $this->assertNotEmpty($option, '+++ opzione non trovata: '.$valore);
   }
 
   /**
@@ -1507,12 +1580,19 @@ class BrowserContext extends BaseContext implements Context {
     if ($intestazioni) {
       $this->assertNotEmpty($header);
     }
+    // colonne delle azioni: il testo dei pulsanti è solo per gli screen reader e va mantenuto
+    $actionColumns = [];
+    foreach ($header as $i=>$nome) {
+      if (preg_match('/^(azioni|azione|comandi|operazioni)$/i', trim((string) $nome))) {
+        $actionColumns[] = $i;
+      }
+    }
     // contenuto
     $bodyRows = $table->findAll('xpath', '/tbody/tr');
     $body = [];
     $rowspan = [];
     foreach ($bodyRows as $bodyRow) {
-      $row = $this->parseTableRow($bodyRow->findAll('xpath', '/td'), $rowspan);
+      $row = $this->parseTableRow($bodyRow->findAll('xpath', '/td'), $rowspan, $actionColumns);
       if ($intestazioni) {
         $this->assertTrue(count($header) == count($row));
       }
@@ -1527,10 +1607,11 @@ class BrowserContext extends BaseContext implements Context {
    *
    * @param array $cellList Lista delle celle della tabella
    * @param array $rowspan Conserva indicazioni di ROWSPAN (valori modificati da funzione)
+   * @param array $actionColumns Indici delle colonne delle azioni (testo dei pulsanti da mantenere)
    *
    * @return array Lista dei valori presenti nelle celle
    */
-  protected function parseTableRow($cellList, &$rowspan=[]): array {
+  protected function parseTableRow($cellList, &$rowspan=[], $actionColumns=[]): array {
     $row = [];
     $col = 0;
     foreach ($cellList as $cell) {
@@ -1543,7 +1624,14 @@ class BrowserContext extends BaseContext implements Context {
         }
         $col++;
       }
-      $text = trim((string) preg_replace('/\s+/', ' ', (string) $cell->getText()));
+      $text = (string) $cell->getText();
+      if (!in_array($col, $actionColumns, true)) {
+        // ignora i testi riservati agli screen reader (es. etichette dei pulsanti nei dati)
+        foreach ($cell->findAll('css', '.sr-only') as $sr) {
+          $text = str_ireplace($sr->getText(), '', $text);
+        }
+      }
+      $text = trim((string) preg_replace('/\s+/', ' ', $text));
       if ($cell->hasAttribute('rowspan')) {
         $rspan = (int) $cell->getAttribute('rowspan');
         if ($rspan > 1) {

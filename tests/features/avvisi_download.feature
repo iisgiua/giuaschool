@@ -76,7 +76,7 @@ Scenario: scarica da gestione l'allegato di un avviso
 Scenario: scarica da bacheca l'allegato di un avviso
   Dato login utente "@alunno_4A_1:username"
   E pagina attiva "avvisi_bacheca"
-  Quando premi pulsante "Visualizza"
+  Quando premi pulsante "Visualizza l'avviso"
   E copia file "tests/data/documento-pdf.pdf" in "FILES/upload/avvisi/documento-pdf.pdf"
   E click su "Scarica l'allegato" e scarica file con nome "Allegato-1.pdf" e dimensione "61514"
   E click su "Visualizza l'allegato" e scarica file con nome "Allegato-1.pdf" e dimensione "61514"
@@ -84,8 +84,6 @@ Scenario: scarica da bacheca l'allegato di un avviso
 # NB: questo scenario fallisce se eseguito nei giorni festivi
 Scenario: scarica dal registro di classe l'allegato di un avviso
   Dato login utente "@docente_curricolare_1:username"
-  E pagina attiva "lezioni_classe"
-  Quando premi pulsante "4ª A"
   E vai alla pagina "lezioni_registro_firme" con parametri:
     | cattedra | classe        | data       | vista |
     | 0        | @classe_4A:id | 2023-04-01 | G     |
