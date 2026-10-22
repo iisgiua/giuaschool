@@ -1,0 +1,262 @@
+####################
+# MiniExtraFixtures - dati per le tabelle rimaste vuote nel set demo ridotto
+#
+# Copre le entità non gestite né dalle fixture Mini* né da DemoPopulator:
+#   allegati, annotazioni, API, autenticazione dispositivi, cambi classe,
+#   comunicazione-classe, deroghe assenza, log, orario docente, provisioning,
+#   raggruppamenti e storico di esiti/voti.
+# I riferimenti puntano agli utenti e alle classi del set ridotto (Mini*).
+####################
+
+
+include:
+  - MiniDatiFixtures.yml
+  - DemoOrarioFixtures.yml
+  - MateriaFixtures.yml
+
+
+# ----- allegati delle comunicazioni (bacheca) -----
+# I file fisici vanno copiati in FILES/upload/avvisi e FILES/upload/circolari
+# (vedi tests/data/documento-*).
+App\Entity\Allegato:
+  allegato_mini_avviso_pdf:
+    titolo: 'Documento PDF mini'
+    nome: 'documento-pdf-mini'
+    estensione: 'pdf'
+    dimensione: 61514
+    file: 'documento-pdf'
+    comunicazione: '@avviso_mini_C'
+  allegato_mini_circolare_docx:
+    titolo: 'Documento Word mini'
+    nome: 'documento-docx-mini'
+    estensione: 'docx'
+    dimensione: 45134
+    file: 'documento-docx'
+    comunicazione: '@circolare_mini'
+  allegato_mini_avviso_xlsx:
+    titolo: 'Documento Excel mini'
+    nome: 'documento-xlsx-mini'
+    estensione: 'xlsx'
+    dimensione: 66812
+    file: 'documento-xlsx'
+    comunicazione: '@avviso_mini_C'
+
+
+# ----- annotazioni sul registro -----
+App\Entity\Annotazione:
+  annotazione_mini_visibile:
+    data: '<dataFissa("05/10/2026")>'
+    testo: 'Annotazione mini visibile anche ai genitori.'
+    visibile: true
+    avviso: '@avviso_mini_C'
+    classe: '@classe_1A'
+    docente: '@docente_mini'
+  annotazione_mini_riservata:
+    data: '<dataFissa("12/10/2026")>'
+    testo: 'Annotazione mini riservata al personale.'
+    visibile: false
+    avviso: '@avviso_mini_E'
+    classe: '@classe_1A'
+    docente: '@docente_mini'
+
+
+# ----- API per servizi esterni -----
+App\Entity\Api:
+  api_mini_attiva:
+    nome: 'Servizio demo (attivo)'
+    token (unique): 'token-demo-mini-attivo'
+    attiva: true
+    dati: '<(array())>'
+  api_mini_disattivata:
+    nome: 'Servizio demo (disattivato)'
+    token (unique): 'token-demo-mini-disattivato'
+    attiva: false
+    dati: '<(array())>'
+
+
+# ----- autenticazione dei dispositivi -----
+App\Entity\AutenticazioneDispositivo:
+  autenticazione_dispositivo_mini_docente:
+    idPubblico (unique): '<uuid()>'
+    utente: '@docente_mini'
+    casuale: '<uuid()>'
+    scadenzaRichiesta: '<dateTimeBetween("-2 days", "-1 day")>'
+    richiestaUsata: true
+    token (unique): '<uuid()>'
+    scadenzaToken: '<dateTimeBetween("now", "+1 month")>'
+    tokenUsato: false
+  autenticazione_dispositivo_mini_alunno:
+    idPubblico (unique): '<uuid()>'
+    utente: '@alunno_mini'
+    casuale: '<uuid()>'
+    scadenzaRichiesta: '<dateTimeBetween("now", "+1 day")>'
+    richiestaUsata: false
+    token (unique): '<uuid()>'
+    scadenzaToken: '<dateTimeBetween("-1 month", "-1 day")>'
+    tokenUsato: true
+
+
+# ----- cambi classe -----
+App\Entity\CambioClasse:
+  cambio_classe_mini_altra_scuola:
+    alunno: '@alunno_mini'
+    inizio: '<date_create("2025-09-15")>'
+    fine: '<date_create("2026-06-30")>'
+    classe:
+    note: 'Proveniente da altra scuola.'
+  cambio_classe_mini_interno:
+    alunno: '@alunno_mini'
+    inizio: '<date_create("2026-09-01")>'
+    fine: '<date_create("2026-09-14")>'
+    classe: '@classe_1B'
+    note: 'Inserito nella 1A al termine delle operazioni di accoglienza.'
+
+
+# ----- comunicazioni destinate alle classi -----
+App\Entity\ComunicazioneClasse:
+  comunicazione_classe_mini_circolare_1A:
+    comunicazione: '@circolare_mini'
+    classe: '@classe_1A'
+    letto:
+  comunicazione_classe_mini_circolare_1B:
+    comunicazione: '@circolare_mini'
+    classe: '@classe_1B'
+    letto: '<dateTimeBetween("-1 week", "now")>'
+  comunicazione_classe_mini_avviso_1A:
+    comunicazione: '@avviso_mini_C'
+    classe: '@classe_1A'
+    letto:
+
+
+# ----- deroghe al conteggio finale delle assenze -----
+App\Entity\DerogaAssenza:
+  deroga_assenza_mini_malattia:
+    data: '<dataFissa("24/09/2026")>'
+    alunno: '@alunno_mini'
+    motivazione: 'Assenza per malattia: deroga al conteggio finale.'
+  deroga_assenza_mini_visita:
+    data: '<dataFissa("29/09/2026")>'
+    alunno: '@alunno_mini'
+    motivazione: 'Visita specialistica: deroga al conteggio finale.'
+
+
+# ----- orario personale del docente -----
+App\Entity\OrarioDocente:
+  orario_docente_mini_1:
+    orario: '@orario_definitivo_1'
+    giorno: 1
+    ora: 1
+    cattedra: '@cattedra_mini_curricolare'
+  orario_docente_mini_2:
+    orario: '@orario_definitivo_1'
+    giorno: 2
+    ora: 2
+    cattedra: '@cattedra_mini_curricolare'
+  orario_docente_mini_3:
+    orario: '@orario_definitivo_1'
+    giorno: 3
+    ora: 3
+    cattedra: '@cattedra_mini_religione'
+  orario_docente_mini_4:
+    orario: '@orario_definitivo_1'
+    giorno: 4
+    ora: 4
+    cattedra: '@cattedra_mini_sostegno'
+  orario_docente_mini_5:
+    orario: '@orario_definitivo_1'
+    giorno: 5
+    ora: 5
+    cattedra: '@cattedra_mini_curricolare'
+
+
+# ----- comandi in attesa di provisioning -----
+# Solo stati 'P' (processato) ed 'E' (errore): nessun comando va eseguito.
+App\Entity\Provisioning:
+  provisioning_mini_processato:
+    utente: '@docente_mini'
+    dati: '<(array("sistema" => "GSuite"))>'
+    funzione: 'creaUtente'
+    stato: 'P'
+  provisioning_mini_errore:
+    utente: '@alunno_mini'
+    dati: '<(array("sistema" => "Moodle"))>'
+    funzione: 'creaUtente'
+    stato: 'E'
+
+
+# ----- raggruppamenti di alunni -----
+App\Entity\Raggruppamento:
+  raggruppamento_mini_recupero:
+    nome (unique): 'Gruppo mini di recupero'
+    alunni: '<collection(@alunno_mini)>'
+  raggruppamento_mini_sportivo:
+    nome (unique): 'Gruppo mini sportivo'
+    alunni: '<collection(@alunno_mini)>'
+
+
+# ----- storico dell'anno scolastico precedente -----
+App\Entity\StoricoEsito:
+  storico_esito_mini_F:
+    classe: '3C'
+    esito: 'A'
+    periodo: 'F'
+    media: 7.75
+    credito: 0
+    creditoPrecedente: 0
+    alunno: '@alunno_mini'
+    dati: '<array_combine(<words(3)>, <sentences(3)>)>'
+App\Entity\StoricoVoto:
+  storico_voto_mini_{1..3}:
+    voto: '<numberBetween(6, 9)>'
+    carenze: '50%? <text()>: <strval("")>'
+    dati: '<array_combine(<words(3)>, <sentences(3)>)>'
+    storicoEsito: '@storico_esito_mini_F'
+    materia: '@materia_curricolare_<current()>'
+
+
+# ----- registro delle azioni degli utenti -----
+App\Entity\Log:
+  log_mini_accesso_docente:
+    utente: '@docente_mini'
+    username: '<($utente->getUsername())>'
+    ruolo: '<($utente->getRoles()[0])>'
+    alias:
+    ip: '192.168.1.30'
+    origine: 'App\Controller\SistemaController::login'
+    tipo: 'A'
+    categoria: 'ACCESSO'
+    azione: 'Accesso effettuato'
+    dati: '<(array())>'
+  log_mini_accesso_genitore:
+    utente: '@genitore_mini'
+    username: '<($utente->getUsername())>'
+    ruolo: '<($utente->getRoles()[0])>'
+    alias:
+    ip: '192.168.1.31'
+    origine: 'App\Controller\SistemaController::login'
+    tipo: 'A'
+    categoria: 'ACCESSO'
+    azione: 'Accesso effettuato'
+    dati: '<(array())>'
+  log_mini_crea_avviso:
+    utente: '@staff_mini'
+    username: '<($utente->getUsername())>'
+    ruolo: '<($utente->getRoles()[0])>'
+    alias:
+    ip: '192.168.1.32'
+    origine: 'App\Controller\AvvisiController::gestione'
+    tipo: 'C'
+    categoria: 'AVVISI'
+    azione: 'Crea avviso'
+    dati: '<(array("titolo" => "Avviso mini per tutti"))>'
+  log_mini_appello:
+    utente: '@docente_mini'
+    username: '<($utente->getUsername())>'
+    ruolo: '<($utente->getRoles()[0])>'
+    alias:
+    ip: '192.168.1.30'
+    origine: 'App\Controller\RegistroController::appello'
+    tipo: 'A'
+    categoria: 'ASSENZE'
+    azione: 'Appello'
+    dati: '<(array())>'

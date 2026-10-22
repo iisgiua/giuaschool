@@ -5,8 +5,10 @@
 # materie, definizioni) ma genera un solo utente per categoria:
 # la classe 1A è piena di dati, la 1B resta vuota. Il resto dei dati
 # (lezioni, valutazioni, scrutini, comunicazioni, colloqui, presenze, ...)
-# viene completato automaticamente da DemoPopulator, così ogni sezione
-# risulta popolata e tutti i bottoni restano attivi per quegli 8 utenti.
+# viene completato automaticamente da DemoPopulator; MiniExtraFixtures.yml
+# copre le tabelle residue (allegati, annotazioni, API, log, orario docente,
+# raggruppamenti, storico di esiti/voti, ...), così ogni sezione risulta
+# popolata e tutti i bottoni restano attivi per quegli 8 utenti.
 #
 # Uso:
 #   php bin/console app:alice:load _demoMini --env=test
@@ -31,6 +33,7 @@ include:
   - FestivitaFixtures.yml
   - ScansioneOrariaFixtures.yml
   - OrarioFixtures.yml
+  - DemoOrarioFixtures.yml
   - ModuloFormativoFixtures.yml
   - AmministratoreFixtures.yml
   - PresideFixtures.yml
@@ -38,3 +41,4 @@ include:
   - MiniCattedraFixtures.yml
   - MiniDatiFixtures.yml
   - MiniRegistroFixtures.yml
+  - MiniExtraFixtures.yml
