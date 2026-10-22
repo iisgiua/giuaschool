@@ -50,10 +50,10 @@
     <link rel="mask-icon" href="{{ asset('icons/safari-pinned-tab.svg') }}" color="#5bbad5">
   </head>
   <body>
-    <p class="gs-mb-0">
-      <a href="#gs-main" class="sr-only sr-only-focusable">Vai al contenuto</a>
-      <a href="#gs-footer" class="sr-only sr-only-focusable">Vai a fine pagina</a>
-    </p>
+    <div class="skiplinks">
+      <a href="#gs-main">Vai al contenuto</a>
+      <a href="#gs-footer">Vai a fine pagina</a>
+    </div>
 
     <!-- pagina -->
     <div class="gs-page-container" id="gs-top">
@@ -119,7 +119,7 @@
 {% endblock %}
           <!-- contenuto -->
           <div class="gs-main-container clearfix">
-            <div id="gs-main">
+            <div id="gs-main" tabindex="-1">
 {% block pagina_contenuto %}
 {% endblock %}
             </div>

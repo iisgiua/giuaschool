@@ -46,8 +46,8 @@
 <body>
   {## # scorciatoie per tastiera/screen reader # ##}
   <div class="skiplinks">
-    <a class="sr-only sr-only-focusable" href="#gs-main">Vai al contenuto</a>
-    <a class="sr-only sr-only-focusable" href="#gs-footer">Vai a fine pagina</a>
+    <a href="#gs-main">Vai al contenuto</a>
+    <a href="#gs-footer">Vai a fine pagina</a>
   </div>
   {## # FINE scorciatoie per tastiera/screen reader # ##}
   
@@ -167,7 +167,7 @@
     <div class="gs-content">
       {## # contenuto pagina # ##}
       <div class="gs-main-container clearfix">
-        <div id="gs-main">
+        <div id="gs-main" tabindex="-1">
           {% block pagina_contenuto %}
           {% endblock %}
         </div>

@@ -210,28 +210,53 @@ code {
   border-bottom: 0 !important;
 }
 
+/* Scorciatoie "Vai al contenuto" / "Vai a fine pagina": restano fuori schermo finché
+   non ricevono il focus, poi prendono il posto della topbar (stessa larghezza e stessa
+   altezza dell'header fisso, z-index 1050), con il testo centrato e ben leggibile.
+   Non usano .sr-only: con quelle classi il link diventerebbe statico e finirebbe
+   dietro l'header, risultando invisibile. */
 .skiplinks {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 9999;
+  height: 0;
+  z-index: 1300;
 }
 
 .skiplinks a {
   position: absolute;
-  top: -100px;
+  top: -6rem;
   left: 0;
-  background: var(--gs-primary);
-  color: white;
-  padding: 1rem;
-  z-index: 10000;
-  transition: top 0.3s;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--gs-hdr-total);
+  margin: 0;
+  padding: 0 1rem;
+  overflow: visible;
+  clip: auto;
+  white-space: nowrap;
+  /* la base del font cambia tra area admin (16px) e area normale (10px su html):
+     il testo della scorciatoia deve restare leggibile in entrambe */
+  font-size: max(15px, 1rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  color: #ffffff;
+  background-color: var(--gs-primary-strong);
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.35);
+  transition: top 0.15s ease-in-out;
 }
 
-.skiplinks a:focus {
+.skiplinks a:focus,
+.skiplinks a:focus-visible {
   top: 0;
-  outline: none;
+  color: #ffffff;
+  text-decoration: none;
+  outline: 3px solid #ffffff;
+  outline-offset: -7px;
 }
 
 
@@ -271,6 +296,12 @@ code {
   height: 100%;
   width: 100%;
   min-width: 0;
+}
+
+/* #gs-main riceve il focus dalle scorciatoie "Vai al contenuto": è un contenitore,
+   non un controllo, quindi non deve disegnare il contorno di focus */
+#gs-main:focus {
+  outline: none;
 }
 
 
