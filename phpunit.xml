@@ -16,6 +16,9 @@
     <server name="SYMFONY_DEPRECATIONS_HELPER" value="disabled" />
   </php>
   <testsuites>
+    <testsuite name="controller">
+      <directory>./tests/UnitTest/Controller</directory>
+    </testsuite>
     <testsuite name="entity">
       <directory>./tests/UnitTest/Entity</directory>
     </testsuite>
