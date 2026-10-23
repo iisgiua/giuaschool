@@ -30,9 +30,9 @@ class OAuth2Controller extends BaseController {
    */
   #[Route(path: '/login/gsuite', name: 'login_gsuite')]
   public function google(ClientRegistry $clientRegistry): Response {
-    // redirezione all'ID provider di Google
-    return $clientRegistry->getClient('gsuite')->redirect([], []);
-	}
+    // redirezione all'ID provider di Google, chiedendo sempre la scelta dell'account
+    return $clientRegistry->getClient('gsuite')->redirect([], ['prompt' => 'select_account']);
+  }
 
   /**
    * Avvia l'autenticazione speciale su provider esterno Google Workspace.
@@ -47,22 +47,7 @@ class OAuth2Controller extends BaseController {
     $request->getSession()->set('login_speciale', 1);
     // redirezione all'ID provider di Google
     return $this->redirectToRoute('login_gsuite');
-	}
-
-  /**
-   * Avvia l'autenticazione speciale su provider esterno Google Workspace.
-   *
-   * @param Request $request Pagina richiesta
-   *
-   * @return Response Redirezione al servizio richiesto
-   */
-  #[Route(path: '/login/gsuite/utente', name: 'login_gsuiteUtente')]
-  public function googleUtente(Request $request): Response {
-    // imposta sessione
-    $request->getSession()->set('login_speciale', 1);
-    // redirezione all'ID provider di Google
-    return $this->redirectToRoute('login_gsuite');
-	}
+  }
 
   /**
    * Esegue autenticazione su Google Workspace tramite GsuiteAuthenticator

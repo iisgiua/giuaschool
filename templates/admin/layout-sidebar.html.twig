@@ -69,11 +69,6 @@
           {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}, false) }}
           <strong class="gs-hdr-exit-label">{{ 'label.alias'|trans|upper }}</strong>
         </a>
-        {% elseif is_granted('ROLE_DOCENTE') and app.session.get('/APP/UTENTE/tipo_accesso') == 'Google' %}
-        <a class="gs-hdr-exit" href="#" onClick="logoutGoogle()" title="Esci dal Registro Elettronico" aria-label="Esci dal Registro Elettronico">
-          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
-          <strong class="gs-hdr-exit-label">{{ 'label.logout'|trans|upper }}</strong>
-        </a>
         {% else %}
         <a class="gs-hdr-exit" href="{{ path('logout') }}" title="Esci dal Registro Elettronico" aria-label="Esci dal Registro Elettronico">
           {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}, false) }}
