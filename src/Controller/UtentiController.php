@@ -205,11 +205,12 @@ class UtentiController extends BaseController {
   }
 
   /**
-   * Abilita i docenti all'uso dell'OTP.
+   * Gestione dell'OTP dell'utente connesso: attivazione e disattivazione.
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param OtpUtil $otp Gestione del codice OTP
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -218,7 +219,7 @@ class UtentiController extends BaseController {
   #[Route(path: '/utenti/otp/', name: 'utenti_otp', methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_UTENTE')]
   public function otp(Request $request, TranslatorInterface $trans, OtpUtil $otp,
-                      LogHandler $dblogger): Response {
+                      UserPasswordHasherInterface $hasher, LogHandler $dblogger): Response {
     // inizializza
     $reset = false;
     $qrcode = null;
@@ -238,6 +239,8 @@ class UtentiController extends BaseController {
       $reset = true;
       // form reset OTP
       $form = $this->container->get('form.factory')->createNamedBuilder('utenti_otp', FormType::class)
+        ->add('current_password', PasswordType::class, ['label' => 'label.current_password',
+          'required' => true])
         ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
           'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
         ->add('submit', SubmitType::class, ['label' => 'label.submit',
@@ -245,15 +248,22 @@ class UtentiController extends BaseController {
         ->getForm();
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
-        // reset otp
-        $this->getUser()->setOtp(null);
-        $this->em->flush();
-        // log azione
-        $dblogger->logAzione('SICUREZZA', 'Disattivazione OTP');
-        // messaggio di successo
-        $this->addFlash('success', 'message.otp_disabilitato');
-        // redirezione
-        return $this->redirectToRoute('utenti_profilo');
+        // controlla la password prima di disattivare il secondo fattore
+        if (!$hasher->isPasswordValid($this->getUser(), $form->get('current_password')->getData())) {
+          // password errata
+          $form->get('current_password')->addError(
+            new FormError($trans->trans('password.wrong', [], 'validators')));
+        } else {
+          // reset otp
+          $this->getUser()->setOtp(null);
+          $this->em->flush();
+          // log azione
+          $dblogger->logAzione('SICUREZZA', 'Disattivazione OTP');
+          // messaggio di successo
+          $this->addFlash('success', 'message.otp_disabilitato');
+          // redirezione
+          return $this->redirectToRoute('utenti_profilo');
+        }
       }
     } else {
       // prima associazione con un dispositivo
