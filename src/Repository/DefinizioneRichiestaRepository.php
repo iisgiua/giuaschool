@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 use App\Entity\DefinizioneConsultazione;
+use App\Entity\Docente;
 use App\Entity\Richiesta;
 use DateTime;
 use App\Entity\Alunno;
@@ -48,8 +49,12 @@ class DefinizioneRichiestaRepository extends BaseRepository {
    */
   public function lista(Utente $utente): array {
     $ruolo = $utente->getCodiceRuolo();
-    $funzioni = array_map(fn($f) => "FIND_IN_SET('".$ruolo.$f."', dr.richiedenti) > 0",
-      $utente->getCodiceFunzioni());
+    $codiciFunzioni = $utente->getCodiceFunzioni();
+    if ($ruolo == 'D' && $this->getEntityManager()->getRepository(Docente::class)->seCoordinatore($utente)) {
+      // funzione coordinatore di classe
+      $codiciFunzioni[] = 'C';
+    }
+    $funzioni = array_map(fn($f) => "FIND_IN_SET('".$ruolo.$f."', dr.richiedenti) > 0", $codiciFunzioni);
     $sql = implode(' OR ', $funzioni);
     // opzione sede
     $classe = ($utente instanceOf Alunno) ? $utente->getClasse() :

@@ -17,8 +17,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * Docente - dati dei docenti
  *
- *
- *
  * @author Antonello Dessì
  */
 #[ORM\Entity(repositoryClass: DocenteRepository::class)]
@@ -110,7 +108,9 @@ class Docente extends Utente {
 
   /**
    * Restituisce i codici corrispondenti alle funzioni svolte nel ruolo dell'utente
-   * Le possibili funzioni sono: N=nessuna, B=responsabile bes, S=responsabile sicurezza, I=rappresentante di istituto, R=rappresentante RSU
+   * Le possibili funzioni sono: N=nessuna, C=coordinatore, B=responsabile bes, S=responsabile sicurezza, I=rappresentante di istituto, R=rappresentante RSU
+   * NB: la funzione di coordinatore è legata alla classe e non al docente, quindi non viene restituita qui.
+   *     Per sapere se un docente è coordinatore bisogna usare il repository
    *
    * @return array Lista della codifica delle funzioni
    */

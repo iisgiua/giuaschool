@@ -180,6 +180,7 @@ class RichiestaRepository extends BaseRepository {
    * Restituisce la lista dei moduli della classe
    *
    * @param Utente $utente Utente che gestisce i moduli
+   * @param string $tipo Codifica del tipo di richiesta
    * @param array $criteri Criteri di ricerca dei moduli
    * @param int $pagina Numero di pagina da visualizzare; se -1 nessuna paginazione
    *
@@ -228,7 +229,7 @@ class RichiestaRepository extends BaseRepository {
   }
 
   /**
-   * Restituisce la lista dei moduli inviati da alunni/genitori
+   * Restituisce la lista dei moduli inviati allo staff da parte di alunni (non gestiti da altre pagine)
    *
    * @param Utente $utente Utente che gestisce i moduli
    * @param array $criteri Criteri di ricerca dei moduli di richiesta
@@ -236,7 +237,7 @@ class RichiestaRepository extends BaseRepository {
    *
    * @return array Lista associativa con i risultati
    */
-  public function listaModuliAlunni(Utente $utente, array $criteri, int $pagina): array {
+  public function listaModuliStaff(Utente $utente, array $criteri, int $pagina): array {
     // controllo destinatario
     $ruolo = $utente->getCodiceRuolo();
     $funzioni = array_map(fn($f) => "FIND_IN_SET('".$ruolo.$f."', dr.destinatari) > 0",

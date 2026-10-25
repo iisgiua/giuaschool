@@ -11,6 +11,10 @@
   <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="form-inline gs-mb-2">
     <div id="filtro">
       <div class="form-group">
+        <label class="sr-only control-label" for="filtro_tipo">{{ form[0].tipo.vars.label|trans }}</label>
+        {{ form_widget(form[0].tipo) }}
+      </div>
+      <div class="form-group">
         <label class="sr-only control-label" for="filtro_sede">{{ form[0].sede.vars.label|trans }}</label>
         {{ form_widget(form[0].sede) }}
       </div>

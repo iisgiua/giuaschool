@@ -127,9 +127,15 @@ class FiltroType extends AbstractType {
     } elseif ($options['form_mode'] == 'evacuazione') {
       // form moduli evacuazione
       $builder
-        ->add('sede', ChoiceType::class, ['label' => 'label.sede',
+        ->add('tipo', ChoiceType::class, ['label' => 'label.modulo_tipo',
           'data' => $options['values'][0],
-          'choices' => $options['values'][1],
+          'choices' => ['label.richiesta_tipo_V' => 'V', 'label.richiesta_tipo_Z' => 'Z'],
+          'attr' => ['title' => 'label.modulo_tipo'],
+          'label_attr' => ['class' => 'sr-only'],
+          'required' => true])
+        ->add('sede', ChoiceType::class, ['label' => 'label.sede',
+          'data' => $options['values'][1],
+          'choices' => $options['values'][2],
           'placeholder' => 'label.qualsiasi_sede',
           'choice_translation_domain' => false,
           'choice_value' => 'id',
@@ -137,8 +143,8 @@ class FiltroType extends AbstractType {
           'label_attr' => ['class' => 'sr-only'],
           'required' => false])
         ->add('classe', ChoiceType::class, ['label' => 'label.classe',
-          'data' => $options['values'][2],
-          'choices' => $options['values'][3],
+          'data' => $options['values'][3],
+          'choices' => $options['values'][4],
           'placeholder' => 'label.qualsiasi_classe',
           'choice_translation_domain' => false,
           'choice_value' => 'id',
@@ -146,7 +152,7 @@ class FiltroType extends AbstractType {
           'label_attr' => ['class' => 'sr-only'],
           'required' => false]);
     } elseif ($options['form_mode'] == 'moduli') {
-      // form moduli evacuazione
+      // form altri moduli
       $builder
         ->add('tipo', ChoiceType::class, ['label' => 'label.modulo_tipo',
           'data' => $options['values'][0],

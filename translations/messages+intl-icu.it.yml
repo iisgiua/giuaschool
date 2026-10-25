@@ -589,6 +589,7 @@ label.ruolo_funzione_AN: Alunni
 label.ruolo_funzione_PN: Dirigente
 label.ruolo_funzione_SN: Staff
 label.ruolo_funzione_DN: Docenti
+label.ruolo_funzione_DC: Coordinatori
 label.ruolo_funzione_TN: ATA
 label.nome_campo: Nome del campo
 label.tipo_campo: Tipo del campo
@@ -613,6 +614,8 @@ label.richiedi_giustificazione: Chiedere la giustificazione?
 label.richiesta_tipo: Modulo di richiesta
 label.richiesta_tipo_E: Deroga orario ingresso
 label.richiesta_tipo_D: Deroga orario uscita
+label.richiesta_tipo_V: Prove di evacuazione
+label.richiesta_tipo_Z: Designazione alunni
 label.richiesta_tipo_altre: Altri moduli
 label.richiesta_tipo_tutte: Tutti i moduli
 label.richiesta_stato: Stato della richiesta
@@ -960,6 +963,10 @@ page.autorizzazioni.dettagli: Dettagli Autorizzazione
 title.autorizzazioni.dettagli: Dettagli per l'autorizzazione dell'attività
 page.sistema.spid: Configura SPID/CIE
 title.sistema.spid: Configurazione accesso SPID/CIE tramite gateway del MIM
+page.richieste.coordinatore: Designazioni Evacuazione
+title.richieste.coordinatore: Designazioni studenti per l'evacuazione
+page.richieste.coordinatore_add: Designazioni Evacuazione
+title.richieste.coordinatore_add: Designazioni studenti per l'evacuazione
 
 
 page.agenda_compito: Agenda Compiti
@@ -1542,6 +1549,7 @@ message.no_moduli_classe: Non sono presenti moduli per la classe.
 message.richieste_add: Inserisci i dati nel modulo e conferma l'invio.
 message.modulo_add: Inserisci i dati nel modulo e conferma l'invio.
 message.richieste_classe_add: Inserisci i dati nel modulo e conferma l'invio.
+message.richieste_coordinatore_add: Inserisci i dati nel modulo e conferma l'invio.
 message.cancella_richiesta: Verrà cancellata la richiesta inviata. Vuoi continuare?
 message.cancella_risposta: Verrà cancellata la risposta inviata. Vuoi continuare?
 message.richieste_remove: La richiesta sarà segnata come rimossa. Puoi inserire un messaggio di risposta che sarà visualizzato dall'utente che ha effettuato la richiesta.
