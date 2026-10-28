@@ -45,8 +45,7 @@ class UtenteCreatoListener {
     $utente = $event->getUtente();
     // provisioning su sistema esterno
     $idProvider = $this->em->getRepository(Configurazione::class)->getParametro('id_provider');
-    $idProviderTipo = $this->em->getRepository(Configurazione::class)->getParametro('id_provider_tipo');
-    if ($idProvider && $utente->controllaRuolo($idProviderTipo)) {
+    if ($idProvider && $utente->controllaRuolo('A,D,S,P')) {
       $provisioning = (new Provisioning())
         ->setUtente($utente)
         ->setFunzione('creaUtente')
