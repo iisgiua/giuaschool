@@ -193,7 +193,6 @@ COPY --from=database_builder /var/www/giuaschool/tests/temp/mysql/ /var/lib/mysq
 # installa ambiente di produzione
 RUN --mount=type=cache,target=/composer-cache \
     COMPOSER_CACHE_DIR=/composer-cache composer install -q --no-dev --no-scripts && \
-    rm -f src/Command/AliceLoadCommand.php  && \
     # crea directory di ambiente
     mkdir -p var/cache/prod var/sessions/prod && \
     # pulizia file inutili

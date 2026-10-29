@@ -22,3 +22,11 @@ services:
   validator.traceable_validator:
     class: Symfony\Component\Validator\Validator\TraceableValidator
     public: true
+
+  # registrato qui perché in produzione Faker e Alice non sono disponibili
+  App\Command\AliceLoadCommand:
+    arguments:
+      $dirProgetto: '%kernel.project_dir%'
+    tags:
+      - { name: console.command }
+      - { name: monolog.logger, channel: command }
