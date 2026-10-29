@@ -362,7 +362,9 @@ class ScrutinioUtil {
       ->select('d.periodo,s.stato')
       ->leftJoin(Scrutinio::class, 's', 'WITH', 's.periodo=d.periodo AND s.classe=:classe')
       ->where($dataAttivazione.'<=:data')
+      ->andWhere("(s.stato IS NULL OR s.stato!=:chiuso)")
 			->setParameter('data', (new DateTime())->format('Y-m-d'))
+			->setParameter('chiuso', 'C')
 			->setParameter('classe', $classe)
       ->orderBy('d.data', 'DESC')
       ->setMaxResults(1)
@@ -736,7 +738,9 @@ class ScrutinioUtil {
    * @return array Dati formattati come un array associativo
    */
   public function quadroProposte(Docente $docente, Classe $classe, $periodo) {
-    $dati = [];
+    // inizializza le liste: una classe senza alunni o senza cattedre non deve
+    // lasciare indefinite le chiavi usate da query e template
+    $dati = ['alunni' => [], 'materie' => []];
     // legge alunni
     if ($periodo == 'P') {
       // alunni in classe alla data di fine periodo
@@ -1033,7 +1037,10 @@ class ScrutinioUtil {
       return null;
     }
     // legge docenti del CdC (esclusi potenziamento)
-    if ($periodo == 'X') {
+    $docenti = [];
+    $dati['form']['docenti'] = [];
+    $docentiScrutinio = $scrutinio->getDato('docenti');
+    if ($periodo == 'X' && is_array($docentiScrutinio)) {
       // scrutinio rinviato da prec. A.S. (legge dati da scrutinio)
       $materie = $this->em->getRepository(Materia::class)->createQueryBuilder('m')
         ->select('m.id,m.nome,m.nomeBreve,m.tipo')
@@ -1042,10 +1049,11 @@ class ScrutinioUtil {
 			  ->setParameter('lista', $scrutinio->getDato('materie'))
         ->getQuery()
         ->getArrayResult();
+      $dati['materie'] = [];
       foreach ($materie as $mat) {
         $dati['materie'][$mat['id']] = $mat;
       }
-      foreach ($scrutinio->getDato('docenti') as $id=>$docente) {
+      foreach ($docentiScrutinio as $id=>$docente) {
         foreach ($docente['cattedre'] as $cattedra) {
           $docenti[] = [
             'id' => $id,
@@ -1053,13 +1061,15 @@ class ScrutinioUtil {
             'nome' => $docente['nome'],
             'sesso' => $docente['sesso'],
             'tipo' => $cattedra['tipo'],
-            'nomeBreve' => $dati['materie'][$cattedra['materia']]['nomeBreve']];
+            'nomeBreve' => $dati['materie'][$cattedra['materia']]['nomeBreve'] ?? null];
         }
       }
     } else {
-      // altri periodi
+      // altri periodi (o dati dello scrutinio rinviato non disponibili)
       $docenti = $this->em->getRepository(Cattedra::class)->docentiScrutinio($classe);
     }
+    // presenze (l'elenco può essere vuoto)
+    $dati['scrutinio']['presenze'] = [];
     foreach ($docenti as $doc) {
       // dati per la visualizzazione della pagina
       $dati['docenti'][$doc['id']][] = $doc;
@@ -1269,7 +1279,9 @@ class ScrutinioUtil {
    * @return array Dati formattati come un array associativo
    */
   public function quadroVoti(Docente $docente, Classe $classe, $periodo) {
-    $dati = [];
+    // inizializza le liste: una classe senza alunni o senza cattedre non deve
+    // lasciare indefinite le chiavi usate da query e template
+    $dati = ['alunni' => [], 'materie' => [], 'voti' => [], 'medie' => []];
     // periodo dello scrutinio
     $dati['periodo'] = $periodo;
     // controllo classe articolata
@@ -1339,6 +1351,18 @@ class ScrutinioUtil {
       foreach ($materie as $mat) {
         $dati['materie'][$mat['id']] = $mat;
       }
+      // ed. civica: insegnamento trasversale, può non avere una cattedra dedicata
+      // ma va comunque inserita per permetterne la valutazione nel passo dedicato
+      if (in_array($periodo, ['P', 'S', 'F'])) {
+        $edcivica = $this->em->getRepository(Materia::class)->findOneByTipo('E');
+        if ($edcivica && !isset($dati['materie'][$edcivica->getId()])) {
+          $dati['materie'][$edcivica->getId()] = [
+            'id' => $edcivica->getId(),
+            'nome' => $edcivica->getNome(),
+            'nomeBreve' => $edcivica->getNomeBreve(),
+            'tipo' => $edcivica->getTipo()];
+        }
+      }
       $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
       $dati['materie'][$condotta->getId()] = [
         'id' => $condotta->getId(),
@@ -1391,6 +1415,7 @@ class ScrutinioUtil {
    */
   public function elencoVoti(Docente $docente, Classe $classe, Materia $materia, $periodo) {
     $elenco = [];
+    $elenco['alunni'] = [];
     $elenco['voti'] = [];
     // legge scrutinio
     $scrutinio = $this->em->getRepository(Scrutinio::class)->createQueryBuilder('s')
