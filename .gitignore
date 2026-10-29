@@ -74,6 +74,7 @@ client_secret_*.json
 /graifcbug.txt
 /report_qa/
 /tools/
+/docs/manuali/
 /var/server_dev.log
 ###< artefatti locali di analisi ###
 
