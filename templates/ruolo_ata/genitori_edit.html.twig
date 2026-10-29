@@ -8,9 +8,9 @@
     </div>
     <div class="panel-body gs-pt-0">
       <div class="row bg-success gs-mb-4">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Alunno:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ alunno }}</span></div>
-        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Classe:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ alunno.classe }}</span></div>
       </div>
       {{ form_start(form) }}
@@ -23,7 +23,7 @@
         <p class="text-center gs-h2">Genitore 2</p>
         {{ form_widget(form.genitore2) }}
       </div>
-      <div class="text-center">
+      <div class="gs-azioni-invertite">
         {{ form_widget(form.submit, {attr: {class: 'btn-primary gs-mr-3'}}) }}
         {{ form_widget(form.cancel) }}
       </div>

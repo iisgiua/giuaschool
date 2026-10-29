@@ -7,9 +7,8 @@
       <div class="panel-title">{{ form_title|trans }}</div>
     </div>
     <div class="panel-body gs-pt-0">
-      <div class="row bg-success gs-mb-3 gs-pt-2 gs-pb-2">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
-        <div class="col-sm-4"><span class="gs-big">{{ info.classe }}</span></div>
+      <div class="bg-success gs-dati-riepilogo gs-mb-3 gs-pt-2 gs-pb-2">
+        <span class="gs-dato"><strong class="gs-big">Classe:</strong><span class="gs-big gs-dato-valore">{{ info.classe }}</span></span>
       </div>
       <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_maggio'|trans|raw }}</em></div>
       {{ form_start(form) }}

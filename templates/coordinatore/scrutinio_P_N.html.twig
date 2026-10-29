@@ -130,7 +130,12 @@ $(document).ready(function() {
     $('body').addClass('modal-open');
   });
   // init
-  $('#gs-fixed-header table').floatThead({top: 60});
+  $('#gs-fixed-header table').floatThead({
+    top: 60,
+    responsiveContainer: function($table) {
+      return $table.closest('.table-responsive');
+    }
+  });
   {% if posizione > 0 %}
   $('html').scrollTop({{ posizione }});
   {% endif %}

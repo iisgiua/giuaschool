@@ -67,9 +67,9 @@
         <td>
           {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza l\'avviso', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-info-date': a.avviso.data|date('j') ~ ' ' ~ info.mesi[a.avviso.data|date('n')] ~ ' ' ~ a.avviso.data|date('Y'), 'data-info-title': a.avviso.titolo, 'data-info-id': a.avviso.id, 'data-body': 'avviso-' ~ loop.index}}) }}
           <div id="avviso-{{ loop.index }}" style="display:none">
-            <div class="alert alert-info gs-mt-0 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
-              <div class="gs-text-normal">{{ a.avviso.testoPersonalizzato|raw|nl2br }}</div>
-              <div class="text-right gs-text-normal"><em>({{ a.avviso.autore }})</em></div>
+            <div class="gs-mb-3">
+              <div class="gs-text-normal text-center">{{ a.avviso.testoPersonalizzato|raw|nl2br }}</div>
+              <div class="gs-text-normal text-center"><em>({{ a.avviso.autore }})</em></div>
             </div>
       {% if a.avviso.allegati|length > 0 %}
             <div class="alert alert-success gs-mt-2 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">

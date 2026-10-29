@@ -46,7 +46,10 @@
           {% if dati.voti[alunno][materia].unico is not defined or dati.voti[alunno][materia].unico is empty %}
             {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Inserisci la valutazione della Condotta', titolo: 'Inserisci la valutazione della Condotta', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_condotta', {classe: classe.id, periodo: periodo, alunno: alunno}) }}) }}
           {% else %}
-            <button type="button" class="btn btn-xs btn-{{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'warning' : 'success') }} gs-button-remote" title="Modifica la valutazione della Condotta" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_condotta', {classe: classe.id, periodo: periodo, alunno: alunno}) }}"><strong>{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</strong></button>
+            <div class="gs-azioni">
+              <span class="label {{ dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].med ? 'label-danger' : (dati.voti[alunno][materia].unico < dati.valutazioni[m.tipo].suff ? 'label-warning' : 'label-success') }}">{{ dati.valutazioni[m.tipo].lista[dati.voti[alunno][materia].unico] }}</span>
+              {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica la valutazione della Condotta', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('coordinatore_scrutinio_condotta', {classe: classe.id, periodo: periodo, alunno: alunno})}}) }}
+            </div>
           {% endif %}
         {% elseif m.tipo == 'R' and a.religione != 'S' and a.religione != 'A' %}
             <span>NA</span>
@@ -65,7 +68,7 @@
       {% endset %}
     {{ include('include/tabella.html.twig', {intestazione_grezza: intestazione_grezza_0, corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   </div>
-  <div class="row gs-mt-5 gs-mb-5">
+  <div class="row gs-mt-5 gs-mb-5 gs-riga-passi">
     <div class="col-sm-6">
       <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '2'}) }}" role="button" title="Annulla e torna al passo precedente">{{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Torna al passo precedente</strong></a>
     </div>
@@ -111,7 +114,12 @@ $(document).ready(function() {
     return true;
   });
   // init
-  $('#gs-fixed-header table').floatThead({top: 60});
+  $('#gs-fixed-header table').floatThead({
+    top: 60,
+    responsiveContainer: function($table) {
+      return $table.closest('.table-responsive');
+    }
+  });
   {% if posizione > 0 %}
   $('html').scrollTop({{ posizione }});
   {% endif %}

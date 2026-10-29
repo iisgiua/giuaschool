@@ -8,30 +8,31 @@
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore.moduliFormativi'|trans }} {{ info.classe }}</h1>
-  <div class="row gs-mt-2">
-    <div class="col-sm-8">
-      <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" class="gs-filters gs-mb-3">
-        <div id="{{ form[0].vars.id }}">
-          <div class="gs-filters-row">
-            <div class="form-group gs-filter-col">
-              {{ form_label(form[0].tipo, null, {label_attr: {class: 'control-label'}}) }}
-              {{ form_widget(form[0].tipo) }}
-            </div>
-            <div class="form-group gs-filter-col">
-              {{ form_label(form[0].moduloFormativo, null, {label_attr: {class: 'control-label'}}) }}
-              {{ form_widget(form[0].moduloFormativo) }}
-            </div>
-          </div>
-          <div class="gs-filters-buttons">
-            {{ form_widget(form[0].submit) }}
-          </div>
-          {{ form_widget(form[0]._token) }}
+  {# selettore sede/classe #}
+  {{ include('include/selettore-classe.html.twig', {classi: gs_classi_coordinatore(), azione: 'coordinatore_seleziona', attiva: info.classe.id, gruppo: false}, with_context: false) }}
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" class="gs-filters gs-mb-3">
+    <div id="{{ form[0].vars.id }}">
+      <div class="gs-filters-row">
+        <div class="form-group gs-filter-col">
+          {{ form_label(form[0].tipo, null, {label_attr: {class: 'control-label'}}) }}
+          {{ form_widget(form[0].tipo) }}
         </div>
-      </form>
+        <div class="form-group gs-filter-col">
+          {{ form_label(form[0].moduloFormativo, null, {label_attr: {class: 'control-label'}}) }}
+          {{ form_widget(form[0].moduloFormativo) }}
+        </div>
+      </div>
+      <div class="gs-filters-buttons">
+        {{ form_widget(form[0].submit) }}
+      </div>
+      {{ form_widget(form[0]._token) }}
     </div>
-    <div class="col-sm-4 text-right">
-      <a class="btn btm-sm btn-success" href="{{ path('coordinatore_moduliFormativi_alunni', {classe: info.classe.id}) }}" role="button" title="Dettagli dei moduli formativi seguiti da ogni alunno"><strong>Situazione alunni</strong></a>
-    </div>
+  </form>
+  {# Azione sulla tabella, non sui filtri: sta subito sopra la tabella e
+     allineata alla colonna Azione, cosi' non sembra parte del pannello
+     dei filtri. #}
+  <div class="text-right gs-mb-2">
+    <a class="btn btn-sm btn-success" href="{{ path('coordinatore_moduliFormativi_alunni', {classe: info.classe.id}) }}" role="button" title="Dettagli dei moduli formativi seguiti da ogni alunno"><strong>Situazione alunni</strong></a>
   </div>
   {% set intestazione = [
       {contenuto: 'Data', classi: 'col-sm-2', scope: 'col'},

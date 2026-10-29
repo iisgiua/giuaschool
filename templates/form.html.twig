@@ -3,10 +3,9 @@
 {% block submit_row %}
 {% apply spaceless %}
   {% if attr.widget is defined and attr.widget == 'gs-button-start' %}
-  <div class="form-group">
-    <div class="{{ block('form_label_class') }}"></div>
-    <div class="{{ block('form_group_class') }}">
-      {{ form_widget(form, {attr: {widget: false, class: attr.class|default('btn-default') ~ ' gs-mr-3'}}) }}
+  <div class="form-group gs-form-actions">
+    <div class="gs-form-actions-buttons">
+      {{ form_widget(form, {attr: {widget: false, class: attr.class|default('btn-primary')}}) }}
   {% elseif attr.widget is defined and attr.widget == 'gs-button-end' %}
       {{ form_widget(form, {attr: {widget: false, class: attr.class|default('btn-default')}}) }}
     </div>

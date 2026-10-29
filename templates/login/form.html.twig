@@ -25,7 +25,7 @@
   {# --- sito non in manutenzione --- #}
   {% if not manutenzione %}
     {% if errore %}
-  <div class="alert alert-danger gs-mt-4 gs-mb-4 gs-big" role="alert">{{ errore.message|trans }}</div>
+  <div class="alert alert-info gs-mt-4 gs-mb-4 gs-big" role="alert">{{ errore.message|trans }}</div>
     {% endif %}
     {# --- unico panel per tutti i metodi di login --- #}
     <div class="panel panel-primary gs-mt-4">
@@ -111,7 +111,7 @@
         {% endif %}
             <p class="gs-mb-2 text-center"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
             <div class="form-group text-center">
-              <button type="submit" class="btn btn-info" id="login" name="login"><strong>Accedi</strong></button>
+              <button type="submit" class="btn btn-primary btn-lg" id="login" name="login"><strong>Accedi</strong></button>
             </div>
             <input type="hidden" id="csrf_token" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
           </form>
@@ -168,7 +168,7 @@
         {% endif %}
             <p class="gs-mb-2 text-center"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
             <div class="form-group text-center">
-              <button type="submit" class="btn btn-info" id="login" name="login"><strong>Accedi</strong></button>
+              <button type="submit" class="btn btn-primary btn-lg" id="login" name="login"><strong>Accedi</strong></button>
             </div>
             <input type="hidden" id="csrf_token" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
           </form>
@@ -202,7 +202,7 @@
           </h3>
           <div class="help-block text-center"><span class="gs-text-normal">Scarica le applicazioni ufficiali per accedere al Registro Elettronico dal tuo dispositivo mobile.</span></div>
           <div class="text-center gs-mt-3">
-            <a href="/api/info/app" class="btn btn-primary gs-app-button">
+            <a href="/api/info/app" class="btn btn-primary btn-lg gs-app-button">
               {{ include('admin/include/icona.html.twig', {nome: 'device-mobile', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Informazioni App</strong>
             </a>
           </div>

@@ -153,6 +153,7 @@
   </div>
     {% endfor %}
   {% endif %}
+  <div id="gs-pagina-dati" data-posizione="{{ posizione|default(0) }}" data-errori="{{ app.flashes('errore')|json_encode }}" hidden></div>
 </div>
 {% endblock %}
 
@@ -169,20 +170,23 @@ $(document).ready(function() {
     $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
   });
   // init
-  {% if posizione > 0 %}
-  $('html').scrollTop({{ posizione }});
-  {% endif %}
+  var posizione = parseInt($('#gs-pagina-dati').attr('data-posizione'), 10) || 0;
+  if (posizione > 0) {
+    $('html').scrollTop(posizione);
+  }
   // init
-  {% for messaggio in app.flashes('errore') %}
-    {% if loop.first %}
-  var m = '';
-    {% endif %}
-  m = m + "{{ messaggio|raw }}<br>";
-    {% if loop.last %}
-  $('#gs-modal-error-text').html(m);
-  $('#gs-modal-error').modal('show');
-    {% endif %}
-  {% endfor %}
+  var errori = $('#gs-pagina-dati').data('errori') || [];
+  if (typeof errori === 'string') {
+    try {
+      errori = JSON.parse(errori);
+    } catch (e) {
+      errori = [];
+    }
+  }
+  if (errori.length > 0) {
+    $('#gs-modal-error-text').html(errori.join('<br>'));
+    $('#gs-modal-error').modal('show');
+  }
 });
 </script>
 {% endblock %}

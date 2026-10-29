@@ -8,14 +8,14 @@
 </div>
 <div class="modal-body">
 {% for k, e in dati.eventi %}
-  <div class="alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2" role="alert">
+  <div class="gs-mb-3">
   {% if info.tipo == 'A' %}
   {# ---------- ATTIVITA' ---------- #}
     {% if app.user.controllaRuolo('DSPT') and dati.classi[k]|length() > 0 %}
-    <div class="gs-text-normal"><strong class="gs-big">Classi: {{ dati.classi[k] }}</strong></div>
+    <div class="gs-text-normal text-center"><strong class="gs-big">Classi: {{ dati.classi[k] }}</strong></div>
     {% endif %}
-    <div class="gs-text-normal">{{ e.testoPersonalizzato|raw|nl2br }}</div>
-    <div class="text-right gs-text-normal"><em>({{ e.autore }})</em></div>
+    <div class="gs-text-normal text-center">{{ e.testoPersonalizzato|raw|nl2br }}</div>
+    <div class="gs-text-normal text-center"><em>({{ e.autore }})</em></div>
   {% elseif info.tipo in ['V', 'S', 'P'] %}
   {# ---------- VERIFICHE/COMPITI ---------- #}
     {% if app.user.controllaRuolo('DSP') %}

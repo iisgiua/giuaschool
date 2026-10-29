@@ -131,6 +131,30 @@
     azioni: azioni,
     paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_modifica'},
   }) }}
+  {# finestra di scelta del genitore per l'invio o lo scarico della password #}
+  <div class="modal fade" id="gs-scelta-genitore" tabindex="-1" role="dialog" aria-labelledby="gs-scelta-genitore-titolo">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="gs-scelta-genitore-titolo"></h5>
+          <button type="button" class="close p-0" data-dismiss="modal" aria-label="{{ 'label.close'|trans }}">
+            {{ include('admin/include/icona.html.twig', {nome: 'x'}) }}
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-10 gs-mb-2"><strong id="gs-scelta-genitore-1"></strong><span id="gs-scelta-genitore-1-email"></span></div>
+            <div class="col-sm-2 gs-mb-2"><a id="gs-scelta-genitore-1-href" class="btn btn-primary btn-xs gs-post" href="" role="button" data-csrf="{{ csrf_token('password') }}"><strong></strong></a></div>
+            <div class="col-sm-10"><strong id="gs-scelta-genitore-2"></strong><span id="gs-scelta-genitore-2-email"></span></div>
+            <div class="col-sm-2"><a id="gs-scelta-genitore-2-href" class="btn btn-primary btn-xs gs-post" href="" role="button" data-csrf="{{ csrf_token('password') }}"><strong></strong></a></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-xs mx-auto" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 

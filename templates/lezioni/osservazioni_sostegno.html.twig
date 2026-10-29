@@ -11,6 +11,9 @@
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   {% elseif not cattedra %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_osservazioni'|trans }}</h1>
+  {# selettore sede/classe per le sostituzioni: c'e' anche qui, cosi' dalla
+     classe sbagliata si puo' passare subito a un'altra senza tornare indietro #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.osservazioni_sostituzione'|trans }}</strong>
   </div>
@@ -21,9 +24,9 @@
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   <div class="row gs-mb-4">
     <div class="col-sm-6">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {cattedra: cattedra.id, classe: classe.id, data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      {% if data_prec %}<a class="btn btn-default btn-sm" href="{{ path('lezioni_osservazioni', {cattedra: cattedra.id, classe: classe.id, data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
       <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia data">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni', {cattedra: cattedra.id, classe: classe.id, data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
+      {% if data_succ %}<a class="btn btn-default btn-sm" href="{{ path('lezioni_osservazioni', {cattedra: cattedra.id, classe: classe.id, data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_osservazioni_personali') }}" role="button" title="Visualizza il diario personale in cui inserire le proprie osservazioni">{{ include('admin/include/icona.html.twig', {nome: 'book', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Diario personale</strong></a>

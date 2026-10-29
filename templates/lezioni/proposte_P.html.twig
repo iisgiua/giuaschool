@@ -11,6 +11,9 @@
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   {% elseif not cattedra %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_proposte'|trans }}</h1>
+  {# selettore sede/classe per le sostituzioni: c'e' anche qui, cosi' dalla
+     classe sbagliata si puo' passare subito a un'altra senza tornare indietro #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.voti_sostituzione'|trans }}</strong>
   </div>
@@ -138,6 +141,10 @@
     {% elseif lista_periodi|length == 0 %}
   <div class="alert alert-info gs-mt-4" role="alert">
     <strong class="gs-big">{{ 'message.no_proposte'|trans }}</strong>
+  </div>
+    {% elseif not periodo %}
+  <div class="alert alert-warning gs-mt-4" role="alert">
+    <strong class="gs-big">{{ 'message.periodo_non_selezionato'|trans }}</strong>
   </div>
     {% endif %}
   {% endif %}

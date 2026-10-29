@@ -6,20 +6,6 @@
   <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_documenti_bes'|trans|raw }}</em>
   </div>
   {{ include('admin/include/flash.html.twig') }}
-  <div class="row">
-    <div class="col-sm-4 gs-mb-0">
-    </div>
-    <div class="col-sm-4 text-center gs-mb-0">
-      <a class="btn btn-default" href="{{ path('documenti_archivio_bes') }}" role="button"
-        title="Vai all'archivio dei documenti BES">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Archivio</strong></a>
-    </div>
-    <div class="col-sm-4 text-right gs-mb-0">
-      {% if dati.azioni.add is defined %}
-      <a class="btn btn-primary" href="{{ path('documenti_bes_add') }}" role="button"
-        title="Inserisci un nuovo documento">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Aggiungi</strong></a>
-      {% endif %}
-    </div>
-  </div>
   {% form_theme form 'bootstrap_3_layout.html.twig' %}
   {{ form_start(form, {attr: {class: 'gs-filters gs-mb-3'}}) }}
     <div class="gs-filters-row">
@@ -38,6 +24,14 @@
       {{ form_widget(form.submit) }}
     </div>
   {{ form_end(form) }}
+  <div class="gs-filtri-azioni gs-mb-3">
+    <a class="btn btn-default" href="{{ path('documenti_archivio_bes') }}" role="button"
+      title="Vai all'archivio dei documenti BES">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Archivio</strong></a>
+    {% if dati.azioni.add is defined %}
+    <a class="btn btn-primary" href="{{ path('documenti_bes_add') }}" role="button"
+      title="Inserisci un nuovo documento">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Aggiungi</strong></a>
+    {% endif %}
+  </div>
   {% if dati.lista is empty %}
   <div class="alert alert-warning gs-mt-2" role="alert">
     <strong class="gs-big">{{ 'message.no_documenti'|trans }}</strong>
@@ -51,98 +45,49 @@
     ] %}
     {% set corpo_grezzo_0 %}
       {% for i, alu in dati.lista %}
+        {% set documenti = dati.documenti[i].lista %}
+        {% for k, doc in documenti %}
+          {# Le azioni del documento stanno in un unico menu a tre puntini, come
+             nelle altre pagine: scarica, codice di accesso e le azioni sul
+             documento, senza affollare la cella di icone. #}
+          {% set voci_documento = [
+            {etichetta: 'Scarica documento', titolo: 'Scarica il documento indicato', url: path('documenti_download', {documento: doc.id})},
+          ] %}
+          {% if doc.cifrato %}
+            {% set voci_documento = voci_documento|merge([{etichetta: 'Codice di accesso: ' ~ doc.cifrato}]) %}
+          {% endif %}
+          {% set voci_azioni = [] %}
+          {% if dati.documenti[i].add[k] is defined %}
+            {% set voci_azioni = voci_azioni|merge([{etichetta: 'Aggiungi', titolo: "Inserisci il documento per l'alunno BES indicato", url: path('documenti_bes_add', {alunno: alu.id}), classi: 'text-primary'}]) %}
+          {% endif %}
+          {% if dati.documenti[i].edit[k] is defined %}
+            {% set voci_azioni = voci_azioni|merge([{etichetta: 'Archivia', titolo: 'Archivia il documento indicato', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_bes_archive', {documento: doc.id}), 'data-text': 'message.archivia_documento_bes'|trans, 'data-csrf': csrf_token('delete')}, classi: 'gs-modal-confirm-button text-warning'}]) %}
+          {% endif %}
+          {% if dati.documenti[i].delete[k] is defined %}
+            {% set voci_azioni = voci_azioni|merge([{etichetta: 'Cancella', titolo: 'Cancella il documento indicato', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_delete', {documento: doc.id}), 'data-text': 'message.cancella_documenti_bes'|trans, 'data-csrf': csrf_token('delete')}, classi: 'gs-modal-confirm-button text-danger'}]) %}
+          {% endif %}
+          {% if voci_azioni is not empty %}
+            {% set voci_documento = voci_documento|merge([{separatore: true}])|merge(voci_azioni) %}
+          {% endif %}
       <tr>
-        <td rowspan="{{ dati.documenti[i].lista|length }}">
+          {% if loop.first %}
+        <td rowspan="{{ documenti|length }}">
           <strong>{{ alu.classe }}</strong>
           <br>{{ alu.classe.corso.nomeBreve }} - {{ alu.classe.sede.citta|upper }}
         </td>
-        <td rowspan="{{ dati.documenti[i].lista|length }}">
+        <td rowspan="{{ documenti|length }}">
           <strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong>
         </td>
+          {% endif %}
         <td>
-          <a href="{{ path('documenti_download', {documento: dati.documenti[i].lista[0].id}) }}"
-            title="Scarica il documento indicato">
-            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{
-              dati.documenti[i].lista[0].allegati[0].titolo }}</strong>
-          </a><br>
-          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso"
-            data-placement="auto left" data-toggle="popover"
-            data-content="{{ dati.documenti[i].lista[0].cifrato }}">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}<span
-              class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[0].cifrato
-              }}</span></button>
-          <small>Dimensione: {{ (dati.documenti[i].lista[0].allegati[0].dimensione / 1000)|number_format(0, ',', '.') }}
-            kB</small>
+          <strong>{{ doc.allegati[0].titolo }}</strong>
+          <br><small>Dimensione: {{ (doc.allegati[0].dimensione / 1000)|number_format(0, ',', '.') }} kB</small>
         </td>
-        <td>
-          {% if dati.documenti[i].add[0] is defined %}
-          {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Aggiungi', titolo: 'Inserisci il documento per l\'alunno BES indicato', url: path('documenti_bes_add', {alunno: alu.id})}) }}
-          {% endif %}
-          {% if dati.documenti[i].edit[0] is defined %}
-          {{ include('include/bottone-azione.html.twig', {nome: 'archive', etichetta: 'Archivia', titolo: 'Archivia il documento indicato', stile: 'warning', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_bes_archive', {documento: dati.documenti[i].lista[0].id}), 'data-text': 'message.archivia_documento_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
-          {% endif %}
-          {% if dati.documenti[i].delete[0] is defined %}
-          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella il documento indicato', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_delete', {documento: dati.documenti[i].lista[0].id}), 'data-text': 'message.cancella_documenti_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
-          {% endif %}
+        <td class="text-right">
+          {{ include('include/menu-azioni.html.twig', {voci: voci_documento, titolo: 'Azioni sul documento'}) }}
         </td>
       </tr>
-      {% if dati.documenti[i].lista|length > 1 %}
-      <tr>
-        <td>
-          <a href="{{ path('documenti_download', {documento: dati.documenti[i].lista[1].id}) }}"
-            title="Scarica il documento indicato">
-            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{
-              dati.documenti[i].lista[1].allegati[0].titolo }}</strong>
-          </a><br>
-          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso"
-            data-placement="auto left" data-toggle="popover"
-            data-content="{{ dati.documenti[i].lista[1].cifrato }}">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}<span
-              class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[1].cifrato
-              }}</span></button>
-          <small>Dimensione: {{ (dati.documenti[i].lista[1].allegati[0].dimensione / 1000)|number_format(0, ',', '.') }}
-            kB</small>
-        </td>
-        <td>
-          {% if dati.documenti[i].add[1] is defined %}
-          {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Aggiungi', titolo: 'Inserisci il documento per l\'alunno BES indicato', url: path('documenti_bes_add', {alunno: alu.id})}) }}
-          {% endif %}
-          {% if dati.documenti[i].edit[1] is defined %}
-          {{ include('include/bottone-azione.html.twig', {nome: 'archive', etichetta: 'Archivia', titolo: 'Archivia il documento indicato', stile: 'warning', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_bes_archive', {documento: dati.documenti[i].lista[1].id}), 'data-text': 'message.archivia_documento_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
-          {% endif %}
-          {% if dati.documenti[i].delete[1] is defined %}
-          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella il documento indicato', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_delete', {documento: dati.documenti[i].lista[1].id}), 'data-text': 'message.cancella_documenti_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
-          {% endif %}
-        </td>
-      </tr>
-      {% endif %}
-      {% if dati.documenti[i].lista|length == 3 %}
-      <tr>
-        <td>
-          <a href="{{ path('documenti_download', {documento: dati.documenti[i].lista[2].id}) }}"
-            title="Scarica il documento indicato">
-            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{
-              dati.documenti[i].lista[2].allegati[0].titolo }}</strong>
-          </a><br>
-          <button type="button" class="btn btn-xs btn-warning gs-mr-2" title="Codice di accesso"
-            data-placement="auto left" data-toggle="popover"
-            data-content="{{ dati.documenti[i].lista[2].cifrato }}">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}<span
-              class="sr-only sr-only-focusable">Codice di accesso: {{ dati.documenti[i].lista[2].cifrato
-              }}</span></button>
-          <small>Dimensione: {{ (dati.documenti[i].lista[2].allegati[0].dimensione / 1000)|number_format(0, ',', '.') }}
-            kB</small>
-        </td>
-        <td>
-          {% if dati.documenti[i].add[2] is defined %}
-          {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Aggiungi', titolo: 'Inserisci il documento per l\'alunno BES indicato', url: path('documenti_bes_add', {alunno: alu.id})}) }}
-          {% endif %}
-          {% if dati.documenti[i].edit[2] is defined %}
-          {{ include('include/bottone-azione.html.twig', {nome: 'archive', etichetta: 'Archivia', titolo: 'Archivia il documento indicato', stile: 'warning', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_bes_archive', {documento: dati.documenti[i].lista[2].id}), 'data-text': 'message.archivia_documento_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
-          {% endif %}
-          {% if dati.documenti[i].delete[2] is defined %}
-          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella il documento indicato', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_delete', {documento: dati.documenti[i].lista[2].id}), 'data-text': 'message.cancella_documenti_bes'|trans, 'data-csrf': csrf_token('delete')}}) }}
-          {% endif %}
-        </td>
-      </tr>
-      {% endif %}
+        {% endfor %}
       {% endfor %}
     {% endset %}
     {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mt-2'}) }}

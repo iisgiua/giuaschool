@@ -91,7 +91,7 @@
         {{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Nuovo avviso
         <span class="caret gs-ml-2"></span>
       </button>
-      <ul class="dropdown-menu">
+      <ul class="dropdown-menu dropdown-menu-right">
         {% if dati.azioni.add is defined %}
         <li><a href="{{ path('avvisi_edit') }}">Generico</a></li>
         <li><a href="{{ path('avvisi_edit_classi', {tipo: 'E'}) }}">Ingresso</a></li>

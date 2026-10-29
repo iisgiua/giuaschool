@@ -34,7 +34,7 @@
         <div id="row_{{ voto.motivazione.vars.id }}" class="form-group gs-mb-2">
           <label class="control-label col-sm-2" for="{{ voto.motivazione.vars.id }}">Descrittori</label>
           <div class="col-sm-10">
-            {{ form_widget(voto.motivazione, {attr: {rows: 4, readonly: 'readonly'}}) }}
+            {{ form_widget(voto.motivazione, {attr: {rows: 4}}) }}
           </div>
         </div>
         <div class="form-group gs-mb-2">
@@ -54,7 +54,7 @@
   {% endfor %}
     </ul>
   </div>
-  <div class="modal-footer">
+  <div class="modal-footer gs-modal-actions">
     {{ form_widget(form.submit, {attr: {class: 'btn-primary'}}) }}
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
@@ -63,6 +63,11 @@
 
 <script>
 var voti = [{{ dati.valutazioni.voti|raw }}];
+var descrittori = [null, null, null, null, "{{ 'message.giudizio_condotta_NC'|trans }}", "{{ 'message.giudizio_condotta_5'|trans }}", "{{ 'message.giudizio_condotta_6'|trans }}", "{{ 'message.giudizio_condotta_7'|trans }}", "{{ 'message.giudizio_condotta_8'|trans }}", "{{ 'message.giudizio_condotta_9'|trans }}", "{{ 'message.giudizio_condotta_10'|trans }}"];
+// Restituisce il descrittore standard associato al voto
+function gsDescrittoreCondotta(valore) {
+  return descrittori[valore] || '';
+}
 $(document).ready(function() {
   $("#gs-form-collection input.slider").slider({
     min: {{ dati.valutazioni.min }},
@@ -74,6 +79,16 @@ $(document).ready(function() {
     focus: true,
     formatter: function(val) { return voti[val - {{ dati.valutazioni.min }}]; },
     natural_arrow_keys: true
+  });
+  // I voti gia' registrati possono avere il campo dei descrittori vuoto: lo
+  // si riempie subito con il descrittore del voto corrente, cosi' il
+  // coordinatore trova il testo standard da cui partire e puo' modificarlo.
+  $("#gs-form-collection input.slider").each(function() {
+    var id = this.id.slice(15,-6);
+    var campo = $('#row_condotta_lista_'+id+'_motivazione').find('textarea');
+    if (!$.trim(campo.val())) {
+      campo.val(gsDescrittoreCondotta($(this).val()));
+    }
   });
   $('#gs-form-collection button.gs-button-add').on('click', function(e) {
     $(this).parent().find('div').attr('style', 'display:inline-block').find('input').addClass('slider')
@@ -94,12 +109,11 @@ $(document).ready(function() {
     e.preventDefault();
   });
   $("#gs-form-collection").on("change", "input.slider", function(e) {
-    var g = [null, null, null, null, "{{ 'message.giudizio_condotta_NC'|trans }}", "{{ 'message.giudizio_condotta_5'|trans }}", "{{ 'message.giudizio_condotta_6'|trans }}", "{{ 'message.giudizio_condotta_7'|trans }}", "{{ 'message.giudizio_condotta_8'|trans }}", "{{ 'message.giudizio_condotta_9'|trans }}", "{{ 'message.giudizio_condotta_10'|trans }}"];
     var d = [{{ dati.valutazioni.votiAbbr|raw }}];
     var c = (e.value.newValue < {{ dati.valutazioni.med }} ? 'label-danger' : (e.value.newValue < {{ dati.valutazioni.suff }} ? 'label-warning' : 'label-success'));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ dati.valutazioni.min }}]);
     var id = this.id.slice(15,-6);
-    $('#row_condotta_lista_'+id+'_motivazione').find('textarea').val(g[e.value.newValue]);
+    $('#row_condotta_lista_'+id+'_motivazione').find('textarea').val(gsDescrittoreCondotta(e.value.newValue));
   });
   $('.gs-scrutinio-unanimita label.radio-inline input[type="radio"]').change(function() {
     var id = parseInt($(this).attr('id').substring(15));

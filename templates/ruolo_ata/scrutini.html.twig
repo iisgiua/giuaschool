@@ -29,9 +29,9 @@
     </div>
   </form>
   {% set intestazione = [
-      {contenuto: 'label.alunno'|trans, classi: 'col-sm-4', scope: 'col'},
-      {contenuto: 'label.classe'|trans, classi: 'col-sm-1', scope: 'col'},
-      {contenuto: 'label.action'|trans, classi: 'col-sm-7', scope: 'col'}
+      {contenuto: 'label.alunno'|trans, classi: 'col-xs-5 col-sm-4', scope: 'col'},
+      {contenuto: 'label.classe'|trans, classi: 'col-xs-2 col-sm-1', scope: 'col'},
+      {contenuto: 'label.action'|trans, classi: 'col-xs-5 col-sm-7', scope: 'col'},
     ] %}
     {% set corpo_grezzo_0 %}
     {% for u in dati.lista %}
@@ -44,6 +44,7 @@
         </td>
         <td>{{ u.classe ? u.classe : 'Non definita' }}</td>
         <td>
+          <div class="gs-azioni-fluide">
       {% for periodo in dati.pagelle[u.id] %}
         {% if periodo[0] == 'G' or periodo[0] == 'R' %}
           <a class="btn btn-primary btn-xs gs-mr-2 gs-mt-1" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Esame giudizio sospeso</strong></a>
@@ -57,11 +58,12 @@
           <a class="btn btn-warning btn-xs gs-mr-2" href="{{ path('segreteria_scrutini_mostra', {alunno: u.id, periodo: periodo[0], scrutinio: periodo[1]}) }}" role="button" title="Clicca per visualizzare i documenti dello scrutinio">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>A.S. precedente</strong></a>
         {% endif %}
       {% endfor %}
+          </div>
         </td>
       </tr>
     {% endfor %}
     {% endset %}
-    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-tabella-fluida'}) }}
   {% if maxPages > 1 %}
   <nav aria-label="Navigazione tra le pagine" class="text-center">
     <ul class="pagination pagination-sm gs-mt-2">

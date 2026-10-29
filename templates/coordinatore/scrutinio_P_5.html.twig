@@ -54,7 +54,7 @@
     <strong>Non sono presenti debiti formativi</strong>
   </div>
     {% endif %}
-  <div class="row gs-mt-5 gs-mb-5">
+  <div class="row gs-mt-5 gs-mb-5 gs-riga-passi">
     <div class="col-sm-6">
       <a class="btn btn-primary gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '4'}) }}" role="button" title="Annulla e torna al passo precedente">{{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Torna al passo precedente</strong></a>
     </div>
@@ -91,7 +91,12 @@ $(document).ready(function() {
     return true;
   });
   // init
-  $('#gs-fixed-header table').floatThead({top: 60});
+  $('#gs-fixed-header table').floatThead({
+    top: 60,
+    responsiveContainer: function($table) {
+      return $table.closest('.table-responsive');
+    }
+  });
   {% if posizione > 0 %}
   $('html').scrollTop({{ posizione }});
   {% endif %}

@@ -9,11 +9,11 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_note'|trans }} {{ classe }}</h1>
     {% for periodo, v in dati %}
-  <div class="row gs-mt-4 gs-mb-2">
-    <div class="col-sm-6 text-info">
+  <div class="gs-periodo-testa gs-mt-4 gs-mb-2">
+    <div class="gs-periodo-titolo text-info">
       <strong class="gs-big">{{ periodo }}</strong>
     </div>
-    <div class="col-sm-6 text-right">
+    <div class="gs-periodo-azioni">
       <a class="btn btn-success btn-sm" href="{{ path('coordinatore_note', {classe: classe.id, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF">{{ include('admin/include/icona.html.twig', {nome: 'printer', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>

@@ -12,13 +12,13 @@
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-3">Passo 1: inizio dello scrutinio e presenze dei docenti</h2>
     {{ include('include/modal-error.html.twig') }}
     {{ form_start(form) }}
-  <div class="form-group gs-mt-5 gs-mb-5">
-    <label class="col-sm-2 control-label gs-big" for="scrutinio_data">Data inizio</label>
-    <div class="col-sm-4">
+  <div class="row gs-mt-5 gs-mb-5">
+    <div class="col-sm-3">
+      <label class="gs-big gs-mb-1" for="scrutinio_data">Data inizio</label>
       {{ form_widget(form.data) }}
     </div>
-    <label class="col-sm-2 control-label gs-big" for="scrutinio_inizio">Ora inizio</label>
-    <div class="col-sm-4">
+    <div class="col-sm-3">
+      <label class="gs-big gs-mb-1" for="scrutinio_inizio">Ora inizio</label>
       {{ form_widget(form.inizio) }}
     </div>
   </div>
@@ -62,20 +62,24 @@
     {% endfor %}
     {% endset %}
     {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
-  <div class="form-group gs-mt-5">
-    <label class="col-sm-4 control-label gs-big">Presiede lo scrutinio</label>
-    <div class="col-sm-8">
-      <div id="gs-scrutinio-presidente">{{ form_widget(form.presiede_ds) }}</div>
-      <div>{{ form_widget(form.presiede_docente) }}</div>
+  <div class="gs-mt-5">
+    <div class="gs-big gs-mb-2"><strong>Presiede lo scrutinio</strong></div>
+    <div class="gs-mb-3" id="gs-scrutinio-presidente">{{ form_widget(form.presiede_ds) }}</div>
+    <div class="row">
+      <div class="col-sm-6">
+        {{ form_widget(form.presiede_docente) }}
+      </div>
     </div>
   </div>
-  <div class="form-group gs-mt-5">
-    <label class="col-sm-4 control-label gs-big">Segretario dello scrutinio</label>
-    <div class="col-sm-8">
-      <div>{{ form_widget(form.segretario) }}</div>
+  <div class="gs-mt-5">
+    <div class="gs-big gs-mb-2"><strong>Segretario dello scrutinio</strong></div>
+    <div class="row">
+      <div class="col-sm-6">
+        {{ form_widget(form.segretario) }}
+      </div>
     </div>
   </div>
-  <div class="row gs-mt-5 gs-mb-5">
+  <div class="row gs-mt-5 gs-mb-5 gs-riga-passi">
     <div class="col-sm-6">
       {% if is_granted('ROLE_STAFF') %}
       <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: 'N'}) }}" role="button" title="Annulla e torna al passo precedente">{{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Annulla apertura scrutinio</strong></a>

@@ -8,9 +8,9 @@
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">Classe non definita</h1>
   {% endif %}
   <div class="gs-lessons-nav gs-mb-1">
-    {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
-    <button class="gs-lessons-nav-date" id="gs-button-date" title="Cambia data">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
-    {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('genitori_lezioni', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
+    {% if data_prec %}<a class="btn btn-default btn-sm" href="{{ path('genitori_lezioni', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+    <button class="gs-lessons-nav-date" id="gs-button-date" type="button" title="Cambia data" data-dates-disabled="{{ lista_festivi|default('[]') }}">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
+    {% if data_succ %}<a class="btn btn-default btn-sm" href="{{ path('genitori_lezioni', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
   </div>
   {% if errore %}
   <div class="alert alert-warning" role="alert">
@@ -76,6 +76,16 @@
 <script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
 <script>
 $(document).ready(function() {
+  // le festività sono lette dall'attributo data per non inserire codice Twig
+  // all'interno del blocco JavaScript
+  var datesDisabled = $('#gs-button-date').data('dates-disabled') || [];
+  if (typeof datesDisabled === 'string') {
+    try {
+      datesDisabled = JSON.parse(datesDisabled);
+    } catch (errore) {
+      datesDisabled = [];
+    }
+  }
   $('#gs-button-date').datepicker({
     format: "yyyy-mm-dd",
     weekStart: 1,
@@ -84,7 +94,7 @@ $(document).ready(function() {
     defaultViewDate: "{{ data }}",
     startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
     endDate: "{{ date()|date('Y-m-d') }}",
-    {% if lista_festivi %}datesDisabled: {{ lista_festivi|raw }},{% endif %}
+    datesDisabled: datesDisabled,
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,

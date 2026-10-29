@@ -11,6 +11,9 @@
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   {% elseif not cattedra %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_tabellone'|trans }}</h1>
+  {# selettore sede/classe per le sostituzioni: c'e' anche qui, cosi' dalla
+     classe sbagliata si puo' passare subito a un'altra senza tornare indietro #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.voti_sostituzione'|trans }}</strong>
   </div>
@@ -463,7 +466,12 @@ $(document).ready(function() {
     $('body').addClass('modal-open');
   });
   // init
-  $('#gs-fixed-header table').floatThead({top: 60});
+  $('#gs-fixed-header table').floatThead({
+    top: 60,
+    responsiveContainer: function($table) {
+      return $table.closest('.table-responsive');
+    }
+  });
 });
 </script>
 {% endblock %}

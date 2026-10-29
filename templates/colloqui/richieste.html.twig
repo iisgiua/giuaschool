@@ -54,8 +54,10 @@
           {% elseif p.stato == 'C' %}
             Confermato
             {% if p.messaggio %}
-            <span class="gs-normal"><br>Messaggio per il genitore:</span>
-            <div class="panel panel-default gs-mb-1"><small>{{ p.messaggio }}</small></div>
+            <div class="gs-colloquio-messaggio">
+              <span class="gs-colloquio-messaggio-label">Messaggio per il genitore</span>
+              <span class="gs-colloquio-messaggio-testo">{{ p.messaggio }}</span>
+            </div>
             {% endif %}
             {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica la scelta effettuata per la richiesta di colloquio', classi: 'pull-right', url: path('colloqui_modifica', {id: p.id})}) }}
           {% elseif p.stato == 'A' %}
@@ -63,8 +65,10 @@
           {% elseif p.stato == 'N' %}
             Rifiutato dal docente
             {% if p.messaggio %}
-            <span class="gs-normal"><br>Messaggio per il genitore:</span>
-            <div class="panel panel-default gs-mb-1"><small>{{ p.messaggio }}</small></div>
+            <div class="gs-colloquio-messaggio">
+              <span class="gs-colloquio-messaggio-label">Messaggio per il genitore</span>
+              <span class="gs-colloquio-messaggio-testo">{{ p.messaggio }}</span>
+            </div>
             {% endif %}
             {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica la scelta effettuata per la richiesta di colloquio', classi: 'pull-right gs-normal', url: path('colloqui_modifica', {id: p.id})}) }}
           {% endif %}

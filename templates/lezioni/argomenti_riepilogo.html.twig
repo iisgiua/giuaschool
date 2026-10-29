@@ -8,9 +8,9 @@
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   <div class="row gs-mb-1">
     <div class="col-sm-6">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {cattedra: (cattedra ? cattedra.id : 0), data: data_prec|date('Y-m-d')}) }}" role="button" title="Mese precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      {% if data_prec %}<a class="btn btn-default btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {cattedra: (cattedra ? cattedra.id : 0), data: data_prec|date('Y-m-d')}) }}" role="button" title="Mese precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
       <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia mese">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ mesi[data|date('n')] }} {{ data|date('Y') }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {cattedra: (cattedra ? cattedra.id : 0), data: data_succ|date('Y-m-d')}) }}" role="button" title="Mese successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
+      {% if data_succ %}<a class="btn btn-default btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {cattedra: (cattedra ? cattedra.id : 0), data: data_succ|date('Y-m-d')}) }}" role="button" title="Mese successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti', {cattedra: cattedra.id, classe: classe.id}) }}" role="button" title="Visualizza gli argomenti e le attività delle lezioni svolte">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Elenco argomenti</strong></a>

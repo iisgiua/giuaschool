@@ -11,10 +11,13 @@
   <div class="alert alert-info gs-mt-5" role="alert">
     <strong class="gs-big">
       Autorizzazione in deroga all'orario di entrata:
+    {# niente gs-text-normal: sul fondo .alert-info il testo e' bianco e
+       la classe lo riportava al colore scuro del corpo, lasciando la
+       risposta, "NESSUNA" compresa, quasi illeggibile #}
     {% if alunno.autorizzaEntrata %}
-      <em class="gs-text-normal gs-big">{{ alunno.autorizzaEntrata }}</em>
+      <em class="gs-big">{{ alunno.autorizzaEntrata }}</em>
     {% else %}
-      <span class="gs-text-normal gs-big">NESSUNA</span>
+      <span class="gs-big">NESSUNA</span>
     {% endif %}
     </strong>
   </div>
@@ -22,9 +25,9 @@
     <strong class="gs-big">
       Autorizzazione in deroga all'orario di uscita:
     {% if alunno.autorizzaUscita %}
-      <em class="gs-text-normal gs-big">{{ alunno.autorizzaUscita }}</em>
+      <em class="gs-big">{{ alunno.autorizzaUscita }}</em>
     {% else %}
-      <span class="gs-text-normal gs-big">NESSUNA</span>
+      <span class="gs-big">NESSUNA</span>
     {% endif %}
     </strong>
   </div>

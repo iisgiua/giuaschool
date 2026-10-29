@@ -21,6 +21,13 @@
       </div>
     </div>
   </div>
+  <div class="gs-voti-legenda" aria-label="Legenda dei colori dei voti">
+    <span class="gs-voti-legenda-titolo">Legenda:</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-success">6</span> Sufficiente</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-warning">5</span> Soglia</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-danger">4</span> Insufficiente</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-default">&ndash;</span> Non in media / senza voto</span>
+  </div>
     {% for periodo, v in dati %}
   {% set intestazione = [
       {contenuto: 'Materia', scope: 'col'},
@@ -38,7 +45,7 @@
             {% for e in v2 %}
               {% if e.tipo == row %}
                 {% if not e.media %}
-          <button type="button" class="gs-grade-badge gs-grade-badge-secondary" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}">{{ e.voto_str }}</button>
+          <button type="button" class="gs-grade-badge gs-grade-badge-secondary" title="Voto non considerato nella media: informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}">{% if e.voto_str is not empty %}{{ e.voto_str }}{% else %}{{ include('admin/include/icona.html.twig', {nome: 'asterisk', stile: 'outline'}) }}{% endif %}</button>
                 {% elseif e.voto > 0 %}
           <button type="button" class="gs-grade-badge gs-grade-badge-{{ e.voto < 5 ? 'danger' : (e.voto < 6 ? 'warning' : 'success') }}" title="Informazioni sulla valutazione" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulla valutazione" data-body="voti-{{ e.id }}">{{ e.voto_str }}</button>
                 {% else %}

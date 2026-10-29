@@ -8,51 +8,56 @@
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
   {# selettore sede/classe per le sostituzioni #}
-  {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {materia: false}, with_context: false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_assenze'|trans }} {{ classe }}</h1>
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>{% endif %}</em></h2>
   {# selettore sede/classe per le sostituzioni #}
-  {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
+  {{ include('include/selettore-classe.html.twig', {materia: false}, with_context: false) }}
     {% if errore %}
-  <div class="row gs-mb-5">
-    <div class="col-sm-12">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
-      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia giorno">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
-    </div>
+  <div class="gs-date-nav gs-mb-4">
+    {% if data_prec %}<a class="btn btn-default gs-date-nav-btn" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno precedente" aria-label="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+    <button class="btn gs-date-btn" id="gs-button-date" type="button" title="Cambia giorno">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ info.data_label }}</strong></button>
+    {% if data_succ %}<a class="btn btn-default gs-date-nav-btn" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno successivo" aria-label="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
   </div>
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
     {% else %}
-  <div class="row gs-mb-1">
-    <div class="col-sm-5">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
-      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia giorno">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
-    </div>
-    <div class="col-sm-2 text-center">
-      {% if dati[data].pulsante_appello is defined %}
-      <a class="btn btn-success" href="{{ dati[data].pulsante_appello }}" role="button" title="Esegui la procedura dell'appello">{{ include('admin/include/icona.html.twig', {nome: 'hand-stop', stile: 'outline', classe: 'gs-mr-3'}) }}Appello</a>
+  <div class="gs-assenze-toolbar">
+    <div class="gs-date-nav" role="group" aria-label="Cambia giorno">
+      {% if data_prec %}
+      <a class="btn btn-default gs-date-nav-btn" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno precedente" aria-label="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>
+      {% endif %}
+      <button class="btn gs-date-btn" id="gs-button-date" type="button" title="Cambia giorno">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}
+      <a class="btn btn-default gs-date-nav-btn" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno successivo" aria-label="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>
       {% endif %}
     </div>
-    <div class="col-sm-3 text-right">
-      {% if not cattedra %}
-      <strong class="gs-big gs-mr-2">Filtro:</strong>
-      <select id="gs-filtro-alunni" class="gs-placeholder form-control" style="width:auto;display:inline;">
+    <div class="gs-toolbar-spacer" aria-hidden="true"></div>
+    {% if not cattedra %}
+    <div class="gs-toolbar-filter">
+      <label class="gs-toolbar-label" for="gs-filtro-alunni">Alunni</label>
+      <select id="gs-filtro-alunni" class="gs-placeholder form-control gs-assenze-filtro">
         <option value="T">Tutti</option>
         <option value="S">Gruppo: Religione</option>
         <option value="A">Gruppo: Mat. Alt.</option>
         <option value="N">Gruppo: N. A.</option>
       </select>
-      {% endif %}
     </div>
-    <div class="col-sm-2 text-right">
-      <strong class="gs-big">Vista:</strong>
-      <a class="btn btn-default btn-sm active" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'G'}) }}" role="button" title="Visualizza le assenze del giorno">{{ include('admin/include/icona.html.twig', {nome: 'player-stop', stile: 'outline'}) }}</a>
-      <a class="btn btn-default btn-sm" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'M'}) }}" role="button" title="Visualizza le assenze del mese">{{ include('admin/include/icona.html.twig', {nome: 'layout-grid', stile: 'outline'}) }}</a>
+    {% endif %}
+    <div class="gs-toolbar-view">
+      <span class="gs-toolbar-label" id="gs-vista-label">Vista</span>
+      <div class="gs-view-switch" role="group" aria-labelledby="gs-vista-label">
+        <a class="gs-view-switch-item active" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'G'}) }}" title="Visualizza le assenze del giorno" aria-current="page">{{ include('admin/include/icona.html.twig', {nome: 'player-stop', stile: 'outline'}) }}<span>Giorno</span></a>
+        <a class="gs-view-switch-item" href="{{ path('lezioni_assenze_quadro', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'M'}) }}" title="Visualizza le assenze del mese">{{ include('admin/include/icona.html.twig', {nome: 'layout-grid', stile: 'outline'}) }}<span>Mese</span></a>
+      </div>
     </div>
+    {% if dati[data].pulsante_appello is defined %}
+    <div class="gs-toolbar-action">
+      <a class="btn btn-primary gs-assenze-appello" href="{{ dati[data].pulsante_appello }}" role="button" title="Esegui la procedura dell'appello">{{ include('admin/include/icona.html.twig', {nome: 'hand-stop', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Appello</strong></a>
+    </div>
+    {% endif %}
   </div>
       {% set tipo_rel = (cattedra and cattedra.materia.tipo == 'R' and cattedra.tipo == 'A') ? 'A' : (cattedra and cattedra.materia.tipo == 'R' ? 'S' : '') %}
       {% for tab in ['N', 'R'] %}
@@ -70,7 +75,6 @@
       <tr id="gs-alunno-{{ v.id_alunno }}" class="gs-alunno-riga">
         <td>{{ loop.index }}</td>
         <td>
-          {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Dettagli alunno', titolo: 'Dettagli alunno', stile: 'default', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-title': v.cognome ~ ' ' ~ v.nome ~ ' (' ~ v.dataNascita|date('d/m/Y') ~ ')', 'data-body': 'alunno-' ~ loop.index}}) }}
           <strong>{{ v.cognome }} {{ v.nome }} ({{ v.dataNascita|date('d/m/Y') }})</strong>
               {% if v.autorizzaEntrata is not empty %}
           <button type="button" class="btn btn-xs btn-info gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ v.autorizzaEntrata }}">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline'}) }}</button>
@@ -124,25 +128,30 @@
               {% endif %}
         </td>
         <td>
-          {% set voci_presenze = [] %}
+          {# i dettagli dell'alunno sono la prima voce del menu: prima erano un
+             bottone a icona accanto al nome, fuori dalla colonna delle azioni #}
+          {% set voce_dettagli = {etichetta: 'Dettagli alunno', titolo: 'Dettagli alunno', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-title': v.cognome ~ ' ' ~ v.nome ~ ' (' ~ v.dataNascita|date('d/m/Y') ~ ')', 'data-body': 'alunno-' ~ loop.index}} %}
+          {% set voci_evento = [] %}
               {% if v.pulsante_presenza is defined %}
-            {% set voci_presenze = voci_presenze|merge([{etichetta: 'Presenza', titolo: 'Segna la presenza dell\'alunno', attributi: {'data-href': v.pulsante_presenza}, classi: 'gs-button-remote text-success', disabilitata: v.pulsante_presenza == '#'}]) %}
+            {% set voci_evento = voci_evento|merge([{etichetta: 'Presenza', titolo: 'Segna la presenza dell\'alunno', attributi: {'data-href': v.pulsante_presenza}, classi: 'gs-button-remote text-success', disabilitata: v.pulsante_presenza == '#'}]) %}
               {% endif %}
               {% if v.pulsante_assenza is defined %}
-            {% set voci_presenze = voci_presenze|merge([{etichetta: 'Assenza', titolo: 'Segna l\'assenza dell\'alunno', attributi: {'data-href': v.pulsante_assenza}, classi: 'gs-button-remote text-danger', disabilitata: v.pulsante_assenza == '#'}]) %}
+            {% set voci_evento = voci_evento|merge([{etichetta: 'Assenza', titolo: 'Segna l\'assenza dell\'alunno', attributi: {'data-href': v.pulsante_assenza}, classi: 'gs-button-remote text-danger', disabilitata: v.pulsante_assenza == '#'}]) %}
               {% endif %}
               {% if v.pulsante_entrata is defined %}
-            {% set voci_presenze = voci_presenze|merge([{etichetta: 'Ritardo', titolo: 'Segna il ritardo dell\'alunno', attributi: {'data-href': v.pulsante_entrata}, classi: 'gs-button-remote text-warning', disabilitata: v.pulsante_entrata == '#'}]) %}
+            {% set voci_evento = voci_evento|merge([{etichetta: 'Ritardo', titolo: 'Segna il ritardo dell\'alunno', attributi: {'data-href': v.pulsante_entrata}, classi: 'gs-button-remote text-warning', disabilitata: v.pulsante_entrata == '#'}]) %}
               {% endif %}
               {% if v.pulsante_uscita is defined %}
-            {% set voci_presenze = voci_presenze|merge([{etichetta: 'Uscita anticipata', titolo: 'Segna l\'uscita anticipata dell\'alunno', attributi: {'data-href': v.pulsante_uscita}, classi: 'gs-button-remote text-warning', disabilitata: v.pulsante_uscita == '#'}]) %}
+            {% set voci_evento = voci_evento|merge([{etichetta: 'Uscita anticipata', titolo: 'Segna l\'uscita anticipata dell\'alunno', attributi: {'data-href': v.pulsante_uscita}, classi: 'gs-button-remote text-warning', disabilitata: v.pulsante_uscita == '#'}]) %}
               {% endif %}
               {% if v.pulsante_fc is defined %}
-            {% set voci_presenze = voci_presenze|merge([{etichetta: 'Fuori classe', titolo: 'Imposta o elimina il fuori classe dell\'alunno', attributi: {'data-href': v.pulsante_fc}, classi: 'gs-button-remote', disabilitata: v.pulsante_fc == '#'}]) %}
+            {% set voci_evento = voci_evento|merge([{etichetta: 'Fuori classe', titolo: 'Imposta o elimina il fuori classe dell\'alunno', attributi: {'data-href': v.pulsante_fc}, classi: 'gs-button-remote', disabilitata: v.pulsante_fc == '#'}]) %}
               {% endif %}
               {% if v.pulsante_giustifica is defined %}
-            {% set voci_presenze = voci_presenze|merge([{etichetta: 'Giustifica', titolo: 'Giustifica le assenze e i ritardi', attributi: {'data-href': v.pulsante_giustifica}, classi: 'gs-button-remote text-primary'}]) %}
+            {% set voci_evento = voci_evento|merge([{etichetta: 'Giustifica', titolo: 'Giustifica le assenze e i ritardi', attributi: {'data-href': v.pulsante_giustifica}, classi: 'gs-button-remote text-primary'}]) %}
               {% endif %}
+          {# separatore solo se dopo i dettagli ci sono altre voci #}
+          {% set voci_presenze = voci_evento is empty ? [voce_dettagli] : [voce_dettagli, {separatore: true}]|merge(voci_evento) %}
           {{ include('include/menu-azioni.html.twig', {voci: voci_presenze, titolo: 'Registra evento'}) }}
         </td>
       </tr>

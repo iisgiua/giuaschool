@@ -92,9 +92,8 @@
         </div>
       </div>
       {{ form_row(form.creaAnnotazione) }}
-      <div class="form-group">
-        <div class="col-sm-2"></div>
-        <div class="col-sm-10">
+      <div class="form-group gs-form-actions">
+        <div class="gs-form-actions-buttons">
           {{ form_widget(form.submit) }}
           {{ form_widget(form.cancel) }}
         </div>
@@ -109,7 +108,7 @@
               {{ form_widget(form.classi) }}
             </div>
             <div class="modal-footer gs-pb-3 gs-pt-3">
-              <div class="text-center">
+              <div class="gs-form-actions-buttons">
                 <button type="button" id="gs-modal-classi-confirm" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
                 <button type="button" id="gs-modal-classi-cancel" class="btn btn-default"><strong>{{ 'label.cancel'|trans }}</strong></button>
               </div>
@@ -127,7 +126,7 @@
               {{ form_widget(form.materie) }}
             </div>
             <div class="modal-footer gs-pb-3 gs-pt-3">
-              <div class="text-center">
+              <div class="gs-form-actions-buttons">
                 <button type="button" id="gs-modal-materie-confirm" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
                 <button type="button" id="gs-modal-materie-cancel" class="btn btn-default"><strong>{{ 'label.cancel'|trans }}</strong></button>
               </div>
@@ -145,9 +144,21 @@
               <div id="gs-modal-docenti-row" class="row bg-info gs-mr-0 gs-ml-0 gs-pt-1 gs-pb-1" style="max-height:240px; overflow-y:auto;">
               </div>
               <div class="row gs-pr-4 gs-pl-4 gs-pt-2 gs-pb-2">
-                <input type="text" id="gs-modal-docenti-cognome" name="cerca[cognome]" style="width:auto;display:inline-block" class="form-control" placeholder="{{ 'label.cognome'|trans }}">
-                <input type="text" id="gs-modal-docenti-nome" name="cerca[nome]" style="width:auto;display:inline-block" class="form-control" placeholder="{{ 'label.nome'|trans }}">
-                <button type="button" id="gs-modal-docenti-search" class="btn btn-default"><strong>{{ 'label.search'|trans }}</strong></button>
+                <div class="col-xs-12">
+                  <div class="gs-modal-search">
+                    <div class="gs-modal-search-field">
+                      <label class="control-label" for="gs-modal-docenti-cognome">{{ 'label.cognome'|trans }}</label>
+                      <input type="text" id="gs-modal-docenti-cognome" name="cerca[cognome]" class="form-control">
+                    </div>
+                    <div class="gs-modal-search-field">
+                      <label class="control-label" for="gs-modal-docenti-nome">{{ 'label.nome'|trans }}</label>
+                      <input type="text" id="gs-modal-docenti-nome" name="cerca[nome]" class="form-control">
+                    </div>
+                    <div class="gs-modal-search-action">
+                      <button type="button" id="gs-modal-docenti-search" class="btn btn-primary"><strong>{{ 'label.search'|trans }}</strong></button>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="row gs-pr-4 gs-pl-4">
                 <div id="gs-modal-docenti-col1" class="col-sm-6"></div>
@@ -156,7 +167,7 @@
               <div id="gs-modal-docenti-pag" class="row text-center gs-pr-4 gs-pl-4 gs-pt-3"></div>
             </div>
             <div class="modal-footer gs-pb-3 gs-pt-3">
-              <div class="text-center">
+              <div class="gs-form-actions-buttons">
                 <button type="button" id="gs-modal-docenti-confirm" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
                 <button type="button" id="gs-modal-docenti-cancel" class="btn btn-default"><strong>{{ 'label.cancel'|trans }}</strong></button>
               </div>
@@ -174,10 +185,25 @@
               <div id="gs-modal-alunni-row" class="row bg-info gs-mr-0 gs-ml-0 gs-pt-1 gs-pb-1" style="max-height:240px; overflow-y:auto;">
               </div>
               <div class="row gs-pr-4 gs-pl-4 gs-pt-2 gs-pb-2">
-                <input type="text" id="gs-modal-alunni-cognome" name="cerca[cognome]" style="width:auto;display:inline-block" class="form-control" placeholder="{{ 'label.cognome'|trans }}">
-                <input type="text" id="gs-modal-alunni-nome" name="cerca[nome]" style="width:auto;display:inline-block" class="form-control" placeholder="{{ 'label.nome'|trans }}">
-                {{ form_widget(form.lista_classi) }}
-                <button type="button" id="gs-modal-alunni-search" class="btn btn-default"><strong>{{ 'label.search'|trans }}</strong></button>
+                <div class="col-xs-12">
+                  <div class="gs-modal-search">
+                    <div class="gs-modal-search-field">
+                      <label class="control-label" for="gs-modal-alunni-cognome">{{ 'label.cognome'|trans }}</label>
+                      <input type="text" id="gs-modal-alunni-cognome" name="cerca[cognome]" class="form-control">
+                    </div>
+                    <div class="gs-modal-search-field">
+                      <label class="control-label" for="gs-modal-alunni-nome">{{ 'label.nome'|trans }}</label>
+                      <input type="text" id="gs-modal-alunni-nome" name="cerca[nome]" class="form-control">
+                    </div>
+                    <div class="gs-modal-search-field">
+                      <label class="control-label" for="{{ form.lista_classi.vars.id }}">{{ 'label.classe'|trans }}</label>
+                      {{ form_widget(form.lista_classi) }}
+                    </div>
+                    <div class="gs-modal-search-action">
+                      <button type="button" id="gs-modal-alunni-search" class="btn btn-primary"><strong>{{ 'label.search'|trans }}</strong></button>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="row gs-pr-4 gs-pl-4">
                 <div id="gs-modal-alunni-col1" class="col-sm-6"></div>
@@ -186,7 +212,7 @@
               <div id="gs-modal-alunni-pag" class="row text-center gs-pr-4 gs-pl-4 gs-pt-3"></div>
             </div>
             <div class="modal-footer gs-pb-3 gs-pt-3">
-              <div class="text-center">
+              <div class="gs-form-actions-buttons">
                 <button type="button" id="gs-modal-alunni-confirm" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>
                 <button type="button" id="gs-modal-alunni-cancel" class="btn btn-default"><strong>{{ 'label.cancel'|trans }}</strong></button>
               </div>

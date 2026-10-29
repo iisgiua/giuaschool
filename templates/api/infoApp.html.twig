@@ -14,7 +14,7 @@
         <hr class="gs-mt-2 gs-mb-2">
         <div class="row text-center">
         </div>
-        <div class="row gs-text-normal">
+        <div class="row">
           <div class="col-sm-8">
             <p>Una volta configurata, permette l'apertura del registro senza dover inserire ogni volta le proprie credenziali di accesso. La possono usare tutti gli utenti.</p>
             <p><strong>Come si installa?</strong></p>
@@ -26,20 +26,20 @@
               che descrive la procedura di configurazione.
             </p>
           </div>
-          <div class="col-sm-4">
+          <div class="col-sm-4 gs-text-normal">
             <table class="table gs-big ">
               <tbody>
                 <tr>
                   <td style="width:50%;vertical-align:middle" class="text-right gs-noborder"><strong>Sistema operativo:</strong></td>
                   <td style="width:50%" class="gs-noborder">
-                    <img src="{{ asset('img/android.png') }}" class="img-thumbnail" alt="Android" title="Android">
+                    <a class="btn btn-primary btn-sm" href="{{ asset('app/' ~ giuaschoolApp[0]) }}" title="Clicca per scaricare l'applicazione sul tuo smartphone">
+                      <img src="{{ asset('img/android.png') }}" width="20" height="20" alt="Android" title="Android">
+                      <strong class="gs-big">Scarica</strong>
+                    </a>
                   </td>
                 </tr>
               </tbody>
             </table>
-            <div class="row text-center">
-              <a class="btn btn-primary btn-sm" href="{{ asset('app/' ~ giuaschoolApp[0]) }}" title="Clicca per scaricare l'applicazione sul tuo smartphone"><strong class="gs-big">Scarica l'app</strong></a>
-            </div>
           </div>
         </div>
       </div>

@@ -192,7 +192,7 @@ class AvvisoType extends AbstractType {
           'multiple' => false,
           'choice_value' => 'id',
           'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
-          'attr' => ['style' => 'width:auto;display:inline-block', 'class' => 'gs-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
           'required' => false,
           'mapped' => false]);
       // aggiunge data transform
@@ -332,7 +332,7 @@ class AvvisoType extends AbstractType {
           'multiple' => false,
           'choice_value' => 'id',
           'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
-          'attr' => ['style' => 'width:auto;display:inline-block', 'class' => 'gs-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
           'required' => false,
           'mapped' => false]);
     } elseif ($options['form_mode'] == 'coordinatore') {

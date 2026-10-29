@@ -495,12 +495,12 @@ attr.size <= 1) -%} {%- set required=false -%} {%- endif -%} {%- set attr=attr|m
 
     {%- block button_row -%}
     {%- if attr.widget is defined and attr.widget == 'gs-button-start' -%}
-    <div class="form-group col text-center">
-      {{ form_widget(form, {attr: attr|merge({widget: false, class: (attr.class|default('btn-primary') ~ ' mt-1 ml-3
-      mr-3')})}) }}
-      {%- elseif attr.widget is defined and attr.widget == 'gs-button-end' -%}
-      {{ form_widget(form, {attr: attr|merge({widget: false, class: (attr.class|default('btn-secondary') ~ ' mt-1 ml-3
-      mr-3')})}) }}
+    <div class="form-group gs-form-actions">
+      <div class="gs-form-actions-buttons">
+        {{ form_widget(form, {attr: attr|merge({widget: false, class: (attr.class|default('btn-primary'))})}) }}
+        {%- elseif attr.widget is defined and attr.widget == 'gs-button-end' -%}
+        {{ form_widget(form, {attr: attr|merge({widget: false, class: (attr.class|default('btn-secondary'))})}) }}
+      </div>
     </div>
     {%- elseif attr.widget is defined and attr.widget == 'gs-button-inline' -%}
     {{ form_widget(form, {attr: attr|merge({widget: false, class: (attr.class|default('btn-secondary') ~ ' mt-1 ml-3

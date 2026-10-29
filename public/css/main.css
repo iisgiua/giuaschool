@@ -1,37 +1,31 @@
 /***** VARIABILI *****/
 
 :root {
-  /* Colori primari (Bootstrap Italia) */
-  --gs-primary: #00264d;
-  --gs-primary-strong: #0066cc;
-  --gs-primary-soft: #eaf3ff;
-  --gs-surface: #ffffff;
-  --gs-surface-soft: #f5f7fa;
-  --gs-surface-muted: #e9ecef;
-  --gs-text: #1f2937;
-  --gs-text-muted: #5f6f82;
-  --gs-border: rgba(123, 140, 163, 0.3);
-  --gs-shadow: rgba(0, 38, 77, 0.15);
-  --gs-shadow-strong: rgba(0, 38, 77, 0.25);
-
-  /* Header e barra laterale: misure */
-  --gs-hdr-height: 3.75rem;
+  /* Header e barra laterale: misure in px, non in rem.
+     Le pagine con base.html.twig hanno html a 10px (Bootstrap 3), quelle
+     dell'area admin a 16px: con i rem le stesse misure davano un header da
+     38px e una barra da 160px contro 60px e 256px. In px i due layout
+     coincidono. */
+  --gs-hdr-height: 60px;
   --gs-hdr-total: calc(var(--gs-hdr-height) + env(safe-area-inset-top, 0px));
-  --gs-side-width: 16rem;
+  --gs-side-width: 256px;
 
-  /* Header e barra laterale: colori */
-  --gs-hdr-bg: #0a2540;
+  /* Header e barra laterale: alias dei token cromatici definiti in
+     gs-standard.css (unica fonte). */
+  --gs-hdr-bg: var(--gs-navy);
   --gs-hdr-text: #ffffff;
-  --gs-hdr-muted: #b9dbff;
-  --gs-hdr-hover: rgba(255, 255, 255, 0.14);
-  --gs-hdr-focus: #b9dbff;
-  --gs-hdr-border: rgba(255, 255, 255, 0.25);
-  --gs-hdr-shadow: 0 2px 10px rgba(10, 37, 64, 0.25);
-  --gs-side-bg: #f8f9fa;
-  --gs-side-text: #0a2540;
-  --gs-side-hover: rgba(13, 110, 253, 0.08);
-  --gs-side-active-bg: #e7f1ff;
-  --gs-side-active-text: #0a58ca;
+  --gs-hdr-muted: #cfe0f2;
+  --gs-hdr-hover: var(--gs-primary-hover);
+  --gs-hdr-focus: #ffffff;
+  --gs-hdr-border: #34506b;
+  --gs-hdr-shadow: 0 2px 10px rgba(23, 50, 77, 0.28);
+  --gs-side-bg: var(--gs-surface);
+  --gs-side-text: var(--gs-text);
+  --gs-side-hover: var(--gs-surface-muted);
+  --gs-side-active-bg: var(--gs-primary);
+  --gs-side-active-text: #ffffff;
+  --gs-shadow: rgba(23, 50, 77, 0.15);
+  --gs-shadow-strong: rgba(23, 50, 77, 0.25);
 }
 
 
@@ -56,7 +50,7 @@ body {
   min-height: 100dvh;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  color: #212529;
+  color: var(--gs-text);
   line-height: 1.6;
 }
 
@@ -132,7 +126,7 @@ code {
   max-width: 100%;
   min-width: 0;
   contain: inline-size;
-  background-color: #fff;
+  background-color: var(--gs-surface);
 }
 
 /* La cornice (bordo esterno e angoli arrotondati) sta sulla <table>, non sul
@@ -161,7 +155,7 @@ code {
 .form-control {
   width: 100%;
   max-width: 100%;
-  border: 1px solid #dfe6ee !important;
+  border: 1px solid var(--gs-border-strong) !important;
   border-radius: 8px !important;
 }
 
@@ -327,7 +321,7 @@ code {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: env(safe-area-inset-top, 0px) calc(1rem + env(safe-area-inset-right, 0px)) 0 calc(1rem + env(safe-area-inset-left, 0px));
+  padding: env(safe-area-inset-top, 0px) calc(16px + env(safe-area-inset-right, 0px)) 0 calc(16px + env(safe-area-inset-left, 0px));
 }
 
 .gs-hdr .glyphicon,
@@ -377,13 +371,13 @@ code {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .gs-hdr-year {
   flex: 0 0 auto;
   color: var(--gs-hdr-muted);
-  font-size: 0.75rem;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -394,10 +388,10 @@ code {
   align-items: center;
   justify-content: center;
   color: var(--gs-hdr-text);
-  font-size: 1.125rem;
+  font-size: 18px;
   background: transparent;
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   cursor: pointer;
   padding: 0;
 }
@@ -408,13 +402,14 @@ code {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 8px;
   color: var(--gs-hdr-text);
+  font-size: 16px;
   font-weight: 600;
   white-space: nowrap;
   text-decoration: none;
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: 8px;
 }
 
 .gs-hdr-toggle:hover,
@@ -463,7 +458,7 @@ html.gs-hdr-lock {
   top: var(--gs-hdr-total);
   bottom: 0;
   left: 0;
-  width: min(22rem, 85vw);
+  width: min(352px, 85vw);
   z-index: 1029;
   color: var(--gs-side-text);
   background-color: var(--gs-side-bg);
@@ -482,6 +477,7 @@ html.gs-hdr-lock {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -497,11 +493,12 @@ html.gs-hdr-lock {
 
 .gs-hdr-collapse .gs-hdr-profile {
   min-height: 44px;
-  padding: 0.875rem 1rem;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
   color: var(--gs-side-text);
+  font-size: 16px;
   text-decoration: none;
 }
 
@@ -512,11 +509,31 @@ html.gs-hdr-lock {
   text-decoration: none;
 }
 
+/* profilo selezionato: sulle pagine del profilo la riga utente usa gli
+   stessi colori di una voce attiva del menu (blu, testo bianco), con il
+   tondo dell'icona invertito per restare leggibile sul fondo blu */
+.gs-hdr-collapse .gs-hdr-account.is-active .gs-hdr-profile,
+.gs-hdr-collapse .gs-hdr-account.is-active .gs-hdr-profile:hover,
+.gs-hdr-collapse .gs-hdr-account.is-active .gs-hdr-profile:focus {
+  color: var(--gs-side-active-text);
+  background-color: var(--gs-side-active-bg);
+}
+
+.gs-hdr-collapse .gs-hdr-account.is-active .gs-hdr-profile .icon,
+.gs-hdr-collapse .gs-hdr-account.is-active .gs-hdr-profile .glyphicon {
+  color: var(--gs-side-active-bg);
+  background-color: var(--gs-side-active-text);
+}
+
+.gs-hdr-collapse .gs-hdr-account.is-active .gs-hdr-user-role {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .gs-hdr-collapse .gs-hdr-profile .glyphicon,
 .gs-hdr-collapse .gs-hdr-profile .icon {
   flex: 0 0 auto;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 36px;
+  height: 36px;
   margin: 0;
   top: 0;
   display: inline-flex;
@@ -542,7 +559,7 @@ html.gs-hdr-lock {
 
 .gs-hdr-user-role {
   color: var(--gs-text-muted);
-  font-size: 0.8125rem;
+  font-size: 13px;
 }
 
 .gs-hdr-user-role:empty {
@@ -551,7 +568,8 @@ html.gs-hdr-lock {
 
 .gs-hdr-menu {
   flex: 1 0 auto;
-  padding: 0.5rem 0 1rem;
+  padding: 8px 0 16px;
+  font-size: 16px;
 }
 
 .gs-hdr-collapse .gs-hdr-menu > ul {
@@ -570,7 +588,7 @@ html.gs-hdr-lock {
 
 .gs-hdr-collapse .gs-hdr-menu > ul > li > a {
   min-height: 44px;
-  padding: 0.5rem 1rem;
+  padding: 8px 16px;
   display: flex;
   align-items: center;
   color: var(--gs-side-text);
@@ -580,26 +598,96 @@ html.gs-hdr-lock {
   border-left: 3px solid transparent;
 }
 
+/* La normalizzazione dei dropdown in gs-standard.css usa un selettore con
+   molte :not() e specificità alta: sui link del menu laterale vinceva sul
+   display:flex qui sopra, rendendoli inline-flex. La voce più lunga
+   ("Coordinatore") allargava così il pannello di pochi pixel, che diventava
+   scrollabile in orizzontale. I link devono occupare sempre tutta la
+   larghezza, come le voci senza sottomenu. */
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li > a,
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li > .dropdown-toggle {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Le voci con sottomenu sono <a class="dropdown-toggle">: la stessa
+   normalizzazione qui sopra le dipinge come pulsanti (padding 0 16px, bordo
+   su tutti i lati, gap 6px, altezza 40px), mentre le voci senza sottomenu
+   hanno padding 0.5rem 1rem e il solo bordo sinistro di 3px. Le due
+   famiglie di voci finivano così su colonne diverse: icona a 17px contro
+   13px, testo a 46px contro 33px, e la riga della voce con sottomenu non
+   combaciava con quella della voce semplice. Qui il toggle riprende
+   esattamente la scatola della voce semplice: restano l'icona, il testo e
+   la freccia a destra, non l'aspetto da pulsante. Il selettore con l'id e'
+   quello che serve per vincere sulla normalizzazione globale. */
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li > .dropdown-toggle {
+  gap: 0;
+  height: auto;
+  min-height: 44px;
+  padding: 8px 16px;
+  justify-content: flex-start;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+/* Distanza icona-testo uguale in tutte le voci. I modelli scrivono
+   gs-mr-2 (0.5rem) sull'icona, ma la regola globale .glyphicon di questo
+   foglio (0.25rem) la sovrascrive perche' arriva dopo a pari specificita',
+   mentre la regola dei toggle qui sopra imponeva 0.5rem: le due famiglie di
+   voci avevano quindi icona-testo a 2.5px e 5px, e i testi non partivano
+   dalla stessa colonna. Qui il margine e' uno solo, quello chiesto dai
+   modelli. */
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li > a .glyphicon,
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li > a .icon {
+  margin-right: 8px;
+}
+
+/* Stati delle voci, uguali per le due famiglie. La normalizzazione dei
+   dropdown (gs-standard.css) e la regola .dropdown-toggle:not(.btn) piu'
+   sotto in questo foglio usano !important e vincono anche su :hover,
+   .open e .active: le voci con sottomenu restavano senza evidenziazione
+   al passaggio del mouse e la sezione attiva non mostrava ne' il fondo ne'
+   la barretta a sinistra, mentre le voci semplici le mostravano. Le due
+   regole qui sotto riportano gli stessi valori delle regole .gs-hdr-menu
+   con in piu' l'id (per la specificita') e !important (per i dichiarativi
+   marcati cosi' a monte). */
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li > a:hover,
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li > a:focus,
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li.open:not(.active) > .dropdown-toggle {
+  background-color: var(--gs-side-hover) !important;
+  color: var(--gs-side-text) !important;
+}
+
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li.active > a,
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li.active > a:hover,
+#gs-navbar-collapse-1 .gs-hdr-menu > ul > li.active > a:focus {
+  background-color: var(--gs-side-active-bg) !important;
+  border-left-color: var(--gs-primary-strong) !important;
+  color: var(--gs-side-active-text) !important;
+  font-weight: 600;
+}
+
 .nav .dropdown {
   border: none !important;
   border-radius: none !important;
 }
 
+/* Il wrapper del dropdown non e' un riquadro: il bordo lo ha il toggle
+   (quando serve) o il campo select. Un bordo qui disegnerebbe una seconda
+   cornice attorno ai bottoni-azione, per esempio ai puntini delle tabelle. */
 .dropdown {
-  border: 1px solid #dfe6ee;
-  border-radius: 8px;
-}
-
-/* Il wrapper del dropdown non aggiunge un secondo riquadro: i bordi li ha
-   il toggle (gs-standard.css §3). Regola non contestuale. */
-body .dropdown:has(> .btn.dropdown-toggle) {
-  border: none;
+  border: 0;
   border-radius: 0;
-  background: transparent !important;
+  background: transparent;
 }
 
 .bootstrap-select.form-control {
-  border: 1px solid #dfe6ee;
+  border: 1px solid var(--gs-border-strong);
   border-radius: 8px;
 }
 
@@ -655,19 +743,33 @@ body .dropdown:has(> .btn.dropdown-toggle) {
   font-size: .88889rem;
   font-weight: 400;
   line-height: 1.3333rem;
-  color: #06c;
+  color: var(--gs-primary);
 }
 
 .gs-menu-select>.dropdown-menu .list-item:hover,
 .gs-menu-select>.dropdown-menu .list-item:focus {
-  background: transparent;
-  color: #06c;
+  background: var(--gs-surface-muted);
+  color: var(--gs-primary-hover);
   text-decoration: underline;
+}
+
+/* Freccia del menu a tendina: Bootstrap Italia impone il grigio (#5c6f82)
+   alle icone, ma sul bottone blu deve seguire il colore del testo. La
+   rotazione di 180° all'apertura riprende il movimento della freccia della
+   barra laterale ed è animata con la stessa transizione. */
+.gs-menu-select .dropdown-toggle .icon {
+  fill: currentColor;
+  transition: transform .3s ease;
+}
+
+.gs-menu-select.show .dropdown-toggle .icon,
+.gs-menu-select .dropdown-toggle[aria-expanded="true"] .icon {
+  transform: translateY(-1px) rotate(180deg);
 }
 
 .gs-hdr-collapse .gs-hdr-menu .dropdown-toggle .glyphicon,
 .gs-hdr-collapse .gs-hdr-menu .dropdown-toggle .icon {
-  margin-right: 0.5rem;
+  margin-right: 8px;
   flex-shrink: 0;
 }
 
@@ -677,6 +779,25 @@ body .dropdown:has(> .btn.dropdown-toggle) {
   width: 1.25em;
   text-align: center;
   fill: currentColor;
+}
+
+/* La misura .icon-sm arriva da Bootstrap Italia, che le pagine con
+   base.html.twig non caricano: senza altezza l'<svg> cade sui 150px del
+   browser e la voce del menu diventa alta quanto l'icona. */
+.gs-hdr-collapse .gs-hdr-menu .icon-sm {
+  width: 24px;
+  height: 24px;
+}
+
+/* passaggio di colore tra voce normale, hover e voce attiva: senza
+   transizione lo sfondo cambia di scatto. Stessa durata dei controlli
+   (--gs-transition, 150ms), per entrambi i layout. */
+.gs-hdr-collapse .gs-hdr-menu > ul > li > a,
+.gs-hdr-collapse .gs-hdr-menu .dropdown-menu > li > a,
+.gs-hdr-collapse .gs-hdr-profile {
+  transition: background-color var(--gs-transition, 150ms ease-in-out),
+    color var(--gs-transition, 150ms ease-in-out),
+    border-left-color var(--gs-transition, 150ms ease-in-out);
 }
 
 .gs-hdr-collapse .gs-hdr-menu > ul > li > a:hover,
@@ -708,12 +829,16 @@ body .dropdown:has(> .btn.dropdown-toggle) {
 .gs-hdr-collapse .gs-hdr-menu .dropdown-toggle::after {
   content: "";
   flex: 0 0 auto;
-  width: 0.5rem;
-  height: 0.5rem;
+  /* misura in px: le pagine con base.html.twig hanno un font di base diverso
+     da quelle dell'area admin (10px contro 16px), quindi 0.5rem dava frecce
+     di dimensioni diverse nei due layout */
+  width: 7px;
+  height: 7px;
   margin-left: auto;
   border-right: 2px solid currentColor;
   border-bottom: 2px solid currentColor;
   transform: rotate(-45deg);
+  transition: transform .3s ease;
 }
 
 .gs-hdr-collapse .gs-hdr-menu .open > .dropdown-toggle::after {
@@ -745,7 +870,7 @@ body .dropdown:has(> .btn.dropdown-toggle) {
 
 .gs-hdr-collapse .gs-hdr-menu .dropdown-menu > li > a {
   min-height: 44px;
-  padding: 0.5rem 1rem 0.5rem 3rem;
+  padding: 8px 16px 8px 48px;
   display: flex;
   align-items: center;
   color: var(--gs-side-text);
@@ -772,7 +897,7 @@ body .dropdown:has(> .btn.dropdown-toggle) {
 
 .gs-hdr-exit-wrapper {
   margin-top: auto;
-  padding: 1rem 0 0;
+  padding: 16px 0 0;
   border-top: 1px solid var(--gs-border);
 }
 
@@ -791,11 +916,11 @@ body .dropdown:has(> .btn.dropdown-toggle) {
   .gs-hdr-brand {
     flex-direction: row;
     align-items: baseline;
-    gap: 0.5rem;
+    gap: 8px;
   }
 
   .gs-hdr-brand-name {
-    font-size: 1.0625rem;
+    font-size: 17px;
   }
 }
 
@@ -836,7 +961,7 @@ body .dropdown:has(> .btn.dropdown-toggle) {
 }
 
 #gs-header .header-slim-right-zone a.btn-default:hover {
-  background-color: #435a70;
+  background-color: var(--gs-primary-hover);
 }
 
 #gs-header nav {
@@ -850,7 +975,7 @@ body .dropdown:has(> .btn.dropdown-toggle) {
   padding: 0.55rem 0.9rem;
   margin-left: 2px;
   margin-top: 0;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid #7aa7d9;
   border-radius: 999px;
   box-shadow: 0 8px 24px var(--gs-shadow);
   transition: all 0.2s ease;
@@ -860,7 +985,7 @@ body .dropdown:has(> .btn.dropdown-toggle) {
 #gs-header nav button.custom-navbar-toggler:hover,
 #gs-header nav button.custom-navbar-toggler:focus {
   transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(0, 38, 77, 0.22);
+  box-shadow: 0 12px 28px var(--gs-shadow-strong);
   filter: brightness(1.04);
 }
 
@@ -886,8 +1011,8 @@ body .dropdown:has(> .btn.dropdown-toggle) {
 #gs-header nav.navbar ul.navbar-nav li.nav-item a.nav-link.active {
   background-color: var(--gs-surface);
   color: var(--gs-primary-strong);
-  border-bottom: 2px solid rgba(67, 90, 112, 0.7);
-  border-top: 1px solid rgba(67, 90, 112, 0.7);
+  border-bottom: 2px solid var(--gs-border-strong);
+  border-top: 1px solid var(--gs-border-strong);
 }
 
 #gs-header nav.navbar ul.navbar-nav li.nav-item a.nav-link.active:hover {
@@ -906,9 +1031,9 @@ body .dropdown:has(> .btn.dropdown-toggle) {
 }
 
 #gs-header .dropdown-menu {
-  border-left: 1px solid #b1b1b3;
-  border-right: 2px solid #818183;
-  border-bottom: 2px solid #818183;
+  border-left: 1px solid var(--gs-border);
+  border-right: 2px solid var(--gs-border-strong);
+  border-bottom: 2px solid var(--gs-border-strong);
   border-top: 0;
 }
 
@@ -921,7 +1046,7 @@ body .dropdown:has(> .btn.dropdown-toggle) {
   border: 0;
   margin-left: 0.5em;
   margin-right: 0.5em;
-  background-color: #d1d1d3;
+  background-color: var(--gs-surface-muted);
 }
 
 #gs-mainmenu .menu-wrapper .navbar-nav ul li span.disabled {
@@ -944,13 +1069,13 @@ body .dropdown:has(> .btn.dropdown-toggle) {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background-color: #fff;
+  background-color: var(--gs-surface);
   padding: 0.5rem 0;
 }
 
 #gs-header .breadcrumb-item .separator::after {
   content: " › ";
-  color: #6c757d;
+  color: var(--gs-text-muted);
   margin: 0 0.25rem;
 }
 
@@ -968,8 +1093,13 @@ body .dropdown:has(> .btn.dropdown-toggle) {
   width: 100%;
 }
 
+/* Niente larghezza massima: il piè di pagina sta nella stessa colonna del
+   contenuto (#gs-main, che occupa tutta l'area a destra del menu) e ne
+   condivide l'imbottitura orizzontale. Con il vecchio max-width: 1200px,
+   oltre i 1200px di area disponibile il riquadro restava centrato e
+   lasciava due vuoti ai lati, mentre la pagina sopra continuava a
+   espandersi (a 1920px: contenuto 160-1920, piè di pagina 440-1640). */
 .gs-footer-inner {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -1260,6 +1390,12 @@ html.gs-admin .gs-footer-legal a {
   .gs-flash-chiusura {
     animation: none;
   }
+
+  /* La rotazione resta (indica lo stato aperto), ma senza animazione. */
+  .gs-menu-select .dropdown-toggle .icon,
+  .gs-hdr-collapse .gs-hdr-menu .dropdown-toggle::after {
+    transition: none;
+  }
 }
 
 @media (max-width: 767.98px) {
@@ -1286,6 +1422,10 @@ html.gs-admin .gs-footer-legal a {
 
 .floatThead-container table {
   margin: 0;
+  /* Il clone fisso contiene solo la testata: gli angoli alti restano tondi
+     come quelli della tabella, quelli bassi vanno squadrati, altrimenti
+     mentre si scorre il corpo resta scoperto da due tacche tonde. */
+  border-radius: 8px 8px 0 0;
 }
 
 /* Cornice della tabella: il bordo sulle celle (.table td, .table th) disegna
@@ -1298,8 +1438,8 @@ html.gs-admin .gs-footer-legal a {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  background-color: #fff;
-  border: 1px solid #dee2e6 !important;
+  background-color: var(--gs-surface);
+  border: 1px solid var(--gs-border) !important;
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 0;
@@ -1309,7 +1449,7 @@ html.gs-admin .gs-footer-legal a {
 .table th {
   padding: 0.75rem 1rem;
   vertical-align: middle;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--gs-border);
 }
 
 .table > thead > tr > th:first-child,
@@ -1346,7 +1486,7 @@ html.gs-admin .gs-footer-legal a {
 :where(.gs-table-caption) {
   padding-top: 8px;
   padding-bottom: 8px;
-  color: #999;
+  color: var(--gs-text-muted);
   text-align: left;
 }
 
@@ -1383,124 +1523,87 @@ html.gs-admin .gs-footer-legal a {
   white-space: nowrap;
 }
 
-/* Pulsanti azione delle tabelle: solo l'icona Tabler a tratti, colorata.
-   Il fondo del bottone sparisce e resta il colore del simbolo, cosi' la
-   colonna delle azioni non introduce un blocco di colore nella tabella.
-   .btn resta per il layout (dimensioni, allineamento) ma senza sfondo:
-   .gs-btn-icona e' dichiarata dopo .btn e ne azzera i colori. */
-.gs-azioni .btn.gs-btn-icona,
-.btn.gs-btn-icona {
-  display: inline-flex;
+/* Variante fluida: la stessa fila di pulsanti, ma quando la cella non ha
+   abbastanza spazio i pulsanti scendono sulla riga successiva invece di
+   allargare la tabella (e di attivare lo scroll orizzontale di
+   .table-responsive). Ogni pulsante si restringe sulla propria etichetta
+   (body .btn in gs-standard.css ha white-space: normal e max-width: 100%),
+   il gap tiene lo spazio fra gli elementi anche quando vanno a capo.
+   Va su un <div> dentro la <td>: cambiare display della cella la tirerebbe
+   fuori dal layout della tabella. */
+.gs-azioni-fluide {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background-color: transparent;
-  background-image: none;
-  box-shadow: none;
-  color: var(--gs-primary-strong);
-  line-height: 1;
-  text-decoration: none;
-  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+  justify-content: flex-start;
+  gap: 0.25rem 0.5rem;
 }
 
-/* lo stato :hover/:focus mantiene il fondo neutro: si evidenzia solo l'icona */
-.gs-azioni .btn.gs-btn-icona:hover,
-.gs-azioni .btn.gs-btn-icona:focus,
-.btn.gs-btn-icona:hover,
-.btn.gs-btn-icona:focus,
-.btn.gs-btn-icona:active,
-.btn.gs-btn-icona:active:focus {
-  background-color: rgba(0, 102, 204, 0.08);
-  border-color: transparent;
-  color: #0a58ca;
-  text-decoration: none;
+/* Tabelle con celle che vanno a capo. Bootstrap, dentro .table-responsive,
+   impone white-space: nowrap a tutte le celle: un gruppo di pulsanti resta
+   cosi' su una riga sola e allarga la tabella oltre il contenitore, dove il
+   contenuto viene tagliato. Con questa classe il testo torna a capo e le
+   azioni si dispongono con .gs-azioni-fluide. */
+.table-responsive > .table.gs-tabella-fluida {
+  min-width: 0;
 }
 
-/* La dimensione dell'icona la si fissa qui, in pixel e non in rem: Bootstrap 3
-   mette html { font-size: 10px }, quindi lo stesso rem varrebbe 15px sulle
-   pagine utenti standard e 24px nel pannello admin (Bootstrap Italia).
-   In pixel il simbolo e' identico nei due mondi.
-   La regola generica sugli <svg> (.icon.icon-outline) usa 1.2em: dentro
-   .btn-xs erediterebbe la font-size piccola del bottone e resterebbe minuscolo.
-   Il tratto si ispessisce insieme alla sagoma, altrimenti ingrandendo l'<svg>
-   il contorno diventa una linea appena visibile. */
-.gs-btn-icona .icon.icon-outline {
-  width: 20px;
-  height: 20px;
-  stroke-width: 1.75;
+.table-responsive > .table.gs-tabella-fluida > thead > tr > th,
+.table-responsive > .table.gs-tabella-fluida > thead > tr > td,
+.table-responsive > .table.gs-tabella-fluida > tbody > tr > th,
+.table-responsive > .table.gs-tabella-fluida > tbody > tr > td,
+.table-responsive > .table.gs-tabella-fluida > tfoot > tr > th,
+.table-responsive > .table.gs-tabella-fluida > tfoot > tr > td {
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
-/* Menu a tendina che non sembra un bottone pieno: resta un <button> (serve a
-   Bootstrap per aprire il menu) ma senza fondo e con i bordi, che alzano
-   solo quanto la riga di testo: si vede la scritta con la freccia dentro una
-   cornice sottile, non un bottone colorato.
-   Il nome richiama il contenuto, non l'aspetto: .gs-dropdown-testo.
-   Gli !important servono per vincere .dropdown.open > .dropdown-toggle di
-   Bootstrap 3, che ha la stessa specificita' e mette fondo e bordi propri
-   quando il menu e' aperto. */
-.gs-dropdown-testo.dropdown-toggle,
-.gs-dropdown-testo.dropdown-toggle:hover,
-.gs-dropdown-testo.dropdown-toggle:focus,
-.gs-dropdown-testo.dropdown-toggle:active,
-.dropdown.open > .gs-dropdown-testo.dropdown-toggle,
-.dropdown.open > .gs-dropdown-testo.dropdown-toggle:hover,
-.dropdown.open > .gs-dropdown-testo.dropdown-toggle:focus,
-.dropdown.open > .gs-dropdown-testo.dropdown-toggle:active {
-  padding: 0.15rem 0.5rem;
-  border: 1px solid var(--gs-border) !important;
-  border-radius: 6px;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none;
-  color: var(--gs-primary-strong);
-  text-decoration: none;
+/* Sotto i 576px le icone dei pulsanti sono decorative e rubano lo spazio
+   necessario all'etichetta: nascondendole e stringendo l'imbottitura i
+   pulsanti si restringono senza spezzare le parole e la tabella resta
+   dentro il contenitore anche a 320px. */
+@media (max-width: 575.98px) {
+  .gs-tabella-fluida .btn .icon {
+    display: none;
+  }
+
+  .gs-tabella-fluida .btn {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .table-responsive > .table.gs-tabella-fluida > thead > tr > th,
+  .table-responsive > .table.gs-tabella-fluida > thead > tr > td,
+  .table-responsive > .table.gs-tabella-fluida > tbody > tr > th,
+  .table-responsive > .table.gs-tabella-fluida > tbody > tr > td,
+  .table-responsive > .table.gs-tabella-fluida > tfoot > tr > th,
+  .table-responsive > .table.gs-tabella-fluida > tfoot > tr > td {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
 }
 
-/* il testo del bottone e' in <strong>, va reso normale per non pesare piu' */
-.gs-dropdown-testo strong {
-  font-weight: 500;
+/* Barra con due azioni ai lati opposti (Indietro a sinistra, Stampa a
+   destra). Flex e nowrap: i pulsanti restano sulla stessa riga anche sotto
+   i 768px, dove le col-sm-6 di Bootstrap li impilavano a tutta larghezza.
+   min-width: 0 lascia restringere le colonne: se lo spazio e' poco e' il
+   testo dentro il pulsante ad andare a capo, non la barra. */
+.gs-barra-azioni {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.gs-barra-azioni > * {
+  min-width: 0;
 }
 
-/* passaggio del mouse e menu aperto: si distinguono i bordi e la scritta,
-   il fondo resta trasparente */
-.gs-dropdown-testo.dropdown-toggle:hover,
-.gs-dropdown-testo.dropdown-toggle:focus,
-.dropdown.open > .gs-dropdown-testo.dropdown-toggle {
-  border-color: var(--gs-primary-strong) !important;
-  color: #0a58ca;
-}
-
-/* la freccia prende il colore del testo: Bootstrap 3 la forza a nero */
-.gs-dropdown-testo .caret {
-  border-top-color: currentColor !important;
-}
-
-/* il wrapper del menu non aggiunge un secondo riquadro: i bordi li ha gia'
-   il bottone */
-.dropdown.gs-dropdown {
-  border: 0;
-  background: transparent;
-}
-
-/* azioni distruttive: icona rossa, sempre senza fondo */
-.btn.gs-btn-icona.btn-danger,
-.btn.gs-btn-icona.gs-icona-danger {
-  color: #c8232c;
-}
-
-.btn.gs-btn-icona.btn-danger:hover,
-.btn.gs-btn-icona.btn-danger:focus,
-.btn.gs-btn-icona.btn-danger:active,
-.btn.gs-btn-icona.gs-icona-danger:hover,
-.btn.gs-btn-icona.gs-icona-danger:focus {
-  background-color: rgba(200, 35, 44, 0.08);
-  border-color: transparent;
-  color: #a71d24;
-}
+/* Pulsanti icona e dropdown-testo: lo stile e' unificato in
+   gs-standard.css (§2.3 e §3). Qui non si ridefinisconofondi o colori,
+   altrimenti le regole piu' specifiche di questo file vincono su quelle
+   standard e riportano i bottoni trasparenti. */
 
 .gs-sticky-header thead th {
   white-space: nowrap;
@@ -1510,13 +1613,13 @@ html.gs-admin .gs-footer-legal a {
   margin: 0;
   border-radius: 0;
   border: none;
-  background-color: #1f2d3d;
+  background-color: var(--gs-navy);
 }
 
 .gs-navbar-toggle-bottom {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: var(--gs-surface);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background-color: #34506b;
+  color: #ffffff;
+  border: 1px solid #4a6683;
   border-radius: 8px;
   padding: 0.5rem 1rem;
 }
@@ -1524,8 +1627,8 @@ html.gs-admin .gs-footer-legal a {
 .navbar-inverse .gs-navbar-toggle-bottom:hover,
 .navbar-inverse .gs-navbar-toggle-bottom:focus,
 .navbar-inverse .gs-navbar-toggle-bottom:active {
-  background-color: rgba(255, 255, 255, 0.14);
-  color: var(--gs-surface);
+  background-color: #4a6683;
+  color: #ffffff;
 }
 
 .gs-checkbox-inline {
@@ -1555,21 +1658,21 @@ html.gs-admin .gs-footer-legal a {
   transform: translateY(-50%);
   cursor: pointer;
   z-index: 10;
-  color: #6c757d;
-  background: transparent;
+  color: var(--gs-text-muted);
+  background: var(--gs-surface);
   pointer-events: auto;
 }
 
 .password-icon:hover {
-  color: #0d6efd;
+  color: var(--gs-primary);
 }
 
 .password-icon svg {
-  background: transparent;
+  background: var(--gs-surface);
 }
 
 .gs-checkbox-inline:hover {
-  background-color: #cccccc;
+  background-color: var(--gs-surface-muted);
 }
 
 .gs-checkbox-inline input[type=checkbox] {
@@ -1587,7 +1690,7 @@ html.gs-admin .gs-footer-legal a {
 }
 
 .gs-checkbox:hover {
-  background-color: #cccccc;
+  background-color: var(--gs-surface-muted);
 }
 
 .gs-checkbox.active {
@@ -1665,15 +1768,19 @@ html.gs-admin .gs-footer-legal a {
 .gs-hr {
   height: 10px;
   border: 0;
-  box-shadow: 0 10px 10px -10px #8c8b8b inset;
+  box-shadow: 0 10px 10px -10px var(--gs-border-strong) inset;
 }
 
 .gs-inline { display: inline; }
 
-.gs-bg-muted { background-color: #777; }
-.gs-bg-secondary { background-color: #CCC; }
+.gs-bg-muted { background-color: var(--gs-surface-muted); }
+.gs-bg-secondary { background-color: var(--gs-secondary); color: #ffffff; }
 
-.gs-text-normal { color: #000; }
+/* La regola body .list-group-item impone il testo scuro: sulle voci con
+   fondo pieno (note annullate) il testo deve restare chiaro. */
+body .list-group-item.gs-bg-secondary { color: #ffffff; }
+
+.gs-text-normal { color: var(--gs-text); }
 
 .gs-vertical-top { display: flex; align-items: flex-start; }
 .gs-vertical-bottom { display: flex; align-items: flex-end; }
@@ -1686,8 +1793,8 @@ html.gs-admin .gs-footer-legal a {
 
 .gs-btn-secondary {
   color: #ffffff;
-  background-color: #777;
-  border-color: #555;
+  background-color: var(--gs-neutral-btn);
+  border-color: var(--gs-neutral-btn);
 }
 
 .gs-btn-secondary:hover,
@@ -1696,11 +1803,11 @@ html.gs-admin .gs-footer-legal a {
 .gs-btn-secondary.active,
 .open .dropdown-toggle.gs-btn-secondary {
   color: #ffffff;
-  background-color: #888;
-  border-color: #444;
+  background-color: var(--gs-neutral-btn-hover);
+  border-color: var(--gs-neutral-btn-hover);
 }
 
-.gs-label-secondary { background-color: #b8b8b8; }
+.gs-label-secondary { background-color: var(--gs-secondary); color: #ffffff; }
 
 .gs-strong { font-weight: bold; }
 .gs-em { font-style: italic; }
@@ -1756,7 +1863,7 @@ html.gs-admin .gs-footer-legal a {
 }
 
 .bootstrap-datetimepicker-widget table td > span:hover {
-  background-color: #eeeeee;
+  background-color: var(--gs-surface-muted);
 }
 
 .bootstrap-datetimepicker-widget .timepicker-hour,
@@ -1769,7 +1876,7 @@ html.gs-admin .gs-footer-legal a {
 
 .bootstrap-datetimepicker-widget table td.hour:hover,
 .bootstrap-datetimepicker-widget table td.minute:hover {
-  background: #eeeeee;
+  background: var(--gs-surface-muted);
   cursor: pointer;
   font-weight: bold;
 }
@@ -1777,20 +1884,20 @@ html.gs-admin .gs-footer-legal a {
 .bootstrap-datetimepicker-widget table td.disabled,
 .bootstrap-datetimepicker-widget table td.disabled:hover {
   background: none;
-  color: #888888;
+  color: var(--gs-text-muted);
   cursor: not-allowed;
 }
 
 .table-striped > tbody > tr:nth-of-type(even) > td.gs-striped-hilited {
-  background-color: #c8fdf7;
+  background-color: #9ec5e8;
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) > td.gs-striped-hilited {
-  background-color: #9fcac5;
+  background-color: #7fb0dd;
 }
 
 .table-hover > tbody > tr:hover > td.gs-striped-hilited {
-  background-color: #cccccc;
+  background-color: #6ba3d6;
 }
 
 .table > tbody > tr > td.gs-td-middle {
@@ -1798,7 +1905,7 @@ html.gs-admin .gs-footer-legal a {
 }
 
 .table tfoot tr {
-  background-color: #ebeced;
+  background-color: var(--gs-surface-muted);
 }
 
 .table tfoot td {
@@ -1810,7 +1917,7 @@ html.gs-admin .gs-footer-legal a {
 
 .form-group .required:before {
   content: "* ";
-  color: #a31f33;
+  color: var(--gs-danger);
 }
 
 form .alert {
@@ -1818,7 +1925,7 @@ form .alert {
 }
 
 .form-group legend {
-  color: #435a70;
+  color: var(--gs-text-muted);
   font-size: 0.777rem;
   font-weight: 600;
   position: absolute;
@@ -1840,12 +1947,12 @@ form .alert {
 }
 
 .form-group textarea {
-  border: 1px solid #979899;
+  border: 1px solid var(--gs-border-strong);
   border-radius: 4px;
 }
 
 .radio-inline:hover {
-  background-color: #cccccc;
+  background-color: var(--gs-surface-muted);
 }
 
 .radio-inline.active {
@@ -1864,7 +1971,10 @@ form .alert {
 .modal.in .modal-dialog {
   display: flex;
   align-items: center;
-  min-height: calc(100vh - 30px);
+  /* Il dialog deve stare nella viewport insieme ai suoi margini: 30px
+     sopra e 30px sotto. Togliendone solo 30 il contenuto finiva 15px
+     sotto il centro. */
+  min-height: calc(100vh - 60px);
 }
 
 .modal-open .modal {
@@ -1873,11 +1983,13 @@ form .alert {
 }
 
 .modal-body {
-  padding: 2rem;
+  padding: 24px;
 }
 
 .modal-dialog {
-  padding: 2rem;
+  /* px e non rem: la radice del font è 10px nelle pagine con base.html.twig
+     e 16px nell'area admin, e i rem davano 20px contro 32px */
+  padding: 32px;
   margin: 30px auto;
 }
 
@@ -1895,13 +2007,20 @@ body.modal-open {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
+/* Il dialog è display:flex: senza width il contenuto si restringe alla
+   larghezza del testo e resta allineato a sinistra dentro il dialog,
+   facendo sembrare la modale spostata rispetto al centro della pagina. */
+.modal.in .modal-dialog .modal-content {
+  width: 100%;
+}
+
 .modal-header {
-  padding: 1.5rem;
+  padding: 16px 24px;
   border-radius: 12px 12px 0 0;
 }
 
 .modal-footer {
-  padding: 1rem 1.5rem;
+  padding: 16px 24px;
   border-radius: 0 0 12px 12px;
 }
 
@@ -1918,11 +2037,13 @@ button.btn.disabled,
 button.btn.disabled:hover,
 button.btn.disabled:active,
 button.btn.disabled:focus {
-  color: #000000;
-  background-color: #cccccc;
+  color: var(--gs-disabled-text);
+  background-color: var(--gs-disabled-bg);
   background-image: none;
   box-shadow: none;
-  border-color: #000000;
+  border-color: var(--gs-disabled-bg);
+  opacity: 1;
+  cursor: not-allowed;
 }
 
 a:hover {
@@ -1935,7 +2056,7 @@ a:hover {
 
 label {
   font-weight: 500;
-  color: #495057;
+  color: var(--gs-text);
   margin-bottom: 0.5rem;
 }
 
@@ -1948,33 +2069,38 @@ label {
 .well {
   border-radius: 8px;
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--gs-shadow-sm);
 }
 
 
 /*** tabella con intestazioni fisse ***/
+/* Scala delle intestazioni del quadro voti. Ogni colonna ha un colore
+   pieno e testo bianco: il colore identifica il tipo di prova, non il voto.
+   1 = alunno/media (grigio-blu), 2 = scritto/grafico (navy),
+   3 = orale (blu), 4 = pratico (grigio-blu), 5 = testo chiaro nel gruppo. */
 .gs-color-1 {
-  background-color: #337ab7;
+  background-color: var(--gs-neutral-btn);
   color: #ffffff;
 }
 
 .gs-color-2 {
-  background-color: #dff0d8;
-  color: #000000;
+  background-color: var(--gs-navy);
+  color: #ffffff;
 }
 
 .gs-color-3 {
-  background-color: #d9edf7;
-  color: #000000;
+  background-color: var(--gs-info);
+  color: #ffffff;
 }
 
 .gs-color-4 {
-  background-color: #fcf8e3;
-  color: #000000;
+  background-color: var(--gs-secondary);
+  color: #ffffff;
 }
 
 .gs-color-5 {
-  color: #000099;
+  background-color: transparent;
+  color: #ffffff;
 }
 
 /* Intestazione delle tabelle utenti che non hanno una classe propria
@@ -1991,9 +2117,9 @@ label {
    gs-grades-table, gs-lessons-table) restano liberi di imporre il proprio
    stile senza !important. */
 .gs-table thead:not([class]) th {
-  color: #4c4c4d;
-  background-color: #cacacc;
-  border-color: #d6dce3;
+  color: #ffffff;
+  background-color: var(--gs-secondary);
+  border-color: var(--gs-secondary);
 }
 /* Le voci dei menu a tendina sono <a class="dropdown-toggle"> e stanno su
    fondo scuro: restano bianche e senza bordo. I <button> sono esclusi: quelli
@@ -2028,67 +2154,189 @@ label {
 
 /***** MODERNIZZAZIONE PANEL / FORM *****/
 
+/* Pannelli: superficie bianca, bordo sottile, testata piena scura.
+   Nessun gradiente: il colore della testata dice il ruolo del pannello
+   (blu = principale/informativo, verde = esito positivo, grigio = neutro). */
 .panel {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--gs-border);
+  border-radius: var(--gs-radius-lg);
+  box-shadow: var(--gs-shadow-sm);
   margin-bottom: 1.5rem;
   overflow: hidden;
+  background: var(--gs-surface);
 }
 
+/* Niente barra laterale colorata sui pannelli con la testata gia' piena
+   (Note disciplinari, Annotazioni): la striscia dello stesso colore della
+   testata sembrava un secondo contenitore incollato sotto. Il pannello
+   resta un'unica card con la testata colorata e il corpo bianco. */
 .panel-success {
-  border-left: 4px solid #198754;
-}
-
-.panel-default {
-  border-left: 4px solid #6c757d;
+  border-left: 4px solid var(--gs-success);
 }
 
 .panel-heading {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-bottom: 1px solid #dee2e6;
+  background: var(--gs-secondary);
+  border-bottom: 1px solid var(--gs-secondary);
   padding: 1.2rem 1.5rem;
+  color: #ffffff;
 }
 
 .panel-success .panel-heading {
-  background: linear-gradient(135deg, #d1e7dd 0%, #badbcc 100%);
-  border-bottom: 1px solid #a3cfbb;
+  background: var(--gs-success);
+  border-bottom-color: var(--gs-success);
+  color: #ffffff;
+}
+
+.panel-warning .panel-heading {
+  background: var(--gs-warning);
+  border-bottom-color: var(--gs-warning);
+  color: #ffffff;
 }
 
 .panel-info .panel-heading,
 .panel-primary .panel-heading {
-  background: linear-gradient(135deg, #cfe2ff 0%, #9ec5fe 100%);
-  border-bottom: 1px solid #7abaff;
+  background: var(--gs-primary);
+  border-bottom-color: var(--gs-primary);
+  color: #ffffff;
 }
 
 .panel-default .panel-heading {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-bottom: 1px solid #dee2e6;
+  background: var(--gs-secondary);
+  border-bottom-color: var(--gs-secondary);
+  color: #ffffff;
 }
 
 .panel-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #212529;
+  color: inherit;
   margin: 0;
+}
+
+/* Testata di pannello con un'azione a destra (Note disciplinari,
+   Annotazioni): titolo e pulsante sulla stessa riga. Il pulsante resta
+   chiaro per essere leggibile su qualunque colore di testata. */
+.panel-heading.gs-panel-heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+/* Titolo di testata leggibile anche con l'html a 10px di Bootstrap 3:
+   niente rem qui, altrimenti il titolo resta piu' piccolo del testo. */
+.panel-heading.gs-panel-heading-actions .panel-title {
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.panel-heading.gs-panel-heading-actions .btn {
+  background: var(--gs-surface);
+  background-image: none;
+  border-color: var(--gs-surface);
+  color: var(--gs-navy);
+}
+
+.panel-heading.gs-panel-heading-actions .btn:hover,
+.panel-heading.gs-panel-heading-actions .btn:focus {
+  background: var(--gs-surface-muted);
+  border-color: var(--gs-surface-muted);
+  color: var(--gs-navy);
+}
+
+/* Le voci della lista chiudono la testata e il pannello: niente margine
+   esterno e niente doppio bordo con la testata o con l'ultima voce. */
+.panel-heading.gs-panel-heading-actions + .list-group {
+  margin-bottom: 0;
+}
+
+.panel-heading.gs-panel-heading-actions + .list-group .list-group-item {
+  border-width: 0 0 1px 0;
+}
+
+.panel-heading.gs-panel-heading-actions + .list-group .list-group-item:last-child {
+  border-bottom-width: 0;
+}
+
+/* Voce di elenco con le azioni accanto al testo (Note disciplinari,
+   Annotazioni): il testo occupa la parte sinistra, i pulsanti stanno in
+   una colonna a destra, centrati verticalmente sul testo e allineati al
+   suo margine destro. Cosi' i due pannelli mostrano il pulsante Cancella
+   nella stessa posizione, invece di farlo scendere sull'ultima riga
+   quando il testo va a capo. */
+.gs-voce-azioni {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* La base di 240px e' la soglia di andata a capo: finche' il testo puo'
+   restare largo almeno cosi' i pulsanti stanno sulla stessa riga, sotto
+   quella misura scendono su una riga loro (senza soglie legate allo
+   schermo, che li facevano scendere anche quando lo spazio c'era). */
+.gs-voce-azioni .list-group-item-text {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.gs-voce-azioni-bottoni {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  margin-left: auto;
 }
 
 .panel-body {
   padding: 2rem 1.5rem;
-  background-color: #ffffff;
+  background-color: var(--gs-surface);
 }
 
 .panel-footer {
-  background-color: #f8f9fa;
-  border-top: 1px solid #dee2e6;
+  background-color: var(--gs-surface-soft);
+  border-top: 1px solid var(--gs-border);
   padding: 1rem 1.5rem;
 }
 
+/* Nei piedi dei pannelli con i pulsanti centrati "Annulla" sta a sinistra e
+   "Conferma" a destra. Nel DOM resta l'ordine submit/cancel (l'invio con
+   Invio non cambia) e row-reverse inverte solo l'ordine visivo. */
+.panel-footer.text-center {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.panel-footer.text-center .btn {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Stessa regola per i piedi delle modali che hanno Conferma e Annulla:
+   row-reverse porta il submit (primo nel DOM) a destra e l'annulla a
+   sinistra, senza cambiare l'ordine logico dei campi del form. */
+.gs-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
 .form-control {
-  border-radius: 8px;
-  border: 1px solid #dfe6ee;
+  border-radius: var(--gs-radius-md);
+  border: 1px solid var(--gs-border-strong);
   padding: 0.75rem 1rem;
   font-size: 1rem;
+  background-color: var(--gs-surface);
+  color: var(--gs-text);
 }
 
 .btn-xs {
@@ -2113,10 +2361,10 @@ label {
 }
 
 .input-group {
-  border: 1px solid #dfe6ee;
+  border: 1px solid var(--gs-border-strong);
   border-radius: 8px;
   overflow: hidden;
-  background-color: #ffffff;
+  background-color: var(--gs-surface);
 }
 
 .input-group .form-control {
@@ -2129,20 +2377,20 @@ label {
 .input-group .input-group-addon {
   background: transparent;
   border: none;
-  border-right: 1px solid #dfe6ee;
+  border-right: 1px solid var(--gs-border);
 }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px #ffffff inset;
-  -webkit-text-fill-color: #212529;
+  -webkit-box-shadow: 0 0 0 30px var(--gs-surface) inset;
+  -webkit-text-fill-color: var(--gs-text);
   transition: background-color 5000s ease-in-out 0s;
 }
 
 .help-block {
-  color: #6c757d;
+  color: var(--gs-text-muted);
   font-size: 0.95rem;
   line-height: 1.6;
   margin-bottom: 1.5rem;
@@ -2150,34 +2398,46 @@ input:-webkit-autofill:active {
 
 #login {
   min-width: 200px;
-  padding: 0.75rem 2rem;
 }
 
+/* Avvisi: fondo pieno scuro e testo bianco. Il colore segnala lo stato,
+   il bordo pieno ne rafforza il contorno. Niente gradienti né trasparenze. */
 .alert {
-  border-radius: 8px;
-  border: none;
+  border-radius: var(--gs-radius-md);
+  border: 1px solid transparent;
+  border-left-width: 4px;
   padding: 1rem 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
+  color: #ffffff;
+}
+
+.alert a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 .alert-warning {
-  background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
-  color: #856404;
+  background: var(--gs-warning);
+  border-color: var(--gs-warning);
+  color: #ffffff;
 }
 
 .alert-danger {
-  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-  color: #721c24;
+  background: var(--gs-danger);
+  border-color: var(--gs-danger);
+  color: #ffffff;
 }
 
 .alert-success {
-  background: linear-gradient(135deg, #d1e7dd 0%, #badbcc 100%);
-  color: #0f5132;
+  background: var(--gs-success);
+  border-color: var(--gs-success);
+  color: #ffffff;
 }
 
 .alert-info {
-  background: linear-gradient(135deg, #cfe2ff 0%, #9ec5fe 100%);
-  color: #055160;
+  background: var(--gs-info);
+  border-color: var(--gs-info);
+  color: #ffffff;
 }
 
 .container_fluid {
@@ -2191,11 +2451,11 @@ input:-webkit-autofill:active {
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) {
-  background-color: #f8f9fa;
+  background-color: var(--gs-surface-soft);
 }
 
 .table-hover > tbody > tr:hover {
-  background-color: #e9ecef;
+  background-color: var(--gs-surface-muted);
 }
 
 
@@ -2203,10 +2463,10 @@ input:-webkit-autofill:active {
 
 .it-datepicker-wrapper .datepicker-calendar {
   width: auto;
-  border-left: 1px solid #b1b1b3;
-  border-right: 2px solid #818183;
-  border-top: 2px solid #435a70;
-  border-bottom: 1px solid #b1b1b3;
+  border-left: 1px solid var(--gs-border);
+  border-right: 1px solid var(--gs-border-strong);
+  border-top: 1px solid var(--gs-border-strong);
+  border-bottom: 1px solid var(--gs-border);
   border-radius: 0 0 4px 4px;
   padding: 10px;
 }
@@ -2235,13 +2495,13 @@ input:-webkit-autofill:active {
 
 .it-datepicker-wrapper .datepicker-calendar.default table.datepicker-grid td.curDay span {
   color: #ffffff;
-  background-color: #0066CC;
+  background-color: var(--gs-primary);
 }
 
 .it-datepicker-wrapper .datepicker-calendar.default table.datepicker-grid td.curMonth,
 .it-datepicker-wrapper .datepicker-calendar.default table.datepicker-grid td.curYear {
   color: #ffffff;
-  background-color: #0066CC;
+  background-color: var(--gs-primary);
 }
 
 .it-datepicker-wrapper .datepicker-calendar.default .gs-datepicker-today {
@@ -2258,15 +2518,15 @@ input:-webkit-autofill:active {
   border: 0 solid transparent;
   border-radius: 4px;
   background-color: transparent;
-  color: #435a70;
+  color: var(--gs-text);
 }
 
 .it-datepicker-wrapper .datepicker-calendar.default .gs-datepicker-today:hover {
-  background-color: #eee;
+  background-color: var(--gs-surface-muted);
 }
 
 .calendar-input-container {
-  border: 1px solid #ced4da;
+  border: 1px solid var(--gs-border-strong);
   border-radius: 8px;
 }
 
@@ -2296,10 +2556,10 @@ input:-webkit-autofill:active {
   z-index: 2;
   width: 100%;
   margin-top: -3rem;
-  border-left: 1px solid #b1b1b3;
-  border-right: 2px solid #818183;
-  border-top: 2px solid #435a70;
-  border-bottom: 1px solid #b1b1b3;
+  border-left: 1px solid var(--gs-border);
+  border-right: 1px solid var(--gs-border-strong);
+  border-top: 1px solid var(--gs-border-strong);
+  border-bottom: 1px solid var(--gs-border);
   border-radius: 0 0 4px 4px;
 }
 
@@ -2382,7 +2642,7 @@ fieldset .gs-add-item {
   }
 
   .table-responsive > .table-bordered {
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--gs-border);
   }
 
   .gs-flex-grid {
@@ -2477,11 +2737,18 @@ fieldset .gs-add-item {
 
   .modal-dialog {
     max-width: 95%;
-    margin: 0.5rem auto;
+    margin: 8px auto;
+    padding: 8px;
+  }
+
+  /* con margini di 8px per lato il dialog deve essere alto 16px in meno
+     della viewport, altrimenti il contenuto scende sotto il centro */
+  .modal.in .modal-dialog {
+    min-height: calc(100vh - 16px);
   }
 
   .modal-body {
-    padding: 1rem;
+    padding: 16px;
   }
 }
 

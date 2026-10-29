@@ -33,6 +33,34 @@ $(document).ready(function() {
     $(this).closest('.table-responsive').removeClass('gs-dropdown-aperto');
     $(this).closest('table').removeClass('gs-dropdown-aperto');
   });
+  // barra strumenti di pagina (registro firme, agenda): resta su una riga
+  // finche' navigazione, vista e azioni ci stanno davvero; quando il blocco
+  // dei comandi va a capo la barra torna impilata a tutta larghezza
+  // (.gs-toolbar-stacked), invece di lasciare un buco accanto alla data.
+  // La misura si fa sempre da capo: prima si toglie la classe, altrimenti
+  // la barra resterebbe impilata anche quando lo spazio torna a bastare.
+  function adattaBarraStrumenti() {
+    $('.gs-page-toolbar, .gs-assenze-toolbar').each(function() {
+      var nav = this.querySelector('.gs-date-nav');
+      var comandi = this.querySelector('.gs-toolbar-controls');
+
+      if (!nav || !comandi) {
+        return;
+      }
+      $(this).removeClass('gs-toolbar-stacked');
+      if (comandi.getBoundingClientRect().top > nav.getBoundingClientRect().top + 1) {
+        $(this).addClass('gs-toolbar-stacked');
+      }
+    });
+  }
+
+  adattaBarraStrumenti();
+  $(window).on('load', adattaBarraStrumenti);
+  var attesaBarra;
+  $(window).on('resize', function() {
+    clearTimeout(attesaBarra);
+    attesaBarra = setTimeout(adattaBarraStrumenti, 100);
+  });
 });
 
 setTimeout(() => {

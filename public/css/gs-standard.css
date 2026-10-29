@@ -9,7 +9,17 @@
    main.css > gs-standard.css
    ========================================================================== */
 
-/* 1. Token di base */
+/* 1. Token di base — unica fonte dei colori.
+   Scala blu istituzionale #0066CC (Bootstrap Italia / Linee guida PA).
+   Ruoli:
+   - navy     testata, piè di pagina, titoli
+   - primary  UNA sola azione principale per schermata, link
+   - surface  fondo pagina e schede; surface-soft/muted per i livelli
+   - semantic solo per stati (success, warning, danger, info)
+   Gli stati derivano dal colore base: hover più scuro, active ancora più
+   scuro, focus ad anello, disabled desaturato. Nessun gradiente.
+   Tutte le combinazioni testo/fondo usate superano WCAG AA (4.5:1),
+   tranne il disabled, che è esente ma resta riconoscibile. */
 :root {
   --gs-font: Inter, system-ui, sans-serif;
   --gs-fs-xs: 12px;
@@ -21,67 +31,139 @@
   --gs-radius-md: 8px;
   --gs-radius-lg: 12px;
 
-  --gs-primary: #0d6efd;
-  --gs-secondary: #6c757d;
-  --gs-success: #198754;
-  --gs-warning: #ffc107;
-  --gs-danger: #dc3545;
-  --gs-info: #0dcaf0;
+  /* Blu istituzionale e sue varianti di stato (invariato) */
+  --gs-navy: #17324d;
+  --gs-primary: #1d4ed8;
+  --gs-primary-strong: #1a3db8;
+  --gs-primary-hover: #1a3db8;
+  --gs-primary-active: #15359e;
+  --gs-primary-soft: #e6f0fa;
+  --gs-primary-border: #b3d1f0;
 
-  --gs-border: #dee2e6;
-  --gs-text: #212529;
-  --gs-text-muted: #6c757d;
+  /* Neutri blu-grigio (invariato) */
+  --gs-secondary: #5c6f82;
+  --gs-secondary-hover: #475a6b;
+  --gs-page-bg: #eef2f7;
   --gs-surface: #ffffff;
+  --gs-surface-soft: #f5f8fb;
+  --gs-surface-muted: #e7edf4;
+  --gs-border: #cfd9e4;
+  --gs-border-strong: #a3b5c7;
+  --gs-text: #1f2a37;
+  --gs-text-muted: #5c6f82;
 
-  --gs-shadow-sm: 0 1px 2px rgba(0, 0, 0, .05);
-  --gs-shadow-md: 0 4px 12px rgba(0, 0, 0, .08);
+  /* Stati semantici */
+  --gs-success: #0f7a4d;
+  --gs-success-hover: #0b6540;
+  --gs-success-active: #095436;
+  --gs-success-soft: #e7f5ee;
+  --gs-success-border: #b7dfc8;
+
+  /* Warning: ambra/giallo scuro, non più rosso-arancio.
+     #a16207 è nettamente più giallo di #c2410c e resta leggibile con
+     testo bianco (4.92:1). */
+  --gs-warning: #a16207;
+  --gs-warning-text: #ffffff;
+  --gs-warning-hover: #854d0e;
+  --gs-warning-active: #713f12;
+  --gs-warning-soft: #fef6e0;
+  --gs-warning-border: #f0dba4;
+
+  --gs-danger: #991b1b;
+  --gs-danger-hover: #8f1d14;
+  --gs-danger-active: #7a1911;
+  --gs-danger-soft: #fdecea;
+  --gs-danger-border: #f5c2bd;
+
+  --gs-info: #0059b3;
+  --gs-info-hover: #004a99;
+  --gs-info-active: #003d80;
+  --gs-info-text: #ffffff;
+  --gs-info-soft: #e6f0fa;
+  --gs-info-border: #b3d1f0;
+
+  /* Disabled (invariato) */
+  --gs-neutral-btn: #3d4b57;
+  --gs-neutral-btn-hover: #2f3a44;
+  --gs-neutral-btn-active: #242d35;
+  --gs-disabled-bg: #4b5563;
+  --gs-disabled-text: #d1d5db;
+
+  --gs-focus: #0066cc;
+  --gs-focus-tint: #cfe3f7;
+
+  --gs-shadow-sm: 0 1px 2px rgba(23, 50, 77, .06);
+  --gs-shadow-md: 0 8px 24px rgba(23, 50, 77, .10);
   --gs-transition: 150ms ease-in-out;
 }
 
+body {
+  overflow-x: hidden;
+}
 /* 2. Normalizzazione bottoni — specificita' alta per sovrascrivere
    BS3, tema BS3 e Bootstrap Italia. */
 
-/* 2.1 Dimensioni fisse: xs 26px / sm 32px / md 40px (default) / lg 48px */
+/* 2.1 Dimensioni: xs 26px / sm 32px / md 40px (default) / lg 48px.
+   min-height e height:auto lasciano crescere il bottone quando l'etichetta
+   va a capo: nessun testo deve essere tagliato dentro una card o una cella. */
 body .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  line-height: 1;
-  white-space: nowrap;
+  line-height: 1.2;
+  white-space: normal;
+  text-align: center;
+  max-width: 100%;
   font-family: var(--gs-font);
   font-size: var(--gs-fs-md);
   font-weight: 500;
-  height: 40px;
-  padding: 0 16px;
+  min-height: 40px;
+  height: auto;
+  padding: 9px 16px;
   border-radius: var(--gs-radius-md);
   border: 1px solid transparent;
-  transition: var(--gs-transition);
-  box-shadow: var(--gs-shadow-sm);
+  transition: background-color var(--gs-transition), border-color var(--gs-transition),
+    color var(--gs-transition), box-shadow var(--gs-transition);
+  box-shadow: none;
   text-decoration: none;
   cursor: pointer;
   background-image: none;
 }
 
 body .btn-xs {
-  height: 26px;
-  padding: 0 8px;
+  min-height: 26px;
+  height: auto;
+  padding: 4px 8px;
   font-size: var(--gs-fs-xs);
+  line-height: 1.15;
   border-radius: var(--gs-radius-sm);
 }
 
 body .btn-sm {
-  height: 32px;
-  padding: 0 12px;
+  min-height: 32px;
+  height: auto;
+  padding: 6px 12px;
   font-size: var(--gs-fs-sm);
+  line-height: 1.2;
   border-radius: var(--gs-radius-md);
 }
 
 body .btn-lg {
-  height: 48px;
-  padding: 0 24px;
+  min-height: 48px;
+  height: auto;
+  padding: 11px 24px;
   font-size: var(--gs-fs-lg);
+  line-height: 1.2;
   border-radius: var(--gs-radius-md);
+}
+
+/* Focus: anello blu pieno, mai trasparente. */
+body .btn:focus-visible,
+body a:focus-visible {
+  outline: 3px solid var(--gs-focus);
+  outline-offset: 3px;
+  box-shadow: none;
 }
 
 /* Le icone dentro i bottoni seguono la size del bottone */
@@ -106,141 +188,307 @@ body .btn-lg svg {
   font-size: 18px;
 }
 
-/* 2.2 Varianti consentite — solo token, nessun colore hardcoded */
+/* 2.2 Varianti consentite — solo token, nessun colore hardcoded.
+   Regola unica: ogni bottone ha fondo scuro e testo chiaro a forte contrasto.
+   primary   CTA della schermata (blu istituzionale)
+   secondary tutti gli altri comandi (grigio-blu)
+   ghost     comandi dentro tabelle e barre dense (grigio-blu)
+   success / warning / info / danger  stati, sempre pieni */
 body .btn-primary {
   background: var(--gs-primary);
   background-image: none;
   border-color: var(--gs-primary);
-  color: var(--gs-surface);
+  color: #ffffff;
 }
 body .btn-primary:hover,
 body .btn-primary:focus {
-  filter: brightness(.92);
-  border-color: var(--gs-primary);
-  color: var(--gs-surface);
+  background: var(--gs-primary-hover);
+  border-color: var(--gs-primary-hover);
+  color: #ffffff;
+  filter: none;
+}
+body .btn-primary:active,
+body .btn-primary.active,
+body .open > .btn-primary.dropdown-toggle,
+body .show > .btn-primary.dropdown-toggle {
+  background: var(--gs-primary-active);
+  border-color: var(--gs-primary-active);
+  color: #ffffff;
 }
 
-body .btn-secondary {
-  background: var(--gs-secondary);
+/* Secondari: grigio-blu pieno, testo bianco. Mai bianco su bianco. */
+body .btn-secondary,
+body .btn-default,
+body .btn-outline-secondary {
+  background: var(--gs-neutral-btn);
   background-image: none;
-  border-color: var(--gs-secondary);
-  color: var(--gs-surface);
+  border: 1px solid var(--gs-neutral-btn);
+  color: #ffffff;
+  box-shadow: none;
+  text-shadow: none;
 }
 body .btn-secondary:hover,
-body .btn-secondary:focus {
-  filter: brightness(.92);
-  border-color: var(--gs-secondary);
-  color: var(--gs-surface);
+body .btn-secondary:focus,
+body .btn-default:hover,
+body .btn-default:focus,
+body .btn-outline-secondary:hover,
+body .btn-outline-secondary:focus {
+  background: var(--gs-neutral-btn-hover);
+  border-color: var(--gs-neutral-btn-hover);
+  color: #ffffff;
+  filter: none;
+}
+body .btn-secondary:active,
+body .btn-secondary.active,
+body .btn-default:active,
+body .btn-default.active,
+body .open > .btn-secondary.dropdown-toggle,
+body .open > .btn-default.dropdown-toggle,
+body .show > .btn-secondary.dropdown-toggle,
+body .show > .btn-default.dropdown-toggle {
+  background: var(--gs-neutral-btn-active);
+  border-color: var(--gs-neutral-btn-active);
+  color: #ffffff;
 }
 
 body .btn-outline-primary {
-  background: transparent;
+  background: var(--gs-primary);
   background-image: none;
   border: 1px solid var(--gs-primary);
-  color: var(--gs-primary);
+  color: #ffffff;
 }
 body .btn-outline-primary:hover,
 body .btn-outline-primary:focus {
-  background: var(--gs-primary);
-  color: var(--gs-surface);
+  background: var(--gs-primary-hover);
+  border-color: var(--gs-primary-hover);
+  color: #ffffff;
 }
-
-body .btn-outline-secondary {
-  background: transparent;
-  background-image: none;
-  border: 1px solid var(--gs-border);
-  color: var(--gs-text);
-}
-body .btn-outline-secondary:hover,
-body .btn-outline-secondary:focus {
-  background: rgba(0, 0, 0, .05);
-  border-color: var(--gs-border);
-  color: var(--gs-text);
+body .btn-outline-primary:active {
+  background: var(--gs-primary-active);
+  border-color: var(--gs-primary-active);
+  color: #ffffff;
 }
 
 body .btn-ghost {
-  background: transparent;
+  background: var(--gs-neutral-btn);
   background-image: none;
-  border: 1px solid transparent;
+  border: 1px solid var(--gs-neutral-btn);
   box-shadow: none;
-  color: var(--gs-text);
+  color: #ffffff;
 }
 body .btn-ghost:hover,
 body .btn-ghost:focus {
-  background: rgba(0, 0, 0, .05);
-  color: var(--gs-text);
+  background: var(--gs-neutral-btn-hover);
+  border-color: var(--gs-neutral-btn-hover);
+  color: #ffffff;
 }
 
 body .btn-danger {
   background: var(--gs-danger);
   background-image: none;
   border-color: var(--gs-danger);
-  color: var(--gs-surface);
+  color: #ffffff;
 }
 body .btn-danger:hover,
 body .btn-danger:focus {
-  filter: brightness(.92);
-  color: var(--gs-surface);
+  background: var(--gs-danger-hover);
+  border-color: var(--gs-danger-hover);
+  color: #ffffff;
+  filter: none;
+}
+body .btn-danger:active,
+body .btn-danger.active {
+  background: var(--gs-danger-active);
+  border-color: var(--gs-danger-active);
+  color: #ffffff;
 }
 
 body .btn-success {
   background: var(--gs-success);
   background-image: none;
   border-color: var(--gs-success);
-  color: var(--gs-surface);
+  color: #ffffff;
 }
 body .btn-success:hover,
 body .btn-success:focus {
-  filter: brightness(.92);
-  color: var(--gs-surface);
+  background: var(--gs-success-hover);
+  border-color: var(--gs-success-hover);
+  color: #ffffff;
+  filter: none;
+}
+body .btn-success:active,
+body .btn-success.active {
+  background: var(--gs-success-active);
+  border-color: var(--gs-success-active);
+  color: #ffffff;
 }
 
 body .btn-warning {
   background: var(--gs-warning);
   background-image: none;
   border-color: var(--gs-warning);
-  color: var(--gs-text);
+  color: #ffffff;
 }
 body .btn-warning:hover,
 body .btn-warning:focus {
-  filter: brightness(.95);
-  color: var(--gs-text);
+  background: var(--gs-warning-hover);
+  border-color: var(--gs-warning-hover);
+  color: #ffffff;
+  filter: none;
+}
+body .btn-warning:active,
+body .btn-warning.active {
+  background: var(--gs-warning-active);
+  border-color: var(--gs-warning-active);
+  color: #ffffff;
 }
 
 body .btn-info {
   background: var(--gs-info);
   background-image: none;
   border-color: var(--gs-info);
-  color: var(--gs-text);
+  color: #ffffff;
+}
+body .btn-info:hover,
+body .btn-info:focus {
+  background: var(--gs-info-hover);
+  border-color: var(--gs-info-hover);
+  color: #ffffff;
+  filter: none;
+}
+body .btn-info:active,
+body .btn-info.active {
+  background: var(--gs-info-active);
+  border-color: var(--gs-info-active);
+  color: #ffffff;
 }
 
-/* btn-default VIETATO: appare come btn-outline-secondary per retrocompatibilita' */
-body .btn-default,
-body .btn-default:hover,
-body .btn-default:focus,
-body .btn-default:active,
-body .open > body .btn-default.dropdown-toggle,
-body .dropdown.open > .btn-default.dropdown-toggle {
-  background: transparent;
+/* Disabilitato: desaturato, leggibile come non disponibile, mai nero. */
+body .btn:disabled,
+body .btn.disabled,
+body .btn[aria-disabled="true"] {
+  background: var(--gs-disabled-bg);
   background-image: none;
-  border: 1px solid var(--gs-border);
-  color: var(--gs-text);
-  box-shadow: var(--gs-shadow-sm);
-  text-shadow: none;
-}
-body .btn-default:hover,
-body .btn-default:focus {
-  background: rgba(0, 0, 0, .05);
+  border-color: var(--gs-disabled-bg);
+  color: var(--gs-disabled-text);
+  box-shadow: none;
+  opacity: 1;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
-/* Neutralizza gradienti del tema Bootstrap 3 su tutti i bottoni */
+/* Neutralizza gradienti e ombre del tema Bootstrap 3 su tutti i bottoni */
 body .btn:active,
 body .btn.active {
   background-image: none;
-  box-shadow: var(--gs-shadow-sm);
+  box-shadow: none;
 }
 
-/* 2.3 Bottoni icona — sempre quadrati, solo icona, nessuno sfondo.
+/* 2.2.1 Riga azioni dei form: larghezza piena, gruppo centrato,
+   "Annulla" a sinistra e "Conferma" a destra. Nel DOM il submit precede
+   il cancel: row-reverse inverte solo l'ordine visivo. */
+.gs-form-actions {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+/* Nei form .form-horizontal Bootstrap 3 applica -15px ai .form-group. La riga
+   azioni non sta dentro una .row, quindi va riallineata ai bordi del form. */
+body .form-horizontal .gs-form-actions {
+  margin-left: 0;
+  margin-right: 0;
+}
+.gs-form-actions > [class*="col-"] {
+  float: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.gs-form-actions-buttons {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+.gs-form-actions-buttons .btn {
+  margin: 0 !important;
+  min-width: 140px;
+}
+@media (max-width: 575.98px) {
+  .gs-form-actions-buttons {
+    flex-direction: column-reverse;
+  }
+  .gs-form-actions-buttons .btn {
+    width: 100%;
+  }
+}
+
+/* Coppie Conferma/Annulla fuori dai piedi di pannelli e modali (per esempio
+   le righe azioni di un form). Nel DOM il submit precede il cancel:
+   row-reverse mette Annulla a sinistra e Conferma a destra senza cambiare
+   l'ordine logico. La variante -sinistra serve alle righe che non erano
+   centrate. */
+.gs-azioni-invertite {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.gs-azioni-invertite.gs-azioni-sinistra {
+  /* Con row-reverse il bordo sinistro della riga è la fine dell'asse
+     principale: flex-end tiene i pulsanti a sinistra come prima. */
+  justify-content: flex-end;
+}
+
+.gs-azioni-invertite .btn {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+@media (max-width: 575.98px) {
+  .gs-azioni-invertite {
+    flex-direction: column-reverse;
+  }
+  .gs-azioni-invertite .btn {
+    width: 100%;
+  }
+}
+
+/* 2.2.2 Icone azione "ghost" — fondo trasparente, icona grigio-blu.
+   Servono nelle toolbar dense (situazione alunni): il colore cambia al
+   passaggio del mouse, al focus e al tocco, con un fondo grigio chiaro.
+   Il testo non e' nel bottone ma in title e aria-label. */
+body .gs-btn-az {
+  background: transparent;
+  background-image: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--gs-text-muted);
+}
+body .gs-btn-az:hover,
+body .gs-btn-az:focus,
+body .gs-btn-az:active {
+  background: var(--gs-surface-muted);
+  border-color: var(--gs-border);
+  color: var(--gs-primary);
+  box-shadow: none;
+}
+/* Azione corrente (pagina situazione di un tipo): evidenziata e non
+   cliccabile, ma resta un'icona per non spezzare la toolbar. */
+body .gs-btn-az.gs-btn-az-attivo,
+body .gs-btn-az.gs-btn-az-attivo:hover {
+  background: var(--gs-primary-soft);
+  border-color: var(--gs-primary-border);
+  color: var(--gs-primary);
+  cursor: default;
+}
+
+/* 2.3 Bottoni icona — quadrati, fondo scuro pieno, icona chiara.
    Lato = altezza della size. Se manca un'icona semantica, usare un
    bottone testuale btn-xs/btn-sm con etichetta breve (Apri, Dettagli). */
 body .btn-icon,
@@ -253,18 +501,19 @@ body .gs-btn-icona {
   width: 40px;
   height: 40px;
   min-width: 40px;
-  background: transparent;
+  background: var(--gs-navy);
   background-image: none;
-  border: 1px solid transparent;
+  border: 1px solid var(--gs-navy);
   border-radius: var(--gs-radius-md);
   box-shadow: none;
-  color: var(--gs-text);
+  color: #ffffff;
   text-shadow: none;
 }
 body .btn-icon.btn-xs,
 body .gs-btn-icona.btn-xs {
-  height: 26px;
-  min-width: 26px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
   border-radius: var(--gs-radius-sm);
 }
 body .btn-icon.btn-sm,
@@ -283,9 +532,9 @@ body .btn-icon:hover,
 body .btn-icon:focus,
 body .gs-btn-icona:hover,
 body .gs-btn-icona:focus {
-  background: rgba(0, 0, 0, .05);
-  border-color: transparent;
-  color: var(--gs-text);
+  background: var(--gs-primary);
+  border-color: var(--gs-primary);
+  color: #ffffff;
   box-shadow: none;
 }
 body .btn-icon.text-danger,
@@ -293,9 +542,9 @@ body .btn-icon.btn-danger,
 body .gs-btn-icona.text-danger,
 body .gs-btn-icona.btn-danger,
 body .gs-btn-icona.gs-icona-danger {
-  color: var(--gs-danger);
-  background: transparent;
-  border-color: transparent;
+  color: #ffffff;
+  background: var(--gs-danger);
+  border-color: var(--gs-danger);
 }
 body .btn-icon.text-danger:hover,
 body .btn-icon.text-danger:focus,
@@ -305,8 +554,9 @@ body .gs-btn-icona.text-danger:hover,
 body .gs-btn-icona.text-danger:focus,
 body .gs-btn-icona.btn-danger:hover,
 body .gs-btn-icona.btn-danger:focus {
-  background: rgba(220, 53, 69, .10);
-  color: var(--gs-danger);
+  background: var(--gs-danger-hover);
+  border-color: var(--gs-danger-hover);
+  color: #ffffff;
 }
 
 /* Icone dentro btn-icon: dimensione fissa in px, identica nei due mondi
@@ -338,6 +588,84 @@ body .gs-btn-icona.btn-lg svg {
   height: 18px;
 }
 
+/* 2.3.1 Toolbar azioni di riga — icone ghost affiancate in un btn-group.
+   I bottoni si toccano (niente margini fra loro), restano sulla stessa riga
+   e mostrano il separatore solo come bordo sottile. La cella della tabella
+   si restringe sul contenuto (vedi §5, td.actions). */
+body .gs-azioni-toolbar {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  vertical-align: middle;
+}
+body .gs-azioni-toolbar > .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 0;
+}
+body table.table td.actions .gs-azioni-toolbar > .btn {
+  /* vince sul margine dei bottoni sciolti nella cella azioni (§5) */
+  margin: 0;
+}
+body .gs-azioni-toolbar > .btn + .btn {
+  border-left-color: var(--gs-border);
+}
+body .gs-azioni-toolbar > .btn:first-child {
+  border-top-left-radius: var(--gs-radius-sm);
+  border-bottom-left-radius: var(--gs-radius-sm);
+}
+body .gs-azioni-toolbar > .btn:last-child {
+  border-top-right-radius: var(--gs-radius-sm);
+  border-bottom-right-radius: var(--gs-radius-sm);
+}
+/* Il menu ⋮ e' l'ultimo bottone del gruppo, ma il <ul> che segue non e' un
+   bottone: :last-child non lo raggiunge, quindi il bordo destro va messo
+   per classe. */
+body .gs-azioni-toolbar > .btn.gs-btn-az-ultimo {
+  border-top-right-radius: var(--gs-radius-sm);
+  border-bottom-right-radius: var(--gs-radius-sm);
+}
+/* Se la pagina corrente e' una voce del menu, il ⋮ resta evidenziato ma
+   deve continuare a sembrare cliccabile (apre il menu). */
+body .gs-azioni-toolbar > .btn.gs-btn-az-ultimo.gs-btn-az-attivo {
+  cursor: pointer;
+}
+/* Riga della toolbar: "Visualizza" (icona + testo) prima del gruppo di
+   icone, con un piccolo spazio fra i due blocchi. */
+body .gs-azioni-riga {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  vertical-align: middle;
+}
+body .gs-btn-az.gs-btn-visualizza {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+/* Variante con etichetta (testata della situazione di un alunno): l'icona
+   resta a sinistra del testo e il bottone si allarga sul contenuto, invece
+   dei 32px fissi della toolbar da tabella. */
+body .gs-azioni-toolbar > .btn.gs-btn-az-testo {
+  width: auto;
+  min-width: 0;
+  padding: 0 0.75rem;
+  gap: 0.4rem;
+}
+body .gs-azioni-toolbar .icon,
+body .gs-azioni-toolbar svg {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
 /* 2.4 Pulsanti del form OTP (pagina profilo utente): Annulla e Conferma
    sono resi a mano nello stesso div.gs-otp-azioni (template utenti/otp),
    il flex li tiene sulla stessa riga, ai lati opposti. */
@@ -366,6 +694,28 @@ body .gs-btn-icona.btn-lg svg {
 }
 .table.gs-dropdown-aperto {
   overflow: visible;
+}
+
+/* Su schermi stretti la tabella scorre in orizzontale: togliere il ritaglio
+   riporterebbe lo scorrimento a zero e il menu ⋮ finirebbe fuori schermo.
+   Qui il contenitore resta scrollabile e il menu diventa un pannello fisso
+   in basso, sempre dentro la finestra. */
+@media (max-width: 767.98px) {
+  .table-responsive.gs-dropdown-aperto {
+    contain: none;
+    overflow-x: auto;
+  }
+  .gs-azioni-toolbar .dropdown-menu {
+    position: fixed;
+    top: auto;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    min-width: 0;
+    max-height: 60vh;
+    margin: 0;
+    overflow-y: auto;
+  }
 }
 
 /* 2.6 Voci del dropdown-azioni (menu-azioni.html.twig): i <button> devono
@@ -403,29 +753,43 @@ body .gs-btn-icona.btn-lg svg {
 .gs-azioni-dropdown .dropdown-menu > li > button.text-success,
 .gs-azioni-dropdown .dropdown-menu > li > a.text-success:hover,
 .gs-azioni-dropdown .dropdown-menu > li > button.text-success:hover {
-  color: #3c763d;
+  color: var(--gs-success);
 }
 .gs-azioni-dropdown .dropdown-menu > li > a.text-danger,
 .gs-azioni-dropdown .dropdown-menu > li > button.text-danger,
 .gs-azioni-dropdown .dropdown-menu > li > a.text-danger:hover,
 .gs-azioni-dropdown .dropdown-menu > li > button.text-danger:hover {
-  color: #a94442;
+  color: var(--gs-danger);
 }
 .gs-azioni-dropdown .dropdown-menu > li > a.text-warning,
 .gs-azioni-dropdown .dropdown-menu > li > button.text-warning,
 .gs-azioni-dropdown .dropdown-menu > li > a.text-warning:hover,
 .gs-azioni-dropdown .dropdown-menu > li > button.text-warning:hover {
-  color: #8a6d3b;
+  color: var(--gs-warning);
 }
 .gs-azioni-dropdown .dropdown-menu > li > a.text-primary,
 .gs-azioni-dropdown .dropdown-menu > li > button.text-primary,
 .gs-azioni-dropdown .dropdown-menu > li > a.text-primary:hover,
 .gs-azioni-dropdown .dropdown-menu > li > button.text-primary:hover {
-  color: #337ab7;
+  color: var(--gs-primary);
+}
+/* Una voce disabilitata resta grigia anche se il chiamante le ha dato una
+   classe semantica (text-danger, text-success, ...): il colore del testo non
+   deve far credere che l'azione sia disponibile. */
+.gs-azioni-dropdown .dropdown-menu > li.disabled > a,
+.gs-azioni-dropdown .dropdown-menu > li.disabled > button,
+.gs-azioni-dropdown .dropdown-menu > li.disabled > a:hover,
+.gs-azioni-dropdown .dropdown-menu > li.disabled > button:hover,
+.gs-azioni-dropdown .dropdown-menu > li.disabled > a:focus,
+.gs-azioni-dropdown .dropdown-menu > li.disabled > button:focus {
+  color: var(--gs-text-muted);
+  cursor: not-allowed;
 }
 
-/* 3. Normalizzazione dropdown — stesso aspetto in ogni pagina. */
-body .dropdown-toggle,
+/* 3. Dropdown e select — vecchio stile: fondo bianco, testo scuro.
+   I bottoni-azione con variante (btn-primary, btn-success, ecc.) restano
+   pieni e scuri: la variante ha specificita' maggiore del toggle generico. */
+body .dropdown-toggle:not(.btn-primary):not(.btn-secondary):not(.btn-default):not(.btn-success):not(.btn-warning):not(.btn-danger):not(.btn-info),
 body .gs-dropdown-testo.dropdown-toggle {
   display: inline-flex;
   align-items: center;
@@ -440,66 +804,48 @@ body .gs-dropdown-testo.dropdown-toggle {
   border-radius: var(--gs-radius-md);
   background: var(--gs-surface);
   background-image: none;
-  border: 1px solid var(--gs-border);
+  border: 1px solid var(--gs-border-strong);
   color: var(--gs-text);
   text-decoration: none;
+  box-shadow: none;
 }
 
-/* Stato aperto: vince su .dropdown.open > .dropdown-toggle di Bootstrap 3
-   (layout base) e su .show > .btn-*.dropdown-toggle di Bootstrap Italia
-   (layout admin: il bundle BI apre i menu con .show, non con .open).
-   Nessun effetto blu al click: fondo, bordo e ombra restano neutri,
-   niente outline, niente anello di focus. */
-html:not(.gs-admin) body .btn.dropdown-toggle,
-html:not(.gs-admin) body .btn.dropdown-toggle:hover,
-html:not(.gs-admin) body .btn.dropdown-toggle:focus,
-html:not(.gs-admin) body .btn.dropdown-toggle:active,
-html:not(.gs-admin) body .dropdown.open > .btn.dropdown-toggle,
-html:not(.gs-admin) body .dropdown.open > .btn.dropdown-toggle:hover,
-html:not(.gs-admin) body .dropdown.open > .btn.dropdown-toggle:focus,
-html:not(.gs-admin) body .dropdown.open > .btn.dropdown-toggle:active,
-body .dropdown.open > .dropdown-toggle,
-body .dropdown.open > .gs-dropdown-testo.dropdown-toggle,
-body .dropdown.show > .dropdown-toggle,
-body .dropdown.show > .gs-dropdown-testo.dropdown-toggle,
-body .dropdown.show > .dropdown-toggle:focus,
-body .dropdown.show > .gs-dropdown-testo.dropdown-toggle:focus {
+/* Select e menu di scelta: bianchi anche da aperti, bordo blu come segnale. */
+body .bootstrap-select .dropdown-toggle,
+body .bootstrap-select > .dropdown-toggle.btn-light,
+body .dropdown-toggle.btn-light,
+body .dropdown-toggle.bs-placeholder,
+body .dropdown.show > .dropdown-toggle:not(.btn-primary):not(.btn-secondary):not(.btn-default):not(.btn-success):not(.btn-warning):not(.btn-danger):not(.btn-info),
+body .dropdown.open > .dropdown-toggle:not(.btn-primary):not(.btn-secondary):not(.btn-default):not(.btn-success):not(.btn-warning):not(.btn-danger):not(.btn-info) {
   background: var(--gs-surface);
   background-image: none;
-  border: 1px solid var(--gs-border);
+  border: 1px solid var(--gs-border-strong);
   color: var(--gs-text);
-  box-shadow: var(--gs-shadow-sm);
+  box-shadow: none;
   outline: 0;
 }
-/* Passaggio del mouse, focus e pressione: nessun bordo o alone blu.
-   Il menu che si apre e' gia' l'indicazione visiva. Vince su
-   .btn-*:hover/:focus di Bootstrap Italia (anello 0 0 0 .2rem blu) e
-   sull'outline globale *:focus di main.css. */
-body .dropdown-toggle:hover,
-body .dropdown-toggle:focus,
-body .dropdown-toggle:active,
-body .dropdown-toggle:active:focus,
-body .gs-dropdown-testo.dropdown-toggle:hover,
-body .gs-dropdown-testo.dropdown-toggle:focus,
-body .gs-dropdown-testo.dropdown-toggle:active {
-  background: var(--gs-surface);
-  background-image: none;
-  border-color: var(--gs-border);
-  color: var(--gs-text);
-  outline: 0;
-}
-/* Istante del click su toggle colorati (es. btn-primary): Bootstrap Italia
-   mette l'anello blu anche su :active:focus con specificita' (0,5,0).
-   I :not() alzano la specificita' senza nominare varianti. */
-body .dropdown.show > .dropdown-toggle:not(:disabled):active:focus {
-  box-shadow: var(--gs-shadow-sm);
-  outline: 0;
-}
-/* bootstrap-select: Bootstrap Italia forza outline con !important, serve
-   !important anche qui per azzerarlo. */
+
+body .dropdown-toggle:not(.btn-primary):not(.btn-secondary):not(.btn-default):not(.btn-success):not(.btn-warning):not(.btn-danger):not(.btn-info):hover,
+body .dropdown-toggle:not(.btn-primary):not(.btn-secondary):not(.btn-default):not(.btn-success):not(.btn-warning):not(.btn-danger):not(.btn-info):focus,
+body .dropdown-toggle:not(.btn-primary):not(.btn-secondary):not(.btn-default):not(.btn-success):not(.btn-warning):not(.btn-danger):not(.btn-info):active,
+body .bootstrap-select .dropdown-toggle:hover,
 body .bootstrap-select .dropdown-toggle:focus {
-  outline: 0 !important;
-  box-shadow: var(--gs-shadow-sm);
+  background: var(--gs-surface-soft);
+  background-image: none;
+  border-color: var(--gs-primary);
+  color: var(--gs-text);
+  outline: 0;
+}
+
+/* Focus da tastiera sempre visibile, anche sui select. */
+body .dropdown-toggle:focus-visible {
+  outline: 3px solid var(--gs-focus);
+  outline-offset: 3px;
+}
+body .bootstrap-select .dropdown-toggle:focus-visible {
+  outline: 3px solid var(--gs-focus) !important;
+  outline-offset: 3px;
+  box-shadow: none;
 }
 body .dropdown-toggle .caret,
 body .gs-dropdown-testo .caret {
@@ -527,7 +873,6 @@ body .dropdown-item {
   font-family: var(--gs-font);
   font-size: var(--gs-fs-md);
   line-height: 36px;
-  border-radius: var(--gs-radius-sm);
   display: flex;
   align-items: center;
   color: var(--gs-text);
@@ -537,8 +882,39 @@ body .dropdown-menu > li > a:hover,
 body .dropdown-menu > li > a:focus,
 body .dropdown-item:hover,
 body .dropdown-item:focus {
-  background: rgba(0, 0, 0, .05);
+  background: var(--gs-surface-muted);
   color: var(--gs-text);
+}
+
+/* Voce di sola informazione nel menu azioni (menu-azioni.html.twig, campo
+   testo): stessa indentazione delle altre voci, ma grigia e non cliccabile. */
+body .dropdown-menu > li > .gs-menu-testo {
+  display: block;
+  padding: 4px 12px;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-sm);
+  line-height: 1.4;
+  color: var(--gs-text-muted);
+  white-space: nowrap;
+}
+/* Voce del menu ⋮ che corrisponde alla pagina corrente: stessa altezza
+   delle altre voci, ma non e' un link. */
+body .dropdown-menu > li > .gs-menu-corrente {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  height: 36px;
+  padding: 0 12px;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-md);
+  font-weight: 600;
+  line-height: 36px;
+  color: var(--gs-primary);
+  white-space: nowrap;
+}
+body .dropdown-menu > li.divider {
+  margin: 4px 0;
+  background-color: var(--gs-border);
 }
 
 /* 4. Input, select, textarea — stessa altezza (40px default). */
@@ -555,7 +931,7 @@ body .form-control {
 }
 body .form-control:focus {
   border-color: var(--gs-primary);
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, .20);
+  box-shadow: 0 0 0 2px var(--gs-primary);
   outline: 0;
 }
 
@@ -622,8 +998,32 @@ body table.table thead th {
   font-family: var(--gs-font);
   font-size: var(--gs-fs-sm);
   font-weight: 600;
-  border-bottom: 1px solid var(--gs-border);
+  color: #ffffff;
+  background: var(--gs-secondary);
+  border-bottom: 1px solid var(--gs-secondary);
   vertical-align: middle;
+}
+/* Le testate del quadro voti conservano il colore del tipo di prova:
+   la classe .gs-color-* vince sulla testata generica. */
+body table.table thead th.gs-color-1 {
+  background: var(--gs-neutral-btn);
+  border-color: var(--gs-neutral-btn);
+  color: #ffffff;
+}
+body table.table thead th.gs-color-2 {
+  background: var(--gs-navy);
+  border-color: var(--gs-navy);
+  color: #ffffff;
+}
+body table.table thead th.gs-color-3 {
+  background: var(--gs-info);
+  border-color: var(--gs-info);
+  color: #ffffff;
+}
+body table.table thead th.gs-color-4 {
+  background: var(--gs-secondary);
+  border-color: var(--gs-secondary);
+  color: #ffffff;
 }
 body table.table tbody td {
   min-height: 48px;
@@ -635,10 +1035,11 @@ body table.table tbody td {
   border-top: 1px solid var(--gs-border);
 }
 body table.table tbody tr:hover {
-  background: rgba(0, 0, 0, .02);
+  background: var(--gs-surface-soft);
 }
 body table.table td.actions,
 body table.table th.actions {
+  width: 1%;
   text-align: right;
   white-space: nowrap;
 }
@@ -674,14 +1075,93 @@ body .badge {
   vertical-align: middle;
 }
 
+/* 6.0 Liste raggruppate: superficie bianca, bordo neutro. Le varianti di
+   stato non usano i pastelli di Bootstrap 3: restano bianche con una barra
+   laterale piena, cosi' il testo scuro resta leggibile. */
+body .list-group-item {
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border);
+  color: var(--gs-text);
+}
+body .list-group-item-warning {
+  background: var(--gs-surface);
+  border-left: 4px solid var(--gs-warning);
+  color: var(--gs-text);
+}
+body .list-group-item-success {
+  background: var(--gs-surface);
+  border-left: 4px solid var(--gs-success);
+  color: var(--gs-text);
+}
+body .list-group-item-info {
+  background: var(--gs-surface);
+  border-left: 4px solid var(--gs-info);
+  color: var(--gs-text);
+}
+body .list-group-item-danger {
+  background: var(--gs-surface);
+  border-left: 4px solid var(--gs-danger);
+  color: var(--gs-text);
+}
+body .list-group-item.active {
+  background: var(--gs-primary);
+  border-color: var(--gs-primary);
+  color: #ffffff;
+}
+/* Nei pannelli Bootstrap azzera i bordi laterali delle liste: la barra di
+   stato deve restare visibile anche li'. */
+body .panel > .list-group .list-group-item-warning,
+body .panel > .panel-collapse > .list-group .list-group-item-warning {
+  border-left: 4px solid var(--gs-warning);
+}
+body .panel > .list-group .list-group-item-success,
+body .panel > .panel-collapse > .list-group .list-group-item-success {
+  border-left: 4px solid var(--gs-success);
+}
+body .panel > .list-group .list-group-item-info,
+body .panel > .panel-collapse > .list-group .list-group-item-info {
+  border-left: 4px solid var(--gs-info);
+}
+body .panel > .list-group .list-group-item-danger,
+body .panel > .panel-collapse > .list-group .list-group-item-danger {
+  border-left: 4px solid var(--gs-danger);
+}
+
+/* 6.1 Testi e etichette semantiche — sempre su token.
+   I colori di testo sono scuri abbastanza da restare leggibili sul bianco. */
+body .text-primary { color: var(--gs-primary) !important; }
+body .text-success { color: var(--gs-success) !important; }
+body .text-warning { color: var(--gs-warning) !important; }
+body .text-danger { color: var(--gs-danger) !important; }
+body .text-info { color: var(--gs-info) !important; }
+body .text-muted { color: var(--gs-text-muted) !important; }
+
+body .label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--gs-font);
+  font-size: var(--gs-fs-xs);
+  font-weight: 600;
+  line-height: 1.2;
+}
+body .label-default { background: var(--gs-secondary); color: #ffffff; }
+body .label-primary { background: var(--gs-primary); color: #ffffff; }
+body .label-success { background: var(--gs-success); color: #ffffff; }
+body .label-info { background: var(--gs-info); color: #ffffff; }
+body .label-warning { background: var(--gs-warning); color: #ffffff; }
+body .label-danger { background: var(--gs-danger); color: #ffffff; }
+
 /* 7. Alert */
 body .alert {
   padding: 12px 16px;
   border-radius: var(--gs-radius-md);
   border: 1px solid transparent;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  border-left-width: 4px;
+  display: block;
   font-family: var(--gs-font);
   font-size: var(--gs-fs-md);
   line-height: 1.5;
@@ -690,40 +1170,171 @@ body .alert i,
 body .alert svg,
 body .alert .glyphicon {
   font-size: 16px;
-  margin-top: 2px;
-  flex-shrink: 0;
+  margin-right: 6px;
 }
 
-/* 8. Modali — footer con bottoni allineati a destra, gap 8px. */
+/* 8. Modali — una sola resa per tutti i layout.
+   Bootstrap 3 e Bootstrap Italia dettano le misure con selettori concatenati
+   (.modal .modal-dialog .modal-content .modal-header in Italia, .modal-header
+   in BS3): per questo i selettori qui sotto ripetono la stessa catena con
+   body davanti. Vincere per specificita' evita gli !important e tiene
+   header, titolo, corpo, footer e bottoni uguali nelle due aree. */
 body .modal-content {
   border-radius: var(--gs-radius-lg);
   box-shadow: var(--gs-shadow-md);
   border: none;
   overflow: hidden;
 }
-body .modal-header {
+/* la finestra non supera mai l'altezza dello schermo: il corpo si accorcia
+   e scorre al suo interno, header e footer restano sempre visibili */
+body .modal .modal-dialog .modal-content {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 100px);
+}
+body .modal .modal-dialog .modal-content .modal-header {
   padding: 16px 24px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid var(--gs-border);
 }
-body .modal-body {
+/* BS3 chiude header e footer con un clearfix (::before/::after display table):
+   dentro un contenitore flex quei pseudo-elementi diventano voci e il gap
+   sposterebbe la X e i pulsanti dai bordi */
+body .modal .modal-dialog .modal-content .modal-header::before,
+body .modal .modal-dialog .modal-content .modal-header::after,
+body .modal .modal-dialog .modal-content .modal-footer::before,
+body .modal .modal-dialog .modal-content .modal-footer::after {
+  content: none;
+  display: none;
+}
+/* titolo e sottotitolo impilati a sinistra: il contenitore tiene insieme i
+   due testi, così la X resta l'unico elemento a destra */
+body .modal .modal-dialog .modal-content .modal-header .gs-modal-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+body .modal .modal-dialog .modal-content .gs-modal-subtitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--gs-text-muted);
+}
+/* il corpo ha sempre sfondo bianco (niente fondi pieni colorati) e scorre da
+   solo quando il contenuto supera l'altezza della finestra */
+body .modal .modal-dialog .modal-content .modal-body {
   padding: 24px;
+  background-color: var(--gs-surface);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
-body .modal-footer {
+body .modal .modal-dialog .modal-content .modal-footer {
   padding: 16px 24px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--gs-border);
+}
+/* gruppi di pulsanti: a sinistra il "Chiudi" delle modali distruttive, a
+   destra le azioni. Senza gruppo il footer resta allineato a destra. */
+body .modal .modal-dialog .modal-content .modal-footer .gs-modal-actions-left,
+body .modal .modal-dialog .modal-content .modal-footer .gs-modal-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   flex-wrap: wrap;
 }
-body .modal-title {
+body .modal .modal-dialog .modal-content .modal-footer .gs-modal-actions-left {
+  margin-right: auto;
+}
+/* Bootstrap Italia dà 4px di margine a ogni figlio del footer: qui lo spazio
+   lo danno i gap, così i pulsanti restano ai bordi dell'imbottitura */
+body .modal .modal-dialog .modal-content .modal-footer > * {
+  margin: 0;
+}
+/* le modali del componente occupano tutta la larghezza del dialog: senza,
+   Bootstrap 3 le fa restringere sul contenuto (il dialog è display: flex) */
+body .gs-modal .modal-dialog .modal-content {
+  width: 100%;
+}
+/* larghezze del componente: valgono solo per le modali generate da
+   ModalRenderer (.gs-modal), le modali storiche restano come sono.
+   Bootstrap 3 fissa la larghezza con width (300, 600, 900), Bootstrap Italia
+   con max-width: qui si impostano entrambe, così la stessa opzione size dà la
+   stessa misura nei due layout. */
+@media (min-width: 768px) {
+  body .gs-modal .modal-dialog {
+    width: 600px;
+    max-width: 95vw;
+  }
+  body .gs-modal .modal-dialog.modal-sm {
+    width: 400px;
+  }
+  body .gs-modal .modal-dialog.modal-lg {
+    width: 800px;
+  }
+  body .gs-modal .modal-dialog.modal-xl {
+    width: 1140px;
+  }
+}
+body .modal .modal-dialog .modal-content .modal-title {
   font-family: var(--gs-font);
   font-size: 18px;
   font-weight: 600;
   line-height: 1.3;
   margin: 0;
+}
+/* la x di chiusura: stessa misura nelle due aree (Bootstrap Italia le dà
+   padding 16px e margini negativi, BS3 il float a destra) */
+body .modal .modal-dialog .modal-content .modal-header .close {
+  padding: 0;
+  margin: 0 0 0 auto;
+  float: none;
+  font-size: 24px;
+  line-height: 1;
+  opacity: 0.65;
+  /* sempre in alto a destra, qualunque sia la posizione nel markup (in
+     alcune modali la X era scritta prima del titolo) */
+  order: 2;
+  align-self: flex-start;
+  flex: 0 0 auto;
+}
+body .modal .modal-dialog .modal-content .modal-header .close:hover,
+body .modal .modal-dialog .modal-content .modal-header .close:focus {
+  opacity: 1;
+}
+/* bottoni del footer: la stessa altezza anche quando il markup usa btn-xs
+   (area admin), così le due famiglie di modali chiudono allo stesso modo */
+body .modal .modal-dialog .modal-content .modal-footer .btn {
+  min-height: 40px;
+  height: auto;
+  margin: 0;
+  padding: 9px 16px;
+  font-size: 14px;
+  border-radius: var(--gs-radius-md);
+}
+
+/* su schermo stretto l'imbottitura scende, altrimenti il contenuto resta
+   schiacciato tra i bordi della finestra */
+@media (max-width: 767.98px) {
+  body .modal .modal-dialog .modal-content {
+    max-height: calc(100vh - 40px);
+  }
+  body .modal .modal-dialog .modal-content .modal-body {
+    padding: 16px;
+  }
+  body .modal .modal-dialog .modal-content .modal-header,
+  body .modal .modal-dialog .modal-content .modal-footer {
+    padding: 12px 16px;
+  }
 }
 
 /* 9. Card */

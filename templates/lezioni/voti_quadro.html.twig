@@ -11,6 +11,9 @@
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   {% elseif not cattedra %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_voti'|trans }}</h1>
+  {# selettore sede/classe per le sostituzioni: c'e' anche qui, cosi' dalla
+     classe sbagliata si puo' passare subito a un'altra senza tornare indietro #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.voti_sostituzione'|trans }}</strong>
   </div>
@@ -20,10 +23,10 @@
   {# selettore sede/classe per le sostituzioni #}
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   <div class="row text-center gs-big gs-mb-2"><em>Clicca su un voto per modificarlo o eliminarlo.</em></div>
-  <div class="row gs-mb-1">
-    <div class="col-sm-4">
-      <strong class="gs-big">Periodo:</strong>
-      <div style="display:inline-block" class="dropdown">
+  <div class="gs-voti-toolbar">
+    <div class="gs-voti-toolbar-main">
+      <span class="gs-voti-toolbar-label">Periodo:</span>
+      <div class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo">{{ periodo ? lista_periodi[periodo].nome : 'Scegli' }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
     {% for p, d in lista_periodi %}
@@ -33,17 +36,28 @@
     {% endfor %}
         </ul>
       </div>
+      <a class="btn btn-default btn-sm" href="{{ path('lezioni_voti_configura') }}" role="button" title="Configura la visualizzazione della pagina dei voti">{{ include('admin/include/icona.html.twig', {nome: 'pin', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Visualizzazione</strong></a>
     </div>
-    <div class="col-sm-4 text-center">
-      <a class="btn btn-info btn-sm" href="{{ path('lezioni_voti_configura') }}" role="button" title="Configura la visualizzazione della pagina dei voti">{{ include('admin/include/icona.html.twig', {nome: 'pin', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Visualizzazione</strong></a>
-    </div>
-    <div class="col-sm-4 text-right">
     {% if periodo %}
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_esporta', {cattedra: cattedra.id, classe: classe.id, data: lista_periodi[periodo].fine}) }}" role="button" title="Esporta i dati in formato CSV">{{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ 'label.esporta'|trans }}</strong></a>
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_stampa', {cattedra: cattedra.id, classe: classe.id, data: lista_periodi[periodo].fine}) }}" role="button" title="Scarica il documento in formato PDF">{{ include('admin/include/icona.html.twig', {nome: 'printer', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ 'label.stampa'|trans }}</strong></a>
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_dettagli', {cattedra: cattedra.id, classe: classe.id}) }}" role="button" title="Visualizza i dettagli delle valutazioni">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Dettagli</strong></a>
-    {% endif %}
+    <div class="gs-voti-toolbar-actions">
+      <a class="btn btn-default btn-sm" href="{{ path('lezioni_voti_esporta', {cattedra: cattedra.id, classe: classe.id, data: lista_periodi[periodo].fine}) }}" role="button" title="Esporta i dati in formato CSV">{{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ 'label.esporta'|trans }}</strong></a>
+      <a class="btn btn-default btn-sm" href="{{ path('lezioni_voti_stampa', {cattedra: cattedra.id, classe: classe.id, data: lista_periodi[periodo].fine}) }}" role="button" title="Scarica il documento in formato PDF">{{ include('admin/include/icona.html.twig', {nome: 'printer', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ 'label.stampa'|trans }}</strong></a>
+      <a class="btn btn-default btn-sm" href="{{ path('lezioni_voti_dettagli', {cattedra: cattedra.id, classe: classe.id}) }}" role="button" title="Visualizza i dettagli delle valutazioni">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Dettagli</strong></a>
     </div>
+    {% endif %}
+  </div>
+
+  <div class="gs-voti-legenda" aria-label="Legenda dei colori del quadro voti">
+    <span class="gs-voti-legenda-titolo">Legenda:</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-s">S</span> Scritto/Grafico</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-o">O</span> Orale</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-p">P</span> Pratico</span>
+    <span class="gs-voti-legenda-sep" aria-hidden="true"></span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-success">6</span> Sufficiente</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-warning">5</span> Soglia</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-danger">4</span> Insufficiente</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-default">&ndash;</span> Non visibile / non in media</span>
+    <span class="gs-voti-legenda-voce"><span class="gs-voti-swatch gs-voti-swatch-info">7</span> Altro docente</span>
   </div>
     {% if info.pagina.compatta %}
   <div class="gs-table-sticky-wrapper">
@@ -68,7 +82,7 @@
           <th class="gs-color-2"><em class="gs-color-5">Media<br>S/G</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-2"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
+          <th class="gs-color-2"><a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
       {% if info.pagina.orale %}
@@ -77,7 +91,7 @@
           <th class="gs-color-3"><em class="gs-color-5">Media<br>O</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
+          <th class="gs-color-3"><a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
       {% if info.pagina.pratico %}
@@ -86,7 +100,7 @@
           <th class="gs-color-4"><em class="gs-color-5">Media<br>P</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-4"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
+          <th class="gs-color-4"><a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
         </tr>
@@ -154,7 +168,7 @@
           <td class="{{ dati.medie[k][tipo] < 5 ? 'text-danger' : (dati.medie[k][tipo] < 6 ? 'text-warning' : 'text-success') }}"><em class="gs-big">{{ dati.medie[k][tipo] ? dati.medie[k][tipo]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</em></td>
             {% endif %}
             {% if edit %}
-          <td><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {cattedra: cattedra.id, alunno: a.id, tipo: tipo}) }}" role="button" title="Aggiungi una valutazione {{ tipo == 'S' ? 'Scritta/Grafica' : (tipo == 'O' ? 'Orale' : 'Pratica') }} per l'alunno"><strong class="gs-big">{{ tipo }}</strong></a></td>
+          <td><a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_alunno', {cattedra: cattedra.id, alunno: a.id, tipo: tipo}) }}" role="button" title="Aggiungi una valutazione {{ tipo == 'S' ? 'Scritta/Grafica' : (tipo == 'O' ? 'Orale' : 'Pratica') }} per l'alunno"><strong class="gs-big">{{ tipo }}</strong></a></td>
             {% endif %}
           {% endfor %}
           <td class="{{ dati.medie[k]['T'] < 5 ? 'text-danger' : (dati.medie[k]['T'] < 6 ? 'text-warning' : 'text-success') }}"><strong class="gs-big">{{ dati.medie[k]['T'] ? dati.medie[k]['T']|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</strong></td>
@@ -185,7 +199,7 @@
         {% for d in dati.lista.S|keys %}
           <th class="gs-color-2">
           {% if edit %}
-            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'S', data: d[7:]}) }}" role="button" title="{% if dati.lista.S[d] is empty %}Modifica la valutazione Scritta/Grafica per la classe{% else %}Modifica la valutazione Scritta/Grafica: {{ dati.lista.S[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+            <a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'S', data: d[7:]}) }}" role="button" title="{% if dati.lista.S[d] is empty %}Modifica la valutazione Scritta/Grafica per la classe{% else %}Modifica la valutazione Scritta/Grafica: {{ dati.lista.S[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
           {% else %}
             {{ d[0:3] }}<br>{{ d[4:2] }}
           {% endif %}
@@ -195,14 +209,14 @@
           <th class="gs-color-2"><em class="gs-color-5">Media<br>S/G</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-2"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
+          <th class="gs-color-2"><a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'S'}) }}" role="button" title="Aggiungi una valutazione Scritta/Grafica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
       {% if info.pagina.orale %}
         {% for d in dati.lista.O|keys %}
           <th class="gs-color-3">
           {% if edit %}
-            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'O', data: d[7:]}) }}" role="button" title="{% if dati.lista.O[d] is empty %}Modifica la valutazione Orale per la classe{% else %}Modifica la valutazione Orale: {{ dati.lista.O[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+            <a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'O', data: d[7:]}) }}" role="button" title="{% if dati.lista.O[d] is empty %}Modifica la valutazione Orale per la classe{% else %}Modifica la valutazione Orale: {{ dati.lista.O[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
           {% else %}
             {{ d[0:3] }}<br>{{ d[4:2] }}
           {% endif %}
@@ -212,14 +226,14 @@
           <th class="gs-color-3"><em class="gs-color-5">Media<br>O</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-3"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
+          <th class="gs-color-3"><a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'O'}) }}" role="button" title="Aggiungi una valutazione Orale per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
       {% if info.pagina.pratico %}
         {% for d in dati.lista.P|keys %}
           <th class="gs-color-4">
           {% if edit %}
-            <a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'P', data: d[7:]}) }}" role="button" title="{% if dati.lista.P[d] is empty %}Modifica la valutazione Pratica per la classe{% else %}Modifica la valutazione Pratica: {{ dati.lista.P[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
+            <a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'P', data: d[7:]}) }}" role="button" title="{% if dati.lista.P[d] is empty %}Modifica la valutazione Pratica per la classe{% else %}Modifica la valutazione Pratica: {{ dati.lista.P[d] }}{% endif %}"><strong class="gs-big">{{ d[0:3] }}<br>{{ d[4:2] }}</strong></a>
           {% else %}
             {{ d[0:3] }}<br>{{ d[4:2] }}
           {% endif %}
@@ -229,7 +243,7 @@
         <th class="gs-color-4"><em class="gs-color-5">Media<br>P</em></th>
         {% endif %}
         {% if edit %}
-          <th class="gs-color-4"><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
+          <th class="gs-color-4"><a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_classe', {cattedra: cattedra.id, tipo: 'P'}) }}" role="button" title="Aggiungi una valutazione Pratica per la classe">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline'}) }}</a></th>
         {% endif %}
       {% endif %}
         </tr>
@@ -299,7 +313,7 @@
           <td class="{{ dati.medie[k][tipo] < 5 ? 'text-danger' : (dati.medie[k][tipo] < 6 ? 'text-warning' : 'text-success') }}"><em class="gs-big">{{ dati.medie[k][tipo] ? dati.medie[k][tipo]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</em></td>
             {% endif %}
             {% if edit %}
-          <td><a class="btn btn-primary btn-xs" href="{{ path('lezioni_voti_alunno', {cattedra: cattedra.id, alunno: a.id, tipo: tipo}) }}" role="button" title="Aggiungi una valutazione {{ tipo == 'S' ? 'Scritta/Grafica' : (tipo == 'O' ? 'Orale' : 'Pratica') }} per l'alunno"><strong class="gs-big">{{ tipo }}</strong></a></td>
+          <td><a class="btn btn-default btn-xs" href="{{ path('lezioni_voti_alunno', {cattedra: cattedra.id, alunno: a.id, tipo: tipo}) }}" role="button" title="Aggiungi una valutazione {{ tipo == 'S' ? 'Scritta/Grafica' : (tipo == 'O' ? 'Orale' : 'Pratica') }} per l'alunno"><strong class="gs-big">{{ tipo }}</strong></a></td>
             {% endif %}
           {% endfor %}
           <td class="{{ dati.medie[k]['T'] < 5 ? 'text-danger' : (dati.medie[k]['T'] < 6 ? 'text-warning' : 'text-success') }}"><strong class="gs-big">{{ dati.medie[k]['T'] ? dati.medie[k]['T']|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') }}</strong></td>

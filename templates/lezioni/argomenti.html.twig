@@ -11,6 +11,9 @@
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
   {% elseif not cattedra %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_argomenti'|trans }}</h1>
+  {# selettore sede/classe per le sostituzioni: c'e' anche qui, cosi' dalla
+     classe sbagliata si puo' passare subito a un'altra senza tornare indietro #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.argomenti_sostituzione'|trans }}</strong>
   </div>
@@ -20,14 +23,16 @@
   {# selettore sede/classe per le sostituzioni #}
   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
     {% for periodo, v in dati.lista %}
-  <div class="row gs-mt-4 gs-mb-2">
-    <div class="col-sm-4 text-info">
+  {# Periodo e pulsanti su una riga sola: le tre colonne .col-sm-4 usate
+     prima impilavano tutto sotto i 768px e separavano i due pulsanti.
+     Qui restano sempre affiancati; se lo spazio e' poco va a capo il
+     titolo del periodo, non i pulsanti (vedi gs-pages.css). #}
+  <div class="gs-periodo-testa gs-mt-4 gs-mb-2">
+    <div class="gs-periodo-titolo text-info">
       <strong class="gs-big">{{ periodo }} (ore totali: {{ dati.ore[periodo] }})</strong>
     </div>
-    <div class="col-sm-4 text-center">
+    <div class="gs-periodo-azioni">
       <a class="btn btn-primary btn-sm" href="{{ path('lezioni_argomenti_programma', {cattedra: cattedra.id}) }}" role="button" title="Scarica il programma svolto">{{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Programma svolto</strong></a>
-    </div>
-    <div class="col-sm-4 text-right">
       <a class="btn btn-success btn-sm" href="{{ path('lezioni_argomenti_riepilogo', {cattedra: cattedra.id}) }}" role="button" title="Visualizza il riepilogo mensile delle lezioni">{{ include('admin/include/icona.html.twig', {nome: 'list-details', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Riepilogo mensile</strong></a>
     </div>
   </div>

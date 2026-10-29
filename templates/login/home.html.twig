@@ -168,7 +168,7 @@
   <p class="gs-mb-0"><strong>Si prega di prendere visione del manuale d'uso:</strong></p>
   <ul class="gs-mb-0">
     <li><a href="{{ asset('doc/giuaschool_manuale_alunni.pdf') }}">Manuale per gli alunni (aggiornato al {{
-        filedate('doc/giuaschool_manuale_genitori.pdf')|date('d/m/Y') }})</a></li>
+        filedate('doc/giuaschool_manuale_alunni.pdf')|date('d/m/Y') }})</a></li>
   </ul>
   {% elseif is_granted('ROLE_ATA') %}
   <p><em>{{ 'message.login_ata'|trans({url: path('utenti_profilo')})|raw }}</em></p>

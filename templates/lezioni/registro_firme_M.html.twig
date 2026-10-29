@@ -17,25 +17,30 @@
     {% if errore %}
   <div class="row gs-mb-5">
     <div class="col-sm-12">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'M'}) }}" role="button" title="Mese precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
-      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia mese">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ mesi[data|date('n')] }} {{ data|date('Y') }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'M'}) }}" role="button" title="Mese successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
+      {% if data_prec %}<a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'M'}) }}" role="button" title="Mese precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia mese" data-dates-disabled="{{ lista_festivi|default('[]') }}">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ mesi[data|date('n')] }} {{ data|date('Y') }}</strong></button>
+      {% if data_succ %}<a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'M'}) }}" role="button" title="Mese successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
   </div>
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
     {% else %}
-  <div class="row gs-mb-1">
-    <div class="col-sm-6">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'M'}) }}" role="button" title="Mese precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
-      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia mese">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ mesi[data|date('n')] }} {{ data|date('Y') }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'M'}) }}" role="button" title="Mese successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
+  <div class="gs-page-toolbar">
+    <div class="gs-date-nav" role="group" aria-label="Cambia mese">
+      {% if data_prec %}<a class="btn btn-default gs-date-nav-btn" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'M'}) }}" role="button" title="Mese precedente" aria-label="Mese precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      <button class="btn gs-date-btn" id="gs-button-date" type="button" title="Cambia mese" data-dates-disabled="{{ lista_festivi|default('[]') }}">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ mesi[data|date('n')] }} {{ data|date('Y') }}</strong></button>
+      {% if data_succ %}<a class="btn btn-default gs-date-nav-btn" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'M'}) }}" role="button" title="Mese successivo" aria-label="Mese successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
-    <div class="col-sm-6 text-right">
-      <strong class="gs-big">Vista:</strong>
-      <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'G'}) }}" role="button" title="Visualizza i dati del giorno">{{ include('admin/include/icona.html.twig', {nome: 'player-stop', stile: 'outline'}) }}</a>
-      <a class="btn btn-default btn-sm active" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'M'}) }}" role="button" title="Visualizza i dati del mese">{{ include('admin/include/icona.html.twig', {nome: 'layout-grid', stile: 'outline'}) }}</a>
+    <div class="gs-toolbar-spacer" aria-hidden="true"></div>
+    <div class="gs-toolbar-controls">
+    <div class="gs-toolbar-view">
+      <span class="gs-toolbar-label" id="gs-vista-label">Vista</span>
+      <div class="gs-view-switch" role="group" aria-labelledby="gs-vista-label">
+        <a class="gs-view-switch-item" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'G'}) }}" title="Visualizza i dati del giorno">{{ include('admin/include/icona.html.twig', {nome: 'player-stop', stile: 'outline'}) }}<span>Giorno</span></a>
+        <a class="gs-view-switch-item active" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'M'}) }}" title="Visualizza i dati del mese" aria-current="page">{{ include('admin/include/icona.html.twig', {nome: 'layout-grid', stile: 'outline'}) }}<span>Mese</span></a>
+      </div>
+    </div>
     </div>
   </div>
   {% set intestazione = [
@@ -165,6 +170,16 @@
 <script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
 <script>
 $(document).ready(function() {
+  // le festività sono lette dall'attributo data per non inserire codice Twig
+  // all'interno del blocco JavaScript
+  var datesDisabled = $('#gs-button-date').data('dates-disabled') || [];
+  if (typeof datesDisabled === 'string') {
+    try {
+      datesDisabled = JSON.parse(datesDisabled);
+    } catch (errore) {
+      datesDisabled = [];
+    }
+  }
   $('#gs-button-date').datepicker({
     format: "yyyy-mm-dd",
     weekStart: 1,
@@ -173,7 +188,7 @@ $(document).ready(function() {
     defaultViewDate: "{{ data }}",
     startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
     endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
-    {% if lista_festivi %}datesDisabled: {{ lista_festivi|raw }},{% endif %}
+    datesDisabled: datesDisabled,
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,

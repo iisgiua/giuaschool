@@ -17,9 +17,9 @@
     {% if errore %}
   <div class="row gs-mb-5">
     <div class="col-sm-12">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
-      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia giorno">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
+      {% if data_prec %}<a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia giorno" data-dates-disabled="{{ lista_festivi|default('[]') }}">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
   </div>
   <div class="alert alert-warning" role="alert">
@@ -43,7 +43,9 @@
           <div class="gs-mt-2">
             <strong>Documento:</strong> {{ c.allegati[0].titolo }}
             <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {circolare: c.id, allegato: 0, tipo: 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
+            {% if c.allegati[0].visualizzabile %}
             <a class="btn btn-xs btn-primary pull-right " target="_blank" href="{{ path('circolari_download', {circolare: c.id, allegato: 0, tipo: 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+            {% endif %}
           </div>
             {% if c.allegati|length > 1 %}
               {% for n, a in c.allegati %}
@@ -51,7 +53,9 @@
           <div class="gs-mt-2">
             <strong>Allegato {{ n }}:</strong> {{ a.titolo }}
             <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {circolare: c.id, allegato: n, tipo: 'D'}) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
+            {% if a.visualizzabile %}
             <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {circolare: c.id, allegato: n, tipo: 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+            {% endif %}
           </div>
                 {% endif %}
               {% endfor %}
@@ -77,36 +81,43 @@
   </div>
       {% endif %}
       {{ include('admin/include/flash.html.twig') }}
-  <div class="row gs-mb-2">
-    <div class="col-sm-5">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
-      <button class="btn btn-primary gs-pt-2 gs-pb-2" id="gs-button-date" title="Cambia giorno">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
+  <div class="gs-page-toolbar">
+    <div class="gs-date-nav" role="group" aria-label="Cambia giorno">
+      {% if data_prec %}<a class="btn btn-default gs-date-nav-btn" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_prec|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno precedente" aria-label="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      <button class="btn gs-date-btn" id="gs-button-date" type="button" title="Cambia giorno" data-dates-disabled="{{ lista_festivi|default('[]') }}">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-default gs-date-nav-btn" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data_succ|date('Y-m-d'), vista: 'G'}) }}" role="button" title="Giorno successivo" aria-label="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
-    <div class="col-sm-2 text-center">
-      <a class="btn btn-success" href="{{ path('richieste_classe', {classe: classe.id}) }}" role="button" title="Compila il modulo per le prove di evacuazione">{{ include('admin/include/icona.html.twig', {nome: 'flame', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Evacuazione</strong></a>
+    <div class="gs-toolbar-spacer" aria-hidden="true"></div>
+    <div class="gs-toolbar-controls">
+    <div class="gs-toolbar-view">
+      <span class="gs-toolbar-label" id="gs-vista-label">Vista</span>
+      <div class="gs-view-switch" role="group" aria-labelledby="gs-vista-label">
+        <a class="gs-view-switch-item active" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'G'}) }}" title="Visualizza i dati del giorno" aria-current="page">{{ include('admin/include/icona.html.twig', {nome: 'player-stop', stile: 'outline'}) }}<span>Giorno</span></a>
+        <a class="gs-view-switch-item" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'M'}) }}" title="Visualizza i dati del mese">{{ include('admin/include/icona.html.twig', {nome: 'layout-grid', stile: 'outline'}) }}<span>Mese</span></a>
+      </div>
     </div>
-    <div class="col-sm-5 text-right">
-      <strong class="gs-big">Vista:</strong>
-      <a class="btn btn-default btn-sm active" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'G'}) }}" role="button" title="Visualizza i dati del giorno">{{ include('admin/include/icona.html.twig', {nome: 'player-stop', stile: 'outline'}) }}</a>
-      <a class="btn btn-default btn-sm" href="{{ path('lezioni_registro_firme', {cattedra: (cattedra ? cattedra.id : 0), classe: (classe ? classe.id : 0), data: data, vista: 'M'}) }}" role="button" title="Visualizza i dati del mese">{{ include('admin/include/icona.html.twig', {nome: 'layout-grid', stile: 'outline'}) }}</a>
+    <div class="gs-toolbar-action">
+      <a class="btn btn-success" href="{{ path('richieste_classe', {classe: classe.id}) }}" role="button" title="Compila il modulo per le prove di evacuazione">{{ include('admin/include/icona.html.twig', {nome: 'flame', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Evacuazione</strong></a>
+    </div>
     </div>
   </div>
-  <div class="row gs-row-eq gs-mb-2">
-    <div id="gs-note" class="col-sm-6 bg-warning">
-      <div class="gs-mt-2 gs-mb-2">
-        <h3 class="gs-h3 gs-inline">Note disciplinari</h3>
-      {% if dati[data].note.add is defined %}
-        <a class="btn btn-primary btn-xs pull-right" href="{{ dati[data].note.add }}" role="button" title="Aggiungi una nota di classe o individuale">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</a>
-      {% endif %}
-      </div>
-      <div class="list-group gs-mb-2">
+  <div class="row gs-mb-2">
+    <div class="col-sm-6">
+      <div id="gs-note" class="panel panel-warning gs-mb-0">
+        <div class="panel-heading gs-panel-heading-actions">
+          <h3 class="panel-title">Note disciplinari</h3>
+        {% if dati[data].note.add is defined %}
+          <a class="btn btn-xs btn-default" href="{{ dati[data].note.add }}" role="button" title="Aggiungi una nota di classe o individuale">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</a>
+        {% endif %}
+        </div>
+        <div class="list-group">
       {% for k, v in dati[data].note.lista %}
         <div class="list-group-item{{ v.annullata ? ' gs-bg-secondary' }}">
-        {% if v.gruppo %}
-          <strong>Gruppo: {{ classe.anno ~ classe.sezione ~ '-' ~ v.gruppo }}</strong><br>
-        {% endif %}
+          <div class="gs-voce-azioni">
           <div class="list-group-item-text">
+        {% if v.gruppo %}
+            <strong>Gruppo: {{ classe.anno ~ classe.sezione ~ '-' ~ v.gruppo }}</strong><br>
+        {% endif %}
         {% if v.alunni is defined %}
             <small><em>Alunni: {{ v.alunni }}</em></small><br>
         {% endif %}
@@ -114,39 +125,49 @@
         {% if v.provvedimento %}
             <br><strong>{{ v.provvedimento|raw|nl2br }}<br><small><em>({{ v.docente_provvedimento }})</em></small></strong>
         {% endif %}
-        {% if v.delete is defined %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella la nota disciplinare', stile: 'danger', classi: 'pull-right gs-ml-3 gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': v.delete, 'data-text': 'message.cancella_nota'|trans, 'data-csrf': csrf_token('delete')}}) }}
-        {% elseif v.cancel is defined %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'circle-x', etichetta: 'Annulla', titolo: 'Annulla la nota disciplinare', stile: 'danger', classi: 'pull-right gs-ml-3 gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': v.cancel, 'data-text': 'message.annulla_nota'|trans, 'data-csrf': csrf_token('delete')}}) }}
-        {% endif %}
-        {% if v.edit is defined %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica la nota disciplinare', classi: 'pull-right gs-ml-3', url: v.edit}) }}
-        {% endif %}
-        {% if v.extra is defined %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'file-text', etichetta: 'Provvedimento', titolo: 'Inserisci il provvedimento disciplinare', classi: 'pull-right', url: v.extra}) }}
-        {% endif %}
         {% if v.annullata %}
             <div class="text-center"><strong class="gs-big">ANNULLATA</strong></div>
         {% endif %}
           </div>
+        {% if v.edit is defined or v.extra is defined or v.delete is defined or v.cancel is defined %}
+          <div class="gs-voce-azioni-bottoni">
+        {% if v.edit is defined %}
+            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica la nota disciplinare', url: v.edit}) }}
+        {% endif %}
+        {% if v.extra is defined %}
+            {{ include('include/bottone-azione.html.twig', {nome: 'file-text', etichetta: 'Provvedimento', titolo: 'Inserisci il provvedimento disciplinare', url: v.extra}) }}
+        {% endif %}
+        {% if v.delete is defined %}
+            {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella la nota disciplinare', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': v.delete, 'data-text': 'message.cancella_nota'|trans, 'data-csrf': csrf_token('delete')}}) }}
+        {% elseif v.cancel is defined %}
+            {{ include('include/bottone-azione.html.twig', {nome: 'circle-x', etichetta: 'Annulla', titolo: 'Annulla la nota disciplinare', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': v.cancel, 'data-text': 'message.annulla_nota'|trans, 'data-csrf': csrf_token('delete')}}) }}
+        {% endif %}
+          </div>
+        {% endif %}
+          </div>
         </div>
+      {% else %}
+        <div class="list-group-item text-muted"><em>Nessuna nota disciplinare</em></div>
       {% endfor %}
+        </div>
       </div>
     </div>
-    <div id="gs-annotazioni" class="col-sm-6 bg-info">
-      <div class="gs-mt-2 gs-mb-2">
-        <h3 class="gs-h3 gs-inline">Annotazioni</h3>
-      {% if dati[data].annotazioni.add is defined %}
-        <a class="btn btn-primary btn-xs pull-right" href="{{ dati[data].annotazioni.add }}" role="button" title="Aggiungi una annotazione sul registro">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</a>
-      {% endif %}
-      </div>
-      <div class="list-group gs-mb-2">
+    <div class="col-sm-6">
+      <div id="gs-annotazioni" class="panel panel-info gs-mb-0">
+        <div class="panel-heading gs-panel-heading-actions">
+          <h3 class="panel-title">Annotazioni</h3>
+        {% if dati[data].annotazioni.add is defined %}
+          <a class="btn btn-xs btn-default" href="{{ dati[data].annotazioni.add }}" role="button" title="Aggiungi una annotazione sul registro">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</a>
+        {% endif %}
+        </div>
+        <div class="list-group">
       {% for k, v in dati[data].annotazioni.lista %}
         <div class="list-group-item">
-        {% if v.gruppo %}
-          <strong>Gruppo: {{ classe.anno ~ classe.sezione ~ '-' ~ v.gruppo }}</strong><br>
-        {% endif %}
+          <div class="gs-voce-azioni">
           <div class="list-group-item-text">
+        {% if v.gruppo %}
+            <strong>Gruppo: {{ classe.anno ~ classe.sezione ~ '-' ~ v.gruppo }}</strong><br>
+        {% endif %}
         {% if v.genitori is not empty %}
             <strong>Destinatari genitori:
             {% for al in v.genitori %}{{ al.cognome }} {{ al.nome }}{{ not loop.last ? ', ' }}{% endfor %}</strong><br>
@@ -157,15 +178,23 @@
         {% endif %}
             {{ v.testo|raw|nl2br }}<br>
             <small><em>({{ v.docente }}, inserita in data {{ (v.avviso ? v.avviso.modificato : v.modificato)|date('d/m/Y') }})</em></small>
-        {% if v.delete is defined and (not v.avviso or v.visibile) %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella l\'annotazione sul registro', stile: 'danger', classi: 'pull-right gs-ml-3 gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': v.delete, 'data-text': 'message.cancella_annotazione'|trans, 'data-csrf': csrf_token('delete')}}) }}
-        {% endif %}
+          </div>
+        {% if (v.delete is defined and (not v.avviso or v.visibile)) or (v.edit is defined and (not v.avviso or v.visibile)) %}
+          <div class="gs-voce-azioni-bottoni">
         {% if v.edit is defined and (not v.avviso or v.visibile) %}
-            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica l\'annotazione sul registro', classi: 'pull-right', url: v.edit}) }}
+            {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica l\'annotazione sul registro', url: v.edit}) }}
+        {% endif %}
+        {% if v.delete is defined and (not v.avviso or v.visibile) %}
+            {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella l\'annotazione sul registro', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': v.delete, 'data-text': 'message.cancella_annotazione'|trans, 'data-csrf': csrf_token('delete')}}) }}
+        {% endif %}
+          </div>
         {% endif %}
           </div>
         </div>
+      {% else %}
+        <div class="list-group-item text-muted"><em>Nessuna annotazione</em></div>
       {% endfor %}
+        </div>
       </div>
     </div>
   </div>
@@ -248,9 +277,9 @@
     <div id="gs-fuoriclasse" class="panel panel-info gs-mb-2 gs-mr-4 gs-ml-4">
       <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
         <div  class="row">
-          <div  class="col-sm-2"><strong class="gs-text-normal">Fuori classe:</strong></div>
+          <div  class="col-sm-2"><strong>Fuori classe:</strong></div>
           <div  class="col-sm-10">
-            <small class="gs-text-normal">{% for a in assenti.fc %}{{ not loop.first ? '<br>' }}{{ a.alunno }}:
+            <small>{% for a in assenti.fc %}{{ not loop.first ? '<br>' }}{{ a.alunno }}:
               {% if a.oraInizio %}dalle {{ a.oraInizio|date('H:i') }}{% if a.oraFine %} alle {{ a.oraFine|date('H:i') }}{% endif %}{% else %}tutto il giorno{% endif %}
               ({{ ('label.presenza_tipo_' ~ a.tipo)|trans }}: {{ a.descrizione }})
               {% endfor %}</small>
@@ -263,8 +292,8 @@
         {% if assenti.assenze is defined %}
       <div id="gs-assenti" class="panel panel-success">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
-          <strong class="gs-text-normal">Assenti:</strong>
-          <small class="gs-text-normal">{% for a in assenti.assenze %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
+          <strong>Assenti:</strong>
+          <small>{% for a in assenti.assenze %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
         </div>
       </div>
         {% else %}
@@ -277,8 +306,8 @@
         {% if assenti.entrate is defined %}
       <div id="gs-ritardi" class="panel panel-success">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
-          <strong class="gs-text-normal">Ritardi:</strong>
-          <small class="gs-text-normal">{% for a in assenti.entrate %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
+          <strong>Ritardi:</strong>
+          <small>{% for a in assenti.entrate %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
         </div>
       </div>
         {% else %}
@@ -291,8 +320,8 @@
         {% if assenti.uscite is defined %}
       <div id="gs-uscite" class="panel panel-success">
         <div class="panel-heading gs-pt-1 gs-pb-1 gs-pr-2 gs-pl-2">
-          <strong class="gs-text-normal">Uscite:</strong>
-          <small class="gs-text-normal">{% for a in assenti.uscite %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
+          <strong>Uscite:</strong>
+          <small>{% for a in assenti.uscite %}{{ not loop.first ? ', ' }}{{ a }}{% endfor %}</small>
         </div>
       </div>
         {% else %}
@@ -321,6 +350,16 @@
 <script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
 <script>
 $(document).ready(function() {
+  // le festività sono lette dall'attributo data per non inserire codice Twig
+  // all'interno del blocco JavaScript
+  var datesDisabled = $('#gs-button-date').data('dates-disabled') || [];
+  if (typeof datesDisabled === 'string') {
+    try {
+      datesDisabled = JSON.parse(datesDisabled);
+    } catch (errore) {
+      datesDisabled = [];
+    }
+  }
   $('#gs-button-date').datepicker({
     format: "yyyy-mm-dd",
     weekStart: 1,
@@ -329,7 +368,7 @@ $(document).ready(function() {
     defaultViewDate: "{{ data }}",
     startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
     endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
-    {% if lista_festivi %}datesDisabled: {{ lista_festivi|raw }},{% endif %}
+    datesDisabled: datesDisabled,
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,

@@ -43,9 +43,9 @@
           {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella l\'avviso indicato', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('avvisi_delete', {avviso: a.id}), 'data-text': 'message.cancella_avviso_coordinatore'|trans, 'data-csrf': csrf_token('delete')}}) }}
       {% endif %}
           <div id="avviso-{{ loop.index }}" style="display:none">
-            <div class="alert alert-info gs-mt-0 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">
-              <div class="gs-text-normal">{{ a.testoPersonalizzato|raw|nl2br }}</div>
-              <div class="text-right gs-text-normal"><em>({{ a.autore }})</em></div>
+            <div class="gs-mb-3">
+              <div class="gs-text-normal text-center">{{ a.testoPersonalizzato|raw|nl2br }}</div>
+              <div class="gs-text-normal text-center"><em>({{ a.autore }})</em></div>
             </div>
       {% if a.allegati|length > 0 %}
             <div class="alert alert-success gs-mt-2 gs-mb-0 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2">

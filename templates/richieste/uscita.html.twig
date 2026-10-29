@@ -8,24 +8,24 @@
     </div>
     <div class="panel-body gs-pt-0">
       <div class="row bg-success">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Data uscita:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Data uscita:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.data }}</span></div>
-        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Classe:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.classe }}</span></div>
       </div>
       <div class="row bg-success{{ not dati.richiesta ? ' gs-mb-3' }}">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Alunno:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.alunno }}</span></div>
   {% if app.session.get('/CONFIG/SCUOLA/gestione_uscite') == 'A' %}
-        <div class="col-sm-2 text-right"><strong class="gs-big">Richiesta:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Richiesta:</strong></div>
         <div class="col-sm-4"><span class="label label-{{ dati.richiesta ? 'success' : 'danger' }} gs-big">{{ dati.richiesta ? 'PRESENTE' : 'NESSUNA' }}</span></div>
   {% endif %}
       </div>
   {% if dati.richiesta %}
       <div class="row bg-info gs-mb-3">
-        <div class="col-sm-3 text-right"><strong>Motivazione richiesta:</strong></div>
+        <div class="col-sm-3"><strong>Motivazione richiesta:</strong></div>
         <div class="col-sm-9"><em>{{ dati.richiesta.valori.motivazione }}</em></div>
-        <div class="col-sm-3 text-right"><strong>Documenti richiesta:</strong></div>
+        <div class="col-sm-3"><strong>Documenti richiesta:</strong></div>
         <div class="col-sm-9">
           <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: dati.richiesta.id}) }}" title="Scarica il modulo di richiesta compilato">
             {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica il modulo compilato</strong>
@@ -42,7 +42,7 @@
       {{ form_widget(form[0]) }}
       <div class="form-group">
         <div class="col-sm-2"></div>
-        <div class="col-sm-10">
+        <div class="col-sm-10 gs-azioni-invertite gs-azioni-sinistra">
           <button type="submit" id="{{ form[0].vars.full_name }}_submit" name="{{ form[0].vars.full_name }}[submit]" class="btn-default gs-mr-3 btn">{{ 'label.submit'|trans }}</button>
   {% if info.delete %}
           <button type="submit" id="{{ form[0].vars.full_name }}_delete" name="{{ form[0].vars.full_name }}[delete]" class="btn-danger gs-mr-3 btn">{{ 'label.delete'|trans }}</button>
