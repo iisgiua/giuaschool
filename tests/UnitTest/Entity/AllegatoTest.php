@@ -118,6 +118,16 @@ class AllegatoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame($existent->getTitolo(), (string) $existent, $this->entity.'::toString');
+    // visualizzabile nel browser solo per i formati che i browser mostrano
+    $allegato = new Allegato();
+    $allegato->setEstensione('pdf');
+    $this->assertTrue($allegato->isVisualizzabile(), $this->entity.'::isVisualizzabile - PDF');
+    $allegato->setEstensione('JPG');
+    $this->assertTrue($allegato->isVisualizzabile(), $this->entity.'::isVisualizzabile - JPG');
+    $allegato->setEstensione('docx');
+    $this->assertFalse($allegato->isVisualizzabile(), $this->entity.'::isVisualizzabile - DOCX');
+    $allegato->setEstensione('zip');
+    $this->assertFalse($allegato->isVisualizzabile(), $this->entity.'::isVisualizzabile - ZIP');
   }
 
   /**
