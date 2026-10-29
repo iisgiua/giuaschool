@@ -22,7 +22,6 @@ use App\Entity\Lezione;
 use App\Entity\Materia;
 use App\Entity\ModuloFormativo;
 use App\Entity\Nota;
-use App\Entity\ScansioneOraria;
 use App\Entity\Valutazione;
 use App\Form\MessageType;
 use App\Message\AvvisoMessage;
@@ -169,15 +168,9 @@ class RegistroController extends BaseController
       $errore = $reg->controlloData($dataObj, $classe->getSede());
       if (!$errore) {
         // non festivo
-        $oggi = new DateTime();
-        $adesso = $oggi->format('H:i');
-        if ($oggi->format('w') != 0 &&
-            $adesso >= $this->em->getRepository(ScansioneOraria::class)->inizioLezioni($oggi, $classe->getSede()) &&
-            $adesso <= $this->em->getRepository(ScansioneOraria::class)->fineLezioni($oggi, $classe->getSede())) {
-          // avvisi alla classe
-          $num_avvisi = $this->em->getRepository(Avviso::class)->numeroClasse($classe);
-          $lista_circolari = $this->em->getRepository(Circolare::class)->listaCircolariClasse($classe);
-        }
+        // avvisi e circolari da leggere (la consultazione non dipende da giorno e ora correnti)
+        $num_avvisi = $this->em->getRepository(Avviso::class)->numeroClasse($classe);
+        $lista_circolari = $this->em->getRepository(Circolare::class)->listaCircolariClasse($classe);
         // recupera dati
         $dati = $reg->tabellaFirmeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
         if ($vista == 'G') {
