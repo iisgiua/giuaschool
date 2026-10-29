@@ -170,9 +170,85 @@ jobs:
           docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${TAG:1}" --build-arg NEWBUILD="build" -t gs:test2 -f tests/docker/TestUpdateDockerfile .
           docker run --rm --name gs_test2 --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test2
 
+  test-prod:
+    name: Prod smoke test
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+
+      - name: Check out the repo
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build production image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: prod
+          file: tests/docker/Dockerfile
+          tags: gs:prod
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start the application in production mode
+        run: |
+          docker run -d --name gs_prod -p 8443:443 gs:prod
+          # attende l'avvio di MariaDB e Apache
+          for tentativo in $(seq 1 60); do
+            codice="$(curl -sk -o /dev/null -w '%{http_code}' https://localhost:8443/login/form/ || true)"
+            if [ "$codice" = "200" ]; then
+              echo "applicazione avviata dopo $tentativo tentativi"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "l'applicazione non risponde in ambiente di produzione"
+          docker logs gs_prod
+          exit 1
+
+      - name: Check production environment
+        run: |
+          # il kernel deve girare in produzione, senza debug
+          docker exec -u www-data gs_prod php bin/console about --no-ansi > about.txt
+          cat about.txt
+          grep -Eq 'Environment[[:space:]]+prod' about.txt
+          grep -Eq 'Debug[[:space:]]+false' about.txt
+          # le dipendenze di sviluppo non devono essere installate: un comando che
+          # le usa (app:alice:load) non deve impedire la compilazione del contenitore
+          if docker exec gs_prod php -r 'exit(class_exists("Faker\\Generator") ? 0 : 1);'; then
+            echo "dipendenze di sviluppo presenti nell'immagine di produzione"
+            exit 1
+          fi
+
+      - name: Check security headers
+        run: |
+          intestazioni="$(curl -skI https://localhost:8443/login/form/)"
+          echo "$intestazioni"
+          # la Content Security Policy deve essere presente
+          echo "$intestazioni" | grep -qi '^content-security-policy'
+          # non devono essere esposti header di debug o la versione di PHP
+          if echo "$intestazioni" | grep -qiE '^(x-debug-token|x-powered-by)'; then
+            echo "header di debug o versione di PHP esposti in produzione"
+            exit 1
+          fi
+          # i file di configurazione di Apache non devono essere scaricabili
+          codice="$(curl -sk -o /dev/null -w '%{http_code}' https://localhost:8443/.htaccess)"
+          if [ "$codice" != "403" ]; then
+            echo "il file .htaccess è accessibile (codice $codice)"
+            exit 1
+          fi
+
+      - name: Stop the container
+        if: always()
+        run: docker rm -f gs_prod
+
   deploy:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-    needs: [test-phpunit, test-behat, test-update]
+    needs: [test-phpunit, test-behat, test-update, test-prod]
     name: Deploy release
     runs-on: ubuntu-latest
     steps:
