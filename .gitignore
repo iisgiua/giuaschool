@@ -29,6 +29,8 @@
 /public/app/*
 !/public/app/.gitkeep
 !/public/app/giuaschool-app-v*
+# APK compilato in locale: le release stanno nelle GitHub Releases
+/public/app/giuaschool-app-v*.apk
 /public/bundles/
 /src/Command/Argo/
 /src/Controller/GiuaController.php
@@ -60,6 +62,7 @@ client_secret_*.json
 .psalm-cache
 
 ###> artefatti locali di analisi ###
+/about.txt
 /risultato.txt
 /security_issues.json
 /CREDENZIALI_TEST.md
