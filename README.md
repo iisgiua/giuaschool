@@ -139,9 +139,10 @@ viene impostata dalla fixture tramite il provider `PersonaProvider` (vedi `tests
 ### 4. Server
 
 ```bash
-php -S localhost:8000 -t public
+php -d expose_php=Off -S localhost:8000 -t public
 ```
 
+L'opzione `expose_php=Off` evita che l'header `X-Powered-By` riveli la versione di PHP.
 Il **document root deve essere `public/`**. I file nella radice del progetto non devono essere
 servibili via web: `.htaccess` in radice nega esplicitamente l'accesso.
 
@@ -575,6 +576,7 @@ token configurato nel parametro `comando_token`. La risposta è `ok` o un errore
 
 - **Manuali per utenti** (alunni, genitori, docenti, ATA): [iisgiua.github.io/giuaschool-docs](https://iisgiua.github.io/giuaschool-docs/),
   e in PDF in `public/doc/`
+- **Stato dei manuali PDF**: [docs/ANALISI_MANUALI_PDF.md](docs/ANALISI_MANUALI_PDF.md)
 - **Architettura e modello di dominio**: [docs/ARCHITETTURA.md](docs/ARCHITETTURA.md)
 - **Annunci**: [GitHub Discussions](https://github.com/iisgiua/giuaschool/discussions/categories/annunci)
 - **Segnalare un errore**: [nuova issue](https://github.com/iisgiua/giuaschool/issues/new?labels=Errore&template=bug-report.md)
