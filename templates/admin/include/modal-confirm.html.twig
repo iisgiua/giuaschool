@@ -5,14 +5,14 @@
 <div class="modal fade" id="gs-modal-confirm" tabindex="-1" role="dialog" aria-labelledby="gs-modal-confirm-titolo">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
-      <div class="modal-header border-bottom">
+      <div class="modal-header">
         <h5 class="modal-title" id="gs-modal-confirm-titolo">{{ 'label.confirm'|trans }}</h5>
         <button type="button" class="close p-0" data-dismiss="modal" aria-label="{{ 'label.close'|trans }}">
           {{ include('admin/include/icona.html.twig', {nome: 'x'}) }}
         </button>
       </div>
       <div class="modal-body" id="gs-modal-confirm-contenuto"></div>
-      <div class="modal-footer mx-auto">
+      <div class="modal-footer gs-modal-actions">
         <form id="gs-modal-confirm-form" method="post" action="#" style="display:inline">
           <input type="hidden" name="_csrf_token" id="gs-modal-confirm-csrf">
           <button type="submit" class="btn btn-primary btn-xs">{{ 'label.continua'|trans }}</button>
