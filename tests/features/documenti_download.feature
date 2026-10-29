@@ -225,7 +225,7 @@ Schema dello scenario: scarica documento BES inserito
     | $d1 | $cl1   | $a1    | <tipo> |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/3A/riservato/documento-xlsx.xlsx"
   Quando pagina attiva "documenti_bes"
-  E click su "Documento Excel"
+  E click su "Scarica documento" in sezione "#gs-main table tbody tr" che contiene "Documento Excel"
   Allora file scaricato con nome "documento-excel-versione-1.xlsx"
   Esempi:
     | tipo |

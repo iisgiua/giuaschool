@@ -11,7 +11,6 @@ namespace App\Tests\Behat;
 use DateTime;
 use stdClass;
 use App\Tests\CustomProvider;
-use App\Tests\DatabaseTestCase;
 use App\Tests\PersonaProvider;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
@@ -574,13 +573,11 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $fixturesName = substr(self::$fixtures, 0, strrpos(self::$fixtures, '.'));
     $sqlPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixturesName.'.sql';
     $mapPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixturesName.'.map';
-    // svuota il database
+    // svuota il database (TRUNCATE azzera anche i contatori AUTO_INCREMENT)
     $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
     $purger = new ORMPurger($this->em);
-    $purger->setPurgeMode(ORMPurger::PURGE_MODE_DELETE);
+    $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);
     $purger->purge();
-    // DELETE non azzera AUTO_INCREMENT come fa TRUNCATE: lo ripristina esplicitamente
-    DatabaseTestCase::resetAutoIncrement($connection);
     $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
     // controllo
     if (!self::$fixtures) {

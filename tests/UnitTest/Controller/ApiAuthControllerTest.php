@@ -83,11 +83,11 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     $controller = $this->creaController();
     // ID dispositivo mancante
     $res = $controller->authRequest($this->creaRequest([]), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     // dispositivo inesistente
     $res = $controller->authRequest($this->creaRequest(['dispositivoId' => 'dispositivo-inesistente']),
       $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     // utente disabilitato
     $utente = $this->getReference('docente_curricolare_1');
     [, $chiavePubblica] = $this->creaChiavi();
@@ -95,26 +95,26 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     $utente->setAbilitato(false);
     $this->em->flush();
     $res = $controller->authRequest($this->creaRequest(['dispositivoId' => $idDispositivo]), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     // dispositivo scaduto
     $utente->setAbilitato(true);
     $utente->setDispositivoRegistrato(new DateTimeImmutable('-200 days'));
     $this->em->flush();
     $res = $controller->authRequest($this->creaRequest(['dispositivoId' => $idDispositivo]), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     $this->assertSame('DISPOSITIVO_NON_VALIDO', $this->datiRisposta($res)['errore'] ?? null);
     // dispositivo senza chiave pubblica
     $utente->setDispositivoRegistrato(new DateTimeImmutable());
     $utente->setDispositivoChiave(null);
     $this->em->flush();
     $res = $controller->authRequest($this->creaRequest(['dispositivoId' => $idDispositivo]), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     $this->assertSame('DISPOSITIVO_NON_VALIDO', $this->datiRisposta($res)['errore'] ?? null);
     // dispositivo valido
     $utente->setDispositivoChiave($chiavePubblica);
     $this->em->flush();
     $res = $controller->authRequest($this->creaRequest(['dispositivoId' => $idDispositivo]), $this->logger);
-    $this->assertSame(Response::HTTP_OK, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_OK, $res->getStatusCode(), $res->getContent());
     $dati = $this->datiRisposta($res);
     $this->assertArrayHasKey('id', $dati);
     $this->assertArrayHasKey('casuale', $dati);
@@ -143,18 +143,18 @@ class ApiAuthControllerTest extends DatabaseTestCase {
       ->with('ACCESSO', 'Registrazione dispositivo', ['utente' => $utente->getUserIdentifier()]);
     // chiave pubblica mancante
     $res = $controller->authRegister($this->creaRequest([]), $this->logger, $this->dblogger);
-    $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $res->getStatusCode(), $res->getContent());
     $this->assertNull($utente->getDispositivoId());
     // chiave pubblica non valida
     $res = $controller->authRegister($this->creaRequest(['chiavePubblica' => 'AAAA']), $this->logger,
       $this->dblogger);
-    $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $res->getStatusCode(), $res->getContent());
     $this->assertNull($utente->getDispositivoId());
     // chiave pubblica valida
     [, , $chiaveBody1] = $this->creaChiavi();
     $res = $controller->authRegister($this->creaRequest(['chiavePubblica' => $chiaveBody1]), $this->logger,
       $this->dblogger);
-    $this->assertSame(Response::HTTP_OK, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_OK, $res->getStatusCode(), $res->getContent());
     $idDispositivo1 = $this->datiRisposta($res)['dispositivoId'] ?? null;
     $this->assertIsString($idDispositivo1);
     $this->assertTrue(Uuid::isValid($idDispositivo1));
@@ -165,7 +165,7 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     [, , $chiaveBody2] = $this->creaChiavi();
     $res = $controller->authRegister($this->creaRequest(['chiavePubblica' => $chiaveBody2]), $this->logger,
       $this->dblogger);
-    $this->assertSame(Response::HTTP_OK, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_OK, $res->getStatusCode(), $res->getContent());
     $idDispositivo2 = $this->datiRisposta($res)['dispositivoId'] ?? null;
     $this->assertIsString($idDispositivo2);
     $this->assertTrue(Uuid::isValid($idDispositivo2));
@@ -186,19 +186,19 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     // richiesta inesistente
     $res = $controller->authValidate($this->creaRequest(['id' => 'richiesta-inesistente',
       'firma' => base64_encode('firma')]), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     // richiesta scaduta
     $autenticazione = $this->creaChallenge($utente, new DateTimeImmutable('-1 second'));
     $res = $controller->authValidate($this->creaRequest(['id' => $autenticazione->getIdPubblico(),
       'firma' => base64_encode('firma')]), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     $this->em->refresh($autenticazione);
     $this->assertFalse($autenticazione->getRichiestaUsata());
     // richiesta gia' usata
     $autenticazione = $this->creaChallenge($utente, new DateTimeImmutable('+60 seconds'), true);
     $res = $controller->authValidate($this->creaRequest(['id' => $autenticazione->getIdPubblico(),
       'firma' => base64_encode('firma')]), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     // dispositivo non valido
     $utenteSenzaDispositivo = $this->getReference('docente_curricolare_2');
     $utenteSenzaDispositivo->setDispositivoId(null)->setDispositivoChiave(null)
@@ -207,14 +207,14 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     $autenticazione = $this->creaChallenge($utenteSenzaDispositivo);
     $res = $controller->authValidate($this->creaRequest(['id' => $autenticazione->getIdPubblico(),
       'firma' => base64_encode('firma')]), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     $this->em->refresh($autenticazione);
     $this->assertTrue($autenticazione->getRichiestaUsata());
     // firma non codificata in base64
     $autenticazione = $this->creaChallenge($utente);
     $res = $controller->authValidate($this->creaRequest(['id' => $autenticazione->getIdPubblico(),
       'firma' => '@@@']), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     $this->em->refresh($autenticazione);
     $this->assertTrue($autenticazione->getRichiestaUsata());
     // chiave pubblica del dispositivo non valida
@@ -226,14 +226,14 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     $autenticazione = $this->creaChallenge($utenteChiaveInvalida);
     $res = $controller->authValidate($this->creaRequest(['id' => $autenticazione->getIdPubblico(),
       'firma' => base64_encode('firma')]), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     $this->em->refresh($autenticazione);
     $this->assertTrue($autenticazione->getRichiestaUsata());
     // firma non valida
     $autenticazione = $this->creaChallenge($utente);
     $res = $controller->authValidate($this->creaRequest(['id' => $autenticazione->getIdPubblico(),
       'firma' => base64_encode('firma-errata')]), $this->logger);
-    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_NOT_FOUND, $res->getStatusCode(), $res->getContent());
     $this->em->refresh($autenticazione);
     $this->assertTrue($autenticazione->getRichiestaUsata());
     // firma valida
@@ -241,7 +241,7 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     $firma = $this->firma($autenticazione, $chiavePrivata);
     $res = $controller->authValidate($this->creaRequest(['id' => $autenticazione->getIdPubblico(),
       'firma' => $firma]), $this->logger);
-    $this->assertSame(Response::HTTP_OK, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_OK, $res->getStatusCode(), $res->getContent());
     $codice = $this->datiRisposta($res)['codice'] ?? null;
     $this->assertIsString($codice);
     $this->assertNotSame('', $codice);
@@ -270,17 +270,17 @@ class ApiAuthControllerTest extends DatabaseTestCase {
       ->with('ACCESSO', 'Revoca dispositivo', ['utente' => $utente->getUserIdentifier()]);
     // ID dispositivo mancante
     $res = $controller->authRevoke($this->creaRequest([]), $this->logger, $this->dblogger);
-    $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $res->getStatusCode(), $res->getContent());
     $this->assertSame($idDispositivo, $utente->getDispositivoId());
     // ID dispositivo errato
     $res = $controller->authRevoke($this->creaRequest(['dispositivoId' => 'dispositivo-errato']),
       $this->logger, $this->dblogger);
-    $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $res->getStatusCode(), $res->getContent());
     $this->assertSame($idDispositivo, $utente->getDispositivoId());
     // revoca corretta
     $res = $controller->authRevoke($this->creaRequest(['dispositivoId' => $idDispositivo]), $this->logger,
       $this->dblogger);
-    $this->assertSame(Response::HTTP_OK, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_OK, $res->getStatusCode(), $res->getContent());
     $this->assertNull($utente->getDispositivoId());
     $this->assertNull($utente->getDispositivoChiave());
     $this->assertNull($utente->getDispositivoRegistrato());
@@ -299,12 +299,12 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     // registrazione del dispositivo
     $res = $controller->authRegister($this->creaRequest(['chiavePubblica' => $chiaveBody]), $this->logger,
       $this->dblogger);
-    $this->assertSame(Response::HTTP_OK, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_OK, $res->getStatusCode(), $res->getContent());
     $idDispositivo = $this->datiRisposta($res)['dispositivoId'] ?? null;
     $this->assertIsString($idDispositivo);
     // richiesta di autenticazione
     $res = $controller->authRequest($this->creaRequest(['dispositivoId' => $idDispositivo]), $this->logger);
-    $this->assertSame(Response::HTTP_OK, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_OK, $res->getStatusCode(), $res->getContent());
     $richiesta = $this->datiRisposta($res);
     $autenticazione = $this->em->getRepository(AutenticazioneDispositivo::class)
       ->findOneBy(['idPubblico' => $richiesta['id']]);
@@ -313,7 +313,7 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     $firma = $this->firma($autenticazione, $chiavePrivata);
     $res = $controller->authValidate($this->creaRequest(['id' => $richiesta['id'], 'firma' => $firma]),
       $this->logger);
-    $this->assertSame(Response::HTTP_OK, $res->getStatusCode());
+    $this->assertSame(Response::HTTP_OK, $res->getStatusCode(), $res->getContent());
     $codice = $this->datiRisposta($res)['codice'] ?? null;
     $this->assertIsString($codice);
     // connessione tramite il token monouso
@@ -393,7 +393,7 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     $dettagli = openssl_pkey_get_details($chiavePrivata);
     $this->assertIsArray($dettagli);
     $chiavePubblica = $dettagli['key'];
-    $chiaveBody = (string) preg_replace('/-----[^-]+-----|\s+/', '', $chiavePubblica);
+    $chiaveBody = (string) preg_replace('/-----[^-]+-----|\s+/', '', (string) $chiavePubblica);
     return [$chiavePrivata, $chiavePubblica, $chiaveBody];
   }
 
@@ -451,7 +451,7 @@ class ApiAuthControllerTest extends DatabaseTestCase {
     $firma = '';
     $this->assertTrue(openssl_sign($protocollo."\n".$autenticazione->getIdPubblico()."\n".
       $autenticazione->getCasuale(), $firma, $chiavePrivata, OPENSSL_ALGO_SHA256));
-    return base64_encode($firma);
+    return base64_encode((string) $firma);
   }
 
 }

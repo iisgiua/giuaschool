@@ -362,6 +362,22 @@ class BrowserContext extends BaseContext implements Context {
   }
 
   /**
+   * Controlla che il sorgente della sezione individuata dal selettore css contenga il testo indicato
+   *  (utile per i contenuti nascosti, come le voci dei menu azioni)
+   *  $selettore: selettore css che individua la sezione o elemento in cui cercare il testo
+   *  $ricerca: testo da cercare come espressione regolare
+   *
+   * @Then la sezione :selettore contiene nel sorgente :ricerca
+   */
+  public function laSezioneContieneNelSorgente($selettore, $ricerca): void {
+    $sezione = $this->session->getPage()->find('css', $selettore);
+    $html = $sezione ? (string) $sezione->getHtml() : '';
+    $this->logDebug('laSezioneContieneNelSorgente -> '.$ricerca.' | '.$html);
+    $this->assertTrue(preg_match($ricerca, $html),
+      '+++ laSezioneContieneNelSorgente -> '.$ricerca.' | '.$html);
+  }
+
+  /**
    * Controlla che la tabella indicata abbia il numero di righe specificato
    *  $numero: numero di righe della tabella
    *  $indice: indice progressivo delle tabelle presenti nel contenuto della pagina (parte da 1)
@@ -443,7 +459,7 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediNellaTabellaLeColonneIndice($indice, TableNode $colonne): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
+    $this->assertArrayKey($indice - 1, $tabelle, 'Tabella non trovata: indice '.$indice);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
     $this->assertEquals(count($intestazioni), count($colonne->getRow(0)));
     $intestazioniTesto = $this->parseTableRow($intestazioni);
@@ -473,12 +489,12 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediNellaRigaDellaTabellaIDatiIndice($numero, $indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
+    $this->assertArrayKey($indice - 1, $tabelle, 'Tabella non trovata: indice '.$indice);
     $intestazioni = $tabelle[$indice - 1]->findAll('css', 'thead tr th');
     $this->assertNotEmpty($intestazioni);
     $intestazioni_nomi = array_map(fn($v) => strtolower(trim($v->getText())), $intestazioni);
     $righe = $tabelle[$indice - 1]->findAll('css', 'tbody tr');
-    $this->assertNotEmpty($righe[$numero - 1]);
+    $this->assertArrayKey($numero - 1, $righe, 'Riga non trovata: '.$numero);
     $colonne = $righe[$numero - 1]->findAll('css', 'td');
     $this->assertNotEmpty($colonne);
     foreach ($dati->getHash()[0] as $key=>$val) {
@@ -512,7 +528,7 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediNellaTabellaIDatiIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
+    $this->assertArrayKey($indice - 1, $tabelle, 'Tabella non trovata: indice '.$indice);
     [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1]);
     $datiIntestazioni = array_keys($dati->getHash()[0]);
     $this->assertNotEmpty($datiIntestazioni);
@@ -564,10 +580,9 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function clickSu($testo, $indice=1): void {
     $links = $this->session->getPage()->findAll('named', ['link_or_button', $testo]);
-    $this->assertNotEmpty($links[$indice - 1]);
-    $links[$indice - 1]->click();
-    // attesa per completare le modifiche sulla pagina
-    sleep(1);
+    $this->assertArrayKey($indice - 1, $links, 'Pulsante o link non trovato: '.$testo);
+    $this->clickElement($links[$indice - 1]);
+    // attende il completamento del caricamento e delle eventuali richieste AJAX
     $this->waitForPage();
   }
 
@@ -594,11 +609,31 @@ class BrowserContext extends BaseContext implements Context {
     }
     $this->assertTrue($trovato, 'Selector not found');
     $links = $sezione->findAll('named', ['link_or_button', $testoParam]);
-    $this->assertNotEmpty($links[$indice - 1]);
-    $links[$indice - 1]->click();
-    // attesa per completare le modifiche sulla pagina
-    sleep(1);
+    $this->assertArrayKey($indice - 1, $links, 'Pulsante o link non trovato nella sezione indicata: '.$testoParam);
+    $this->clickElement($links[$indice - 1]);
+    // attende il completamento del caricamento e delle eventuali richieste AJAX
     $this->waitForPage();
+  }
+
+  /**
+   * Clicca sull'elemento indicato, aprendo il menu azioni se è una voce ancora nascosta
+   *
+   * @param NodeElement $element Elemento su cui cliccare
+   */
+  protected function clickElement(NodeElement $element): void {
+    if (!$element->isVisible()) {
+      // voce di un menu azioni chiuso: apre il menu che la contiene
+      $menu = $element->find('xpath', 'ancestor::div[contains(concat(" ", normalize-space(@class), " "), " dropdown ")][1]');
+      $toggle = $menu ? $menu->find('css', 'button[data-toggle="dropdown"]') : null;
+      if ($toggle) {
+        $toggle->click();
+        // attesa per l'apertura del menu
+        for ($i = 0; $i < 10 && !$element->isVisible(); $i++) {
+          usleep(200000);
+        }
+      }
+    }
+    $element->click();
   }
 
   /**
@@ -634,7 +669,7 @@ class BrowserContext extends BaseContext implements Context {
   public function clickEScaricaConNomeEDimensione($testo, $testoParam, $dimensione=null): void {
     // trova URL di download
     $links = $this->session->getPage()->findAll('named', ['link_or_button', $testo]);
-    $this->assertNotEmpty($links[0]);
+    $this->assertArrayKey(0, $links, 'Pulsante o link non trovato: '.$testo);
     $url = $this->getMinkParameter('base_url').$links[0]->getAttribute('href');
     // scarica direttamente da URL
     $path = $this->kernel->getProjectDir().'/tests/temp/download/'.$testoParam;
@@ -688,8 +723,21 @@ class BrowserContext extends BaseContext implements Context {
       'file = new File([arrayBuffer], "'.$testoParam.'");'.
       'Dropzone.forElement("'.$dz.'").addFile(file);';
     $this->session->executeScript($js);
-    // attesa per completare le modifiche sulla pagina
-    sleep(1);
+    // attende il completamento dell'upload del file
+    $condizione = '(function(){'.
+      'if(typeof Dropzone==="undefined"){return false;}'.
+      'var dz=Dropzone.forElement('.json_encode($dz).');'.
+      'if(!dz){return false;}'.
+      'var files=dz.getAcceptedFiles();'.
+      'if(files.length===0){return false;}'.
+      'if(dz.getUploadingFiles().length>0){return false;}'.
+      'for(var i=0;i<files.length;i++){'.
+      'if(files[i].status==="uploading"||files[i].status==="queued"){return false;}'.
+      '}'.
+      'return true;'.
+      '})()';
+    $this->assertTrue($this->session->wait(10000, $condizione),
+      'Caricamento del file non completato: '.$testoParam);
     $this->log('UPLOAD', 'File: '.$testoParam);
   }
 
@@ -730,6 +778,8 @@ class BrowserContext extends BaseContext implements Context {
   public function vediInPDF($ricerca, $testoParam, $valore=null): void {
     $nomefile = $this->kernel->getProjectDir().'/FILES/'.$testoParam;
     $this->log('PDF', 'File: '.$nomefile);
+    // attende che il file sia stato creato e scritto completamente
+    $this->waitForFileStable($nomefile);
     $convertito = substr($nomefile, 0, -3).'txt';
     $testo = null;
     try {
@@ -764,6 +814,8 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function analizziPDF($testoParam, $valore=null): void {
     $nomefile = $this->kernel->getProjectDir().'/FILES/'.$testoParam;
+    // attende che il file sia stato creato e scritto completamente
+    $this->waitForFileStable($nomefile);
     $convertito = substr($nomefile, 0, -3).'txt';
     $testo = null;
     try {
@@ -813,6 +865,8 @@ class BrowserContext extends BaseContext implements Context {
   public function vediTestoInPDFAnalizzato($ricerca): void {
     $this->assertNotEmpty($this->vars['sys']['pdf']);
     $testo = implode(' ', $this->vars['sys']['pdf']);
+    // normalizza gli spazi usati da pdftotext per l'impaginazione delle colonne
+    $testo = trim((string) preg_replace('/\s+/u', ' ', $testo));
     $this->assertTrue(preg_match($ricerca, $testo), '+++ vediTestoInPDFAnalizzato -> '.$ricerca.' | '.$testo);
   }
 
@@ -825,7 +879,7 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediTestoInPDFAnalizzatoAllaRiga($ricerca, $valore): void {
     $this->assertNotEmpty($this->vars['sys']['pdf']);
-    $this->assertNotEmpty($this->vars['sys']['pdf'][$valore - 1]);
+    $this->assertArrayKey($valore - 1, $this->vars['sys']['pdf'], 'Riga PDF non trovata: '.$valore);
     $testo = $this->vars['sys']['pdf'][$valore - 1];
     $this->assertTrue(preg_match($ricerca, (string) $testo), '+++ vediTestoInPDFAnalizzatoAllaRiga -> '.$ricerca.' | '.$testo);
     $this->vars['sys']['pdfRiga'] = $valore - 1;
@@ -855,13 +909,15 @@ class BrowserContext extends BaseContext implements Context {
   public function vediPoiTestoInPDFAnalizzatoInRiga($ricerca, $num=1): void {
     $this->assertNotEmpty($this->vars['sys']['pdf']);
     $riga = $this->vars['sys']['pdfRiga'] + 1;
-    $this->assertNotEmpty($this->vars['sys']['pdf'][$riga]);
-    $this->assertNotEmpty($this->vars['sys']['pdf'][$riga + $num - 1]);
+    $this->assertArrayKey($riga, $this->vars['sys']['pdf'], 'Riga PDF non trovata: '.($riga + 1));
+    $this->assertArrayKey($riga + $num - 1, $this->vars['sys']['pdf'], 'Righe PDF insufficienti: '.$num);
     $trovato = false;
     for ($cnt = $riga; $cnt < count($this->vars['sys']['pdf']) - $num + 1; $cnt++) {
       $testo = '';
       for ($cnt2 = 0; $cnt2 < $num; $cnt2++) {
-        $testo .= ($cnt > 0 ? ' ' : '').$this->vars['sys']['pdf'][$cnt + $cnt2];
+        // normalizza gli spazi usati da pdftotext per l'impaginazione delle colonne
+        $parte = trim((string) preg_replace('/\s+/u', ' ', (string) $this->vars['sys']['pdf'][$cnt + $cnt2]));
+        $testo .= ($cnt2 > 0 ? ' ' : '').$parte;
       }
       $this->logDebug('+++ vediTestoInPDFAnalizzatoInRiga -> '.$ricerca.' | '.$testo);
       if (preg_match($ricerca, $testo)) {
@@ -936,8 +992,7 @@ class BrowserContext extends BaseContext implements Context {
     $option = $field->find('named', ['option', $valore]);
     $this->assertNotEmpty($option);
     $option->click();
-    // attesa per completare le modifiche sulla pagina
-    sleep(1);
+    // attende il completamento delle eventuali richieste AJAX
     $this->waitForPage();
   }
 
@@ -963,8 +1018,8 @@ class BrowserContext extends BaseContext implements Context {
     }
     $this->assertNotEmpty($option);
     $option->click();
-    // attesa per completare le modifiche sulla pagina
-    sleep(1);
+    // attende il completamento delle eventuali richieste AJAX
+    $this->waitForPage();
   }
 
   /**
@@ -989,8 +1044,8 @@ class BrowserContext extends BaseContext implements Context {
     }
     $this->assertNotEmpty($option);
     $option->click();
-    // attesa per completare le modifiche sulla pagina
-    sleep(1);
+    // attende il completamento delle eventuali richieste AJAX
+    $this->waitForPage();
   }
 
   /**
@@ -1112,7 +1167,7 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediLaTabellaIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
+    $this->assertArrayKey($indice - 1, $tabelle, 'Tabella non trovata: indice '.$indice);
     [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1]);
     // controlla intestazioni
     $datiIntestazioni = array_keys($dati->getHash()[0]);
@@ -1152,7 +1207,7 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediLaTabellaSenzaIntestazioniIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
+    $this->assertArrayKey($indice - 1, $tabelle, 'Tabella non trovata: indice '.$indice);
     [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1], false);
     // controlla dati
     $datiValori = $dati->getHash();
@@ -1188,7 +1243,7 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediLaTabellaNonOrdinataIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
+    $this->assertArrayKey($indice - 1, $tabelle, 'Tabella non trovata: indice '.$indice);
     [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1]);
     // controlla intestazioni
     $datiIntestazioni = array_keys($dati->getHash()[0]);
@@ -1244,7 +1299,7 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function vediLaTabellaNonOrdinataSenzaIntestazioniIndice($indice, TableNode $dati): void {
     $tabelle = $this->session->getPage()->findAll('css', '#gs-main table');
-    $this->assertNotEmpty($tabelle[$indice - 1]);
+    $this->assertArrayKey($indice - 1, $tabelle, 'Tabella non trovata: indice '.$indice);
     [$intestazione, $valori] = $this->parseTable($tabelle[$indice - 1], false);
     // controlla dati
     $this->assertEquals(count($dati->getHash()), count($valori), 'Table row count is different');
@@ -1352,7 +1407,7 @@ class BrowserContext extends BaseContext implements Context {
    */
   public function scorreCursoreIndice($indice, $pos): void {
     $sliders = $this->session->getPage()->findAll('css', 'form div.slider');
-    $this->assertNotEmpty($sliders[$indice - 1]);
+    $this->assertArrayKey($indice - 1, $sliders, 'Cursore non trovato: indice '.$indice);
     $handle = $sliders[$indice - 1]->find('css', '.min-slider-handle');
     $this->assertNotEmpty($handle);
     $vmin = $handle->getAttribute('aria-valuemin');
@@ -1387,9 +1442,8 @@ class BrowserContext extends BaseContext implements Context {
     do {
       // clicca su pulsante
       $links = $this->session->getPage()->findAll('named', ['link_or_button', $testo]);
-      $this->assertNotEmpty($links[0]);
+      $this->assertArrayKey(0, $links, 'Pulsante o link non trovato: '.$testo);
       $links[0]->click();
-      sleep(1);
       $this->waitForPage();
       $this->assertPageStatus(200);
       // controllo pagina
@@ -1493,7 +1547,7 @@ class BrowserContext extends BaseContext implements Context {
         return;
       }
       // aspetta 200ms prima di riprovare
-      sleep(200);
+      usleep(200000);
     } while (time() < $timeout);
     // errore
     $this->assertFalse(time() >= $timeout, '+++ Attesa massima scaduta.');
@@ -1543,12 +1597,39 @@ class BrowserContext extends BaseContext implements Context {
   }
 
   /**
-   * Aspetta il caricamento completo della pagina
+   * Aspetta il caricamento completo della pagina e delle eventuali richieste AJAX
    *
+   * @return void
    */
   protected function waitForPage(): void {
-    sleep(1);
-    $this->session->wait(30000, "document.readyState === 'complete'");
+    // breve attesa per permettere l'avvio della navigazione o della richiesta AJAX
+    usleep(50000);
+    // attende il completamento del caricamento (anche per navigazioni avviate da JavaScript)
+    $this->waitForCondition("document.readyState === 'complete'", 30000);
+    // attende il completamento delle richieste AJAX gestite da jQuery
+    $this->waitForCondition("typeof jQuery === 'undefined' || jQuery.active === 0", 5000);
+  }
+
+  /**
+   * Attende che la condizione JavaScript indicata sia verificata
+   *
+   * @param string $condizione Espressione JavaScript da verificare
+   * @param int $timeout Tempo massimo di attesa in millisecondi
+   *
+   * @return void
+   */
+  protected function waitForCondition(string $condizione, int $timeout): void {
+    $scadenza = microtime(true) + $timeout / 1000;
+    do {
+      try {
+        if ($this->session->wait(1000, $condizione)) {
+          return;
+        }
+      } catch (Exception) {
+        // la pagina è in fase di navigazione: riprova
+      }
+      usleep(50000);
+    } while (microtime(true) < $scadenza);
   }
 
   /**
@@ -1562,6 +1643,31 @@ class BrowserContext extends BaseContext implements Context {
         return;
       }
       usleep(200000); // 200 ms
+    }
+  }
+
+  /**
+   * Aspetta che il file esista e che non sia più in fase di scrittura
+   *
+   * @param string $file Percorso completo del file
+   * @param int $timeout Tempo massimo di attesa in millisecondi
+   *
+   * @return void
+   */
+  protected function waitForFileStable(string $file, int $timeout=10000): void {
+    $scadenza = microtime(true) + $timeout / 1000;
+    $dimensione = -1;
+    while (microtime(true) < $scadenza) {
+      clearstatcache(true, $file);
+      if (file_exists($file)) {
+        $nuovaDimensione = filesize($file);
+        if ($nuovaDimensione > 0 && $nuovaDimensione === $dimensione) {
+          // stessa dimensione in due controlli successivi: scrittura completata
+          return;
+        }
+        $dimensione = $nuovaDimensione;
+      }
+      usleep(100000); // 100 ms
     }
   }
 
@@ -1629,6 +1735,18 @@ class BrowserContext extends BaseContext implements Context {
         // ignora i testi riservati agli screen reader (es. etichette dei pulsanti nei dati)
         foreach ($cell->findAll('css', '.sr-only') as $sr) {
           $text = str_ireplace($sr->getText(), '', $text);
+        }
+      } else {
+        // le voci del menu azioni sono nascoste finché il menu non viene aperto:
+        // aggiunge le loro etichette, leggendole dal sorgente della cella
+        $html = (string) $cell->getHtml();
+        if (preg_match_all('#<li[^>]*>(.*?)</li>#is', $html, $voci)) {
+          foreach ($voci[1] as $voce) {
+            $etichetta = trim((string) preg_replace('/\s+/', ' ', strip_tags($voce)));
+            if ($etichetta !== '' && !str_contains($text, $etichetta)) {
+              $text = trim($text.' '.$etichetta);
+            }
+          }
         }
       }
       $text = trim((string) preg_replace('/\s+/', ' ', $text));

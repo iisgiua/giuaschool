@@ -236,7 +236,7 @@ Schema dello scenario: visualizza documento BES e controlla la sua codifica
   E ricerca istanze di tipo "Documento":
     | id  | tipo      | alunno  |
     | $d1 | <tipodoc> | $a1     |
-  Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
+  Allora la sezione "#gs-main table tbody" contiene nel sorgente "$d1:cifrato"
   E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in PDF "upload/documenti/riservato/{{$d1:allegati[0].file}}.pdf" con password "$d1:cifrato"
   Esempi:
     | tipo           | tipodoc | alunno                 |
