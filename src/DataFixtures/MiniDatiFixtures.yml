@@ -109,7 +109,7 @@ App\Entity\Avviso:
     materia:
     annotazioni: '<collection()>'
     testo: 'Ingresso posticipato mini per tutte le classi.'
-    sostituzioni: []
+    sostituzioni: '<array_combine(["{ora}"], ["09:00"])>'
   avviso_mini_U:
     tipo: 'U'
     cifrato:

@@ -494,7 +494,8 @@ class DemoPopulator {
    * La pagina "tabellone dello scrutinio svolto" legge dagli scrutini le chiavi
    * `docenti` e `valutazioni` e i voti da `gs_voto_scrutinio`: senza questi dati
    * la pagina risulta vuota o in errore. Vengono quindi create le informazioni
-   * mancanti per i periodi P, S e F (quelli mostrati dal tabellone).
+   * mancanti per i periodi P, S e F (quelli mostrati dal tabellone) e per lo
+   * scrutinio rinviato X (letto dalla pagina delle presenze).
    *
    * @param Connection $conn Connessione al database
    *
@@ -523,14 +524,24 @@ class DemoPopulator {
     }
     // cattedre del consiglio di classe (esclusi potenziamento e sostegno) e tipo materia
     $docenti = [];
+    $docentiPresenze = [];
     $materieClasse = [];
     $materiaTipo = [];
-    $sql = "SELECT c.classe_id,c.docente_id,c.materia_id,c.tipo AS cattedra_tipo,m.tipo AS materia_tipo ".
-      "FROM gs_cattedra c JOIN gs_materia m ON m.id=c.materia_id WHERE c.attiva=1 AND c.tipo!='P' ".
-      "AND m.tipo!='S'";
+    $sql = "SELECT c.classe_id,c.docente_id,c.materia_id,c.tipo AS cattedra_tipo,m.tipo AS materia_tipo, ".
+      "d.cognome,d.nome,d.sesso ".
+      "FROM gs_cattedra c JOIN gs_materia m ON m.id=c.materia_id JOIN gs_utente d ON d.id=c.docente_id ".
+      "WHERE c.attiva=1 AND c.tipo!='P' AND m.tipo!='S'";
     foreach ($conn->fetchAllAssociative($sql) as $r) {
-      $docenti[(int) $r['classe_id']][(int) $r['docente_id']][(int) $r['materia_id']] = $r['cattedra_tipo'];
-      $materieClasse[(int) $r['classe_id']][(int) $r['materia_id']] = true;
+      $classeId = (int) $r['classe_id'];
+      $docenteId = (int) $r['docente_id'];
+      $docenti[$classeId][$docenteId][(int) $r['materia_id']] = $r['cattedra_tipo'];
+      if (!isset($docentiPresenze[$classeId][$docenteId])) {
+        $docentiPresenze[$classeId][$docenteId] = ['cognome' => $r['cognome'], 'nome' => $r['nome'],
+          'sesso' => $r['sesso'], 'cattedre' => []];
+      }
+      $docentiPresenze[$classeId][$docenteId]['cattedre'][] = ['tipo' => $r['cattedra_tipo'],
+        'materia' => (int) $r['materia_id']];
+      $materieClasse[$classeId][(int) $r['materia_id']] = true;
       $materiaTipo[(int) $r['materia_id']] = $r['materia_tipo'];
     }
     // voto di condotta (materia speciale, senza cattedra)
@@ -543,7 +554,7 @@ class DemoPopulator {
       $classeId = (int) $classe['id'];
       $alunni = $conn->fetchFirstColumn("SELECT id FROM gs_utente WHERE ruolo='ALU' AND abilitato=1 AND classe_id=?",
         [$classeId]);
-      foreach (['P', 'S', 'F', 'G', 'R'] as $periodo) {
+      foreach (['P', 'S', 'F', 'G', 'R', 'X'] as $periodo) {
         $scrutinioId = $conn->fetchOne('SELECT id FROM gs_scrutinio WHERE classe_id=? AND periodo=? LIMIT 1',
           [$classeId, $periodo]);
         if (!$scrutinioId) {
@@ -552,8 +563,17 @@ class DemoPopulator {
         // arricchisce i dati dello scrutinio con docenti e valutazioni
         $dati = @unserialize((string) $conn->fetchOne('SELECT dati FROM gs_scrutinio WHERE id=?', [$scrutinioId]));
         $dati = is_array($dati) ? $dati : [];
-        $dati['docenti'] = $docenti[$classeId] ?? [];
+        // lo scrutinio rinviato usa i docenti nel formato della pagina delle presenze
+        $dati['docenti'] = ($periodo == 'X') ? ($docentiPresenze[$classeId] ?? []) :
+          ($docenti[$classeId] ?? []);
         $dati['valutazioni'] = $valutazioni;
+        if ($periodo == 'X') {
+          // materie usate dalla pagina delle presenze dello scrutinio rinviato
+          $dati['materie'] = array_keys($materieClasse[$classeId] ?? []);
+          if ($condotta) {
+            $dati['materie'][] = (int) $condotta;
+          }
+        }
         if ($periodo == 'G' || $periodo == 'R') {
           // scrutini con giudizio sospeso: nessun alunno sospeso nel set demo
           $dati['sospesi'] = [];

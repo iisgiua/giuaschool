@@ -110,7 +110,7 @@ App\Entity\Avviso:
     materia:
     annotazioni: '<collection()>'
     testo: '<text()>'
-    sostituzioni: '<array_combine(["{ora}"], ["09":00"])>'
+    sostituzioni: '<array_combine(["{ora}"], ["09:00"])>'
   avviso_A:
     tipo: 'A'
     cifrato:
