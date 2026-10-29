@@ -29,6 +29,8 @@ use App\Entity\Staff;
  */
 class ConfigLoader {
 
+  /** Versione del formato dell'elenco classi memorizzato in sessione */
+  private const VERSIONE_CLASSI = 2;
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -186,13 +188,29 @@ class ConfigLoader {
       ->addOrderBy('cl.gruppo', 'ASC')
       ->getQuery()
       ->getArrayResult();
-    // classi in cui il docente ha già una cattedra attiva (conferma sostituzione)
+    // cattedre attive del docente per classe: con una cattedra propria la
+    // scelta apre i propri dati, altrimenti è una sostituzione
     $proprie = [];
     foreach ($this->em->getRepository(Cattedra::class)->cattedreDocente($utente, 'Q') as $cattedra) {
-      $proprie[$cattedra->getClasse()->getId()] = true;
+      $materia = $cattedra->getMateria()->getNomeBreve();
+      if ($cattedra->getAlunno()) {
+        // cattedra di sostegno: distingue l'alunno seguito
+        $materia .= ' (' . $cattedra->getAlunno()->getCognome() . ' ' .
+          $cattedra->getAlunno()->getNome() . ')';
+      }
+      $proprie[$cattedra->getClasse()->getId()][] = ['id' => $cattedra->getId(),
+        'materia' => $materia, 'sostegno' => ($cattedra->getMateria()->getTipo() == 'S')];
+    }
+    // la cattedra di sostegno va per ultima: le pagine che non chiedono la
+    // materia (note, assenze, osservazioni della classe) aprono la prima
+    foreach ($proprie as $id => $lista) {
+      usort($lista, fn ($a, $b) => [(int) $a['sostegno'], $a['materia']] <=> [(int) $b['sostegno'], $b['materia']]);
+      $proprie[$id] = $lista;
     }
     foreach ($lista_classi as $k => $c) {
-      $lista_classi[$k]['propria'] = isset($proprie[$c['id']]);
+      $lista_classi[$k]['cattedre'] = $proprie[$c['id']] ?? [];
+      $lista_classi[$k]['propria'] = !empty($lista_classi[$k]['cattedre']);
+      $lista_classi[$k]['versione'] = self::VERSIONE_CLASSI;
     }
     $this->reqstack->getSession()->set('/APP/DOCENTE/classi', $lista_classi);
   }
@@ -207,7 +225,9 @@ class ConfigLoader {
    */
   public function classiSelettore(): array {
     $classi = $this->reqstack->getSession()->get('/APP/DOCENTE/classi');
-    if (!is_array($classi)) {
+    // ricarica se manca o se e' nel formato precedente (senza le cattedre),
+    // come accade alle sessioni aperte prima dell'aggiunta della materia
+    if (!is_array($classi) || ($classi !== [] && (($classi[0]['versione'] ?? 0) !== self::VERSIONE_CLASSI))) {
       $this->precaricaClassiSelettore();
       $classi = $this->reqstack->getSession()->get('/APP/DOCENTE/classi');
     }

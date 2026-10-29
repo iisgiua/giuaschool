@@ -9,10 +9,12 @@
  # utilizzo dalla funzione gs_classi_selettore(), così il componente si può
  # includere sotto qualunque pagina senza passare variabili.
  #
- # La scelta invia un form GET a "lezioni_seleziona": la classe viene memorizzata
- # in sessione e la PAGINA CORRENTE viene ricaricata (si resta sulla stessa
- # pagina, senza cambiare sezione). Scegliendo una classe in cui il docente ha
- # già una cattedra attiva viene chiesta conferma (sostituzione in classe propria).
+ # La scelta invia un form GET a "lezioni_seleziona": la classe (o la
+ # cattedra) viene memorizzata in sessione e la PAGINA CORRENTE viene
+ # ricaricata (si resta sulla stessa pagina, senza cambiare sezione).
+ # Scegliendo una classe in cui il docente ha una cattedra attiva si apre la
+ # propria cattedra (i propri dati); se le cattedre sono più di una compare
+ # la scelta della materia. Le altre classi restano sostituzioni.
  #
  # Le classi sono elencate nell'ordine sede, sezione, anno, gruppo.
  #
@@ -27,12 +29,17 @@
  #   id         id HTML del select delle classi - default: 'gs-selettore-classe'
  #   etichetta  chiave di traduzione del segnaposto delle classi
  #              - default: 'label.scegli_classe'
- #   gruppo     se vero mostra la conferma per le proprie classi - default: true
+ #   gruppo     mantiene il flag "propria" sulle opzioni (usato dal
+ #              coordinatore) - default: true
  #   azione     nome della rotta a cui inviare la scelta del form
  #              - default: 'lezioni_seleziona'
  #   attiva     id della classe gia' scelta: se non indicato viene letta dalla
  #              sessione delle lezioni (gs_scelta_selettore); le altre sezioni
  #              lo passano esplicitamente con la loro scelta corrente
+ #   materia    mostra la scelta della materia tra le cattedre della classe
+ #              - default: true; le pagine per classe (note, assenze,
+ #              osservazioni della classe) passano false, perché i dati non
+ #              cambiano con la materia
  #}
 {% set sc_classi = classi is defined ? classi : gs_classi_selettore() %}
 {% if sc_classi %}
@@ -40,7 +47,14 @@
 {% set sc_etichetta = etichetta is defined ? etichetta : 'label.scegli_classe' %}
 {% set sc_gruppo = gruppo is defined ? gruppo : true %}
 {% set sc_azione = azione is defined ? azione : 'lezioni_seleziona' %}
-{% set sc_attiva = attiva is defined ? attiva : gs_scelta_selettore().classe|default(0) %}
+{% set sc_materia = materia is defined ? materia : true %}
+{# la scelta della materia ha senso solo per le lezioni: il coordinatore
+   sceglie la classe con la sua rotta #}
+{% set sc_con_cattedra = sc_azione == 'lezioni_seleziona' %}
+{# una sola lettura della scelta in sessione (può risolvere la cattedra) #}
+{% set sc_scelta = gs_scelta_selettore() %}
+{% set sc_attiva = attiva is defined ? attiva : sc_scelta.classe|default(0) %}
+{% set sc_cattedra_attiva = (attiva is defined or not sc_con_cattedra) ? 0 : sc_scelta.cattedra|default(0) %}
 {% set sc_sedi = [] %}
 {% for c in sc_classi %}
 {% set sc_sede = c.sede|default('') %}
@@ -65,10 +79,22 @@
       <select id="{{ sc_id }}" name="classe" class="form-control gs-selettore-classe-classe">
         <option value="0">{{ sc_etichetta|trans }}</option>
 {% for c in sc_classi %}
-        <option value="{{ c.id }}" data-sede="{{ c.sede|default('') }}" data-propria="{{ (c.propria|default(false) and sc_gruppo) ? '1' : '0' }}"{% if c.id == sc_attiva %} selected{% endif %}>{{ c.anno }}º {{ c.sezione }}{% if c.gruppo %}-{{ c.gruppo }}{% endif %}</option>
+        <option value="{{ c.id }}" data-sede="{{ c.sede|default('') }}" data-propria="{{ (c.propria|default(false) and sc_gruppo) ? '1' : '0' }}" data-cattedre="{{ sc_con_cattedra ? c.cattedre|default([])|json_encode : '[]' }}"{% if c.id == sc_attiva %} selected{% endif %}>{{ c.anno }}º {{ c.sezione }}{% if c.gruppo %}-{{ c.gruppo }}{% endif %}</option>
 {% endfor %}
       </select>
     </div>
+{% if sc_con_cattedra and sc_materia %}
+    <div class="gs-selettore-classe-gruppo gs-selettore-classe-gruppo-cattedra" style="display:none">
+      <label class="gs-selettore-classe-label" for="{{ sc_id }}-cattedra">{{ 'label.materia'|trans }}</label>
+      <select id="{{ sc_id }}-cattedra" name="cattedra" class="form-control gs-selettore-classe-cattedra" disabled>
+        <option value="0">{{ 'label.scegli_materia'|trans }}</option>
+      </select>
+    </div>
+{% elseif sc_con_cattedra %}
+    {# pagina per classe: la materia non si sceglie, la cattedra si aggiunge
+       al form solo quando serve aprire i propri dati #}
+    <input type="hidden" id="{{ sc_id }}-cattedra" name="cattedra" class="gs-selettore-classe-cattedra" value="0" disabled>
+{% endif %}
   </div>
   <noscript>
     <button type="submit" class="btn btn-primary">{{ 'label.visualizza'|trans }}</button>
@@ -80,7 +106,59 @@
   if (!form) { return; }
   var sedeSel = form.querySelector('.gs-selettore-classe-sede');
   var classeSel = form.querySelector('.gs-selettore-classe-classe');
+  var cattedraSel = form.querySelector('.gs-selettore-classe-cattedra');
+  var gruppoCattedra = form.querySelector('.gs-selettore-classe-gruppo-cattedra');
+  var cattedraAttiva = '{{ sc_cattedra_attiva }}';
+  var conMateria = {{ sc_materia ? 'true' : 'false' }};
   if (!sedeSel || !classeSel) { return; }
+
+  // cattedre attive del docente nella classe scelta: se ci sono, la scelta
+  // apre la propria cattedra (i propri dati); se mancano è una sostituzione
+  function cattedreClasse() {
+    var opt = classeSel.options[classeSel.selectedIndex];
+    if (!opt || opt.value === '0' || opt.disabled) { return []; }
+    try {
+      return JSON.parse(opt.getAttribute('data-cattedre') || '[]') || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function aggiornaCattedra() {
+    var cattedre = cattedreClasse();
+    if (!conMateria || !cattedraSel || !gruppoCattedra) { return cattedre; }
+    cattedraSel.innerHTML = '';
+    cattedre.forEach(function (c) {
+      var option = document.createElement('option');
+      option.value = String(c.id);
+      option.textContent = c.materia || '';
+      if (String(c.id) === cattedraAttiva) {
+        // mantiene selezionata la cattedra già in uso
+        option.selected = true;
+      }
+      cattedraSel.appendChild(option);
+    });
+    cattedraSel.disabled = cattedre.length === 0;
+    gruppoCattedra.style.display = cattedre.length === 0 ? 'none' : '';
+    return cattedre;
+  }
+
+  // invia la scelta: cattedra valorizzata = propria cattedra,
+  // altrimenti classe = sostituzione
+  function invia(cattedra) {
+    if (cattedraSel) {
+      if (cattedra) {
+        classeSel.removeAttribute('name');
+        cattedraSel.disabled = false;
+        cattedraSel.value = String(cattedra);
+      } else {
+        classeSel.setAttribute('name', 'classe');
+        cattedraSel.disabled = true;
+      }
+    }
+    // memorizza in sessione e ricarica la pagina corrente (si resta qui)
+    form.submit();
+  }
 
   function filtra() {
     // le classi sono visibili solo per la sede scelta (tutte se è "Tutte le sedi")
@@ -96,19 +174,38 @@
       // la classe scelta non appartiene più alla sede: torna al segnaposto
       classeSel.value = '0';
     }
+    aggiornaCattedra();
   }
 
   sedeSel.addEventListener('change', filtra);
+  if (cattedraSel) {
+    cattedraSel.addEventListener('change', function () {
+      var opt = cattedraSel.options[cattedraSel.selectedIndex];
+      if (!opt || !opt.value || opt.value === '0') { return; }
+      invia(opt.value);
+    });
+  }
   classeSel.addEventListener('change', function () {
     var opt = classeSel.options[classeSel.selectedIndex];
     if (!opt || opt.value === '0' || opt.disabled) { return; }
-    if (opt.getAttribute('data-propria') === '1' &&
-        !window.confirm('Stai entrando nel registro come SOSTITUTO in una tua classe. Vuoi continuare?')) {
-      classeSel.value = '0';
+    var cattedre = aggiornaCattedra();
+    if (!conMateria) {
+      // pagina per classe: la materia non conta, si apre la prima cattedra
+      invia(cattedre.length > 0 ? cattedre[0].id : 0);
       return;
     }
-    // memorizza in sessione e ricarica la pagina corrente (si resta qui)
-    form.submit();
+    if (cattedre.length === 1) {
+      // una sola cattedra: si entra subito nei propri dati
+      invia(cattedre[0].id);
+      return;
+    }
+    if (cattedre.length > 1) {
+      // più cattedre nella stessa classe: si sceglie la materia
+      cattedraSel.focus();
+      return;
+    }
+    // nessuna cattedra: sostituzione
+    invia(0);
   });
   filtra();
 })();
