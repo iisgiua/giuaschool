@@ -47,6 +47,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class VotiController extends BaseController {
 
+  /** Pattern per le date in formato ISO (AAAA-MM-GG) */
+  private const FORMATO_DATA_ISO = 'Y-m-d';
+  /** Pattern per la data numerica breve */
+  private const FORMATO_DATA = 'd/m/Y';
+
   /**
    * Quadro dei voti
    *
@@ -123,7 +128,7 @@ class VotiController extends BaseController {
         // seleziona periodo in base alla data
         if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
           // recupera data da sessione
-          $data = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+          $data = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
         } else {
           // imposta data odierna
           $data = new DateTime();
@@ -135,8 +140,8 @@ class VotiController extends BaseController {
       }
       if ($periodo) {
         // dati periodo
-        $inizio = DateTime::createFromFormat('Y-m-d', $lista_periodi[$periodo]['inizio']);
-        $fine = DateTime::createFromFormat('Y-m-d', $lista_periodi[$periodo]['fine']);
+        $inizio = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $lista_periodi[$periodo]['inizio']);
+        $fine = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $lista_periodi[$periodo]['fine']);
         // controlla permessi
         if ($reg->azioneVoti($inizio, $this->getUser(), $classe, $cattedra->getMateria(), null)) {
           // edit permesso
@@ -225,7 +230,7 @@ class VotiController extends BaseController {
       $dataObject = new DateTime('today');
     } else {
       // data esistente
-      $dataObject = DateTime::createFromFormat('Y-m-d', substr($data, 0, 10));
+      $dataObject = DateTime::createFromFormat(self::FORMATO_DATA_ISO, substr($data, 0, 10));
     }
     // elenco di alunni
     $elenco = $reg->elencoVoti($data, $this->getUser(), $classe, $cattedra->getMateria(),
@@ -236,8 +241,8 @@ class VotiController extends BaseController {
     $label['classe'] = ''.$classe;
     $label['tipo'] = 'label.voti_'.$tipo;
     $label['festivi'] = $reg->listaFestivi();
-    $label['inizio'] = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
-    $label['fine'] = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
+    $label['inizio'] = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format(self::FORMATO_DATA);
+    $label['fine'] = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format(self::FORMATO_DATA);
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_classe', FormType::class)
       ->add('data', DateType::class, ['label' => 'label.data',
@@ -318,10 +323,14 @@ class VotiController extends BaseController {
         } else {
           // alunni presenti
           $ordine = (int) substr($data, 11);
+          // data effettiva della valutazione: il parametro della pagina vale
+          // "0000-00-00.0" quando si entra senza indicare una data, e non e'
+          // una data valida da passare al database
+          $data_voto = $form->get('data')->getData()->format(self::FORMATO_DATA_ISO).'.'.$ordine;
           // controllo verifiche su valutazionu con stessa materia/alunno/tipo/data
           $altroDocente = $this->em->getRepository(Valutazione::class)
-            ->altroDocente($this->getUser(), $cattedra->getMateria(), $classe, $tipo, $data);
-          if (substr($data, 0, 10) != $form->get('data')->getData()->format('Y-m-d') || $altroDocente) {
+            ->altroDocente($this->getUser(), $cattedra->getMateria(), $classe, $tipo, $data_voto);
+          if (substr($data, 0, 10) != $form->get('data')->getData()->format(self::FORMATO_DATA_ISO) || $altroDocente) {
             $ordine = $this->em->getRepository(Valutazione::class)
               ->numeroOrdineClasse($cattedra->getMateria(), $classe, $tipo, $form->get('data')->getData());
           }
@@ -377,8 +386,9 @@ class VotiController extends BaseController {
           $this->em->flush();
           // log azione
           $dblogger->logAzione('VOTI', 'Voti della classe');
-          // redirezione
-          return $this->redirectToRoute('lezioni_voti_quadro');
+          // redirezione: si torna al quadro della cattedra appena usata,
+          // altrimenti la pagina chiede di scegliere di nuovo la classe
+          return $this->redirectToRoute('lezioni_voti_quadro', ['cattedra' => $cattedra->getId()]);
         }
       }
     }
@@ -460,11 +470,11 @@ class VotiController extends BaseController {
     $label['materia'] = $cattedra->getMateria()->getNomeBreve();
     $label['classe'] = ''.$classe;
     $label['tipo'] = 'label.voti_'.$tipo;
-    $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome().' ('.$alunno->getDataNascita()->format('d/m/Y').')';
+    $label['alunno'] = $alunno->getCognome().' '.$alunno->getNome().' ('.$alunno->getDataNascita()->format(self::FORMATO_DATA).')';
     $label['bes'] = $alunno->getBes();
     $label['festivi'] = $reg->listaFestivi();
-    $label['inizio'] = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format('d/m/Y');
-    $label['fine'] = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format('d/m/Y');
+    $label['inizio'] = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio'))->format(self::FORMATO_DATA);
+    $label['fine'] = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))->format(self::FORMATO_DATA);
     // form di inserimento
     $form = $this->container->get('form.factory')->createNamedBuilder('voti_alunno', FormType::class, $valutazione)
       ->add('data', DateType::class, ['label' => 'label.data',
@@ -671,7 +681,7 @@ class VotiController extends BaseController {
       if ($alunno && in_array($alunno->getId(), $listaAlunni)) {
         // alunno indicato e presente in classe
         $info['alunno_scelto'] = $alunno->getCognome().' '.$alunno->getNome().' ('.
-          $alunno->getDataNascita()->format('d/m/Y').')';
+          $alunno->getDataNascita()->format(self::FORMATO_DATA).')';
         $info['bes'] = $alunno->getBes();
         $info['note'] = $alunno->getNote();
       } else {
@@ -812,14 +822,14 @@ class VotiController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata
-      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $data);
     }
     // data in formato stringa
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
@@ -888,14 +898,14 @@ class VotiController extends BaseController {
       // data non specificata
       if ($this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione')) {
         // recupera data da sessione
-        $data_obj = DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
+        $data_obj = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $this->reqstack->getSession()->get('/APP/DOCENTE/data_lezione'));
       } else {
         // imposta data odierna
         $data_obj = new DateTime();
       }
     } else {
       // imposta data indicata
-      $data_obj = DateTime::createFromFormat('Y-m-d', $data);
+      $data_obj = DateTime::createFromFormat(self::FORMATO_DATA_ISO, $data);
     }
     // data in formato stringa
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
@@ -982,7 +992,6 @@ class VotiController extends BaseController {
    *
    * @param RegistroUtil $reg Funzioni di utilità per il registro
    * @param StaffUtil $staff Funzioni di utilità per il personale
-   * @param int $classe Identificativo della classe
    * @param int $periodo Periodo relativo allo scrutinio
    *
    * @return Response Pagina di risposta
@@ -999,33 +1008,39 @@ class VotiController extends BaseController {
       $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
     }
     // controllo cattedra
-    $cattedra = ($cattedra > 0) ? $this->em->getRepository(Cattedra::class)->find($cattedra) : null;
-    if (!$cattedra) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    $classe = $cattedra->getClasse();
-    if (!$this->em->getRepository(Cattedra::class)->docenteClasse($this->getUser(), $classe, true)) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // periodo
-    $listaPeriodi = $reg->infoPeriodi();
-    // seleziona periodo se non indicato
-    if ($periodo == 0) {
-      // seleziona periodo in base alla data
-      $datiPeriodo = $reg->periodo(new DateTime());
-      $periodo = $datiPeriodo['periodo'];
+    if ($cattedra > 0) {
+      // cattedra indicata: controlla esistenza e permessi
+      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+      if (!$cattedra) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      $classe = $cattedra->getClasse();
+      if (!$this->em->getRepository(Cattedra::class)->docenteClasse($this->getUser(), $classe, true)) {
+        // errore
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
+      // periodo
+      $listaPeriodi = $reg->infoPeriodi();
+      // seleziona periodo se non indicato
+      if ($periodo == 0) {
+        // seleziona periodo in base alla data
+        $datiPeriodo = $reg->periodo(new DateTime());
+        $periodo = $datiPeriodo['periodo'];
+      } else {
+        $datiPeriodo = $listaPeriodi[$periodo];
+      }
+      // info da visualizzare
+      $info['periodo'] = $periodo;
+      $info['listaPeriodi'] = $listaPeriodi;
+      $info['materia'] = $cattedra->getMateria()->getNomeBreve();
+      $info['alunno'] = $cattedra->getAlunno();
+      // legge voti
+      $dati = $staff->voti($classe, $datiPeriodo);
     } else {
-      $datiPeriodo = $listaPeriodi[$periodo];
+      // cattedra non specificata: mostra il selettore della classe
+      $cattedra = null;
     }
-    // info da visualizzare
-    $info['periodo'] = $periodo;
-    $info['listaPeriodi'] = $listaPeriodi;
-    $info['materia'] = $cattedra->getMateria()->getNomeBreve();
-    $info['alunno'] = $cattedra->getAlunno();
-    // legge voti
-    $dati = $staff->voti($classe, $datiPeriodo);
     // visualizza pagina
     return $this->render('lezioni/voti_quadro_sostegno.html.twig', [
       'pagina_titolo' => 'page.lezioni_voti_sostegno',
