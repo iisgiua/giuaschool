@@ -56,7 +56,7 @@
     <div class="gs-hdr-bar">
       <button type="button" class="gs-hdr-toggle" aria-expanded="false" aria-controls="gs-navbar-collapse-1"
         aria-label="Apri il menu di navigazione">
-        {{ include('admin/include/icona.html.twig', {nome: 'menu-2'}) }}
+        {{ include('admin/include/icona.html.twig', {nome: 'menu-2'}, false) }}
       </button>
       <div class="gs-hdr-brand"
         aria-label="{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }} - anno scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}">
@@ -66,7 +66,7 @@
       {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         {% if is_granted('ROLE_IMPERSONATOR') %}
         <a class="gs-hdr-exit" href="{{ path('sistema_alias_exit') }}" title="Esci dall'alias" aria-label="Esci dall'alias">
-          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
+          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}, false) }}
           <strong class="gs-hdr-exit-label">{{ 'label.alias'|trans|upper }}</strong>
         </a>
         {% elseif is_granted('ROLE_DOCENTE') and app.session.get('/APP/UTENTE/tipo_accesso') == 'Google' %}
@@ -76,7 +76,7 @@
         </a>
         {% else %}
         <a class="gs-hdr-exit" href="{{ path('logout') }}" title="Esci dal Registro Elettronico" aria-label="Esci dal Registro Elettronico">
-          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
+          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}, false) }}
           <strong class="gs-hdr-exit-label">{{ 'label.logout'|trans|upper }}</strong>
         </a>
         {% endif %}
@@ -88,77 +88,11 @@
   <div class="gs-page-container">
     <div class="gs-app-shell">
     {## # barra laterale (sotto i 992px diventa un pannello a scorrimento) # ##}
-    {## # definizione route corrente per il menu # ##}
-    {% set page_route = app.request.attributes.get('_route') %}
     <aside class="gs-hdr-collapse" id="gs-navbar-collapse-1" aria-label="Menu di navigazione">
       <div class="gs-hdr-panel">
-        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-        <div class="gs-hdr-account">
-          <a class="gs-hdr-profile" href="{{ path('utenti_profilo') }}" title="{{ 'title.modifica_profilo'|trans }}">
-            {{ include('admin/include/icona.html.twig', {nome: 'user'}) }}
-            <span class="gs-hdr-user">
-              <span class="gs-hdr-user-name">{% if is_granted('ROLE_GENITORE') %}{{ app.user.alunno.nome }} {{
-                app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %}</span>
-              <small class="gs-hdr-user-role">{{ ('label.' ~ app.user.roles[0])|trans }}</small>
-            </span>
-          </a>
-        </div>
-        {% endif %}
+        {{ include('include/menu-utente.html.twig') }}
         <nav class="gs-hdr-menu" aria-label="Menu principale">
-          {## # icone delle voci di primo livello, indicizzate per nome # ##}
-          {# Tabler Icons, set filled (sprite SVG, MIT): nomi dei <symbol> in #}
-          {# public/icons/tabler-sprite-filled.svg #}
-          {% set icone_menu = {
-            Home: 'home',
-            Sistema: 'settings',
-            Scuola: 'school',
-            ATA: 'briefcase',
-            Docenti: 'book',
-            Alunni: 'user',
-          } %}
-          <ul class="nav navbar-nav gs-navbar-nav">
-            {% for opt in app.session.get('/CONFIG/MENU/main').opzioni %}
-              {# il nome nel DB puo' contenere entity HTML (es. 'Recupero&nbsp;Password') #}
-              {% set nome_opzione = opt.nome|replace({'&nbsp;': ' ', '&agrave;': 'à', '&egrave;': 'è', '&igrave;': 'ì', '&ograve;': 'ò', '&ugrave;': 'ù'})|trim %}
-              {% if opt.nome == '__SEPARATORE__' %}
-                <li role="none"><span class="divider"></span></li>
-              {% elseif opt.sottomenu %}
-                {% set submenu_active = false %}
-                {% for subopt in opt.sottomenu %}
-                  {% if subopt.url == page_route %}
-                    {% set submenu_active = true %}
-                  {% endif %}
-                {% endfor %}
-                <li class="dropdown{{ submenu_active ? ' active open' }}">
-                  <a href="#" title="{{ opt.descrizione|raw }}" class="dropdown-toggle"{{ submenu_active ? ' aria-expanded="true"' }}>
-                    {% if icone_menu[nome_opzione] is defined %}
-                      {{ include('admin/include/icona.html.twig', {nome: icone_menu[nome_opzione], classe: 'icon-sm gs-mr-2'}) }}
-                    {% endif %}
-                    <span>{{ opt.nome|raw }}</span>
-                    <span class="caret"></span>
-                  </a>
-                  <ul role="menu" class="dropdown-menu gs-dropdown-menu{{ submenu_active ? ' show' }}">
-                    {% for subopt in opt.sottomenu %}
-                      {% if subopt.nome == '__SEPARATORE__' %}
-                        <li role="none"><span class="divider"></span></li>
-                      {% else %}
-                        <li{{ page_route == subopt.url ? ' class="active"' }}><a href="{{ subopt.url ? path(subopt.url) : '#' }}" title="{{ subopt.descrizione|raw }}">{{ subopt.nome|raw }}</a></li>
-                      {% endif %}
-                    {% endfor %}
-                  </ul>
-                </li>
-              {% else %}
-                <li{{ page_route == opt.url ? ' class="active"' }}>
-                  <a href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
-                    {% if icone_menu[nome_opzione] is defined %}
-                      {{ include('admin/include/icona.html.twig', {nome: icone_menu[nome_opzione], classe: 'icon-sm gs-mr-2'}) }}
-                    {% endif %}
-                    <span>{{ opt.nome|raw }}</span>
-                  </a>
-                </li>
-              {% endif %}
-            {% endfor %}
-          </ul>
+          {{ include('admin/include/menu.html.twig') }}
         </nav>
       </div>
     </aside>
@@ -184,7 +118,7 @@
   {## # link TornaSu # ##}
   <a class="back-to-top back-to-top-small shadow" href="#" aria-hidden="true" data-attribute="back-to-top"
     title="Vai a inizio pagina">
-    {{ include('admin/include/icona.html.twig', {nome: 'circle-arrow-up', classe: 'icon-light'}) }}
+    {{ include('admin/include/icona.html.twig', {nome: 'circle-arrow-up', classe: 'icon-light'}, false) }}
   </a>
   {## # FINE link TornaSu # ##}
 

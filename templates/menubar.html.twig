@@ -7,8 +7,8 @@
     {{ include('ruolo_genitore/menu_alunno.html.twig') }}
   {% elseif is_granted('ROLE_ATA') %} {#- ---- ATA ---- -#}
     {{ include('ruolo_ata/menu.html.twig') }}
-  {% elseif is_granted('ROLE_AMMINISTRATORE') %} {#- ---- AMMINISTRATORE ---- -#}
-    {{ include('ruolo_amministratore/menu.html.twig') }}
+  {% elseif is_granted('ROLE_AMMINISTRATORE') %} {#- ---- AMMINISTRATORE: stesso menu dell'area admin, letto dal DB ---- -#}
+    {{ include('admin/include/menu.html.twig') }}
   {% else %} {#- ---- UTENTE GENERICO ---- -#}
 <ul class="nav navbar-nav gs-navbar-nav">
     {{ include('ruolo_utente/menu.html.twig') }}

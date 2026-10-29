@@ -1,0 +1,66 @@
+{## # Menu principale dell'amministratore
+  #
+  # Le voci non sono scritte qui: si leggono da /CONFIG/MENU/main, caricato in
+  # sessione da ConfigLoader a partire dalla tabella gs_menu_opzione. Aggiungere
+  # o togliere una voce e' quindi una modifica ai dati (vedi
+  # src/DataFixtures/MenuOpzioneFixtures.yml), non al template.
+  #
+  # Usato da admin/layout-sidebar.html.twig (pagina dell'area admin) e da
+  # menubar.html.twig (pagine con base.html.twig), cosi' l'amministratore vede
+  # lo stesso menu ovunque.
+  #
+  # Il markup del <ul> resta in questo file: il chiamante mette solo il <nav>
+  # (o il contenitore) intorno. # ##}
+{% set page_route = app.request.attributes.get('_route') %}
+{# Tabler Icons, set filled (sprite SVG, MIT): nomi dei <symbol> in #}
+{# public/icons/tabler-sprite-filled.svg #}
+{% set icone_menu = {
+  Home: 'home',
+  Sistema: 'settings',
+  Scuola: 'school',
+  ATA: 'briefcase',
+  Docenti: 'book',
+  Alunni: 'user',
+} %}
+<ul class="nav navbar-nav gs-navbar-nav">
+  {% for opt in app.session.get('/CONFIG/MENU/main').opzioni %}
+    {# il nome nel DB puo' contenere entity HTML (es. 'Recupero&nbsp;Password') #}
+    {% set nome_opzione = opt.nome|replace({'&nbsp;': ' ', '&agrave;': 'à', '&egrave;': 'è', '&igrave;': 'ì', '&ograve;': 'ò', '&ugrave;': 'ù'})|trim %}
+    {% if opt.nome == '__SEPARATORE__' %}
+      <li role="none"><span class="divider"></span></li>
+    {% elseif opt.sottomenu %}
+      {% set submenu_active = false %}
+      {% for subopt in opt.sottomenu %}
+        {% if subopt.url == page_route %}
+          {% set submenu_active = true %}
+        {% endif %}
+      {% endfor %}
+      <li class="dropdown{{ submenu_active ? ' active open' }}">
+        <a href="#" title="{{ opt.descrizione|raw }}" class="dropdown-toggle"{{ submenu_active ? ' aria-expanded="true"' }}>
+          {% if icone_menu[nome_opzione] is defined %}
+            {{ include('admin/include/icona.html.twig', {nome: icone_menu[nome_opzione], classe: 'icon-sm gs-mr-2'}, false) }}
+          {% endif %}
+          <span>{{ opt.nome|raw }}</span>
+        </a>
+        <ul role="menu" class="dropdown-menu gs-dropdown-menu{{ submenu_active ? ' show' }}">
+          {% for subopt in opt.sottomenu %}
+            {% if subopt.nome == '__SEPARATORE__' %}
+              <li role="none"><span class="divider"></span></li>
+            {% else %}
+              <li{{ page_route == subopt.url ? ' class="active"' }}><a href="{{ subopt.url ? path(subopt.url) : '#' }}" title="{{ subopt.descrizione|raw }}">{{ subopt.nome|raw }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </li>
+    {% else %}
+      <li{{ page_route == opt.url ? ' class="active"' }}>
+        <a href="{{ opt.url ? path(opt.url) : '#' }}" title="{{ opt.descrizione|raw }}">
+          {% if icone_menu[nome_opzione] is defined %}
+            {{ include('admin/include/icona.html.twig', {nome: icone_menu[nome_opzione], classe: 'icon-sm gs-mr-2'}, false) }}
+          {% endif %}
+          <span>{{ opt.nome|raw }}</span>
+        </a>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
