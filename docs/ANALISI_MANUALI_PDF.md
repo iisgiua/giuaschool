@@ -1,141 +1,227 @@
-# Analisi dei manuali PDF in `public/doc`
+# Manuali PDF in `public/doc`
 
-Analisi dei cinque manuali utente distribuiti con l'applicazione, **testo e immagini**,
-finalizzata a capirne lo stato di aggiornamento e a guidare una rigenerazione.
-
-## Metodo
-
-- Estrazione del testo con `pdftotext -layout`.
-- Estrazione di **tutte** le immagini incorporate con `pdfimages -list` + `pdfimages -png`.
-- **OCR** di ogni immagine (RapidOCR/ONNX su CPU) per leggere il contenuto degli screenshot
-  e dei pulsanti. Le immagini con testo illeggibile (mascherine `smask`, icone piccolissime)
-  restituiscono zero righe: sono segnalate come tali, non interpretate.
-
-L'analisi è stata fatta su una copia di lavoro in `/tmp/pdfanalysis/`; i PDF originali in
-`public/doc/` non sono stati modificati.
+I cinque manuali utente distribuiti con l'applicazione sono stati rigenerati a **ottobre
+2026** con le schermate dell'interfaccia corrente e contenuti estesi. I nomi dei file sono
+rimasti quelli usati dai template; i vecchi PDF e le varianti `*_ricco_pieno.pdf` sono stati
+rimossi.
 
 ## Inventario
 
-| File | Pagine | Producer | Immagini | Screenshot | Icone/pulsanti |
-|---|---|---|---|---|---|
-| `giuaschool_accesso_docenti.pdf` | 8 | LibreOffice 5.1 | 22 | 20 | 2 |
-| `giuaschool_manuale_alunni.pdf` | 4 | LibreOffice 6.4 | 18 (9 + 9 mascherine) | 1 | 8 |
-| `giuaschool_manuale_ata.pdf` | 2 | LibreOffice 5.1 | 5 | 2 | 3 |
-| `giuaschool_manuale_docenti.pdf` | 17 | LibreOffice 5.1 | 112 | 15 | 97 |
-| `giuaschool_manuale_genitori.pdf` | 5 | LibreOffice 6.4 | 27 (14 + 13 mascherine) | 3 | 11 |
+| File | Pagine | Pubblico | Capitoli |
+|---|---|---|---|
+| `giuaschool_manuale_docenti.pdf` | 40 | docenti | 16 |
+| `giuaschool_manuale_genitori.pdf` | 31 | genitori | 13 |
+| `giuaschool_manuale_alunni.pdf` | 29 | alunni | 12 |
+| `giuaschool_manuale_ata.pdf` | 22 | personale ATA | 8 |
+| `giuaschool_accesso_docenti.pdf` | 21 | tutti gli utenti | 10 |
 
-Totale: **36 pagine**, **184 oggetti immagine**. Il testo è selezionabile e ben recuperabile.
-I manuali sono esportati da documenti LibreOffice (writer), non da HTML/Markdown.
+Totale: **143 pagine**. I PDF sono in formato A4, con testo selezionabile e immagini a colori.
 
-## Contenuto testuale, per manuale
+## Struttura dei manuali
 
-### `accesso_docenti` (8 pagine)
-Documento monografico sulle quattro modalità di accesso dei docenti:
-nome utente/password (bloccato 8–14 nei giorni non festivi), **impronta digitale**,
-**Tessera Sanitaria / CNS** e **codice OTP** (Google Authenticator, 2FA). Per ciascuna:
-livello di sicurezza, restrizioni, servizi abilitati, procedura di attivazione.
-Include la procedura completa di registrazione delle impronte (Protector Suite 2012) e,
-per l'OTP, cambio password e recupero password.
+Ogni manuale è composto da:
 
-### `manuale_alunni` (4 pagine)
-Accesso con Google, uscita, gestione utente Google (Apprendere, Classroom, Gmail),
-menu Home, Lezioni, Situazione (voti/assenze/note/autorizzazioni), Pagelle, Bacheca
-(circolari/avvisi/documenti), Agenda.
+1. **copertina** con logo, titolo, pubblico, istituto, anno scolastico e data di aggiornamento;
+2. **presentazione** con la guida alla lettura e la legenda dei riquadri;
+3. **indice** su due o tre pagine, con il numero di pagina e i titoli collegati alle sezioni;
+4. **capitoli** con banda blu del titolo, introduzione, schermata commentata e riquadri
+   «In breve» e «Nota» per le informazioni operative;
+5. **piè di pagina** con istituto e «Pagina X di Y».
 
-### `manuale_ata` (2 pagine)
-Accesso con utente/password, uscita, menu e profilo, Circolari e gestione notifiche,
-menu Segreteria (Frequenza, Scrutini) con stampa PDF.
+I metadati PDF riportano titolo, autore e descrizione del manuale.
 
-### `manuale_docenti` (17 pagine)
-Il manuale più ricco: accesso (impronta, tessera sanitaria, OTP da un lato; utente/password
-dall'altro), Lezioni (Classe/Materia, Registro, lezioni in compresenza e di sostegno, note
-disciplinari, annotazioni, Assenze/appello, Voti, Argomenti, Osservazioni e diario personale,
-Scrutinio), Colloqui, Documenti (programmi svolti e relazioni finali), Bacheca, Agenda
-(verifiche), Coordinatore (classi, assenze, note, voti, situazione, avvisi, scrutinio).
+Le schermate sono state catturate dall'ambiente demo dell'istituto **I.I.S. Michele Giua**:
+nomi, classi e dati sono di esempio. Nell'istituto reale cambiano; anche l'interfaccia può
+variare in base alla configurazione e alle funzioni attive.
 
-### `manuale_genitori` (5 pagine)
-Accesso, uscita, recupero password, profilo, Home, Lezioni, Situazione (voti, assenze, note,
-osservazioni, autorizzazioni), Pagelle, Colloqui (richiesta/conferma/disdetta), Bacheca, Agenda.
+Il set `_demo` delle fixture è pensato per i test automatici e contiene testi segnaposto
+(«demo», «mini», lorem ipsum): prima della cattura lo script
+`tools/giuaschool_tools/manuali/dati_demo.py` sostituisce nomi, argomenti, note, moduli,
+circolari, colloqui e recapiti con dati scolastici coerenti, usando l'istituto, le sedi e i
+dati di contatto reali. Le fixture del progetto non vengono modificate.
 
-## Cosa dicono le immagini
+## Contenuti per manuale
 
-Le immagini sono di due tipi:
+### `giuaschool_manuale_docenti.pdf` (40 pagine)
+1. Accesso e profilo
+2. La Home e il menu principale
+3. Il registro di classe
+4. Voti e valutazioni
+5. Assenze, ritardi e appello
+6. Note disciplinari
+7. Argomenti e programma svolto
+8. Osservazioni e diario personale
+9. Scrutinio e proposte di voto
+10. Colloqui con le famiglie
+11. Documenti e piani di lavoro
+12. Bacheca: circolari, avvisi e documenti
+13. Agenda, verifiche e compiti
+14. Funzioni del coordinatore
+15. L'app giua@school/app
+16. Sicurezza, assistenza e glossario
 
-1. **Screenshot di pagina** — barra di navigazione, registro, assenze, voti, calendario,
-   form di cambio password/OTP, ecc. L'OCR recupera le voci di menu e i dati d'esempio.
-2. **Ritagli di pulsanti/icone** — il singolo pulsante o l'icona citata dal testo
-   ("clicca su …"). Sono la maggior parte degli oggetti: **97 sui 112** del solo manuale
-   docenti.
+### `giuaschool_manuale_genitori.pdf` (31 pagine)
+1. Accesso e profilo
+2. La Home e le notifiche
+3. Lezioni e argomenti
+4. Situazione: voti
+5. Situazione: assenze e giustificazioni
+6. Note, osservazioni e autorizzazioni
+7. Pagelle e scrutini
+8. Colloqui con i docenti
+9. Bacheca: circolari, avvisi e documenti
+10. Moduli e richieste
+11. Agenda e appuntamenti
+12. L'app giua@school/app
+13. Sicurezza, assistenza e glossario
 
-Esempi ricavati dall'OCR:
+### `giuaschool_manuale_alunni.pdf` (25 pagine)
+1. Accesso e profilo
+2. La Home e il menu
+3. Lezioni e argomenti
+4. Situazione: voti
+5. Assenze e giustificazioni
+6. Note e autorizzazioni
+7. Pagelle e scrutini
+8. Moduli e richieste
+9. Bacheca: circolari, avvisi e documenti
+10. Agenda e scadenze
+11. L'app giua@school/app
+12. Sicurezza, assistenza e glossario
 
-- **Barre di menu** con anno scolastico diverso per manuale:
-  `A.S. 2017-2018` (ata), `A.S. 2018-2019` (accesso_docenti), `A.S. 2017-2018` (docenti),
-  `A.S. 2017-2018` (genitori) e `A.S. 2020/2021` (header login genitori).
-- **Registro** (docenti, p.3): colonne *Ora / Materia / Docenti / Argomenti o Attività / Azioni*,
-  docenti d'esempio ("Antonello Dessi", "Roberto Musanti", "Lanfranco Puddu").
-- **Assenze/appello** (p.6-8): legenda `A / R / G / U`, "Appello degli studenti".
-- **Voti** (p.8-9): cursore di voto 1–10 ("Voto 6", slider) e pulsanti `Scritto/Orale/Pratico`.
-- **Calendario** (alunni/genitori/docenti): mesi "Marzo/Aprile/Maggio 2018".
-- **Circolari** (ata/docenti): filtri "Destinate a me", intervallo date, oggetto.
-- **Pulsanti ricorrenti**: `Conferma`, `Annulla`, `Modifica`, `Cancella`, `Aggiungi`,
-  `Appello`, `Visualizza`, `Scarica`.
-- **accesso_docenti**: screenshot del sistema operativo Windows (Protector Suite 2012,
-  "Siti registrati", "Pagina iniziale di Control Center"), pagina di registrazione delle
-  impronte e form di attivazione OTP con QR code.
+### `giuaschool_manuale_ata.pdf` (22 pagine)
+1. Accesso e profilo
+2. La Home e il menu
+3. Bacheca e circolari
+4. Segreteria: frequenza degli alunni
+5. Segreteria: scrutini
+6. Segreteria: utenti genitori
+7. L'app giua@school/app
+8. Sicurezza, assistenza e glossario
 
-Il logo/intestazione ricorrente è un'immagine di **104×28**, ripetuta nei manuali alunni, ata,
-docenti e genitori; la barra di intestazione grande è **2245×252**.
+### `giuaschool_accesso_docenti.pdf` (21 pagine)
+1. Il Registro Elettronico
+2. Accedere con nome utente e password
+3. Accedere con Google
+4. Accedere con SPID, CIE ed eIDAS
+5. Recuperare la password
+6. Cambiare la password
+7. Profilo e notifiche
+8. Uscire dal registro
+9. L'app giua@school/app
+10. Sicurezza, assistenza e glossario
 
-## Obsolescenze e incoerenze rilevate
+## La pagina `/api/info/app`
 
-**Date/versione**
-- Gli screenshot mostrano anni scolastici 2017/2018, 2018/2019 e 2020/2021.
-- I dati d'esempio sono del 2017 ("lunedì 25 settembre 2017").
+La pagina «Informazioni App» è documentata nel capitolo **L'app giua@school/app** di tutti i
+manuali; nel manuale di accesso è il capitolo 9. La schermata
+`docs/manuali/img/comune/app.png` riproduce lo stato attuale:
 
-**Interfaccia superata**
-- Le barre di menu negli screenshot riportano voci che il testo non usa più:
-  `Calendario` vs `Agenda`, `Didattica` nel manuale docenti, `+ Situazione` tra Home e Pagelle.
-  I menu sono pilotati dal database (`gs_menu_opzione`), quindi questi ritagli si degradano
-  a ogni modifica del menu.
-- `accesso_docenti` è costruito intorno a **Windows + Protector Suite 2012 + Internet
-  Explorer**, cioè a un'immagine delle postazioni scolastiche ormai datata.
+- riquadro verde con la versione disponibile (`giua@school/app v1.3.4`);
+- testo bianco su fondo verde, con le istruzioni «Come si installa?» e «Come si usa?»;
+- pulsante blu **«Scarica»** con l'icona Android, cliccabile, nella riga «Sistema operativo».
 
-**Riferimenti impropri**
-- Manuale **alunni** e **genitori**: la giustificazione delle assenze cita il
-  *modulo di autodichiarazione correlata all'emergenza pandemica del COVID-19*: da rimuovere.
-- Manuale **docenti**, §1: l'URL in "orario non scolastico" è scritto
-  `https://registro.giua.gov.it` (dominio **gov.it**) mentre ovunque si usa
-  `https://registro.giua.edu.it`. Refuso da correggere.
+Il download usa l'APK storico distribuito dalla scuola
+(`public/app/giuaschool-app-v1.3.4.apk`). Il capitolo descrive requisiti, download,
+installazione da fonti sconosciute, configurazione al primo avvio, uso quotidiano,
+aggiornamento, sicurezza, problemi frequenti e disinstallazione.
 
-**Copertura incompleta rispetto al codice**
-- Non sono documentati: accesso **SPID/CIE** (gateway MIM), accesso con **Google Workspace**
-  per staff/ATA, l'**app mobile**, il recupero/attivazione OTP per gli altri ruoli.
-- `accesso_docenti` non accenna ai servizi aggiuntivi oggi abilitati dalle varie modalità.
+## Rigenerazione
 
-**Forma**
-- Il manuale docenti fa riferimento a pulsanti e icone tramite ritagli immagine: una qualsiasi
-  revisione grafica (il ramo corrente è `grafic-refactor`) invalida decine di ritagli in blocco.
-- Nei testi alcune icone inline risultano "vuote" nel `pdftotext` (spazi bianchi): sono
-  immagini, non testo, e vanno rigenerate insieme al pulsante.
+Il package `tools/giuaschool_tools/manuali/` contiene i testi (`contenuti.py`, con la
+costante `MANUALI` e i capitoli comuni costruiti da `capitolo_app()` e
+`capitolo_sicurezza()`) e la cattura delle schermate (`cattura.py`).
+`tools/crea_manuali_pdf.py` impagina i PDF con ReportLab + Pillow e importa i due moduli
+dal package; non servono esportazioni intermedie né PHP.
 
-## Raccomandazioni per la rigenerazione
+Le immagini sono in `docs/manuali/img` e possono essere ricatturate con `--cattura`
+dall'istanza locale dell'applicazione (Playwright). La cattura usa gli utenti demo
+indicati dalle variabili `GS_DOCENTE`, `GS_GENITORE`, `GS_ALUNNO` e `GS_ATA` (default
+`docente`, `genitore`, `alunno`, `ata`); per il ruolo docenti serve `login_speciale = 1`
+oppure uno storage state Playwright con una sessione Google già autenticata.
 
-1. **Un'unica sorgente** per i manuali (Markdown o HTML) + pipeline di export, invece di
-   documenti LibreOffice mantenuti a mano: rende sostenibile l'aggiornamento periodico.
-2. **Screenshot rigenerati** dall'app reale (anno scolastico corrente, menu attuale), e
-   almeno per le funzioni di punta; i ritagli-pulsante vanno estratti dagli asset correnti.
-3. **Aggiornare i testi**: rimuovere i riferimenti COVID, correggere l'URL `.gov.it`,
-   uniformare i nomi dei menu a quelli attuali.
-4. **Aggiungere una sezione accessi unica** (utente/password, Google, SPID/CIE, OTP) valida
-   per tutti i ruoli, con le restrizioni orarie reali.
-5. **Versionare i manuali** con l'anno scolastico e la versione applicativa nel piè di pagina,
-   così l'obsolescenza è visibile.
+> Nota: `tools/` e `docs/manuali/img` sono esclusi dal versionamento perché raccolgono
+> strumenti e immagini di lavoro locali. I PDF in `public/doc` sono il deliverable
+> versionato; per rigenerarli servono gli script locali e le immagini, che vanno ricatturate
+> o ripristinate da un backup.
 
-## Limiti dell'analisi
+```bash
+# 1) dataset demo presentabile, 2) schermate, 3) PDF
+export GS_DOCENTE=ciro.deluca GS_GENITORE=lauro.parisi.f \
+       GS_ALUNNO=lauro.parisi.s GS_ATA=lucilla.mariani.a
+php bin/console app:alice:load _demo
+python3 -m tools.giuaschool_tools.manuali.dati_demo
+python3 tools/crea_manuali_pdf.py --cattura
 
-- L'analisi delle immagini è basata su **OCR**, non su ispezione visiva: il testo dentro gli
-  screenshot è letto (con qualche errore di riconoscimento), ma colori, layout fine e icone
-  puramente grafiche non sono descritti.
-- Le immagini molto piccole e le mascherine di trasparenza (`smask`) non producono testo.
-- I PDF non contengono form, link o metadati di versione utili oltre al producer.
+# tutti i manuali, direttamente in public/doc, senza ricatturare
+python3 tools/crea_manuali_pdf.py
+
+# un solo manuale, in una cartella di prova
+python3 tools/crea_manuali_pdf.py --solo comune --output-dir /tmp/opencode/pdf-nuovi
+
+# ricattura le schermate prima di generare (richiede Playwright e l'ambiente demo)
+python3 tools/crea_manuali_pdf.py --cattura
+```
+
+Il generatore fa due passate: la prima misura le pagine dei capitoli, la seconda compila
+l'indice con i numeri definitivi e i collegamenti interni. Se la seconda passata cambia
+la lunghezza dei capitoli, ripete l'impaginazione fino a stabilizzare i numeri dell'indice.
+Con `--debug` stampa le informazioni di impaginazione di ogni capitolo.
+
+Dopo la generazione:
+
+```bash
+pdfinfo public/doc/giuaschool_manuale_docenti.pdf
+pdftotext -layout public/doc/giuaschool_manuale_docenti.pdf - | less
+pdftoppm -r 96 -png -f 1 -l 4 public/doc/giuaschool_manuale_docenti.pdf /tmp/manuale
+pdftohtml -xml -i -stdout -f 3 -l 4 public/doc/giuaschool_manuale_docenti.pdf | grep href
+```
+
+## Verifiche eseguite
+
+- Conteggio pagine e metadati con `pdfinfo`: 143 pagine complessive
+  (40 + 31 + 29 + 22 + 21), tutte in formato A4.
+- Controllo delle pagine documentate in ogni schermata catturata: le pagine di tutti i
+  ruoli (docente, genitore, alunno, ATA) sono state aperte con gli utenti demo e il testo
+  di `#gs-main` verificato riga per riga, senza residui di testi segnaposto.
+- Estrazione del testo con `pdftotext -layout` per tutti i manuali.
+- Controllo dei collegamenti dell'indice con `pdftohtml`: ogni voce punta alla pagina
+  stampata accanto al titolo.
+- Confronto con i PDF prodotti dal precedente generatore PHP/TCPDF, poi rimosso: stessi
+  numeri di pagina e stesso testo per pagina, con differenze visive limitate ai metadati
+  del producer.
+- Verifica dei segnalibri: ogni voce dell'indice ha un segnalibro che apre la stessa pagina.
+- Ispezione visiva di copertine, indici, capitoli campione e della pagina dell'app.
+- Verifica del download dell'APK dalla pagina `/api/info/app`: risposta `200 OK` con
+  `Content-Type: application/vnd.android.package-archive`.
+- Assenza delle procedure obsolete basate su impronta digitale, Tessera Sanitaria/CNS,
+  Protector Suite o Internet Explorer, e dei riferimenti all'emergenza COVID-19.
+- Corretto il link al manuale degli alunni nelle pagine di accesso, che usava la data del
+  manuale dei genitori.
+
+## Analisi dei PDF precedenti (storico)
+
+I PDF sostituiti erano esportazioni LibreOffice del 2019 e del 2021, per un totale di 36
+pagine. Le criticità principali erano:
+
+- screenshot fermi agli anni scolastici 2017/2018, 2018/2019 e 2020/2021;
+- procedure legate a Windows, Protector Suite 2012, impronta digitale e Tessera Sanitaria;
+- URL `registro.giua.gov.it` nel manuale docenti (dominio corretto: `registro.giua.edu.it`);
+- riferimento al modulo COVID-19 nella giustificazione delle assenze;
+- refusi ricorrenti («è importare uscire», «la presenze di assenze»);
+- pulsanti e icone inseriti come ritagli immagine, quindi non ricercabili e fragili ai
+  cambi di grafica;
+- nessuna documentazione dell'app mobile e delle modalità di accesso Google Workspace per il
+  personale, SPID e CIE;
+- nessun piè di pagina con data o versione.
+
+La rigenerazione ha risolto questi punti: i testi sono centralizzati, le schermate sono
+attuali, i riferimenti ai pulsanti sono testo e non ritagli immagine, l'indice è collegato e
+ogni manuale riporta anno scolastico e data di aggiornamento.
+
+## Limiti
+
+- Le schermate provengono dall'ambiente demo, non da un'installazione di produzione: vanno
+  verificate le voci di menu e le funzioni effettivamente abilitate presso l'istituto.
+- La versione dell'APK e la data dei manuali possono cambiare senza che questo documento
+  venga aggiornato: la fonte autorevole è sempre il PDF distribuito in `public/doc`.
