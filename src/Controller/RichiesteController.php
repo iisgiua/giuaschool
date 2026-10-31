@@ -34,6 +34,7 @@ use IntlDateFormatter;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
@@ -1626,84 +1627,20 @@ class RichiesteController extends BaseController {
           // richiesta già presente
           $form->addError(new FormError($trans->trans('exception.richiesta_esistente')));
         }
-      }
-      if (!$definizioneRichiesta->getUnica()) {
-        // controllo data
-        if ($form->get('data')->getData() === null) {
-          // campo data vuoto
-          $form->addError(new FormError($trans->trans('exception.campo_data_vuoto')));
-        } elseif (!$definizioneRichiesta->getGestione() && $form->get('data')->getData()->format('Y-m-d') > $info['valore_data']) {
-          // per i moduli la data è sempre quella odierna
-          $form->addError(new FormError($trans->trans('exception.campo_data_successivo_oggi')));
-        } else {
-          // controlla se richiesta esiste già per la data
-          $altra = $this->em->getRepository(Richiesta::class)->findOneBy([
-            'definizioneRichiesta' => $modulo, 'stato' => ['I', 'G'], 'classe' => $classe,
-            'data' => $form->get('data')->getData()]);
-          if ($altra) {
-            // richiesta già presente
-            $form->addError(new FormError($trans->trans('exception.richiesta_esistente')));
-          }
-          if ($definizioneRichiesta->getGestione()) {
-            // controlla scadenza
-            $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
-            $scadenza = clone ($form->get('data')->getData());
-            $scadenza->modify('-1 day +'.substr((string) $oraScadenza, 0, 2).' hour +'.substr((string) $oraScadenza, 3, 2).' minute');
-            if ($invio > $scadenza) {
-              // richiesta inviata oltre i termini
-              $form->addError(new FormError($trans->trans('exception.richiesta_ora_invio', [
-                'ora' => $oraScadenza])));
-            }
+        if ($definizioneRichiesta->getGestione()) {
+          // controlla scadenza
+          $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
+          $scadenza = clone $form->get('data')->getData();
+          $scadenza->modify('-1 day +'.substr((string) $oraScadenza, 0, 2).' hour +'.substr((string) $oraScadenza, 3, 2).' minute');
+          if ($invio > $scadenza) {
+            // richiesta inviata oltre i termini
+            $form->addError(new FormError($trans->trans('exception.richiesta_ora_invio', [
+              'ora' => $oraScadenza])));
           }
         }
-      }
-      // controlla allegati
-      $allegatiTemp = $this->reqstack->getSession()->get($varSessione, []);
-      if (count($allegatiTemp) < $info['allegati']) {
-        $form->addError(new FormError($trans->trans('exception.modulo_allegati_mancanti')));
-        $this->reqstack->getSession()->remove($varSessione);
-      }
-      if ($form->isValid()) {
-        // data richiesta
-        $data = $definizioneRichiesta->getUnica() ? null : $form->get('data')->getData();
-        // memorizza richiesta
-        $richiesta
-          ->setValori($valori)
-          ->setInviata($invio)
-          ->setGestita(null)
-          ->setData($data)
-          ->setStato('I')
-          ->setMessaggio('');
-        $this->em->flush();
-        // crea documento PDF
-        [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
-          $classe, $valori, $data, $invio);
-        // gestioone designazione per evacuazione
-        if ($definizioneRichiesta->getTipo() == 'Z') {
-          // copia documento nella scheda di evacuazione della classe
-          $classeNome = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
-          $fileScheda = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$classeNome.
-            '/documenti/'.$classeNome.'-scheda-evacuazione.pdf';
-          $fileDocumento = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$classeNome.
-            '/documenti/'.$documento;
-          copy($fileDocumento, $fileScheda);
-        }
-
-
-        // imposta eventuali allegati
-        $allegati = $ric->impostaAllegati($utente, $classe, $documentoId, $allegatiTemp);
-        $this->reqstack->getSession()->remove($varSessione);
-        // ok: memorizzazione e log
-        $richiesta
-          ->setDocumento($documento)
-          ->setAllegati($allegati);
-        $dblogger->logAzione('RICHIESTE', 'Invio modulo assegnazione studenti per evacuazione');
-        // redirezione
-        return $this->redirectToRoute('richieste_coordinatore', ['classe'=> $classe->getId()]);
       }
     }
-    // pagina di risposta
-    return $this->renderHtml('richieste', 'coordinatore_add', $dati, $info, [$form->createView(),  'message.richieste_coordinatore_add']);
+    return $valori;
   }
 
   /**

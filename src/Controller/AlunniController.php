@@ -35,6 +35,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -52,6 +53,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * @author Antonello Dessì
  */
 class AlunniController extends BaseController {
+
+  /** Pattern per la data numerica breve */
+  private const FORMATO_DATA = 'd/m/Y';
+  /** Scostamento per il giorno precedente */
+  private const GIORNO_PRECEDENTE = '-1 day';
 
   /**
    * Importa alunni e genitori da file
@@ -777,7 +783,7 @@ class AlunniController extends BaseController {
    */
   #[Route(path: '/alunni/passwordFiltro/{genitore}', name: 'alunni_passwordFiltro', requirements: ['genitore' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function passwordFiltro(UserPasswordHasherInterface $hasher,
+  public function passwordFiltro(Request $request, UserPasswordHasherInterface $hasher,
                                  PdfManager $pdf, StaffUtil $staff, LoggerInterface $logger,
                                  LogHandler $dblogger, int $genitore): Response {
     // controllo CSRF
