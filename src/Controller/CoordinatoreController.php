@@ -1007,4 +1007,20 @@ class CoordinatoreController extends BaseController {
     return $this->renderHtml('coordinatore', 'moduliFormativi_alunni', $dati, $info, []);
   }
 
+  /**
+   * Controlla che l'utente sia autorizzato ad accedere ai dati della classe indicata
+   *
+   * @param Classe $classe Classe di cui controllare l'accesso
+   */
+  private function controllaAccessoClasse(Classe $classe): void {
+    if (!($this->getUser() instanceOf Staff) && !($this->getUser() instanceOf Preside)) {
+      // coordinatore
+      $classi = explode(',', (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore'));
+      if (!in_array($classe->getId(), $classi)) {
+        // errore
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
+    }
+  }
+
 }

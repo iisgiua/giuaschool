@@ -1752,34 +1752,14 @@ class RegistroUtil {
     $dati[1]['scrutinio'] = 'P';
     // secondo periodo
     $dati[2]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome');
-    $data = DateTime::createFromFormat('Y-m-d H:i', $dati[1]['fine'].' 00:00');
-    if (!$data) {
-      // dato di configurazione invalido: migliora solo i valori della visualizzazione
-      $dati[2]['inizio'] = '';
-      $dati[2]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine');
-      $dati[2]['scrutinio'] = 'F';
-      $dati[3]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
-      $dati[3]['inizio'] = '';
-      $dati[3]['scrutinio'] = 'F';
-      $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
-    }
-    $data->modify('+1 day');
-    $dati[2]['inizio'] = $data->format('Y-m-d');
+    $finePrimo = $dataConfig('periodo1_fine');
+    $dati[2]['inizio'] = $finePrimo ? $finePrimo->modify('+1 day')->format('Y-m-d') : '';
     $dati[2]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine');
     $dati[2]['scrutinio'] = 'F';
     // terzo periodo
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
-      $dati[3]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
-    $fine2 = $dati[2]['fine'] ?? '';
-    $dati[3]['inizio'] = '';
-    $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
-    if ($fine2 !== '') {
-      $data = DateTime::createFromFormat('Y-m-d H:i', $fine2.' 00:00');
-      if ($data) {
-        $data->modify('+1 day');
-        $dati[3]['inizio'] = $data->format('Y-m-d');
-      }
-    }
+    $nomeTerzo = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
+    if ($nomeTerzo !== null && $nomeTerzo !== '') {
+      // tre periodi: il secondo periodo è uno scrutinio intermedio
       $dati[2]['scrutinio'] = 'S';
       $dati[3]['nome'] = $nomeTerzo;
       $fineSecondo = $dataConfig('periodo2_fine');

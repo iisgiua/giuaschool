@@ -22,9 +22,14 @@ class EnvFile {
   //==================== ATTRIBUTI DELLA CLASSE ====================
 
   /**
+   * @var string ENV_LOCAL Configurazione della macchina, non versionata
+   */
+  public const ENV_LOCAL = '.env.local';
+
+  /**
    * @var array ENV_FILES File di configurazione, in ordine di precedenza crescente
    */
-  public const ENV_FILES = ['.env', '.env.local'];
+  public const ENV_FILES = ['.env', self::ENV_LOCAL];
 
   /**
    * @var string APP_SECRET_PLACEHOLDER Segnaposto distribuito nel modello ".env": non è un segreto
