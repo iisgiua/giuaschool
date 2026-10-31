@@ -8,10 +8,10 @@
 
 namespace App\Controller;
 
+use Throwable;
 use App\Entity\Allegato;
 use App\Entity\Alunno;
 use App\Entity\Avviso;
-use App\Entity\CambioClasse;
 use App\Entity\Cattedra;
 use App\Entity\Circolare;
 use App\Entity\Classe;
@@ -34,6 +34,7 @@ use App\Form\ConfigurazioneType;
 use App\Form\ModuloType;
 use App\Form\UtenteType;
 use App\Util\ArchiviazioneUtil;
+use App\Util\EnvFile;
 use App\Util\LogHandler;
 use App\Util\TelegramManager;
 use DateTime;
@@ -1461,22 +1462,13 @@ class SistemaController extends BaseController {
     }
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
+    // legge la configurazione corrente
+    $projectDir = (string) $this->getParameter('kernel.project_dir');
+    $envData = EnvFile::leggi($projectDir);
     // imposta nuovo livello di log
-    $logLevel = ($request->server->get('LOG_LEVEL') == 'warning') ? 'debug' : 'warning';
-    // legge .env
-    $envPath = $this->getParameter('kernel.project_dir').'/.env';
-    $envData = file($envPath);
-    // modifica impostazione
-    foreach ($envData as $row=>$text) {
-      if (str_starts_with($text, 'LOG_LEVEL')) {
-        // modifica valore
-        $envData[$row] = "LOG_LEVEL='".$logLevel."'\n";
-        break;
-      }
-    }
-    // scrive nuovo .env
-    unlink($envPath);
-    file_put_contents($envPath, $envData);
+    $logLevel = (($envData['LOG_LEVEL'] ?? '') == 'warning') ? 'debug' : 'warning';
+    // scrive l'impostazione nel file della macchina
+    EnvFile::imposta($projectDir.'/'.EnvFile::ENV_LOCAL, ['LOG_LEVEL' => $logLevel]);
     // cancella cache
     $command = new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]);
     // esegue comando
@@ -1513,7 +1505,6 @@ class SistemaController extends BaseController {
     }
     // controllo CSRF (il passo 0 effettua solo controlli, gli altri modificano il sistema)
     if ($step > 0 && (!$request->isMethod('POST') ||
-        !$this->isCsrfTokenValid('sistema_aggiorna', $request->request->get('_csrf_token')))) {
         !$this->isCsrfTokenValid('sistema_aggiorna', $request->request->get('_csrf_token')))) {
       throw $this->createNotFoundException('exception.invalid_params');
     }
@@ -1702,7 +1693,7 @@ class SistemaController extends BaseController {
       }
       // restituisce il contenuto
       return $item->get();
-    } catch (\Throwable) {
+    } catch (Throwable) {
       // errore della cache: scarica direttamente
       return $this->scaricaUrl($url);
     }
@@ -1730,9 +1721,9 @@ class SistemaController extends BaseController {
       // inizializza sessione
       $this->reqstack->getSession()->set('/APP/ROUTE/sistema_email/invio', '');
     }
-    // legge .env
-    $envPath = $this->getParameter('kernel.project_dir').'/.env';
-    $envData = parse_ini_file($envPath);
+    // legge la configurazione corrente
+    $projectDir = (string) $this->getParameter('kernel.project_dir');
+    $envData = EnvFile::leggi($projectDir);
     // estrae configurazione
     $dsn = parse_url($envData['MAILER_DSN'] ?? '');
     $info['server'] = (in_array($dsn['scheme'] ?? '', ['smtp', 'sendmail', 'gmail+smtp', 'php'], true) ?
@@ -1782,20 +1773,9 @@ class SistemaController extends BaseController {
             $dsn = $server.'://'.$user.':'.$password.'@'.
               ($server == 'smtp' ? $host.':'.$port : 'default');
           }
-          // legge .env
-          $envData = file($envPath);
-          // modifica impostazione
-          foreach ($envData as $row => $text) {
-            if (preg_match('/^\s*MAILER_DSN\s*=/', $text)) {
-              // modifica valore
-              $envData[$row] = "MAILER_DSN='".$dsn."'\n";
-              break;
-            }
-          }
-          // scrive nuovo .env
-          unlink($envPath);
-          file_put_contents($envPath, $envData);
-          // cancella cache e ricarica .env
+          // scrive l'impostazione nel file della macchina
+          EnvFile::imposta($projectDir.'/'.EnvFile::ENV_LOCAL, ['MAILER_DSN' => $dsn]);
+          // cancella cache e ricarica .env.local
           $command = new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]);
           // esegue comando
           $application = new Application($kernel);
@@ -1927,9 +1907,9 @@ class SistemaController extends BaseController {
     // inizializza
     $dati = [];
     $info = [];
-    // legge .env
-    $envPath = $this->getParameter('kernel.project_dir').'/.env';
-    $envData = parse_ini_file($envPath);
+    // legge la configurazione corrente
+    $projectDir = (string) $this->getParameter('kernel.project_dir');
+    $envData = EnvFile::leggi($projectDir);
     // estrae configurazione
     $info['abilitato'] = $this->em->getRepository(Configurazione::class)->getParametro('spid');
     $info['client'] = $envData['MIMSPID_CLIENT_ID'] ?? '';
@@ -1943,30 +1923,19 @@ class SistemaController extends BaseController {
       $abilitato = $form->get('abilitato')->getData();
       $client = $form->get('client')->getData();
       $secret = $form->get('secret')->getData();
+      // controlli
       if ($abilitato != 'N' && (empty($client) || empty($secret))) {
         // errore
-        // errore        $form->addError(new FormError($trans->trans('exception.spid_no_client_secret')));
         $form->addError(new FormError($trans->trans('exception.spid_no_client_secret')));
       }
       if ($form->isValid()) {
         // memorizza dati
         $this->em->getRepository(Configurazione::class)->setParametro('spid', $abilitato);
-        // legge .env
-        $envData = file($envPath);
-        // modifica impostazioni
-        foreach ($envData as $row => $text) {
-          if (preg_match('/^\s*MIMSPID_CLIENT_ID\s*=/', $text)) {
-            // modifica valore
-            $envData[$row] = "MIMSPID_CLIENT_ID='".$client."'\n";
-          } elseif (preg_match('/^\s*MIMSPID_CLIENT_SECRET\s*=/', $text)) {
-            // modifica valore
-            $envData[$row] = "MIMSPID_CLIENT_SECRET='".$secret."'\n";
-          }
-        }
-        // scrive nuovo .env
-        unlink($envPath);
-        file_put_contents($envPath, $envData);
-        // cancella cache e ricarica .env
+        // scrive le impostazioni nel file della macchina
+        EnvFile::imposta($projectDir.'/'.EnvFile::ENV_LOCAL, [
+          'MIMSPID_CLIENT_ID' => $client,
+          'MIMSPID_CLIENT_SECRET' => $secret]);
+        // cancella cache e ricarica .env.local
         $command = new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]);
         // esegue comando
         $application = new Application($kernel);
