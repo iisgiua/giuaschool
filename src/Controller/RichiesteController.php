@@ -932,7 +932,7 @@ class RichiesteController extends BaseController {
       ->setClasse($classe);
     $this->em->persist($richiesta);
     // informazioni per la visualizzazione
-    $info['modulo'] = '@data/moduli/'.$definizioneRichiesta->getModulo();
+    $info['modulo'] = $this->templateModulo('moduli', $definizioneRichiesta->getModulo());
     $info['allegati'] = $definizioneRichiesta->getAllegati();
     $info['classe'] = $classe;
     $info['valore_classe'] = $classe.' - '.$classe->getSede()->getNomeBreve();
@@ -1751,6 +1751,26 @@ class RichiesteController extends BaseController {
     $dblogger->logAzione('RICHIESTE', 'Annulla modulo assegnazione studenti per evacuazione');
     // redirezione
     return $this->redirectToRoute('richieste_coordinatore', ['classe'=> $classe->getId()]);
+  }
+
+  /**
+   * Restituisce il template da usare per visualizzare il modulo indicato, ricorrendo
+   * ad un modulo generico se il file personalizzato non è presente.
+   *
+   * @param string $tipo Tipo di modulo: moduli, consultazioni, autorizzazioni
+   * @param string|null $modulo Nome del file del modulo personalizzato
+   *
+   * @return string Nome logico del template da includere
+   */
+  private function templateModulo(string $tipo, ?string $modulo): string {
+    // file personalizzato nel namespace @data (PERSONAL/data)
+    $percorso = $this->getParameter('kernel.project_dir').'/PERSONAL/data/'.$tipo.'/'.$modulo;
+    if (!empty($modulo) && (is_file($percorso) || is_file($percorso.'.twig'))) {
+      // modulo personalizzato presente
+      return '@data/'.$tipo.'/'.$modulo;
+    }
+    // modulo generico di riserva
+    return 'richieste/modulo_default.html.twig';
   }
 
 }
