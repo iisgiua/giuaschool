@@ -805,6 +805,9 @@ class AvvisiController extends BaseController {
       // errore: file non trovato
       throw $this->createNotFoundException('exception.id_notfound');
     }
+    // segna lettura e memorizza su db solo dopo aver verificato il file
+    $com->leggeUtente($this->getUser(), $avviso);
+    $this->em->flush();
     return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
       ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
   }
@@ -822,6 +825,11 @@ class AvvisiController extends BaseController {
   public function legge(Request $request,
                         #[MapEntity] ?Avviso $avviso=null
                         ): JsonResponse {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('avvisi_legge', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // controlla avviso
     if (!$avviso) {
       // errore: avviso non trovato
@@ -1449,7 +1457,14 @@ class AvvisiController extends BaseController {
     }
     // azione add
     $fineAnno = $this->em->getRepository(Configurazione::class)->getParametro('anno_fine', '2000-01-01');
-    if ($com->azioneAvviso('add', DateTime::createFromFormat('Y-m-d', $fineAnno), $this->getUser(), null)) {
+    $dtFineAnno = DateTime::createFromFormat('Y-m-d', $fineAnno);
+    if (!$dtFineAnno) {
+      // dato di configurazione invalido: degrada stagione add senza interrompere la pagina
+      $this->addFlash('warning', 'config.anno_fine_non_valido');
+      $dati['azioni']['add'] = 0;
+      return $dati;
+    }
+    if ($com->azioneAvviso('add', $dtFineAnno, $this->getUser(), null)) {
       // pulsante add
       $dati['azioni']['add'] = 1;
     }

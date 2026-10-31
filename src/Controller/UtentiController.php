@@ -239,10 +239,12 @@ class UtentiController extends BaseController {
       $reset = true;
       // form reset OTP
       $form = $this->container->get('form.factory')->createNamedBuilder('utenti_otp', FormType::class)
-        ->add('submit', SubmitType::class, ['label' => 'label.submit',
-          'attr' => ['class' => 'btn btn-primary']])
+        ->add('current_password', PasswordType::class, ['label' => 'label.current_password',
+          'required' => true])
         ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
           'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
+        ->add('submit', SubmitType::class, ['label' => 'label.submit',
+          'attr' => ['class' => 'btn btn-primary']])
         ->getForm();
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
@@ -285,8 +287,6 @@ class UtentiController extends BaseController {
           'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
         ->add('submit', SubmitType::class, ['label' => 'label.submit',
           'attr' => ['class' => 'btn btn-primary']])
-        ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
-          'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
         ->getForm();
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {

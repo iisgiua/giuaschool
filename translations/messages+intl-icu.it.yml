@@ -968,7 +968,7 @@ title.autorizzazioni.dettagli: Dettagli per l'autorizzazione dell'attività
 page.sistema.spid: Configura SPID/CIE
 title.sistema.spid: Configurazione accesso SPID/CIE tramite gateway del MIM
 page.richieste.coordinatore: Designazioni Evacuazione
-title.richieste.coordinatore: Designazioni studenti per l'evacuazione
+title.richieste.coordinatore: Designazioni studenti per l'evacuazione della {classe}
 page.richieste.coordinatore_add: Designazioni Evacuazione
 title.richieste.coordinatore_add: Designazioni studenti per l'evacuazione
 

@@ -42,8 +42,8 @@ $(document).ready(function() {
   // vincoli sul minuto. Il timepicker vendor non espone opzioni min/max, quindi
   // il limite e' applicato disabilitando i pulsanti di decremento e correggendo
   // il valore digitato. Le soglie arrivano da PHP per essere coerenti con dp_min.
-  var oggi = '{{ date()|date('d/m/Y') }}';
-  var minOra = '{{ date()|date('H:i') }}';
+  var oggi = "{{ date()|date('d/m/Y') }}";
+  var minOra = "{{ date()|date('H:i') }}";
   var min = minOra.split(':');
   var minH = parseInt(min[0], 10);
   var minM = parseInt(min[1], 10);
@@ -96,29 +96,32 @@ $(document).ready(function() {
     }
   }
 
-{% for n in 1..5 %}
-  (function() {
-    var data = $('#definizione_scrutinio_classiVisibiliData{{ n }}');
-    var ora = $('#definizione_scrutinio_classiVisibiliOra{{ n }}');
-    if (!data.length || !ora.length) {
-      return;
-    }
-    // il click sui pulsanti cambia i valori solo al termine: ricalcola il limite
-    data.on('change', function() {
-      applicaLimite(data, ora);
-    });
-    ora.on('change', function() {
-      if (data.val() === oggi) {
-        correggi(ora);
+  // cinque coppie data/ora (classi 1..5): le tappe sono generate qui,
+  // senza tag Twig, cosi' lo script resta JavaScript valido anche nel sorgente
+  for (var n = 1; n <= 5; n++) {
+    // la IIFE fissa il valore corrente di n per i gestori di evento
+    (function (n) {
+      var data = $('#definizione_scrutinio_classiVisibiliData' + n);
+      var ora = $('#definizione_scrutinio_classiVisibiliOra' + n);
+      if (!data.length || !ora.length) {
+        return;
       }
+      // il click sui pulsanti cambia i valori solo al termine: ricalcola il limite
+      data.on('change', function () {
+        applicaLimite(data, ora);
+      });
+      ora.on('change', function () {
+        if (data.val() === oggi) {
+          correggi(ora);
+        }
+        applicaLimite(data, ora);
+      });
+      ora.closest('.time-spinner').find('.spinner-control button').on('click', function () {
+        applicaLimite(data, ora);
+      });
       applicaLimite(data, ora);
-    });
-    ora.closest('.time-spinner').find('.spinner-control button').on('click', function() {
-      applicaLimite(data, ora);
-    });
-    applicaLimite(data, ora);
-  })();
-{% endfor %}
+    })(n);
+  }
 });
 </script>
 {% endblock %}

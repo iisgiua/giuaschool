@@ -46,7 +46,7 @@
 <script>
 Dropzone.autoDiscover = false;
 var DZ = new Dropzone(".dropzone", {
-  url: "{{ path('file_upload', {pagina: 'richieste_add', param: 'files'}) }}",
+  url: "{{ path('file_upload', {pagina: 'richieste_classe_add', param: 'files'}) }}",
   maxFiles: {{ info.allegati }},
   maxFilesize: 50,
   acceptedFiles: ".pdf,.jpg,.jpeg",
@@ -73,7 +73,7 @@ var DZ = new Dropzone(".dropzone", {
       });
     });
     this.on("removedfile", function(file) {
-      $.post("{{ path('file_remove', {pagina: 'richieste_add', param: 'files'}) }}", {"files": file.uploaded, _csrf_token: "{{ csrf_token('file') }}"});
+      $.post("{{ path('file_remove', {pagina: 'richieste_classe_add', param: 'files'}) }}", {"files": file.uploaded, _csrf_token: "{{ csrf_token('file') }}"});
       if (file.status == 'success') {
         $('#documento_submit').attr('disabled', true);
       }

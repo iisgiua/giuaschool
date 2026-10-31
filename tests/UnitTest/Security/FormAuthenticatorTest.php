@@ -149,6 +149,8 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // cache: adattatore in memoria, così la logica di blocco dei tentativi si comporta
     // come in produzione (il callback viene eseguito in caso di cache miss)
     $this->mockedCache = new ArrayAdapter();
+    $this->mockedSession->method('remove')->willReturnCallback(
+      function($key) { unset($this->session[$key]); });
   }
 
   /**

@@ -46,7 +46,7 @@ class OAuth2Controller extends BaseController {
     // imposta sessione
     $request->getSession()->set('login_speciale', 1);
     // redirezione all'ID provider di Google
-    return $clientRegistry->getClient('gsuite')->redirect([], []);
+    return $this->redirectToRoute('login_gsuite');
   }
 
   /**
