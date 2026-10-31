@@ -193,4 +193,61 @@ class DefinizioneRichiestaRepository extends BaseRepository {
    return $dati;
  }
 
+  /**
+   * Restituisce la lista dei moduli accessibili ai coordinatori di classe
+   * NB: attualmente solo il modulo di assegnazione degli studenti per l'evacuazione
+   *
+   * @param Classe $classe Classe di riferimento per la quale si vogliono leggere i moduli di richiesta
+   *
+   * @return array Lista associativa con i risultati
+   */
+  public function listaCoordinatori(Classe $classe): array {
+    $sedi = [$classe->getSede()];
+    // legge richieste
+    $richieste = $this->createQueryBuilder('dr')
+      ->select('dr.id,dr.nome,dr.unica,dr.gestione,r.id as richiesta_id,r.inviata,r.gestita,r.data,r.documento,r.allegati,r.stato,r.messaggio,(r.utente) AS utente_id')
+      ->leftJoin(Richiesta::class, 'r', 'WITH', "r.definizioneRichiesta=dr.id AND r.stato IN ('I', 'G') AND r.classe=:classe")
+      ->where('NOT (dr INSTANCE OF '.DefinizioneConsultazione::class.') AND dr.abilitata=1 AND (dr.sede IS NULL OR dr.sede IN (:sedi))')
+      ->andWhere("FIND_IN_SET('DC', dr.richiedenti) > 0")
+      ->setParameter('classe', $classe)
+      ->setParameter('sedi', $sedi)
+      ->orderBy('dr.nome', 'ASC')
+      ->addOrderBy('r.data', 'DESC')
+      ->addOrderBy('r.inviata', 'DESC')
+      ->getQuery()
+      ->getArrayResult();
+    // formatta dati
+    $dati['uniche'] = [];
+    $dati['multiple'] = [];
+    $dati['richieste'] = [];
+    $moduloPrec = null;
+    $oggi = new DateTime('today');
+    foreach ($richieste as $richiesta) {
+      $modulo = $richiesta['id'];
+      if (!$moduloPrec || $moduloPrec != $modulo) {
+        // aggiunge a lista moduli
+        $dati[$richiesta['unica'] ? 'uniche' : 'multiple'][$modulo] = [
+          'nome' => $richiesta['nome'],
+          'gestione' => $richiesta['gestione']];
+        $moduloPrec = $modulo;
+      }
+      if ($richiesta['richiesta_id']) {
+        // aggiunge a lista richieste
+        $tipo = ($richiesta['unica'] || $richiesta['data'] >= $oggi) ? 'nuove' : 'vecchie';
+        $dati['richieste'][$modulo][$tipo][] = [
+          'id' => $richiesta['richiesta_id'],
+          'utente_id' => $richiesta['utente_id'],
+          'inviata' => $richiesta['inviata'],
+          'gestita' => $richiesta['gestita'],
+          'data' => $richiesta['data'],
+          'documento' => $richiesta['documento'],
+          'allegati' => $richiesta['allegati'],
+          'stato' => $richiesta['stato'],
+          'messaggio' => $richiesta['messaggio']];
+      }
+    }
+    // restituisce dati
+    return $dati;
+  }
+
 }
