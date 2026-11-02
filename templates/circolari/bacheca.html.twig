@@ -2,64 +2,57 @@
 
 {% block pagina_menu %}
   {% if is_granted('ROLE_DOCENTE') %}
-    {% include 'ruolo_docente/menu.html.twig' with {'attivo': 'bacheca'} %}
+    {{ include('ruolo_docente/menu.html.twig') }}
   {% elseif is_granted('ROLE_ATA') %}
-    {% include 'ruolo_ata/menu.html.twig' %}
+    {{ include('ruolo_ata/menu.html.twig') }}
   {% elseif is_granted('ROLE_GENITORE') %}
-    {% include 'ruolo_genitore/menu_genitore.html.twig' %}
+    {{ include('ruolo_genitore/menu_genitore.html.twig') }}
   {% elseif is_granted('ROLE_ALUNNO') %}
-    {% include 'ruolo_genitore/menu_alunno.html.twig' %}
+    {{ include('ruolo_genitore/menu_alunno.html.twig') }}
   {% elseif is_granted('ROLE_UTENTE') %}
-    {% include 'ruolo_utente/menu.html.twig' %}
+    {{ include('ruolo_utente/menu.html.twig') }}
   {% endif %}
 {% endblock %}
 
 {% block pagina_submenu %}
-  {% if is_granted('ROLE_DOCENTE') %}
-    {% include 'ruolo_docente/menu_bacheca.html.twig' %}
-  {% elseif is_granted('ROLE_ATA') %}
-    {% include 'ruolo_ata/menu_bacheca.html.twig' %}
-  {% elseif is_granted('ROLE_UTENTE') and not is_granted('ROLE_GENITORE') and not is_granted('ROLE_ALUNNO') %}
-    {% include 'ruolo_utente/menu_bacheca.html.twig' %}
-  {% endif %}
 {% endblock %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
+<div class="container-fluid gs-circolari-bacheca">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.circolari_bacheca'|trans }}</h1>
-  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="form-inline gs-mb-2">
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-filters gs-mb-3">
     <div id="{{ form.vars.id }}">
-      <div class="form-group" title="{{ form.visualizza.vars.label|trans }}">
-        <label class="sr-only control-label" for="circolare_filtro_visualizza">{{ form.visualizza.vars.label|trans }}</label>
-        {{ form_widget(form.visualizza) }}
-      </div>
-      <div class="form-group" title="{{ form.mese.vars.label|trans }}">
-        <label class="sr-only control-label" for="circolare_filtro_mese">{{ form.mese.vars.label|trans }}</label>
-        {{ form_widget(form.mese) }}
+      <div class="gs-filters-row">
+        <div class="form-group gs-filter-col" title="{{ form.visualizza.vars.label|trans }}">
+          <label class="control-label" for="circolare_filtro_visualizza">{{ form.visualizza.vars.label|trans }}</label>
+          {{ form_widget(form.visualizza) }}
+        </div>
+        <div class="form-group gs-filter-col" title="{{ form.mese.vars.label|trans }}">
+          <label class="control-label" for="circolare_filtro_mese">{{ form.mese.vars.label|trans }}</label>
+          {{ form_widget(form.mese) }}
+        </div>
       </div>
       <div class="form-group" title="{{ form.oggetto.vars.label|trans }}">
-        <label class="sr-only control-label" for="circolare_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
-        {{ form_widget(form.oggetto, {'attr': {'style': 'width:30em'}}) }}
+        <label class="control-label" for="circolare_filtro_oggetto">{{ form.oggetto.vars.label|trans }}</label>
+        {{ form_widget(form.oggetto) }}
       </div>
-      <div class="form-group _col-sm-2">
+      <div class="gs-filters-buttons">
+        <button type="button" class="btn btn-default" id="circolare_reset" title="Resetta i filtri">Reset</button>
         {{ form_widget(form.submit) }}
       </div>
       {{ form_widget(form._token) }}
     </div>
   </form>
   {% if dati.lista|length > 0 %}
-  <table class="table table-bordered table-hover table-striped gs-mb-4">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-1">{{ 'label.stato'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.numero'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.data'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.sede'|trans }}</th>
-        <th class="col-sm-6">{{ 'label.oggetto'|trans }}</th>
-        <th class="col-sm-1">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'label.stato'|trans, classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'label.numero'|trans, classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'label.data'|trans, classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'label.sede'|trans, classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'label.oggetto'|trans, classi: 'col-sm-6', scope: 'col'},
+      {contenuto: 'label.action'|trans, classi: 'col-sm-1', scope: 'col'},
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for c in dati.lista %}
       <tr>
         <td>
@@ -74,26 +67,30 @@
         <td><small>{% for s in c.circolare.sedi %}{{ s.nomeBreve|upper }}{{ not loop.last ? ', ' }}{% endfor %}</small></td>
         <td>{{ c.circolare.titolo }}</td>
         <td>
-          <button type="button" class="btn btn-xs btn-primary" title="Visualizza la circolare" data-toggle="modal" data-target="#gs-modal-info" data-info-num="{{ c.circolare.numero }}" data-info-date="{{ c.circolare.data|date('j') }} {{ info.mesi[c.circolare.data|date('n')] }} {{ c.circolare.data|date('Y') }}" data-info-title="{{ c.circolare.titolo }}" data-body="circolare-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2"></span>Visualizza</button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza la circolare', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-info', 'data-info-num': c.circolare.numero, 'data-info-date': c.circolare.data|date('j') ~ ' ' ~ info.mesi[c.circolare.data|date('n')] ~ ' ' ~ c.circolare.data|date('Y'), 'data-info-title': c.circolare.titolo, 'data-body': 'circolare-' ~ loop.index}}) }}
           <div id="circolare-{{ loop.index }}" style="display:none">
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <div class="gs-mt-3 gs-mb-3">
                   <strong>Documento:</strong> {{ c.circolare.allegati[0].titolo }}
-                  <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {'circolare': c.circolare.id, 'allegato': 0, 'tipo': 'D'}) }}" title="Scarica la circolare" download><strong>Scarica</strong></a>
-                  <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {'circolare': c.circolare.id, 'allegato': 0, 'tipo': 'V'}) }}" title="Visualizza la circolare" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+                  {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica la circolare', url: path('circolari_download', {circolare: c.circolare.id, allegato: 0, tipo: 'D'}), attributi: {download: ''}, classi: 'pull-right gs-ml-3'}) }}
+                  {% if c.circolare.allegati[0].visualizzabile %}
+                  {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza la circolare', url: path('circolari_download', {circolare: c.circolare.id, allegato: 0, tipo: 'V'}), attributi: {target: '_blank', rel: 'noopener noreferrer'}, classi: 'pull-right'}) }}
+                  {% endif %}
                 </div>
               </div>
             </div>
       {% if c.circolare.allegati|length > 1 %}
             <div class="list-group-item">
               <div class="list-group-item-text">
-        {% for n,a in c.circolare.allegati %}
-          {% if not loop.first  %}
+        {% for n, a in c.circolare.allegati %}
+          {% if not loop.first %}
                 <div class="gs-mt-3 gs-mb-3">
                   <strong>Allegato {{ n }}:</strong> {{ a.titolo }}
-                  <a class="btn btn-xs btn-primary pull-right gs-ml-3" href="{{ path('circolari_download', {'circolare': c.circolare.id, 'allegato': n, 'tipo': 'D' }) }}" title="Scarica l'allegato" download><strong>Scarica</strong></a>
-                  <a class="btn btn-xs btn-primary pull-right" target="_blank" href="{{ path('circolari_download', {'circolare': c.circolare.id, 'allegato': n, 'tipo': 'V'}) }}" title="Visualizza l'allegato" rel="noopener noreferrer"><strong>Visualizza</strong></a>
+                  {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica l\'allegato', titolo: 'Scarica l\'allegato', url: path('circolari_download', {circolare: c.circolare.id, allegato: n, tipo: 'D'}), attributi: {download: ''}, classi: 'pull-right gs-ml-3'}) }}
+                  {% if a.visualizzabile %}
+                  {{ include('include/bottone-azione.html.twig', {nome: 'eye', etichetta: 'Visualizza l\'allegato', titolo: 'Visualizza l\'allegato', url: path('circolari_download', {circolare: c.circolare.id, allegato: n, tipo: 'V'}), attributi: {target: '_blank', rel: 'noopener noreferrer'}, classi: 'pull-right'}) }}
+                  {% endif %}
                 </div>
           {% endif %}
         {% endfor %}
@@ -108,7 +105,7 @@
         {% else %}
                 <div>
                   <em>La circolare non è stata ancora letta.</em>
-                  <a class="btn btn-xs btn-success pull-right gs-ml-3" href="{{ path('circolari_firma', {'circolare': c.circolare.id}) }}" role="button" title="Conferma la lettura della circolare"><strong>Conferma lettura</strong></a>
+                  {{ include('include/bottone-azione.html.twig', {nome: 'check', etichetta: 'Conferma lettura', titolo: 'Conferma la lettura della circolare', stile: 'success', url: path('circolari_firma', {circolare: c.circolare.id}), classi: 'pull-right gs-ml-3 gs-post', attributi: {'data-csrf': csrf_token('circolari_firma')}}) }}
                 </div>
         {% endif %}
       {% else %}
@@ -120,16 +117,16 @@
         </td>
       </tr>
     {% endfor %}
-  </tbody>
-</table>
+  {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mb-4'}) }}
   {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Nessuna circolare presente</strong>
   </div>
   {% endif %}
-  {% include 'include/paginate.html.twig' with {'maxPagine': dati.maxPagine, 'pagina': info.pagina, 'url': 'circolari_bacheca'} %}
-  {% include 'include/modal-info.html.twig' %}
-  {% include 'include/modal-waiting.html.twig' %}
+  {{ include('include/paginate.html.twig', {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'circolari_bacheca'}) }}
+  {{ include('include/modal-info.html.twig') }}
+  {{ include('include/modal-waiting.html.twig') }}
 </div>
 {% endblock %}
 
@@ -146,6 +143,14 @@ $(document).ready(function() {
     $('#gs-modal-waiting').modal('show');
   });
   $('#circolare_filtro_submit').click(function (e) {
+    $('form[name="{{ form.vars.name }}"]').submit();
+    $('#gs-modal-waiting').modal('show');
+  });
+  $('#circolare_reset').click(function (e) {
+    e.preventDefault();
+    $('#circolare_filtro_visualizza').val('P');
+    $('#circolare_filtro_mese').val('');
+    $('#circolare_filtro_oggetto').val('');
     $('form[name="{{ form.vars.name }}"]').submit();
     $('#gs-modal-waiting').modal('show');
   });

@@ -211,6 +211,20 @@ class Allegato implements Stringable {
   }
 
   /**
+   * Indica se il file è visualizzabile direttamente nel browser.
+   *
+   * I formati che i browser non sanno mostrare (documenti di testo, fogli di
+   * calcolo, archivi) possono solo essere scaricati: per questi file non ha
+   * senso offrire il pulsante di anteprima.
+   *
+   * @return bool Vero se il file è visualizzabile nel browser, falso altrimenti
+   */
+  public function isVisualizzabile(): bool {
+    return in_array(strtolower((string) $this->estensione),
+      ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'txt'], true);
+  }
+
+  /**
    * Restituisce la dimensione del file
    *
    * @return int Dimensione del file

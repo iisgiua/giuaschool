@@ -92,11 +92,11 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
   /**
    * Modifica l'inizio dell'inserimento delle proposte di voto
    *
-   * @param DateTime $dataProposte Inizio dell'inserimento delle proposte di voto
+   * @param DateTime|null $dataProposte Inizio dell'inserimento delle proposte di voto
    *
    * @return self Oggetto modificato
    */
-  public function setDataProposte(DateTime $dataProposte): self {
+  public function setDataProposte(?DateTime $dataProposte): self {
     $this->dataProposte = $dataProposte;
     return $this;
   }
@@ -168,7 +168,7 @@ class DefinizioneScrutinio extends DefinizioneConsiglio {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return 'Scrutini per il '.$this->getData()->format('d/m/Y');
+    return 'Scrutini per il '.($this->getData()?->format('d/m/Y') ?? '');
   }
 
 }

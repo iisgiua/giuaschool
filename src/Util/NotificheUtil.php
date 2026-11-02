@@ -165,7 +165,6 @@ class NotificheUtil {
   public function numeroVerifiche(Docente $docente) {
     // conta verifiche di oggi
     $ora = new DateTime();
-    $dati['oggi'] = 0;
     // verifiche per giorno di lezione
     $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
@@ -230,7 +229,6 @@ class NotificheUtil {
   public function numeroVerificheGenitori(Alunno $alunno) {
     // conta verifiche di oggi
     $ora = new DateTime();
-    $dati['oggi'] = 0;
     // verifiche per giorno di lezione
     $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
@@ -270,7 +268,6 @@ class NotificheUtil {
   public function numeroCompitiGenitori(Alunno $alunno) {
     // conta compiti di oggi
     $ora = new DateTime();
-    $dati['oggi'] = 0;
     // compiti per giorno di lezione
     $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')
@@ -307,7 +304,6 @@ class NotificheUtil {
   public function numeroCompiti(Docente $docente) {
     // conta verifiche di oggi
     $ora = new DateTime();
-    $dati['oggi'] = 0;
     // compiti per giorno di lezione
     $dati['oggi'] = $this->em->getRepository(Avviso::class)->createQueryBuilder('a')
       ->select('COUNT(a.id)')

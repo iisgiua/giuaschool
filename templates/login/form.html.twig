@@ -1,14 +1,16 @@
-{% extends 'base.html.twig' %}
+{% extends 'base-login.html.twig' %}
+
+{% block pagina_back_button %}
+{% endblock %}
 
 {% block pagina_contenuto %}
-<div class="container_fluid gs-mt-5 gs-ml-3 gs-mr-3">
   {# --- banner --- #}
   {% if app.session.get('/CONFIG/SISTEMA/banner_login') %}
-  <div class="alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3" role="alert"><strong class="gs-big">{{ app.session.get('/CONFIG/SISTEMA/banner_login')|raw }}</strong></div>
+  <div class="alert alert-warning gs-mb-4" role="alert"><strong class="gs-big">{{ app.session.get('/CONFIG/SISTEMA/banner_login')|raw }}</strong></div>
   {% endif %}
   {# --- messaggio manutenzione --- #}
   {% if manutenzione or 'now'|date('Y-m-d H:i') <= app.session.get('/CONFIG/SISTEMA/manutenzione_inizio') %}
-  <div class="col-sm-12 bg-danger gs-mb-4 text-center">
+  <div class="alert alert-danger gs-mb-4 text-center">
     <h1 class="gs-h2">ATTENZIONE</h1>
     <p>
       <span class="gs-big">A causa di una manutenzione programmata del sistema informatico,<br>
@@ -23,60 +25,220 @@
   {# --- sito non in manutenzione --- #}
   {% if not manutenzione %}
     {% if errore %}
-  <div class="alert alert-danger gs-mt-4 gs-mb-4 gs-big" role="alert">{{ errore.message|trans }}</div>
+  <div class="alert alert-info gs-mt-4 gs-mb-4 gs-big" role="alert">{{ errore.message|trans }}</div>
     {% endif %}
-    {# --- SPID/CIE obbligatorio --- #}
-    {% if app.session.get('/CONFIG/ACCESSO/spid') in ['O', 'A', 'M'] %}
-  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-3">
-      {# --- GOOGLE attivo --- #}
-      {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
-    <div class="panel panel-success gs-mb-3">
-      {{ include('login/form-google.html.twig') }}
-    </div>
-      {% endif %}
-    {# --- SPID/CIE --- #}
-    <div class="panel panel-default _gs-mb-2">
-    {{ include('login/form-spid.html.twig') }}
-    </div>
-  </div>
-    {# --- SPID/CIE non obbligatorio --- #}
-    {% else %}
-      {# --- GOOGLE attivo --- #}
-      {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
-  <div class="gs-row-eq-container gs-mb-2">
-    <div class="panel panel-success gs-mb-2 gs-row-eq-col2">
-      {{ include('login/form-google.html.twig') }}
-    </div>
-    <div class="gs-row-eq-space">
-      &nbsp;
-    </div>
-    <div class="panel panel-info gs-mb-2 gs-row-eq-col2">
-      {{ include('login/form-user.html.twig') }}
-    </div>
-  </div>
+    {# --- unico panel per tutti i metodi di login --- #}
+    <div class="panel panel-primary gs-mt-4">
+      <div class="panel-heading">
+        <div class="panel-title text-center"><strong>Accesso al Registro Elettronico</strong></div>
+      </div>
+      <div class="panel-body">
+        {# --- SPID/CIE obbligatorio --- #}
+        {% if app.session.get('/CONFIG/ACCESSO/spid') in ['O', 'A', 'M'] %}
+          {# --- GOOGLE attivo --- #}
+          {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
+        <div class="gs-login-section gs-mb-4">
+          <h3 class="gs-login-section-title text-center">
+            {{ include('admin/include/icona.html.twig', {nome: 'brand-google', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con Google
+          </h3>
+          <div class="help-block text-center"><span class="gs-text-normal">Clicca sul pulsante <strong>"Accedi con Google"</strong> e poi inserisci, nella pagina successiva mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@{{ app.session.get('/CONFIG/ACCESSO/id_provider_dominio') }}) e la <strong>password</strong>.</span></div>
+          <p class="gs-mb-2 text-center"><strong><em>Password Google dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></em></strong></p>
+          <div class="text-center gs-mt-3">
+            <a href="{{ path('login_gsuite') }}" class="btn btn-success"><strong>Accedi con GOOGLE</strong></a>
+          </div>
+        </div>
+        <hr class="gs-login-divider">
+          {% endif %}
         {# --- SPID/CIE --- #}
-        {% if app.session.get('/CONFIG/ACCESSO/spid') == 'S' %}
-  <div class="panel panel-default">
-    {{ include('login/form-spid.html.twig') }}
-  </div>
+        <div class="gs-login-section">
+          <h3 class="gs-login-section-title text-center">
+            {{ include('admin/include/icona.html.twig', {nome: 'shield', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con SPID - CIE - eIDAS
+            <a href="#" type="button" class="gs-help-icon" data-toggle="modal" data-target="#gs-spid-info" title="Informazioni">
+              {{ include('admin/include/icona.html.twig', {nome: 'help-circle', stile: 'outline', classe: 'gs-ml-2'}) }}
+            </a>
+          </h3>
+          <div class="help-block text-center"><span class="gs-text-normal">Clicca sul pulsante <strong>"Entra con SPID - CIE - eIDAS"</strong> per accedere utilizzando la tua identità digitale.</span></div>
+          <div class="text-center gs-mt-3">
+            <a href="{{ path('login_mimspid') }}" style="width:auto" class="italia-it-button italia-it-button-size-m button-spid" title="Usa l'accesso tramite SPID, CIE o eIDAS">
+              <span class="italia-it-button-icon"><img src="{{ asset('img/spid-ico-circle-bb.svg') }}" /></span>
+              <span class="italia-it-button-text">Entra con SPID - CIE - eIDAS</span>
+            </a>
+          </div>
+        </div>
+        {# --- SPID/CIE non obbligatorio --- #}
+        {% else %}
+          {# --- GOOGLE attivo --- #}
+          {% if app.session.get('/CONFIG/ACCESSO/id_provider') %}
+        <div class="gs-login-section gs-mb-4">
+          <h3 class="gs-login-section-title text-center">
+            {{ include('admin/include/icona.html.twig', {nome: 'brand-google', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con Google
+          </h3>
+          <div class="help-block text-center"><span class="gs-text-normal">Clicca sul pulsante <strong>"Accedi con Google"</strong> e poi inserisci, nella pagina successiva mostrata da <em>Google</em>, l'<strong>email</strong> istituzionale (@{{ app.session.get('/CONFIG/ACCESSO/id_provider_dominio') }}) e la <strong>password</strong>.</span></div>
+          <p class="gs-mb-2 text-center"><strong><em>Password Google dimenticata? <a href="https://accounts.google.com/signin/recovery">Vai al recupero password dell'utente Google</a></em></strong></p>
+          <div class="text-center gs-mt-3">
+            <a href="{{ path('login_gsuite') }}" class="btn btn-success"><strong>Accedi con Google</strong></a>
+          </div>
+        </div>
+        <hr class="gs-login-divider">
+        <div class="gs-login-section gs-mb-4">
+          <h3 class="gs-login-section-title text-center">
+            {{ include('admin/include/icona.html.twig', {nome: 'user', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con Nome Utente e Password
+          </h3>
+          <div class="help-block text-center"><span class="gs-text-normal">Inserisci nei campi sottostanti l'<strong>utente</strong> e la <strong>password</strong>, quindi clicca sul pulsante <strong>"Accedi"</strong>.</span></div>
+          <form name="login_form" method="post" class="form-horizontal">
+            <div class="form-group">
+              <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
+              <div class="input-group gs-ml-4 gs-mr-4">
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'user', stile: 'outline'}) }}</div>
+                <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
+              <div class="input-group gs-ml-4 gs-mr-4">
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}</div>
+                <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
+              </div>
+            </div>
+        {% if app.session.get('/CONFIG/ACCESSO/id_provider') is empty %}
+            <div class="form-group gs-pr-4 gs-pl-4 gs-mb-4">
+              <label for="otp" class="control-label text-primary text-left gs-d-block">{{ 'label.login_otp'|trans|raw }}</label>
+              <div class="input-group">
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'bolt', stile: 'outline'}) }}</div>
+                <input type="text" class="form-control" id="otp" name="_otp" placeholder="{{ 'label.otp'|trans }}" value="">
+              </div>
+            </div>
         {% endif %}
-      {# --- GOOGLE non attivo --- #}
-      {% else %}
-  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4">
-    <div class="panel panel-primary" >
-      {{ include('login/form-user.html.twig') }}
-    </div>
-        {# --- SPID/CIE --- #}
-        {% if app.session.get('/CONFIG/ACCESSO/spid') == 'S' %}
-    <div class="panel panel-default">
-      {{ include('login/form-spid.html.twig') }}
-    </div>
+            <p class="gs-mb-2 text-center"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
+            <div class="form-group text-center">
+              <button type="submit" class="btn btn-primary btn-lg" id="login" name="login"><strong>Accedi</strong></button>
+            </div>
+            <input type="hidden" id="csrf_token" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+          </form>
+        </div>
+            {# --- SPID/CIE --- #}
+            {% if app.session.get('/CONFIG/ACCESSO/spid') == 'S' %}
+        <hr class="gs-login-divider">
+        <div class="gs-login-section">
+          <h3 class="gs-login-section-title text-center">
+            {{ include('admin/include/icona.html.twig', {nome: 'shield', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con SPID - CIE - eIDAS
+            <a href="#" type="button" class="gs-help-icon" data-toggle="modal" data-target="#gs-spid-info" title="Informazioni">
+              {{ include('admin/include/icona.html.twig', {nome: 'help-circle', stile: 'outline', classe: 'gs-ml-2'}) }}
+            </a>
+          </h3>
+          <div class="help-block text-center"><span class="gs-text-normal">Clicca sul pulsante <strong>"Entra con SPID - CIE - eIDAS"</strong> per accedere utilizzando la tua identità digitale.</span></div>
+          <div class="text-center gs-mt-3">
+            <a href="{{ path('login_mimspid') }}" style="width:auto" class="italia-it-button italia-it-button-size-m button-spid" title="Usa l'accesso tramite SPID, CIE o eIDAS">
+              <span class="italia-it-button-icon"><img src="{{ asset('img/spid-ico-circle-bb.svg') }}" /></span>
+              <span class="italia-it-button-text">Entra con SPID - CIE - eIDAS</span>
+            </a>
+          </div>
+        </div>
+            {% endif %}
+          {# --- GOOGLE non attivo --- #}
+          {% else %}
+        <div class="gs-login-section gs-mb-4">
+          <h3 class="gs-login-section-title text-center">
+            {{ include('admin/include/icona.html.twig', {nome: 'user', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con Nome Utente e Password
+          </h3>
+          <div class="help-block text-center"><span class="gs-text-normal">Inserisci nei campi sottostanti l'<strong>utente</strong> e la <strong>password</strong>, quindi clicca sul pulsante <strong>"Accedi"</strong>.</span></div>
+          <form name="login_form" method="post" class="form-horizontal">
+            <div class="form-group">
+              <label for="username" class="sr-only">{{ 'label.username'|trans }}</label>
+              <div class="input-group gs-ml-4 gs-mr-4">
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'user', stile: 'outline'}) }}</div>
+                <input type="text" class="form-control" id="username" name="_username" required="required" placeholder="{{ 'label.username'|trans }}" value="{{ username }}">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="password" class="sr-only">{{ 'label.password'|trans }}</label>
+              <div class="input-group gs-ml-4 gs-mr-4">
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'key', stile: 'outline'}) }}</div>
+                <input type="password" class="form-control" id="password" name="_password" required="required" placeholder="{{ 'label.password'|trans }}" value="">
+              </div>
+            </div>
+        {% if app.session.get('/CONFIG/ACCESSO/id_provider') is empty %}
+            <div class="form-group gs-pr-4 gs-pl-4 gs-mb-4">
+              <label for="otp" class="control-label text-primary text-left gs-d-block">{{ 'label.login_otp'|trans|raw }}</label>
+              <div class="input-group">
+                <div class="input-group-addon">{{ include('admin/include/icona.html.twig', {nome: 'bolt', stile: 'outline'}) }}</div>
+                <input type="text" class="form-control" id="otp" name="_otp" placeholder="{{ 'label.otp'|trans }}" value="">
+              </div>
+            </div>
         {% endif %}
-  </div>
-      {% endif %}
-    {% endif %}
+            <p class="gs-mb-2 text-center"><strong><em>Password dimenticata? <a href="{{ path('login_recovery') }}">Vai al recupero password</a></strong></em></p>
+            <div class="form-group text-center">
+              <button type="submit" class="btn btn-primary btn-lg" id="login" name="login"><strong>Accedi</strong></button>
+            </div>
+            <input type="hidden" id="csrf_token" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+          </form>
+        </div>
+            {# --- SPID/CIE --- #}
+            {% if app.session.get('/CONFIG/ACCESSO/spid') == 'S' %}
+        <hr class="gs-login-divider">
+        <div class="gs-login-section">
+          <h3 class="gs-login-section-title text-center">
+            {{ include('admin/include/icona.html.twig', {nome: 'shield', stile: 'outline', classe: 'gs-mr-2'}) }}Accesso con SPID - CIE - eIDAS
+            <a href="#" type="button" class="gs-help-icon" data-toggle="modal" data-target="#gs-spid-info" title="Informazioni">
+              {{ include('admin/include/icona.html.twig', {nome: 'help-circle', stile: 'outline', classe: 'gs-ml-2'}) }}
+            </a>
+          </h3>
+          <div class="help-block text-center"><span class="gs-text-normal">Clicca sul pulsante <strong>"Entra con SPID - CIE - eIDAS"</strong> per accedere utilizzando la tua identità digitale.</span></div>
+          <div class="text-center gs-mt-3">
+            <a href="{{ path('login_mimspid') }}" style="width:auto" class="italia-it-button italia-it-button-size-m button-spid" title="Usa l'accesso tramite SPID, CIE o eIDAS">
+              <span class="italia-it-button-icon"><img src="{{ asset('img/spid-ico-circle-bb.svg') }}" /></span>
+              <span class="italia-it-button-text">Entra con SPID - CIE - eIDAS</span>
+            </a>
+          </div>
+        </div>
+            {% endif %}
+          {% endif %}
+        {% endif %}
+        {# --- APP section --- #}
+        <hr class="gs-login-divider">
+        <div class="gs-login-section">
+          <h3 class="gs-login-section-title text-center">
+            {{ include('admin/include/icona.html.twig', {nome: 'device-mobile', stile: 'outline', classe: 'gs-mr-2'}) }}Applicazioni Disponibili
+          </h3>
+          <div class="help-block text-center"><span class="gs-text-normal">Scarica le applicazioni ufficiali per accedere al Registro Elettronico dal tuo dispositivo mobile.</span></div>
+          <div class="text-center gs-mt-3">
+            <a href="/api/info/app" class="btn btn-primary btn-lg gs-app-button">
+              {{ include('admin/include/icona.html.twig', {nome: 'device-mobile', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Informazioni App</strong>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {# --- Modal unico per SPID info --- #}
+    <div class="modal fade" id="gs-spid-info" tabindex="-1" role="dialog" aria-labelledby="gs-spid-info-title">
+      <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+              {{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}
+              <span class="sr-only">{{ 'label.close'|trans }}</span>
+            </button>
+            <h3 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Informazioni sulle identità digitali</h3>
+          </div>
+          <div class="modal-body text-left">
+            <h4 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Cos'è SPID?</h4>
+            <p>SPID è il sistema di accesso che consente di utilizzare, con un'identità digitale unica, i servizi online della Pubblica Amministrazione e dei privati accreditati.
+              Se sei già in possesso di un'identità digitale, accedi con le credenziali del tuo gestore.
+              Se non hai ancora un'identità digitale, richiedila ad uno dei gestori.</p>
+            <h4 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Cos'è CIE?</h4>
+            <p>La Carta di Identità Elettronica (CIE) è il documento personale che attesta l'identità del cittadino.
+              Dotata di microprocessore, oltre a comprovare l'identità personale, permette l'accesso ai servizi digitali della Pubblica Amministrazione.</p>
+            <h4 class="modal-title text-primary gs-h3" id="gs-spid-info-title">Cos'è eIDAS?</h4>
+            <p>Il regolamento eIDAS è la base legislativa per le interazioni elettroniche tra imprese, cittadini e autorità pubbliche, migliorando la sicurezza e l'efficienza dei servizi online e delle transazioni e-business nell'Unione Europea.
+              Con il pulsante "Login with eIDAS", il nodo italiano abilita l'interoperabilità transfrontaliera delle identità digitali (eID) e la sua implementazione consentirà la circolarità delle eID italiane tra gli stati membri dell'UE.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'label.close'|trans }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
   {% endif %}
-</div>
 {% endblock %}
 
 {% block pagina_css %}
@@ -90,6 +252,14 @@
 <script>
 $(document).ready(function() {
   $('[data-toggle="popover"]').popover();
+
+  $('#gs-spid-info').on('show.bs.modal', function () {
+    $('body').css('overflow', 'hidden');
+  });
+
+  $('#gs-spid-info').on('hidden.bs.modal', function () {
+    $('body').css('overflow', 'auto');
+  });
 });
 </script>
 {% endblock %}

@@ -34,6 +34,7 @@ use IntlDateFormatter;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
@@ -183,6 +184,10 @@ class RichiesteController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.modulo_allegati_mancanti')));
         $this->reqstack->getSession()->remove($varSessione);
       }
+      if (!$ric->esisteTemplate('moduli', $definizioneRichiesta->getModulo())) {
+        // errore: template del modulo non disponibile
+        $form->addError(new FormError($trans->trans('exception.modulo_template_mancante')));
+      }
       if ($form->isValid()) {
         // data richiesta
         $data = $definizioneRichiesta->getUnica() ? null : $form->get('data')->getData();
@@ -195,16 +200,24 @@ class RichiesteController extends BaseController {
           ->setStato('I')
           ->setMessaggio('');
         $this->em->flush();
-        // crea documento PDF
-        [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
-          $utente->getClasse(), $valori, $data, $invio);
-        // imposta eventuali allegati
-        $allegati = $ric->impostaAllegati($utente, $utente->getClasse(), $documentoId, $allegatiTemp);
+        try {
+          // crea documento PDF
+          [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
+            $utente->getClasse(), $valori, $data, $invio);
+          // imposta eventuali allegati
+          $allegati = $ric->impostaAllegati($utente, $utente->getClasse(), $documentoId, $allegatiTemp);
+        } catch (\Exception $e) {
+          // errore: elimina la richiesta incompleta per non bloccare un nuovo invio
+          $this->em->remove($richiesta);
+          $this->em->flush();
+          throw $e;
+        }
         $this->reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
         $richiesta
           ->setDocumento($documento)
           ->setAllegati($allegati);
+        $this->em->flush();
         $dblogger->logAzione('RICHIESTE', 'Invio richiesta');
         // redirezione
         return $this->redirectToRoute('richieste_lista');
@@ -223,9 +236,13 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/richieste/delete/{id}', name: 'richieste_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/richieste/delete/{id}', name: 'richieste_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
-  public function delete(LogHandler $dblogger, int $id): Response {
+  public function delete(Request $request, LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla richiesta
     $richiesta = $this->em->getRepository(Richiesta::class)->findOneBy(['id' => $id, 'stato' => ['I', 'G']]);
     if (!$richiesta) {
@@ -382,6 +399,10 @@ class RichiesteController extends BaseController {
     }
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data, $alunno->getClasse()->getSede());
+    if (empty($orario)) {
+      // errore: orario non definito per la data indicata
+      throw $this->createNotFoundException('exception.orario_sede_invalido');
+    }
     // controlla uscita
     $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno,
       'data' => $data]);
@@ -805,11 +826,15 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/richieste/classe/delete/{classe}/{id}', name: 'richieste_classe_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/richieste/classe/delete/{classe}/{id}', name: 'richieste_classe_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classeDelete(LogHandler $dblogger,
+  public function classeDelete(Request $request, LogHandler $dblogger,
                                #[MapEntity] Classe $classe,
                                int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla richiesta
     $criteri = $this->getUser()->controllaRuolo('D') ? ['id' => $id, 'stato' => ['I', 'G']] :
       ['id' => $id, 'utente' => $this->getUser(), 'stato' => ['I', 'G']];
@@ -890,6 +915,12 @@ class RichiesteController extends BaseController {
       // controlla se esiste già una richiesta
       $altraRichiesta = $this->em->getRepository(Richiesta::class)->findOneBy([
         'definizioneRichiesta' => $modulo, 'classe' => $classe, 'stato' => ['I', 'G']]);
+      if ($altraRichiesta && $altraRichiesta->getStato() === 'I' && $altraRichiesta->getDocumento() === '') {
+        // richiesta incompleta (invio precedente non riuscito): la elimina per permettere il nuovo invio
+        $this->em->remove($altraRichiesta);
+        $this->em->flush();
+        $altraRichiesta = null;
+      }
       if ($altraRichiesta) {
         // errore: esiste già altra richiesta
         throw $this->createNotFoundException('exception.not_allowed');
@@ -902,7 +933,7 @@ class RichiesteController extends BaseController {
       ->setClasse($classe);
     $this->em->persist($richiesta);
     // informazioni per la visualizzazione
-    $info['modulo'] = '@data/moduli/'.$definizioneRichiesta->getModulo();
+    $info['modulo'] = $this->templateModulo('moduli', $definizioneRichiesta->getModulo());
     $info['allegati'] = $definizioneRichiesta->getAllegati();
     $info['classe'] = $classe;
     $info['valore_classe'] = $classe.' - '.$classe->getSede()->getNomeBreve();
@@ -916,6 +947,10 @@ class RichiesteController extends BaseController {
       $valori = [];
       // controllo errori
       foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
+        // un tipo di campo non gestito da RichiestaType non crea il campo nel form
+        if (!$form->has($nome)) {
+          continue;
+        }
         if ($form->get($nome)->getData() === null && $campo[1]) {
           // campo obbligatorio vuoto
           $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
@@ -960,6 +995,10 @@ class RichiesteController extends BaseController {
         $form->addError(new FormError($trans->trans('exception.modulo_allegati_mancanti')));
         $this->reqstack->getSession()->remove($varSessione);
       }
+      if (!$ric->esisteTemplate('moduli', $definizioneRichiesta->getModulo())) {
+        // errore: template del modulo non disponibile
+        $form->addError(new FormError($trans->trans('exception.modulo_template_mancante')));
+      }
       if ($form->isValid()) {
         // data richiesta
         $data = $definizioneRichiesta->getUnica() ? null : $form->get('data')->getData();
@@ -972,16 +1011,24 @@ class RichiesteController extends BaseController {
           ->setStato('I')
           ->setMessaggio('');
         $this->em->flush();
-        // crea documento PDF
-        [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
-          $classe, $valori, $data, $invio);
-        // imposta eventuali allegati
-        $allegati = $ric->impostaAllegati($utente, $classe, $documentoId, $allegatiTemp);
+        try {
+          // crea documento PDF
+          [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
+            $classe, $valori, $data, $invio);
+          // imposta eventuali allegati
+          $allegati = $ric->impostaAllegati($utente, $classe, $documentoId, $allegatiTemp);
+        } catch (\Exception $e) {
+          // errore: elimina la richiesta incompleta per non bloccare un nuovo invio
+          $this->em->remove($richiesta);
+          $this->em->flush();
+          throw $e;
+        }
         $this->reqstack->getSession()->remove($varSessione);
         // ok: memorizzazione e log
         $richiesta
           ->setDocumento($documento)
           ->setAllegati($allegati);
+        $this->em->flush();
         $dblogger->logAzione('RICHIESTE', 'Invio modulo evacuazione');
         // redirezione
         return $this->redirectToRoute('richieste_classe', ['classe'=> $classe->getId()]);
@@ -1063,16 +1110,10 @@ class RichiesteController extends BaseController {
     // pagina di risposta
     if ($formato == 'C') {
       // crea documento CSV
-      $csv = $this->renderView('richieste/modulo_evacuazione.csv.twig', [
-        'dati' => $dati,
-        'info' => $info]);
-      // invia il documento
+      // crea documento CSV
+      // il nome del file dipende dal tipo di modulo esportato
       $nomefile = $criteri['tipo'] == 'V' ? 'prove-evacuazione.csv' : 'designazioni-evacuazione.csv';
-      $response = new Response($csv);
-      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-      $response->headers->set('Content-Disposition', $disposition);
-      $response->headers->set('Content-Type', 'text/csv');
-      return $response;
+      return $this->renderCsv('richieste', 'modulo_evacuazione', $nomefile, $dati, $info);
     } elseif ($formato == 'Z') {
       // crea archivio ZIP
       $zipPath = $this->getParameter('kernel.project_dir').'/FILES/tmp/evacuazione-'.uniqid().'.zip';
@@ -1094,6 +1135,7 @@ class RichiesteController extends BaseController {
         // invia il documento
         $nomefile = $criteri['tipo'] == 'V' ? 'prove-evacuazione.zip' : 'designazioni-evacuazione.zip';
         $response = new BinaryFileResponse($zipPath);
+        $response->deleteFileAfterSend(true);
         $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
         $response->headers->set('Content-Disposition', $disposition);
         $response->headers->set('Content-Type', 'application/zip');
@@ -1187,16 +1229,7 @@ class RichiesteController extends BaseController {
     // pagina di risposta
     if ($formato == 'C') {
       // crea documento CSV
-      $csv = $this->renderView('richieste/modulo_lista.csv.twig', [
-        'dati' => $dati,
-        'info' => $info]);
-      // invia il documento
-      $nomefile = 'modulo.csv';
-      $response = new Response($csv);
-      $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
-      $response->headers->set('Content-Disposition', $disposition);
-      $response->headers->set('Content-Type', 'text/csv');
-      return $response;
+      return $this->renderCsv('richieste', 'modulo_lista', 'modulo.csv', $dati, $info);
     }
     // visualizza pagina HTML
     return $this->renderHtml('richieste', 'modulo_lista', $dati, $info, [$form->createView()]);
@@ -1255,6 +1288,12 @@ class RichiesteController extends BaseController {
     // controlla se esiste già una risposta
     $altra = $this->em->getRepository(Richiesta::class)->findOneBy(['definizioneRichiesta' => $modulo,
       'utente' => $utente, 'stato' => ['I', 'G']]);
+    if ($altra && $altra->getStato() === 'I' && $altra->getDocumento() === '') {
+      // risposta incompleta (invio precedente non riuscito): la elimina per permettere il nuovo invio
+      $this->em->remove($altra);
+      $this->em->flush();
+      $altra = null;
+    }
     if ($altra) {
       // errore: esiste già altra risposta
       throw $this->createNotFoundException('exception.not_allowed');
@@ -1277,6 +1316,10 @@ class RichiesteController extends BaseController {
       $valori = [];
       // controllo errori
       foreach ($consultazione->getCampi() as $nome => $campo) {
+        // un tipo di campo non gestito da RichiestaType non crea il campo nel form
+        if (!$form->has($nome)) {
+          continue;
+        }
         if ($form->get($nome)->getData() === null && $campo[1]) {
           // campo obbligatorio vuoto
           $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
@@ -1284,6 +1327,10 @@ class RichiesteController extends BaseController {
           // memorizza valore
           $valori[$nome] = $form->get($nome)->getData();
         }
+      }
+      if (!$ric->esisteTemplate('consultazioni', $consultazione->getModulo())) {
+        // errore: template della consultazione non disponibile
+        $form->addError(new FormError($trans->trans('exception.consultazione_template_mancante')));
       }
       if ($form->isValid()) {
         // memorizza risposta
@@ -1294,13 +1341,21 @@ class RichiesteController extends BaseController {
           ->setStato('I')
           ->setMessaggio('');
         $this->em->flush();
-        // crea documento PDF
-        $documento = $ric->rispostaPdf($consultazione, $utente->getId(), $risposta->getId(), $classe,
-          $valori, $invio);
+        try {
+          // crea documento PDF
+          $documento = $ric->rispostaPdf($consultazione, $utente->getId(), $risposta->getId(), $classe,
+            $valori, $invio);
+        } catch (\Exception $e) {
+          // errore: elimina la risposta incompleta per non bloccare un nuovo invio
+          $this->em->remove($risposta);
+          $this->em->flush();
+          throw $e;
+        }
         // ok: memorizzazione e log
         $risposta
           ->setDocumento($documento)
           ->setInviata($invio);
+        $this->em->flush();
         $dblogger->logAzione('CONSULTAZIONI', 'Invio risposta');
         // redirezione
         return $this->redirectToRoute('richieste_lista');
@@ -1420,7 +1475,58 @@ class RichiesteController extends BaseController {
   }
 
   /**
-   * Crea un nuovo modulo per il coordinatore di classe
+   * Crea l'archivio ZIP con i moduli di evacuazione delle richieste indicate
+   *
+   * @param array $dati Dati delle richieste selezionate
+   *
+   * @return Response|null Pagina di risposta con l'archivio, null se non è stato creato
+   */
+  private function archivioEvacuazione(array $dati): ?Response {
+    $zipPath = $this->getParameter('kernel.project_dir').'/FILES/tmp/evacuazione-'.uniqid().'.zip';
+    $zip = new ZipArchive();
+    if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
+      // errore
+      $this->addFlash('danger', 'exception.impossibile_creare_zip');
+      return null;
+    }
+    // aggiunta dei file
+    $aggiunti = 0;
+    foreach ($dati['lista'] as $richiesta) {
+      $nomeClasse = $richiesta->getClasse()->getAnno().$richiesta->getClasse()->getSezione().
+        $richiesta->getClasse()->getGruppo();
+      $file = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$nomeClasse.'/documenti/'.
+        $richiesta->getDocumento();
+      if (file_exists($file) && $zip->addFile($file, $nomeClasse.'/'.$richiesta->getDocumento())) {
+        $aggiunti++;
+      }
+    }
+    // chiusura del file ZIP
+    $zip->close();
+    if ($aggiunti == 0) {
+      // nessun file aggiunto: elimina l'eventuale archivio vuoto
+      if (file_exists($zipPath)) {
+        unlink($zipPath);
+      }
+      $this->addFlash('warning', 'exception.nessun_allegato_archivio');
+      return null;
+    }
+    if (!file_exists($zipPath)) {
+      // errore: archivio non creato
+      $this->addFlash('danger', 'exception.impossibile_creare_zip');
+      return null;
+    }
+    // invia il documento
+    $nomefile = 'prove-evacuazione.zip';
+    $response = new BinaryFileResponse($zipPath);
+    $response->deleteFileAfterSend(true);
+    $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
+    $response->headers->set('Content-Disposition', $disposition);
+    $response->headers->set('Content-Type', 'application/zip');
+    return $response;
+  }
+
+  /**
+   * Verifica che il modulo di richiesta esista e che l'utente sia autorizzato a utilizzarlo
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
@@ -1475,112 +1581,66 @@ class RichiesteController extends BaseController {
         throw $this->createNotFoundException('exception.not_allowed');
       }
     }
-    // crea richiesta
-    $richiesta = (new Richiesta())
-      ->setDefinizioneRichiesta($definizioneRichiesta)
-      ->setUtente($utente)
-      ->setClasse($classe);
-    $this->em->persist($richiesta);
-    // informazioni per la visualizzazione
-    $info['modulo'] = '@data/moduli/'.$definizioneRichiesta->getModulo();
-    $info['allegati'] = $definizioneRichiesta->getAllegati();
-    $info['classe'] = $classe;
-    $info['valore_classe'] = $classe.' - '.$classe->getSede()->getNomeBreve();
-    $info['valore_data'] = (new DateTime())->format('Y-m-d');
-    // form di inserimento
-    $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
-      'values' => [$definizioneRichiesta->getCampi(), $definizioneRichiesta->getUnica()]]);
-    $form->handleRequest($request);
-    if ($form->isSubmitted()) {
-      $invio = new DateTime();
-      $valori = [];
-      // controllo errori
-      foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
-        if ($form->get($nome)->getData() === null && $campo[1]) {
-          // campo obbligatorio vuoto
-          $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
-        } else {
-          // memorizza valore
-          $valori[$nome] = $form->get($nome)->getData();
-        }
-      }
-      if (!$definizioneRichiesta->getUnica()) {
-        // controllo data
-        if ($form->get('data')->getData() === null) {
-          // campo data vuoto
-          $form->addError(new FormError($trans->trans('exception.campo_data_vuoto')));
-        } elseif (!$definizioneRichiesta->getGestione() && $form->get('data')->getData()->format('Y-m-d') > $info['valore_data']) {
-          // per i moduli la data è sempre quella odierna
-          $form->addError(new FormError($trans->trans('exception.campo_data_successivo_oggi')));
-        } else {
-          // controlla se richiesta esiste già per la data
-          $altra = $this->em->getRepository(Richiesta::class)->findOneBy([
-            'definizioneRichiesta' => $modulo, 'stato' => ['I', 'G'], 'classe' => $classe,
-            'data' => $form->get('data')->getData()]);
-          if ($altra) {
-            // richiesta già presente
-            $form->addError(new FormError($trans->trans('exception.richiesta_esistente')));
-          }
-          if ($definizioneRichiesta->getGestione()) {
-            // controlla scadenza
-            $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
-            $scadenza = clone ($form->get('data')->getData());
-            $scadenza->modify('-1 day +'.substr((string) $oraScadenza, 0, 2).' hour +'.substr((string) $oraScadenza, 3, 2).' minute');
-            if ($invio > $scadenza) {
-              // richiesta inviata oltre i termini
-              $form->addError(new FormError($trans->trans('exception.richiesta_ora_invio', [
-                'ora' => $oraScadenza])));
-            }
-          }
-        }
-      }
-      // controlla allegati
-      $allegatiTemp = $this->reqstack->getSession()->get($varSessione, []);
-      if (count($allegatiTemp) < $info['allegati']) {
-        $form->addError(new FormError($trans->trans('exception.modulo_allegati_mancanti')));
-        $this->reqstack->getSession()->remove($varSessione);
-      }
-      if ($form->isValid()) {
-        // data richiesta
-        $data = $definizioneRichiesta->getUnica() ? null : $form->get('data')->getData();
-        // memorizza richiesta
-        $richiesta
-          ->setValori($valori)
-          ->setInviata($invio)
-          ->setGestita(null)
-          ->setData($data)
-          ->setStato('I')
-          ->setMessaggio('');
-        $this->em->flush();
-        // crea documento PDF
-        [$documento, $documentoId] = $ric->richiestaPdf($definizioneRichiesta, $utente->getId(), $richiesta->getId(),
-          $classe, $valori, $data, $invio);
-        // gestioone designazione per evacuazione
-        if ($definizioneRichiesta->getTipo() == 'Z') {
-          // copia documento nella scheda di evacuazione della classe
-          $classeNome = $classe->getAnno().$classe->getSezione().$classe->getGruppo();
-          $fileScheda = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$classeNome.
-            '/documenti/'.$classeNome.'-scheda-evacuazione.pdf';
-          $fileDocumento = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.$classeNome.
-            '/documenti/'.$documento;
-          copy($fileDocumento, $fileScheda);
-        }
+    return $definizioneRichiesta;
+  }
 
-
-        // imposta eventuali allegati
-        $allegati = $ric->impostaAllegati($utente, $classe, $documentoId, $allegatiTemp);
-        $this->reqstack->getSession()->remove($varSessione);
-        // ok: memorizzazione e log
-        $richiesta
-          ->setDocumento($documento)
-          ->setAllegati($allegati);
-        $dblogger->logAzione('RICHIESTE', 'Invio modulo assegnazione studenti per evacuazione');
-        // redirezione
-        return $this->redirectToRoute('richieste_coordinatore', ['classe'=> $classe->getId()]);
+  /**
+   * Controlla i dati inseriti nel modulo di richiesta, aggiungendo al form gli eventuali errori
+   *
+   * @param FormInterface $form Form di inserimento della richiesta
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param mixed $definizioneRichiesta Definizione del modulo di richiesta
+   * @param int $modulo Identificativo del modulo di richiesta
+   * @param mixed $utente Utente che sta effettuando la richiesta
+   * @param mixed $invio Data e ora di invio della richiesta
+   *
+   * @return array Valori inseriti nel modulo
+   */
+  private function controllaCampiModulo(FormInterface $form, TranslatorInterface $trans, mixed $definizioneRichiesta,
+                                        int $modulo, mixed $utente, mixed $invio): array {
+    $valori = [];
+    foreach ($definizioneRichiesta->getCampi() as $nome => $campo) {
+      // un tipo di campo non gestito da RichiestaType non crea il campo nel form:
+      // senza il controllo si otterrebbe un errore fatale di Form::get()
+      if (!$form->has($nome)) {
+        continue;
+      }
+      if ($form->get($nome)->getData() === null && $campo[1]) {
+        // campo obbligatorio vuoto
+        $form->addError(new FormError($trans->trans('exception.campo_obbligatorio_vuoto')));
+      } else {
+        // memorizza valore
+        $valori[$nome] = $form->get($nome)->getData();
       }
     }
-    // pagina di risposta
-    return $this->renderHtml('richieste', 'coordinatore_add', $dati, $info, [$form->createView(),  'message.richieste_coordinatore_add']);
+    if (!$definizioneRichiesta->getUnica()) {
+      // controllo data
+      if ($form->get('data')->getData() === null) {
+        // campo data vuoto
+        $form->addError(new FormError($trans->trans('exception.campo_data_vuoto')));
+      } else {
+        // controlla se richiesta esiste già per la data
+        $altra = $this->em->getRepository(Richiesta::class)->findOneBy([
+          'definizioneRichiesta' => $modulo, 'utente' => $utente, 'stato' => ['I', 'G'],
+          'data' => $form->get('data')->getData()]);
+        if ($altra) {
+          // richiesta già presente
+          $form->addError(new FormError($trans->trans('exception.richiesta_esistente')));
+        }
+        if ($definizioneRichiesta->getGestione()) {
+          // controlla scadenza
+          $oraScadenza = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/scadenza_invio_richiesta');
+          $scadenza = clone $form->get('data')->getData();
+          $scadenza->modify('-1 day +'.substr((string) $oraScadenza, 0, 2).' hour +'.substr((string) $oraScadenza, 3, 2).' minute');
+          if ($invio > $scadenza) {
+            // richiesta inviata oltre i termini
+            $form->addError(new FormError($trans->trans('exception.richiesta_ora_invio', [
+              'ora' => $oraScadenza])));
+          }
+        }
+      }
+    }
+    return $valori;
   }
 
   /**
@@ -1628,6 +1688,26 @@ class RichiesteController extends BaseController {
     $dblogger->logAzione('RICHIESTE', 'Annulla modulo assegnazione studenti per evacuazione');
     // redirezione
     return $this->redirectToRoute('richieste_coordinatore', ['classe'=> $classe->getId()]);
+  }
+
+  /**
+   * Restituisce il template da usare per visualizzare il modulo indicato, ricorrendo
+   * ad un modulo generico se il file personalizzato non è presente.
+   *
+   * @param string $tipo Tipo di modulo: moduli, consultazioni, autorizzazioni
+   * @param string|null $modulo Nome del file del modulo personalizzato
+   *
+   * @return string Nome logico del template da includere
+   */
+  private function templateModulo(string $tipo, ?string $modulo): string {
+    // file personalizzato nel namespace @data (PERSONAL/data)
+    $percorso = $this->getParameter('kernel.project_dir').'/PERSONAL/data/'.$tipo.'/'.$modulo;
+    if (!empty($modulo) && (is_file($percorso) || is_file($percorso.'.twig'))) {
+      // modulo personalizzato presente
+      return '@data/'.$tipo.'/'.$modulo;
+    }
+    // modulo generico di riserva
+    return 'richieste/modulo_default.html.twig';
   }
 
 }

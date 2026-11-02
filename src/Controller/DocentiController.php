@@ -174,9 +174,13 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/docenti/abilita/{id}/{abilita}', name: 'docenti_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/docenti/abilita/{id}/{abilita}', name: 'docenti_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function abilita(int $id, int $abilita): Response {
+  public function abilita(Request $request, int $id, int $abilita): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo docente
     $docente = $this->em->getRepository(Docente::class)->find($id);
     if (!$docente) {
@@ -267,12 +271,16 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/docenti/password/{id}/{tipo}', name: 'docenti_password', requirements: ['id' => '\d+', 'tipo' => 'E|P'], methods: ['GET'])]
+  #[Route(path: '/docenti/password/{id}/{tipo}', name: 'docenti_password', requirements: ['id' => '\d+', 'tipo' => 'E|P'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function password(Request $request, UserPasswordHasherInterface $hasher,
                            PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
                            LoggerInterface $logger, LogHandler $dblogger, int $id,
                            string $tipo): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('password', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // controlla docente
     $docente = $this->em->getRepository(Docente::class)->find($id);
     if (!$docente) {
@@ -343,14 +351,19 @@ class DocentiController extends BaseController {
   /**
    * Reset della funzione OTP per i docenti
    *
+   * @param Request $request Pagina di richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id ID dell'utente
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/docenti/otp/{id}', name: 'docenti_reset', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/docenti/otp/{id}', name: 'docenti_reset', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function reset(LogHandler $dblogger, int $id): Response {
+  public function reset(Request $request, LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla docente
     $docente = $this->em->getRepository(Docente::class)->find($id);
     if (!$docente) {
@@ -478,9 +491,13 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/docenti/staff/delete/{id}', name: 'docenti_staff_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/docenti/staff/delete/{id}', name: 'docenti_staff_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function staffDelete(int $id): Response {
+  public function staffDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla utente staff
     $staff = $this->em->getRepository(Staff::class)->find($id);
     if (!$staff) {
@@ -569,11 +586,13 @@ class DocentiController extends BaseController {
       }
       $docente = $classe->getCoordinatore();
       $classe_old = $classe->getId();
-      $docente_old = $docente->getId();
+      $docente_old = $docente?->getId();
     } else {
       // azione add
       $classe = null;
       $docente = null;
+      $classe_old = null;
+      $docente_old = null;
     }
     // form
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(null, false);
@@ -587,7 +606,7 @@ class DocentiController extends BaseController {
       $docente = $form->get('docente')->getData();
       $classe->setCoordinatore($docente);
       // provisioning
-      if (!$id) {
+      if (!$id || $docente_old === null) {
         // aggiunge coordinatore
         $provisioning = (new Provisioning())
           ->setUtente($docente)
@@ -621,17 +640,25 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/docenti/coordinatori/delete/{id}', name: 'docenti_coordinatori_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/docenti/coordinatori/delete/{id}', name: 'docenti_coordinatori_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function coordinatoriDelete(int $id): Response {
+  public function coordinatoriDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla classe
     $classe = $this->em->getRepository(Classe::class)->find($id);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // toglie coordinatore
+    // toglie coordinatore (se presente)
     $docente_old = $classe->getCoordinatore();
+    if (!$docente_old) {
+      // nessun coordinatore da rimuovere
+      return $this->redirectToRoute('docenti_coordinatori');
+    }
     $classe->setCoordinatore(null);
     // provisioning
     $provisioning = (new Provisioning())
@@ -719,11 +746,13 @@ class DocentiController extends BaseController {
       }
       $docente = $classe->getSegretario();
       $classe_old = $classe->getId();
-      $docente_old = $docente->getId();
+      $docente_old = $docente?->getId();
     } else {
       // azione add
       $classe = null;
       $docente = null;
+      $classe_old = null;
+      $docente_old = null;
     }
     // form
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(null, false);
@@ -737,8 +766,8 @@ class DocentiController extends BaseController {
       $docente = $form->get('docente')->getData();
       $classe->setSegretario($docente);
       // provisioning
-      if (!$id) {
-        // aggiunge coordinatore
+      if (!$id || $docente_old === null) {
+        // aggiunge segretario
         $provisioning = (new Provisioning())
           ->setUtente($docente)
           ->setFunzione('aggiungeCoordinatore')
@@ -771,17 +800,25 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/docenti/segretari/delete/{id}', name: 'docenti_segretari_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/docenti/segretari/delete/{id}', name: 'docenti_segretari_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function segretariDelete(int $id): Response {
+  public function segretariDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla classe
     $classe = $this->em->getRepository(Classe::class)->find($id);
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // toglie coordinatore
+    // toglie segretario (se presente)
     $docente_old = $classe->getSegretario();
+    if (!$docente_old) {
+      // nessun segretario da rimuovere
+      return $this->redirectToRoute('docenti_segretari');
+    }
     $classe->setSegretario(null);
     // provisioning
     $provisioning = (new Provisioning())
@@ -1034,9 +1071,13 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/docenti/cattedre/abilita/{id}/{abilita}', name: 'docenti_cattedre_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/docenti/cattedre/abilita/{id}/{abilita}', name: 'docenti_cattedre_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function cattedreEnable(int $id, int $abilita): Response {
+  public function cattedreEnable(Request $request, int $id, int $abilita): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo cattedra
     $cattedra = $this->em->getRepository(Cattedra::class)->find($id);
     if (!$cattedra) {
@@ -1184,9 +1225,13 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/docenti/responsabiliBes/delete/{id}', name: 'docenti_responsabiliBes_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/docenti/responsabiliBes/delete/{id}', name: 'docenti_responsabiliBes_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function responsabiliBesDelete(int $id): Response {
+  public function responsabiliBesDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla utente
     $docente = $this->em->getRepository(Docente::class)->find($id);
     if (!$docente) {
@@ -1301,14 +1346,19 @@ class DocentiController extends BaseController {
           // modifica
           $utente = $form->get('utente')->getData();
         }
-        // imposta tipo rappresentante
-        $utente->setRappresentante($nuoviTipi);
-        // memorizza dati
-        $this->em->flush();
-        // messaggio
-        $this->addFlash('success', 'message.update_ok');
-        // redirect
-        return $this->redirectToRoute('docenti_rappresentanti');
+        if (!$utente) {
+          // utente selezionato non valido: errore di compilazione e non di sistema
+          $form->addError(new FormError($trans->trans('exception.invalid_user')));
+        } else {
+          // imposta tipo rappresentante
+          $utente->setRappresentante($nuoviTipi);
+          // memorizza dati
+          $this->em->flush();
+          // messaggio
+          $this->addFlash('success', 'message.update_ok');
+          // redirect
+          return $this->redirectToRoute('docenti_rappresentanti');
+        }
       }
     }
     // mostra la pagina di risposta
@@ -1323,9 +1373,13 @@ class DocentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/docenti/rappresentanti/delete/{id}', name: 'docenti_rappresentanti_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/docenti/rappresentanti/delete/{id}', name: 'docenti_rappresentanti_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function rappresentantiDelete(int $id): Response {
+  public function rappresentantiDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla utente
     $utente = $this->em->getRepository(Docente::class)->find($id);
     if (!$utente) {

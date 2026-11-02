@@ -218,7 +218,8 @@ public function opzioni(?int $sede = null, bool $breve=true, $ordAnno=true, bool
     $dati = [];
     // query base
     $classi = $this->createQueryBuilder('c')
-      ->join('c.sede', 's');
+      ->join('c.sede', 's')->addSelect('s')
+      ->leftJoin('c.corso', 'co')->addSelect('co');
     if ($sede) {
       $classi = $classi->where('c.sede = :sede')->setParameter('sede', $sede);
     }

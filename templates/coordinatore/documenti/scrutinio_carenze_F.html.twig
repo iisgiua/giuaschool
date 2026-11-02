@@ -40,7 +40,7 @@
       <td width="30%" align="center"><strong>MATERIA</strong></td>
       <td width="70%" align="center"><strong>Argomenti da recuperare</strong></td>
     </tr>
-{% for idmat,mat in dati.materie %}
+{% for idmat, mat in dati.materie %}
   {% if dati.carenze[idmat].unico is defined %}
     <tr>
       <td align="left"><strong>{{ mat.nome }}</strong></td>

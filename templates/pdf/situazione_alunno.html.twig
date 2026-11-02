@@ -8,9 +8,9 @@
 </p>
 <p>&nbsp;</p>
 {% if dati.voti is defined %}
-  {% for materia,v in dati.voti %}
-    {% for periodo,v1 in v %}
-<br><div style="text-align:center"><strong>Valutazioni: {{materia}} - {{ periodo }}</strong></div>
+  {% for materia, v in dati.voti %}
+    {% for periodo, v1 in v %}
+<br><div style="text-align:center"><strong>Valutazioni: {{ materia }} - {{ periodo }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">
     <td width="12%" style="text-align:center"><strong>Data</strong></td>
@@ -19,7 +19,7 @@
     <td width="8%" style="text-align:center"><strong>Voto</strong></td>
     <td width="42%" style="text-align:center"><strong>Giudizio</strong></td>
   </tr>
-      {% for data,v2 in v1 %}
+      {% for data, v2 in v1 %}
         {% for e in v2 %}
   <tr nobr="true">
     <td style="font-size:9pt">{{ e.data }}</td>
@@ -40,16 +40,16 @@
 <p>&nbsp;</p>
 {% endif %}
 {% if dati.scrutini is defined %}
-  {% for periodo,v in dati.scrutini %}
+  {% for periodo, v in dati.scrutini %}
     {% if (periodo == 'P' or periodo == 'S') and not alunno.frequenzaEstero %}
-<br><div style="text-align:center"><strong>Scrutinio del {{ ('label.periodo_'~periodo)|trans }}</strong></div>
+<br><div style="text-align:center"><strong>Scrutinio del {{ ('label.periodo_' ~ periodo)|trans }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">
     <td width="30%" style="text-align:center"><strong>Materia</strong></td>
     <td width="50%" style="text-align:center"><strong>Voto</strong></td>
     <td width="20%" style="text-align:center"><strong>Ore di assenza</strong></td>
   </tr>
-      {% for materia,m in v.materie %}
+      {% for materia, m in v.materie %}
   <tr nobr="true" style="font-size:11pt">
     <td><strong>{{ m.nome }}</strong></td>
         {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
@@ -59,7 +59,7 @@
     <td>
       {{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}
           {% if v.debiti[materia] is defined %}
-      <br><span style="font-size:10pt"><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</span>
+      <br><span style="font-size:10pt"><strong>Modalità di recupero:</strong> {{ ('label.recupero_' ~ v.debiti[materia].recupero)|trans }}</span>
       <br><span style="font-size:10pt"><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</span>
           {% endif %}
     </td>
@@ -73,28 +73,28 @@
     {% elseif periodo == 'F' %}
       {% if v.esito.esito == 'L' %}
 <div style="text-align:center">
-  <strong>{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+  <strong>{{ ('label.periodo_' ~ periodo)|trans }}</strong><br>
   <strong>{{ 'label.no_scrutinabile_assenze'|trans }}</strong>
 </div>
       {% elseif v.esito.esito == 'R' %}
 <div style="text-align:center">
-  <strong>{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+  <strong>{{ ('label.periodo_' ~ periodo)|trans }}</strong><br>
   <strong>{{ 'label.no_scrutinabile_cessata_frequenza'|trans }}</strong>
 </div>
       {% elseif v.esito.esito == 'E' %}
 <div style="text-align:center">
-  <strong>{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+  <strong>{{ ('label.periodo_' ~ periodo)|trans }}</strong><br>
   <strong>{{ 'label.frequenza_estero'|trans }}</strong>
 </div>
       {% else %}
-<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }} - Esito: {{ ('label.esito_'~v.esito.esito)|trans }}</strong></div>
+<br><div style="text-align:center"><strong>{{ ('label.periodo_' ~ periodo)|trans }} - Esito: {{ ('label.esito_' ~ v.esito.esito)|trans }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">
     <td width="49%" style="text-align:center"><strong>Materia</strong></td>
     <td width="35%" style="text-align:center"><strong>Voto</strong></td>
     <td width="16%" style="text-align:center"><strong>Ore di assenza</strong></td>
   </tr>
-        {% for materia,m in v.materie %}
+        {% for materia, m in v.materie %}
   <tr nobr="true">
     <td><strong>{{ m.nome }}</strong></td>
           {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
@@ -104,7 +104,7 @@
       <td>
         {{ v.valutazioni[m.tipo].lista[v.voti[materia].unico] }}
             {% if v.esito.esito == 'S' and v.debiti[materia] is defined %}
-        <br><span style="font-size:10pt"><strong>Modalità di recupero:</strong> {{ ('label.recupero_'~v.debiti[materia].recupero)|trans }}</span>
+        <br><span style="font-size:10pt"><strong>Modalità di recupero:</strong> {{ ('label.recupero_' ~ v.debiti[materia].recupero)|trans }}</span>
         <br><span style="font-size:10pt"><strong>Argomenti da recuperare:</strong> {{ v.debiti[materia].debito }}</span>
             {% endif %}
       </td>
@@ -119,18 +119,18 @@
     {% elseif periodo == 'G' %}
       {% if v.esito.esito == 'X' %}
 <div style="text-align:center">
-  <strong>{{ ('label.periodo_'~periodo)|trans }}</strong><br>
+  <strong>{{ ('label.periodo_' ~ periodo)|trans }}</strong><br>
   <strong>{{ 'label.esito_X'|trans }}</strong>
 </div>
       {% else %}
-<br><div style="text-align:center"><strong>{{ ('label.periodo_'~periodo)|trans }} - Esito: {{ ('label.esito_'~v.esito.esito)|trans }}</strong></div>
+<br><div style="text-align:center"><strong>{{ ('label.periodo_' ~ periodo)|trans }} - Esito: {{ ('label.esito_' ~ v.esito.esito)|trans }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">
     <td width="34%" style="text-align:center"><strong>Materia</strong></td>
     <td width="50%" style="text-align:center"><strong>Voto</strong></td>
     <td width="16%" style="text-align:center"><strong>Ore di assenza</strong></td>
   </tr>
-        {% for materia,m in v.materie %}
+        {% for materia, m in v.materie %}
   <tr nobr="true">
     <td><strong>{{ m.nome }}</strong></td>
           {% if m.tipo == 'R' and alunno.religione != 'S' and alunno.religione != 'A' %}
@@ -188,7 +188,7 @@
     <td>{{ dati.assenze.stat.ore }} &nbsp;&nbsp; <em>{{ dati.assenze.stat.ore_perc|number_format(2, ',', null) }}%</em></td>
   </tr>
 </table>
-  {% for periodo,v in dati.assenze.lista %}
+  {% for periodo, v in dati.assenze.lista %}
 <br><div style="text-align:center"><strong>Assenze {{ periodo }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true" style="text-align:center">
@@ -197,13 +197,13 @@
     <td width="45%" style="text-align:center"><strong>Annotazioni</strong></td>
     <td width="15%" style="text-align:center"><strong>Giustificazione</strong></td>
   </tr>
-    {% for data,v1 in v %}
-      {% for tipo,e in v1 %}
+    {% for data, v1 in v %}
+      {% for tipo, e in v1 %}
   <tr nobr="true">
         {% if tipo == 'assenza' %}
     <td><strong>{{ e.data }}{% if e.giorni > 1 %} -<br>{{ e.data_fine }}{% endif %}</strong></td>
     <td><strong>Assenza{% if e.giorni > 1 %} di {{ e.giorni }} giorni{% endif %}</strong></td>
-    <td><span style="font-size:9pt">{{ e.motivazione ? 'Motivazione assenza: '~e.motivazione }}</span></td>
+    <td><span style="font-size:9pt">{{ e.motivazione ? 'Motivazione assenza: ' ~ e.motivazione }}</span></td>
     <td>{% if not e.giustificato %}<em>Da giustificare</em>{% endif %}</td>
         {% elseif tipo == 'ritardo' %}
     <td><strong>{{ e.data }}</strong></td>
@@ -227,7 +227,7 @@
   {% endfor %}
 {% endif %}
 {% if dati.note is defined %}
-  {% for periodo,v in dati.note %}
+  {% for periodo, v in dati.note %}
 <br><div style="text-align:center"><strong>Note disciplinari {{ periodo }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">
@@ -236,20 +236,20 @@
     <td width="35%" style="text-align:center"><strong>Nota</strong></td>
     <td width="30%" style="text-align:center"><strong>Provvedimento</strong></td>
   </tr>
-    {% for data,v1 in v %}
-      {% for tipo,v2 in v1 %}
-        {% for k,e in v2 %}
+    {% for data, v1 in v %}
+      {% for tipo, v2 in v1 %}
+        {% for k, e in v2 %}
   <tr nobr="true">
           {% if tipo == 'classe' %}
     <td><strong>{{ e.data }}</strong></td>
     <td><strong>Nota di classe</strong></td>
     <td>{{ e.nota|striptags|nl2br }}<br><em style="font-size:9pt">({{ e.nota_doc }})</em></td>
-    <td>{{ e.provvedimento ? ((e.provvedimento|striptags|nl2br)~'<br><em style="font-size:9pt">('~e.nota_doc~')</em>')|raw }}</td>
+    <td>{{ e.provvedimento ? ((e.provvedimento|striptags|nl2br) ~ '<br><em style="font-size:9pt">(' ~ e.nota_doc ~ ')</em>')|raw }}</td>
           {% else %}
     <td><strong>{{ e.data }}</strong></td>
     <td><strong>Nota individuale</strong></td>
     <td>{{ e.nota|striptags|nl2br }}<br><em style="font-size:9pt">({{ e.nota_doc }})</em></td>
-    <td>{{ e.provvedimento ? ((e.provvedimento|striptags|nl2br)~'<br><em style="font-size:9pt">('~e.provvedimento_doc~')</em>')|raw }}</td>
+    <td>{{ e.provvedimento ? ((e.provvedimento|striptags|nl2br) ~ '<br><em style="font-size:9pt">(' ~ e.provvedimento_doc ~ ')</em>')|raw }}</td>
           {% endif %}
   </tr>
         {% endfor %}
@@ -263,7 +263,7 @@
   {% endfor %}
 {% endif %}
 {% if dati.osservazioni is defined %}
-  {% for periodo,v in dati.osservazioni %}
+  {% for periodo, v in dati.osservazioni %}
 <br><div style="text-align:center"><strong>Osservazioni {{ periodo }}</strong></div>
 <table border="1" cellpadding="2" style="font-size:10pt">
   <tr nobr="true">
@@ -271,8 +271,8 @@
     <td width="20%" style="text-align:center"><strong>Materia</strong></td>
     <td width="65%" style="text-align:center"><strong>Osservazioni</strong></td>
   </tr>
-    {% for data,v1 in v %}
-      {% for k,e in v1 %}
+    {% for data, v1 in v %}
+      {% for k, e in v1 %}
   <tr nobr="true">
     <td><strong>{{ e.data }}</strong></td>
     <td><strong>{{ e.materia }}</strong><br><em style="font-size:9pt">({{ e.docente }})</em></td>

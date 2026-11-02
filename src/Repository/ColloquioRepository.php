@@ -43,8 +43,12 @@ class ColloquioRepository extends BaseRepository {
       $inizio = new DateTime('today');
     }
     if (!$fine) {
-      $fine = DateTime::createFromFormat('Y-m-d H:i:s',
-        $this->getEntityManager()->getRepository(Configurazione::class)->getParametro('anno_fine').' 00:00:00');
+      $annoFine = $this->getEntityManager()->getRepository(Configurazione::class)->getParametro('anno_fine');
+      $fine = DateTime::createFromFormat('Y-m-d H:i:s', $annoFine.' 00:00:00');
+      if (!$fine || $annoFine === null) {
+        // dato di configurazione assente o non parsato: nessuna data di fine vincolante
+        return [];
+      }
     }
     // query base
     $colloqui = $this->createQueryBuilder('c')

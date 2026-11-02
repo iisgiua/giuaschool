@@ -1,0 +1,48 @@
+{##
+  # menu-azioni: azioni di riga come voci di testo in un menu a tendina.
+  # Il menu si apre dal bottone con i 3 puntini (dots-vertical, solo icona).
+  #
+  # Vale per le celle con troppe azioni per stare a icone (autorizzazioni,
+  # password, assenze): dentro il menu le voci sono solo testo.
+  #
+  # parametri:
+  #   voci   (obbligatorio) lista di voci {etichetta, url?, titolo?,
+  #                            attributi?, classi?, disabilitata?}
+  #     etichetta    testo della voce (gia' tradotto dal chiamante)
+  #     url          se valorizzato la voce e' un <a>, altrimenti un <button>
+  #     titolo       tooltip della voce (opzionale)
+  #     attributi    dict di attributi extra, es. {'data-toggle': 'modal',
+  #                    'data-target': '#gs-modal-info', 'data-href': ...}
+  #                    (le classi e gli hook JS passano intatti, quindi
+  #                    modali remote/confirm continuano a funzionare)
+  #     classi       classi aggiuntive sulla voce, es. 'text-danger' per le
+  #                    azioni distruttive o 'text-success' per quelle positive
+  #     disabilitata se vera la voce esce disabilitata (li.disabled)
+  #   titolo (opzionale) tooltip del bottone puntini (default 'Azioni')
+  #   classi (opzionale) classi aggiuntive sul contenitore .dropdown
+  #
+  # NB: il toggle NON ha la classe .dropdown-toggle: gs-standard.css (§3) la
+  # rende un bottone grande, qui serve solo l'icona. Il JS di Bootstrap apre
+  # il menu con il solo attributo data-toggle="dropdown".
+  # Il menu e' allineato a destra (dropdown-menu-right): il toggle sta
+  # nell'ultima colonna e il menu rientra nella tabella invece di uscirne.
+  # Il menu scende sotto il bottone e sta sopra la tabella: mentre e'
+  # aperto lo script in public/js/script.js toglie il ritaglio di .table e
+  # .table-responsive (gs-standard.css §2.5), alla chiusura lo ripristina.
+  # ##}
+<div class="dropdown gs-azioni-dropdown {{ classi|default('') }}">
+  <button type="button" class="btn btn-xs gs-btn-icona" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{{ titolo|default('Azioni') }}">
+    <span class="sr-only">{{ titolo|default('Azioni') }}</span>{{ include('admin/include/icona.html.twig', {nome: 'dots-vertical', stile: 'outline'}, with_context = false) }}
+  </button>
+  <ul class="dropdown-menu dropdown-menu-right">
+{% for voce in voci %}
+    <li{{ voce.disabilitata|default(false) ? ' class="disabled"' }}>
+      {%- if voce.url is defined and voce.url is not empty -%}
+      <a href="{{ voce.url }}"{% if voce.titolo|default('') %} title="{{ voce.titolo }}"{% endif %}{% for attributo, valore in voce.attributi|default({}) %} {{ attributo }}="{{ valore }}"{% endfor %}{% if voce.classi|default('') %} class="{{ voce.classi }}"{% endif %}>{{ voce.etichetta }}</a>
+      {%- else -%}
+      <button type="button"{% if voce.titolo|default('') %} title="{{ voce.titolo }}"{% endif %}{% for attributo, valore in voce.attributi|default({}) %} {{ attributo }}="{{ valore }}"{% endfor %}{% if voce.classi|default('') %} class="{{ voce.classi }}"{% endif %}{{ voce.disabilitata|default(false) ? ' disabled' }}>{{ voce.etichetta }}</button>
+      {%- endif -%}
+    </li>
+{% endfor %}
+  </ul>
+</div>

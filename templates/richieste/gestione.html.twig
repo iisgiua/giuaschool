@@ -1,20 +1,35 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
+<div class="container-fluid gs-richieste-gestione">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.richieste.gestione'|trans }}</h1>
-  {% include 'include/form-inline.html.twig' with {form: form[0], form_success: '', form_help: ''} %}
-  <table class="table table-bordered table-hover table-striped gs-mb-0">
-    <thead class="bg-success">
-      <tr>
-        <th>{{ 'label.richiesta_tipo'|trans }}</th>
-        <th>{{ 'label.richiesta_stato'|trans }}</th>
-        <th>{{ 'label.classe'|trans }}</th>
-        <th>{{ 'label.alunno'|trans }}</th>
-        <th>{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  <form name="{{ form[0].vars.name }}" method="{{ form[0].vars.method }}" action="{{ form[0].vars.action }}" class="gs-filters gs-mb-3">
+    <div id="{{ form[0].vars.id }}">
+      <div class="gs-filters-row">
+        <div class="gs-filter-col">
+          {{ form_label(form[0].sede) }}
+          {{ form_widget(form[0].sede) }}
+        </div>
+        <div class="gs-filter-col">
+          {{ form_label(form[0].classe) }}
+          {{ form_widget(form[0].classe) }}
+        </div>
+      </div>
+      <div class="gs-filters-buttons">
+        <button type="button" class="btn btn-default" id="richieste_gestione_reset" title="Resetta i filtri">Reset</button>
+        {{ form_widget(form[0].submit) }}
+      </div>
+      {{ form_widget(form[0]._token) }}
+    </div>
+  </form>
+  {% set intestazione = [
+      {contenuto: 'label.richiesta_tipo'|trans, scope: 'col'},
+      {contenuto: 'label.richiesta_stato'|trans, scope: 'col'},
+      {contenuto: 'label.classe'|trans, scope: 'col'},
+      {contenuto: 'label.alunno'|trans, scope: 'col'},
+      {contenuto: 'label.action'|trans, scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
   {% for r in dati.lista %}
     <tr>
       <td>{{ r.definizioneRichiesta.nome }}</td>
@@ -48,7 +63,7 @@
           data-valore-data="{{ r.data|date('d/m/Y') }}"
     {% endif %}
           data-campi="{{ r.valori|length }}"
-    {% for c,cv in r.definizioneRichiesta.campi %}
+    {% for c, cv in r.definizioneRichiesta.campi %}
           data-campo-{{ loop.index }}="{{ c }}"
           data-valore-{{ loop.index }}="{{ r.valori[c] is empty ? '' : (cv[0] == 'date' ? r.valori[c]|date('d/m/Y') : (cv[0] == 'time' ? r.valori[c]|date('H:i') : r.valori[c])) }}"
     {% endfor %}
@@ -68,21 +83,21 @@
       </td>
     </tr>
   {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   {% if dati.maxPagine > 1 %}
   <nav aria-label="Navigazione tra le pagine" class="text-center">
     <ul class="pagination pagination-sm gs-mt-2">
     {% if info.pagina > 1 %}
-      <li><a href="{{ path('richieste_gestione', {'pagina': info.pagina - 1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
+      <li><a href="{{ path('richieste_gestione', {pagina: info.pagina - 1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
     {% else %}
       <li class="disabled"><span title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></span></li>
     {% endif %}
-    {% for i in 1 .. dati.maxPagine %}
-      <li {{ info.pagina == i ? 'class="active"' }}><a href="{{ path('richieste_gestione', {'pagina': i}) }}">{{ i }}</a></li>
+    {% for i in 1..dati.maxPagine %}
+      <li {{ info.pagina == i ? 'class="active"' }}><a href="{{ path('richieste_gestione', {pagina: i}) }}">{{ i }}</a></li>
     {% endfor %}
     {% if info.pagina < dati.maxPagine %}
-      <li><a href="{{ path('richieste_gestione', {'pagina': info.pagina + 1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
+      <li><a href="{{ path('richieste_gestione', {pagina: info.pagina + 1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
     {% else %}
       <li class="disabled"><span title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></span></li>
     {% endif %}
@@ -94,7 +109,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">
-            <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+            {{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}
             <span class="sr-only">{{ 'label.close'|trans }}</span>
           </button>
           <h3 class="modal-title gs-h3" id="gs-info-richiesta-titolo"></h3>
@@ -133,10 +148,25 @@
 {{ parent() }}
 <script>
 $(document).ready(function() {
+  // Aggiungi opzione vuota alle select se sono vuote
+  if ($('#filtro_sede option').length === 0) {
+    $('#filtro_sede').prepend('<option value="">Tutte le sedi</option>');
+  }
+  if ($('#filtro_classe option').length === 0) {
+    $('#filtro_classe').prepend('<option value="">Tutte le classi</option>');
+  }
   $('#filtro_sede').change(function(e) {
     $('#filtro_classe optgroup').hide();
     $('#filtro_classe optgroup[label="'+sedi[$(this).val()]+'"]').show();
     $('#filtro_classe').val('');
+  });
+  $('#richieste_gestione_reset').click(function (e) {
+    e.preventDefault();
+    $('#filtro_sede').val('');
+    $('#filtro_classe').val('');
+    $('#filtro_classe optgroup').hide();
+    $('#filtro_classe optgroup[label="'+sedi[$('#filtro_sede').val()]+'"]').show();
+    $('form[name="{{ form[0].vars.name }}"]').submit();
   });
   $('#gs-info-richiesta').on('show.bs.modal', function (e) {
     $(this).find('#gs-info-richiesta-titolo').text($(e.relatedTarget).data('titolo'));
@@ -163,10 +193,10 @@ $(document).ready(function() {
     }
     $(this).find('#gs-info-richiesta-valori').html(valori);
     var documenti = '<a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="'+$(e.relatedTarget).data('documento')+
-      '" title="Scarica il modulo di richiesta compilato"><span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong></a>';
+      '" title="Scarica il modulo di richiesta compilato"><svg class="icon icon-outline gs-mr-1" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#download"></use></svg><strong>Scarica il modulo compilato</strong></a>';
     for (var i = 1; i <= $(e.relatedTarget).data('allegati'); i++) {
       documenti += '<a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="'+$(e.relatedTarget).data('allegato-'+i)+
-        '" title="Scarica l\'allegato"><span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l\'allegato '+i+
+        '" title="Scarica l\'allegato"><svg class="icon icon-outline gs-mr-1" aria-hidden="true"><use xlink:href="{{ asset('icons/tabler-sprite.svg') }}#download"></use></svg><strong>Scarica l\'allegato '+i+
         '</strong></a>';
     }
     $(this).find('#gs-info-richiesta-documenti').html(documenti);
@@ -182,7 +212,7 @@ $(document).ready(function() {
   });
   // init
   var sedi = [];
-  {% for s,n in info.sedi %}
+  {% for s, n in info.sedi %}
   sedi[{{ s }}] = '{{ n }}';
   {% endfor %}
   $('#filtro_classe optgroup').hide();

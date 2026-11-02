@@ -1,0 +1,67 @@
+{##
+  # verbale-scrutinio: contenuto del passo finale dello scrutinio (verbale e
+  # chiusura), condiviso da scrutinio_P_6, scrutinio_F_9 e scrutinio_G_4.
+  #
+  # Parametri:
+  #   form             vista del form dello scrutinio (numeroVerbale, fine)
+  #   dati             dati dello scrutinio (dati.verbale.struttura)
+  #   classe           classe dello scrutinio
+  #   periodo          periodo usato dal modal del verbale
+  #   stato_precedente stato a cui torna il pulsante "Torna al passo precedente"
+  #
+  # form_start e form_end restano nei template chiamanti: qui c'e' solo il
+  # contenuto, cosi' ogni pagina continua a gestire il token come prima.
+  #}
+  <div class="gs-verbale">
+    <div class="gs-verbale-campo">
+      <label class="gs-verbale-etichetta" for="{{ form.numeroVerbale.vars.id }}">Numero del verbale</label>
+      <div class="gs-verbale-controllo">{{ form_widget(form.numeroVerbale) }}</div>
+    </div>
+  {% for step, args in dati.verbale.struttura %}
+    {% if args.tipo == 'Argomento' and (args.classi is empty or (classe.anno ~ classe.sezione) in args.classi) %}
+    <section class="gs-verbale-sezione">
+      <h3 class="gs-verbale-titolo">{{ include('admin/include/icona.html.twig', {nome: 'asterisk', stile: 'outline'}, with_context: false) }}{% if args.sezione != args.argomento %}{{ args.sezione }}. {% endif %}{{ args.argomento }}</h3>
+    {% if args.inizio is not empty %}
+      <div class="gs-verbale-paragrafo">{{ args.inizio|nl2br }}</div>
+    {% endif %}
+      <div class="gs-verbale-testo{{ args.testo is empty ? ' gs-verbale-testo-vuoto' }}">
+        <div class="gs-verbale-contenuto">
+    {% if args.testo is not empty %}
+          <em><strong>{{ args.testo|nl2br }}</strong></em>
+    {% else %}
+          <span class="text-muted">Nessun testo inserito. Usa «Scrivi» per scrivere il verbale.</span>
+    {% endif %}
+        </div>
+        <div class="gs-verbale-azione">
+    {% if args.validato %}
+          <button type="button" class="btn btn-sm btn-default gs-button-remote" title="Modifica il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {classe: classe.id, periodo: periodo, step: step}) }}">{{ include('admin/include/icona.html.twig', {nome: 'pencil', stile: 'outline'}, with_context: false) }}<strong>Modifica</strong></button>
+    {% else %}
+          <button type="button" class="btn btn-sm btn-primary gs-button-remote" title="Scrivi il testo da inserire nel verbale" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('coordinatore_scrutinio_verbale', {classe: classe.id, periodo: periodo, step: step}) }}">{{ include('admin/include/icona.html.twig', {nome: 'pencil', stile: 'outline'}, with_context: false) }}<strong>Scrivi</strong></button>
+    {% endif %}
+        </div>
+      </div>
+    {% if args.fine is not empty %}
+      <div class="gs-verbale-paragrafo">{{ args.fine|nl2br }}</div>
+    {% endif %}
+    </section>
+    {% endif %}
+  {% endfor %}
+    <div class="gs-verbale-campo">
+      <label class="gs-verbale-etichetta" for="{{ form.fine.vars.id }}">Ora di chiusura</label>
+      <div class="gs-verbale-controllo">{{ form_widget(form.fine) }}</div>
+    </div>
+  </div>
+
+  <div class="gs-verbale-avviso" role="note">
+    {{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}, with_context: false) }}
+    <div><strong>Controllare i dati inseriti prima di chiudere lo scrutinio.<br>Una volta chiuso, lo scrutinio potrà essere riaperto solo dalla Presidenza.</strong></div>
+  </div>
+
+  <div class="gs-mt-5 gs-mb-5">
+    <div class="form-group gs-form-actions">
+      <div class="gs-form-actions-buttons">
+        <button type="submit" class="btn btn-primary" title="Termina la procedura dello scrutinio" data-toggle="modal" data-target="#gs-modal-waiting">{{ include('admin/include/icona.html.twig', {nome: 'arrow-right', stile: 'outline'}, with_context: false) }}<strong>Chiudi lo scrutinio</strong></button>
+        <a class="btn btn-default gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: stato_precedente}) }}" role="button" title="Annulla e torna al passo precedente">{{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline'}, with_context: false) }}<strong>Torna al passo precedente</strong></a>
+      </div>
+    </div>
+  </div>

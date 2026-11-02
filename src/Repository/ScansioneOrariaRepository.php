@@ -148,6 +148,10 @@ class ScansioneOrariaRepository extends EntityRepository {
   /**
    * Restituisce i dati della scansione oraria completa per un orario specificato.
    *
+   * Le ore mancanti vengono completate con dati fittizi (ora = 0) tenuti solo
+   * in memoria, come valori di default per il form di modifica: non vengono
+   * memorizzati su database (il salvataggio crea le righe effettive).
+   *
    * @param Orario $orario Orario a cui fare riferimento
    *
    * @return array Array associativo con la scansione oraria
@@ -174,7 +178,6 @@ class ScansioneOrariaRepository extends EntityRepository {
           ->setInizio(DateTime::createFromFormat('H:i', '08:30'))
           ->setFine(DateTime::createFromFormat('H:i', '09:30'))
           ->setDurata(1);
-        $this->getEntityManager()->persist($dati[$giorno][$ora]);
       }
     }
     // restituisce dati

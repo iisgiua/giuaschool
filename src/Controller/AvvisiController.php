@@ -20,6 +20,7 @@ use App\Entity\Docente;
 use App\Entity\Festivita;
 use App\Entity\Materia;
 use App\Entity\Orario;
+use App\Entity\Preside;
 use App\Entity\ScansioneOraria;
 use App\Entity\Sede;
 use App\Entity\Staff;
@@ -289,11 +290,14 @@ class AvvisiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/avvisi/delete/{avviso}', name: 'avvisi_delete', requirements: ['avviso' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/avvisi/delete/{avviso}', name: 'avvisi_delete', requirements: ['avviso' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(ComunicazioniUtil $com, RegistroUtil $reg, LogHandler $dblogger,
-                         #[MapEntity] Avviso $avviso
-                         ): Response {
+  public function delete(Request $request, ComunicazioniUtil $com, RegistroUtil $reg, LogHandler $dblogger,
+                         #[MapEntity] Avviso $avviso): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo permessi
     if (!$com->azioneAvviso('delete', $avviso->getData(), $this->getUser(), $avviso)) {
       // errore
@@ -362,19 +366,23 @@ class AvvisiController extends BaseController {
       // azione edit
       $edit = true;
       $tipo = $avviso->getTipo();
+      if (!in_array($tipo, ['E', 'U', 'A'], true)) {
+        // errore: tipo di avviso non gestibile da questa pagina
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
       switch ($tipo) {
         case 'E':
-          $valori['ora'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{ora}']);
-          $valori['note'] = $avviso->getSostituzioni()['{note}'];
-          break;
         case 'U':
-          $valori['ora'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{ora}']);
-          $valori['note'] = $avviso->getSostituzioni()['{note}'];
+          $valori['ora'] = !empty($avviso->getSostituzioni()['{ora}']) ?
+            DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{ora}']) : null;
+          $valori['note'] = $avviso->getSostituzioni()['{note}'] ?? '';
           break;
         case 'A':
-          $valori['inizio'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{inizio}']);
-          $valori['fine'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{fine}']);
-          $valori['attivita'] = $avviso->getSostituzioni()['{attivita}'];
+          $valori['inizio'] = !empty($avviso->getSostituzioni()['{inizio}']) ?
+            DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{inizio}']) : null;
+          $valori['fine'] = !empty($avviso->getSostituzioni()['{fine}']) ?
+            DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{fine}']) : null;
+          $valori['attivita'] = $avviso->getSostituzioni()['{attivita}'] ?? '';
           break;
       }
     } else {
@@ -419,13 +427,17 @@ class AvvisiController extends BaseController {
       if ($this->getUser()->getSede()) {
         $avviso->addSede($this->getUser()->getSede());
       }
-      $this->em->persist($avviso);
     }
-    // controllo permessi
-    if (!$com->azioneAvviso(($edit ? 'edit' : 'add'), $avviso->getData(), $this->getUser(),
-        $edit ? $avviso : null)) {
+    // controllo permessi PRIMA di persistere
+    $permesso = $com->azioneAvviso(($edit ? 'edit' : 'add'), $avviso->getData(), $this->getUser(),
+        $edit ? $avviso : null);
+    if (!$permesso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // persisti solo dopo il controllo dei permessi
+    if (!$edit) {
+      $this->em->persist($avviso);
     }
     // imposta autore dell'avviso
     $avviso->setAutore($this->getUser());
@@ -775,17 +787,28 @@ class AvvisiController extends BaseController {
   /**
    * Conferma la lettura dell'avviso destinato alla classe
    *
+   * @param Request $request Pagina richiesta
    * @param Classe $classe Classe di riferimento
    * @param Avviso|null $avviso Avviso per lettura di un singolo avviso o valore nullo per tutti gli avvisi della classe
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/avvisi/classe/firma/{classe}/{avviso}', name: 'avvisi_classe_firma', requirements: ['classe' => '\d+', 'avviso' => '\d+'], defaults: ['avviso' => 0], methods: ['GET'])]
+  #[Route(path: '/avvisi/classe/firma/{classe}/{avviso}', name: 'avvisi_classe_firma', requirements: ['classe' => '\d+', 'avviso' => '\d+'], defaults: ['avviso' => 0], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classeFirma(
+  public function classeFirma(Request $request,
                               #[MapEntity] Classe $classe,
                               #[MapEntity] ?Avviso $avviso=null
                               ): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('avvisi_classe_firma', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // inizializza
     $lista = [];
     // controlla avvisi da firmare
@@ -829,13 +852,17 @@ class AvvisiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db
-    $com->leggeUtente($this->getUser(), $avviso);
-    $this->em->flush();
     // invia il file
     $file = $avviso->getAllegati()[$allegato];
     $dir = $this->getParameter('dir_avvisi').($avviso->getStato() == 'A' ? '/'.$avviso->getAnno() : '');
     $nomefile = $dir.'/'.$file->getFile().'.'.$file->getEstensione();
+    if (!file_exists($nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // segna lettura e memorizza su db solo dopo aver verificato il file
+    $com->leggeUtente($this->getUser(), $avviso);
+    $this->em->flush();
     return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
       ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
   }
@@ -843,15 +870,26 @@ class AvvisiController extends BaseController {
   /**
    * Conferma la lettura dell'avviso da parte dell'utente
    *
+   * @param Request $request Pagina richiesta
    * @param Avviso $avviso Avviso in lettura
    *
    * @return JsonResponse Informazioni di risposta
    */
-  #[Route(path: '/avvisi/legge/{avviso}', name: 'avvisi_legge', requirements: ['avviso' => '\d+'], defaults: ['avviso' => '0'], methods: ['GET'])]
+  #[Route(path: '/avvisi/legge/{avviso}', name: 'avvisi_legge', requirements: ['avviso' => '\d+'], defaults: ['avviso' => '0'], methods: ['POST'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function legge(
+  public function legge(Request $request,
                         #[MapEntity] ?Avviso $avviso=null
                         ): JsonResponse {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('avvisi_legge', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla avviso
+    if (!$avviso) {
+      // errore: avviso non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // firma
     $this->em->getRepository(ComunicazioneUtente::class)->legge($avviso, $this->getUser());
     // restituisce dati
@@ -934,7 +972,7 @@ class AvvisiController extends BaseController {
     // parametro classe
     $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
     // controllo classe
-    $classe = $this->em->getRepository(Classe::class)->find($classe);
+    $classe = ($classe > 0) ? $this->em->getRepository(Classe::class)->find($classe) : null;
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -1359,6 +1397,177 @@ class AvvisiController extends BaseController {
     return $this->render('avvisi/scheda_dettagli_agenda.html.twig', [
       'info' => $info,
       'dati' => $dati]);
+  }
+
+  /**
+   * Restituisce le sedi utilizzabili dall'utente per la creazione di un avviso
+   *
+   * @return array Opzioni delle sedi
+   */
+  private function opzioniSedi(): array {
+    if ($this->getUser()->getSede()) {
+      // utente con sede: usa la propria
+      $sede = $this->getUser()->getSede();
+      return [$sede->getNomeBreve() => $sede];
+    }
+    // utente senza sede: tutte le sedi
+    return $this->em->getRepository(Sede::class)->opzioni();
+  }
+
+  /**
+   * Inserisce l'avviso nella coda delle notifiche, con attesa di mezzora
+   *
+   * @param MessageBusInterface $msg Gestore della coda dei messaggi
+   * @param Avviso $avviso Avviso da notificare
+   * @param bool $edit Vero se si tratta di una modifica di un avviso esistente
+   */
+  private function notificaAvviso(MessageBusInterface $msg, Avviso $avviso, bool $edit): void {
+    $notifica = new AvvisoMessage($avviso->getId());
+    if (!$edit || !NotificaMessageHandler::update($this->em, $notifica->getTag(), 'avviso', 1800)) {
+      // inserisce avviso (nuovo o modificato) in coda notifiche
+      $msg->dispatch($notifica, [new DelayStamp(1800000)]);
+    }
+  }
+
+  /**
+   * Determina gli allegati dell'avviso, leggendoli dalla sessione se la pagina è stata
+   * inviata, oppure ricostruendoli a partire dagli allegati già presenti
+   *
+   * @param Request $request Pagina richiesta
+   * @param Avviso $avviso Avviso di cui leggere gli allegati
+   * @param string $var_sessione Prefisso della variabile di sessione utilizzata
+   *
+   * @return array Lista degli allegati
+   */
+  private function leggiAllegati(Request $request, Avviso $avviso, string $var_sessione): array {
+    $allegati = [];
+    if ($request->isMethod('POST')) {
+      // pagina inviata
+      foreach ($this->reqstack->getSession()->get($var_sessione, []) as $f) {
+        if ($f['type'] != 'removed') {
+          // aggiunge allegato
+          $allegati[] = $f;
+        }
+      }
+      return $allegati;
+    }
+    // pagina iniziale
+    foreach ($avviso->getAllegati() as $k=>$file) {
+      $allegati[$k]['type'] = 'existent';
+      $allegati[$k]['name'] = $file->getTitolo();
+      $allegati[$k]['temp'] = $file->getFile();
+      $allegati[$k]['ext'] = $file->getEstensione();
+      $allegati[$k]['size'] = $file->getDimensione();
+    }
+    // modifica dati sessione
+    $this->reqstack->getSession()->remove($var_sessione);
+    $this->reqstack->getSession()->set($var_sessione, $allegati);
+    // elimina file temporanei
+    $fs = new Filesystem();
+    $finder = new Finder();
+    $finder->files()->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
+    foreach ($finder as $f) {
+      $fs->remove($f);
+    }
+    return $allegati;
+  }
+
+  /**
+   * Restituisce le classi da indicare come filtro dell'avviso, considerando le classi
+   * articolate collegate alla cattedra selezionata
+   *
+   * @param Avviso $avviso Avviso di cui determinare il filtro
+   *
+   * @return array Lista degli identificativi delle classi
+   */
+  private function classiArticolateAvviso(Avviso $avviso): array {
+    if (!$avviso->getCattedra()) {
+      // nessuna classe (non dovrebbe succedere)
+      return [];
+    }
+    // gestisce classi articolate
+    $filtroClassi = [$avviso->getCattedra()->getClasse()->getId()];
+    $articolate = $this->em->getRepository(Classe::class)->classiArticolate($filtroClassi);
+    foreach ($articolate as $articolata) {
+      if (empty($articolata['comune'])) {
+        // se classe comune aggiunge tutti i gruppi
+        $filtroClassi = array_merge($filtroClassi, $articolata['gruppi']);
+      }
+    }
+    return $filtroClassi;
+  }
+
+  /**
+   * Restituisce il nome breve della materia indicata nell'avviso
+   *
+   * @param Avviso $avviso Avviso di cui leggere la materia
+   *
+   * @return string|null Nome breve della materia, stringa vuota se non indicata
+   */
+  private function materiaAvviso(Avviso $avviso): ?string {
+    if ($avviso->getMateria()) {
+      return $avviso->getMateria()->getNomeBreve();
+    }
+    if ($avviso->getCattedra()) {
+      return $avviso->getCattedra()->getMateria()->getNomeBreve();
+    }
+    return '';
+  }
+
+  /**
+   * Determina il mese da visualizzare nell'agenda, recuperandolo dalla sessione
+   * se non è stato indicato nella pagina
+   *
+   * @param string $mese Anno e mese indicati nella pagina (AAAA-MM)
+   *
+   * @return mixed Data del primo giorno del mese
+   */
+  private function meseAgenda(string $mese): mixed {
+    if ($mese != '0000-00') {
+      // imposta data indicata e la memorizza in sessione
+      $mese_obj = DateTime::createFromFormat('Y-m-d', $mese.'-01');
+      $this->reqstack->getSession()->set('/APP/ROUTE/avvisi_agenda/mese', $mese_obj->format('Y-m'));
+      return $mese_obj;
+    }
+    // mese non specificato
+    if ($this->reqstack->getSession()->get('/APP/ROUTE/avvisi_agenda/mese')) {
+      // recupera data da sessione
+      return DateTime::createFromFormat('Y-m-d',
+        $this->reqstack->getSession()->get('/APP/ROUTE/avvisi_agenda/mese').'-01');
+    }
+    // imposta data odierna
+    return (new DateTime())->modify('first day of this month');
+  }
+
+  /**
+   * Aggiunge all'agenda i dati utilizzabili dai docenti: filtro delle classi e azione di creazione
+   *
+   * @param array $dati Dati già letti per la pagina
+   * @param ComunicazioniUtil $com Funzioni di utilità per le comunicazioni
+   *
+   * @return array Dati della pagina integrati con quelli riservati ai docenti
+   */
+  private function datiAgendaDocente(array $dati, ComunicazioniUtil $com): array {
+    // filtro classi
+    $dati['filtro'] = [];
+    $classi = $this->em->getRepository(Cattedra::class)->cattedreDocente($this->getUser(), 'Q');
+    foreach ($classi as $c) {
+      $dati['filtro'][$c->getClasse()->getId()] = ''.$c->getClasse();
+    }
+    // azione add
+    $fineAnno = $this->em->getRepository(Configurazione::class)->getParametro('anno_fine', '2000-01-01');
+    $dtFineAnno = DateTime::createFromFormat('Y-m-d', $fineAnno);
+    if (!$dtFineAnno) {
+      // dato di configurazione invalido: degrada stagione add senza interrompere la pagina
+      $this->addFlash('warning', 'config.anno_fine_non_valido');
+      $dati['azioni']['add'] = 0;
+      return $dati;
+    }
+    if ($com->azioneAvviso('add', $dtFineAnno, $this->getUser(), null)) {
+      // pulsante add
+      $dati['azioni']['add'] = 1;
+    }
+    return $dati;
   }
 
 }

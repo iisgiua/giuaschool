@@ -69,7 +69,8 @@ class EncryptedStringType extends Type {
     if ($value === null) {
       return $value;
     }
-    return self::$encryptor->decrypt($value);
+    // un valore non decifrabile non deve bloccare l'applicazione: viene restituito null
+    return self::$encryptor->tryDecrypt($value);
   }
 
   /**

@@ -55,14 +55,25 @@ class LogoutSubscriber implements EventSubscriberInterface {
     // legge utente attuale
     $user = $this->security->getUser();
     if ($user) {
-      $tipo = $this->reqstack->getSession()->get('/APP/UTENTE/tipo_accesso');
-      // ditrugge la sessione
-      $this->reqstack->getSession()->invalidate();
       // log azione
       $this->dblogger->logAzione('ACCESSO', 'Logout', [
         'Username' => $user->getUserIdentifier(),
         'Ruolo' => $user->getRoles()[0]]);
     }
+    // invalida la sessione e cancella il cookie dal browser
+    $session = $this->reqstack->getSession();
+    $sessionName = $session->getName();
+    $session->invalidate();
+    $response->headers->clearCookie(
+      $sessionName,
+      '/',
+      null,
+      $logoutEvent->getRequest()->isSecure(),
+      true,
+      'lax'
+    );
+    // cancella anche eventuali dati salvati localmente dal browser
+    $response->headers->set('Clear-Site-Data', '"cookies", "storage"');
     // reindirizza a nuova pagina
     $logoutEvent->setResponse($response);
   }

@@ -11,6 +11,7 @@ namespace App\Controller;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
 use App\Entity\Utente;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use App\Entity\Alunno;
 use App\Entity\Amministratore;
@@ -27,6 +28,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -38,6 +40,8 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 
@@ -47,6 +51,20 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  * @author Antonello Dessì
  */
 class LoginController extends BaseController {
+
+  /** Numero massimo di richieste di recupero password ogni ora per IP */
+  private const MAX_RECOVERY_ORARIE = 5;
+
+  /** Durata della finestra di throttling per il recupero password (in secondi) */
+  private const RECOVERY_FINESTRA_SECONDI = 3600;
+
+
+  public function __construct(
+      EntityManagerInterface $em,
+      RequestStack $reqstack,
+      private readonly CacheInterface $throttleCache) {
+    parent::__construct($em, $reqstack);
+  }
 
   /**
    * Login dell'utente attraverso username e password
@@ -152,6 +170,26 @@ class LoginController extends BaseController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
+      // protezione anti-enumeration e anti-bombing: massimo N richieste ogni ora per IP;
+      // la risposta mostrata e' sempre identica, a prescindere dall'esito
+      $recoveryKey = 'recovery_'.md5((string) $request->getClientIp());
+      $recoveryCount = (int) $this->throttleCache->get($recoveryKey, function (ItemInterface $item) {
+        $item->expiresAfter(self::RECOVERY_FINESTRA_SECONDI);
+        return 0;
+      });
+      if ($recoveryCount >= self::MAX_RECOVERY_ORARIE) {
+        // limite superato: risposta generica identica, nessuna operazione
+        $logger->error('Troppe richieste di recupero password dallo stesso IP.', [
+          'ip' => $request->getClientIp()]);
+        $successo = 'message.recovery_ok';
+      } else {
+      // registra la richiesta nella finestra di throttling oraria
+      $nuovoConteggio = $recoveryCount + 1;
+      $this->throttleCache->delete($recoveryKey);
+      $this->throttleCache->get($recoveryKey, function (ItemInterface $item) use ($nuovoConteggio) {
+        $item->expiresAfter(self::RECOVERY_FINESTRA_SECONDI);
+        return $nuovoConteggio;
+      });
       $email = $form->get('email')->getData();
       $utente = $this->em->getRepository(Utente::class)->findOneBy(['email' => $email, 'abilitato' => 1]);
       // legge configurazione: id_provider
@@ -159,26 +197,26 @@ class LoginController extends BaseController {
       $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
       $spid = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/spid', 'N');
       if (!$utente) {
-        // utente non esiste
+        // utente non esiste: risposta generica identica (anti-enumeration), solo log interno
         $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', [
           'email' => $email,
           'ip' => $request->getClientIp()]);
-        $errore = 'exception.invalid_recovery_email';
+        $successo = 'message.recovery_ok';
       } elseif (!$utente->getLoginSpeciale() &&
                 $spid == 'O' ||
                 (in_array($spid, ['A', 'M']) && !$utente->controllaRuolo('A')) ||
                 ($spid == 'M' && $utente->controllaRuoloFunzione('AM'))) {
-        // errore: niente recupero password se SPID/CIE obbligatorio
+        // niente recupero password se SPID/CIE obbligatorio: risposta generica
         $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
           'email' => $email,
           'ip' => $request->getClientIp()]);
-        $errore = 'exception.invalid_user_type_recovery';
+        $successo = 'message.recovery_ok';
       } elseif ($idProvider && $utente->controllaRuolo($idProviderTipo)) {
-        // errore: niente recupero password per utente su id provider
+        // niente recupero password per utente su id provider: risposta generica
         $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
           'email' => $email,
           'ip' => $request->getClientIp()]);
-        $errore = 'exception.invalid_user_type_recovery';
+        $successo = 'message.recovery_ok';
       } else {
         // effettua il recupero password
         if ($utente instanceOf Amministratore) {
@@ -259,6 +297,7 @@ class LoginController extends BaseController {
             'errore' => $err->getMessage()]);
           $errore = 'exception.error_recovery';
         }
+      }
       }
     }
     // mostra la pagina di risposta
@@ -349,6 +388,24 @@ class LoginController extends BaseController {
     return $this->render('login/profilo.html.twig', [
       'pagina_titolo' => 'page.login_profilo',
       'form' => $form->createView()]);
+  }
+
+  /**
+   * Esegue il login tramite token
+   *
+   */
+  //@TODO rimuovere
+  #[Route(path: '/login/token/', name: 'login_token', methods: ['POST'])]
+  public function token(): void {
+  }
+
+  /**
+   * Connette utente tramite token OTP, dopo aver eseguito la procedura di autenticazione con token
+   *
+   */
+  //@TODO rimuovere
+  #[Route(path: '/login/connect/{token}', name: 'login_connect', methods: ['GET'])]
+  public function connect(): void {
   }
 
   /**

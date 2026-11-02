@@ -11,7 +11,8 @@ knpu_oauth2_client:
       # Optional value for sending access_type parameter. More detail: https://developers.google.com/identity/protocols/OpenIDConnect#authenticationuriparameters
       access_type: null
       # Optional value for sending hd parameter. More detail: https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
-      hosted_domain: '%env(OAUTH_GOOGLE_CLIENT_HD)%'
+      # Se la variabile è vuota il processore "default" restituisce null (nessuna restrizione di dominio)
+      hosted_domain: '%env(default::OAUTH_GOOGLE_CLIENT_HD)%'
       # Optional value for additional fields to be requested from the user profile. If set, these values will be included with the defaults. More details: https://developers.google.com/+/web/api/rest/latest/people
       user_fields: {}
       # Optional value if you don't want or need to enable Google+ API access.

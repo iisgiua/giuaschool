@@ -175,7 +175,7 @@ class CircolareType extends AbstractType {
           'multiple' => false,
           'choice_value' => 'id',
           'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
-          'attr' => ['style' => 'width:auto;display:inline-block', 'class' => 'gs-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
           'required' => false,
           'mapped' => false])
         ->add('submit', SubmitType::class, ['label' => 'label.submit',

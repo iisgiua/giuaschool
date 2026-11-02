@@ -1,6 +1,6 @@
 <div class="modal-header">
   <button type="button" class="close" data-dismiss="modal">
-    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+    {{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}
     <span class="sr-only">{{ 'label.close'|trans }}</span>
   </button>
   <h3 class="modal-title gs-h3">Richieste di colloquio per i ricevimenti passati o disabilitati</h3>
@@ -8,8 +8,8 @@
 <div class="modal-body">
 {% for r in dati.storico %}
   <h4 class="gs-h4 gs-mb-1">
-    <span>{{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i')}} alle {{ r.fine|date('G:i')}}</span>
-    <span class="gs-normal">({{ ('label.tipo_colloquio_'~r.tipo)|trans }}: {{ r.luogo }})</span>
+    <span>{{ r.data|format_date('full')|title }} dalle {{ r.inizio|date('G:i') }} alle {{ r.fine|date('G:i') }}</span>
+    <span class="gs-normal">({{ ('label.tipo_colloquio_' ~ r.tipo)|trans }}: {{ r.luogo }})</span>
     {% if not r.abilitato %}- DISABILITATO{% endif %}
   </h4>
   <div class="panel panel-default">

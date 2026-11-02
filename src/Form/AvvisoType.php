@@ -192,7 +192,7 @@ class AvvisoType extends AbstractType {
           'multiple' => false,
           'choice_value' => 'id',
           'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
-          'attr' => ['style' => 'width:auto;display:inline-block', 'class' => 'gs-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
           'required' => false,
           'mapped' => false]);
       // aggiunge data transform
@@ -231,14 +231,14 @@ class AvvisoType extends AbstractType {
 					'format' => 'dd/MM/yyyy',
 					'required' => true])
         ->add('ora', TimeType::class, ['label' => ($options['values'][0] == 'E' ? 'label.ora_entrata' : 'label.ora_uscita'),
-					'data' => $options['values'][1]['ora'],
+					'data' => $options['values'][1]['ora'] ?? null,
           'widget' => 'single_text',
 					'html5' => false,
 					'attr' => ['widget' => 'gs-picker'],
 					'required' => true,
           'mapped' => false])
         ->add('note', MessageType::class, ['label' => 'label.note',
-					'data' => $options['values'][1]['note'],
+					'data' => $options['values'][1]['note'] ?? null,
 					'attr' => ['rows' => '3'],
 					'required' => false,
           'mapped' => false])
@@ -332,7 +332,7 @@ class AvvisoType extends AbstractType {
           'multiple' => false,
           'choice_value' => 'id',
           'choice_attr' => fn() => ['class' => 'gs-no-placeholder'],
-          'attr' => ['style' => 'width:auto;display:inline-block', 'class' => 'gs-placeholder'],
+          'attr' => ['class' => 'gs-placeholder'],
           'required' => false,
           'mapped' => false]);
     } elseif ($options['form_mode'] == 'coordinatore') {

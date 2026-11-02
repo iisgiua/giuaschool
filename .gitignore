@@ -48,3 +48,25 @@
 /.env.local
 /.env.local.php
 /last_deploy.date
+client_secret_*.json
+
+###> vincentlanglet/twig-cs-fixer ###
+/.twig-cs-fixer.cache
+###< vincentlanglet/twig-cs-fixer ###
+
+.psalm-cache
+
+###> artefatti locali di analisi ###
+/risultato.txt
+/security_issues.json
+/CREDENZIALI_TEST.md
+/PIANO_SICUREZZA.md
+/PIANO_COMMIT.md
+/audit_qa.py
+/routes.json
+/report_qa/
+/tools/
+/var/server_dev.log
+###< artefatti locali di analisi ###
+
+/__pycache__/

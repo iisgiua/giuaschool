@@ -84,23 +84,23 @@ return [
   'envDelete' => [
   ],
   'procedure' => [
-    <<<EOT
-      \$migrator->migraDa_1_6_1_start();
-    EOT,
-    <<<EOT
-      \$migrator->migraDa_1_6_1_documento();
-    EOT,
-    <<<EOT
-      \$migrator->migraDa_1_6_1_circolare();
-    EOT,
-    <<<EOT
-      \$migrator->migraDa_1_6_1_avviso();
-    EOT,
-    <<<EOT
-      \$migrator->migraDa_1_6_1_log();
-    EOT,
-    <<<EOT
-      \$migrator->migraDa_1_6_1_end();
-    EOT,
+    function ($pdo, $migrator) {
+      $migrator->migraDa_1_6_1_start();
+    },
+    function ($pdo, $migrator) {
+      $migrator->migraDa_1_6_1_documento();
+    },
+    function ($pdo, $migrator) {
+      $migrator->migraDa_1_6_1_circolare();
+    },
+    function ($pdo, $migrator) {
+      $migrator->migraDa_1_6_1_avviso();
+    },
+    function ($pdo, $migrator) {
+      $migrator->migraDa_1_6_1_log();
+    },
+    function ($pdo, $migrator) {
+      $migrator->migraDa_1_6_1_end();
+    },
   ]
 ];

@@ -1,0 +1,31 @@
+{##
+  # tabella-js: gestione lato browser delle tabelle del pannello admin
+  #    parametri: url_paginazione (nome route per il salto di pagina, opzionale)
+  # ##}
+<script>
+$(document).ready(function() {
+{% if url_paginazione is defined %}
+  $("#gs-paginazione").on("submit", function() {
+    var p = $("#jumpToPage").val();
+    window.location.href = "{{ path(url_paginazione) }}/" + p;
+    return false;
+  });
+{% endif %}
+  $('#gs-modal-info').on('show.bs.modal', function(e) {
+    var titolo = $(e.relatedTarget).data('titolo');
+    var contenuto = $('#' + $(e.relatedTarget).data('cont-id')).html();
+    $(this).find('#gs-modal-info-titolo').html(titolo);
+    $(this).find('#gs-modal-info-contenuto').html(contenuto);
+  });
+  $('#gs-modal-confirm').on('show.bs.modal', function(e) {
+    var href = $(e.relatedTarget).data('href');
+    var csrf = $(e.relatedTarget).data('csrf');
+    var titolo = $(e.relatedTarget).data('titolo');
+    var contenuto = $(e.relatedTarget).data('contenuto');
+    $(this).find('#gs-modal-confirm-titolo').html(titolo);
+    $(this).find('#gs-modal-confirm-contenuto').html(contenuto);
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
+  });
+});
+</script>

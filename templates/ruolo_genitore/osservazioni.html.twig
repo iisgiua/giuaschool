@@ -2,34 +2,37 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_osservazioni'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_osservazioni'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome ~ ' ' ~ alunno.cognome }}</h1>
   {% if errore %}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-    {% for periodo,v in dati %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
-    <thead class="bg-success">
+    {% for periodo, v in dati %}
+      {% if v is not empty %}
+  <div class="gs-pobs-wrapper">
+  {% set intestazione = [
+      {contenuto: 'Data', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Materia', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Osservazioni', classi: 'col-sm-7', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
+      {% for data, v1 in v %}
+        {% for k, e in v1 %}
       <tr>
-        <th class="col-sm-2">Data</th>
-        <th class="col-sm-3">Materia</th>
-        <th class="col-sm-7">Osservazioni</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for data,v1 in v %}
-        {% for k,e in v1 %}
-      <tr>
-        <td><strong>{{ e.data }}</strong></td>
-        <td><strong>{{ e.materia }}</strong><br><small><em>({{ e.docente }})</em></small></td>
+        <td class="gs-pobs-data">{{ e.data }}</td>
+        <td>
+          <span class="gs-pobs-materia">{{ e.materia }}</span>
+          <span class="gs-pobs-docente">{{ e.docente }}</span>
+        </td>
         <td>{{ e.testo|raw|nl2br }}</td>
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ periodo ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_0, intestazione: [intestazione], classi: 'gs-pobs-table'}) }}
+  </div>
+      {% endif %}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti osservazioni</strong>

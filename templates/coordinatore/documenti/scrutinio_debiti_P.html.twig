@@ -28,13 +28,13 @@
       <td width="48%" align="center"><strong>Argomenti da recuperare</strong></td>
       <td width="15%" align="center"><strong>Modalità di recupero</strong></td>
     </tr>
-{% for idmat,mat in dati.materie %}
+{% for idmat, mat in dati.materie %}
   {% if dati.debiti[idmat].unico is defined %}
     <tr>
       <td align="left"><strong>{{ mat.nome }}</strong></td>
       <td align="center"><strong>{{ dati.valutazioni[mat.tipo].lista[dati.debiti[idmat].unico] }}</strong></td>
       <td align="left" style="font-size:9pt">{{ dati.debiti[idmat].debito|nl2br }}</td>
-      <td align="center">{{ ('label.recupero_'~dati.debiti[idmat].recupero)|trans }}</td>
+      <td align="center">{{ ('label.recupero_' ~ dati.debiti[idmat].recupero)|trans }}</td>
     </tr>
   {% endif %}
 {% endfor %}

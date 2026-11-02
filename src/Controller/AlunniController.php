@@ -35,6 +35,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -52,6 +53,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * @author Antonello Dessì
  */
 class AlunniController extends BaseController {
+
+  /** Pattern per la data numerica breve */
+  private const FORMATO_DATA = 'd/m/Y';
+  /** Scostamento per il giorno precedente */
+  private const GIORNO_PRECEDENTE = '-1 day';
 
   /**
    * Importa alunni e genitori da file
@@ -162,9 +168,13 @@ class AlunniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/alunni/abilita/{id}/{abilita}', name: 'alunni_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/alunni/abilita/{id}/{abilita}', name: 'alunni_abilita', requirements: ['id' => '\d+', 'abilita' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function abilita(int $id, int $abilita): Response {
+  public function abilita(Request $request, int $id, int $abilita): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo alunno
     $alunno = $this->em->getRepository(Alunno::class)->find($id);
     if (!$alunno) {
@@ -204,6 +214,10 @@ class AlunniController extends BaseController {
   #[Route(path: '/alunni/modifica/edit/{id}', name: 'alunni_modifica_edit', requirements: ['id' => '\d+'], defaults: ['id' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function modificaEdit(Request $request, int $id): Response {
+    // le nuove entità (profilo e genitori mancanti) entrano nella sessione di lavoro
+    // solo quando la richiesta è un salvataggio: la sola lettura della pagina non
+    // deve creare dati (evita scritture indesiderate su richieste GET).
+    $salvataggio = $request->isMethod('POST');
     // controlla azione
     if ($id > 0) {
       // azione edit
@@ -215,21 +229,45 @@ class AlunniController extends BaseController {
       $classe_old = $alunno->getClasse() ? $alunno->getClasse()->getId() : null;
       $alunno_old = ['cognome' => $alunno->getCognome(), 'nome' => $alunno->getNome(),
         'sesso' => $alunno->getSesso()];
-      // legge genitori nell'ordine corretto
+      // legge genitori nell'ordine corretto (ne crea di nuovi se mancanti)
       $username = substr((string) $alunno->getUsername(), 0, -2).'f'.substr((string) $alunno->getUsername(), -1);
-      if ($alunno->getGenitori()[0]->getUsername() == $username) {
-        $genitore1 = $alunno->getGenitori()[0];
-        $genitore2 = $alunno->getGenitori()[1] ?? null;
-      } else {
-        $genitore1 = $alunno->getGenitori()[1];
-        $genitore2 = $alunno->getGenitori()[0];
+      $genitori = $alunno->getGenitori()->toArray();
+      if (count($genitori) > 1 && $genitori[0]->getUsername() != $username) {
+        // inverte l'ordine
+        $genitori = array_reverse($genitori);
+      }
+      $genitore1 = $genitori[0] ?? null;
+      $genitore2 = $genitori[1] ?? null;
+      if (!$genitore1) {
+        // genitore mancante: crea il profilo da compilare
+        $genitore1 = (new Genitore())
+          ->setAbilitato(true)
+          ->setAlunno($alunno)
+          ->setSesso('M')
+          ->setPassword('NOPASSWORD');
+        if ($salvataggio) {
+          $this->em->persist($genitore1);
+        }
+      }
+      if (!$genitore2) {
+        // genitore mancante: crea il profilo da compilare
+        $genitore2 = (new Genitore())
+          ->setAbilitato(true)
+          ->setAlunno($alunno)
+          ->setSesso($genitore1->getSesso() == 'M' ? 'F' : 'M')
+          ->setPassword('NOPASSWORD');
+        if ($salvataggio) {
+          $this->em->persist($genitore2);
+        }
       }
     } else {
       // azione add
       $alunno = (new Alunno())
         ->setAbilitato(true)
         ->setPassword('NOPASSWORD');
-      $this->em->persist($alunno);
+      if ($salvataggio) {
+        $this->em->persist($alunno);
+      }
       $classe_old = null;
       // aggiunge genitori
       $genitore1 = (new Genitore())
@@ -237,13 +275,17 @@ class AlunniController extends BaseController {
         ->setAlunno($alunno)
         ->setSesso('M')
         ->setPassword('NOPASSWORD');
-      $this->em->persist($genitore1);
+      if ($salvataggio) {
+        $this->em->persist($genitore1);
+      }
       $genitore2 = (new Genitore())
         ->setAbilitato(true)
         ->setAlunno($alunno)
         ->setSesso('F')
         ->setPassword('NOPASSWORD');
-      $this->em->persist($genitore2);
+      if ($salvataggio) {
+        $this->em->persist($genitore2);
+      }
     }
     // form
     $opzioniClassi = $this->em->getRepository(Classe::class)->opzioni(null, false);
@@ -338,12 +380,16 @@ class AlunniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/alunni/password/{tipo}/{username}', name: 'alunni_password', requirements: ['tipo' => 'E|P'], methods: ['GET'])]
+  #[Route(path: '/alunni/password/{tipo}/{username}', name: 'alunni_password', requirements: ['tipo' => 'E|P'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function password(Request $request, UserPasswordHasherInterface $hasher,
                            PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
                            LoggerInterface $logger, LogHandler $dblogger, string $tipo,
                            ?string $username): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('password', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // controlla alunno
     $utente = $this->em->getRepository(Alunno::class)->findOneByUsername($username);
     if (!$utente) {
@@ -700,9 +746,13 @@ class AlunniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/alunni/classe/delete/{id}', name: 'alunni_classe_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/alunni/classe/delete/{id}', name: 'alunni_classe_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function classeDelete(int $id): Response {
+  public function classeDelete(Request $request, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     $cambio = $this->em->getRepository(CambioClasse::class)->find($id);
     if (!$cambio) {
       // errore
@@ -731,11 +781,15 @@ class AlunniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/alunni/passwordFiltro/{genitore}', name: 'alunni_passwordFiltro', requirements: ['genitore' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/alunni/passwordFiltro/{genitore}', name: 'alunni_passwordFiltro', requirements: ['genitore' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function passwordFiltro(UserPasswordHasherInterface $hasher,
+  public function passwordFiltro(Request $request, UserPasswordHasherInterface $hasher,
                                  PdfManager $pdf, StaffUtil $staff, LoggerInterface $logger,
                                  LogHandler $dblogger, int $genitore): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('password', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // recupera criteri dalla sessione
     $criteri = [];
     $criteri['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');
@@ -966,14 +1020,19 @@ class AlunniController extends BaseController {
           // modifica
           $utente = $form->get('utente')->getData();
         }
-        // imposta tipo rappresentante
-        $utente->setRappresentante($nuoviTipi);
-        // memorizza dati
-        $this->em->flush();
-        // messaggio
-        $this->addFlash('success', 'message.update_ok');
-        // redirect
-        return $this->redirectToRoute('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : ''));
+        if (!$utente) {
+          // utente selezionato non valido: errore di compilazione e non di sistema
+          $form->addError(new FormError($trans->trans('exception.invalid_user')));
+        } else {
+          // imposta tipo rappresentante
+          $utente->setRappresentante($nuoviTipi);
+          // memorizza dati
+          $this->em->flush();
+          // messaggio
+          $this->addFlash('success', 'message.update_ok');
+          // redirect
+          return $this->redirectToRoute('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : ''));
+        }
       }
     }
     // mostra la pagina di risposta
@@ -990,9 +1049,13 @@ class AlunniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/alunni/rappresentanti/delete/{ruolo}/{id}', name: 'alunni_rappresentanti_delete', requirements: ['ruolo' => 'A|G', 'id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/alunni/rappresentanti/delete/{ruolo}/{id}', name: 'alunni_rappresentanti_delete', requirements: ['ruolo' => 'A|G', 'id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function rappresentantiDelete(string $ruolo, int $id): Response {
+  public function rappresentantiDelete(Request $request, string $ruolo, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla utente
     $utente = ($ruolo == 'A') ?
       $this->em->getRepository(Alunno::class)->find($id) :
@@ -1009,6 +1072,289 @@ class AlunniController extends BaseController {
     $this->addFlash('success', 'message.update_ok');
     // redirezione
     return $this->redirectToRoute('alunni_rappresentanti'.($ruolo == 'G' ? 'Genitori' : ''));
+  }
+
+  /**
+   * Normalizza e imposta i numeri di telefono del genitore indicato
+   *
+   * @param mixed $genitore Genitore di cui impostare i numeri di telefono
+   */
+  private function impostaNumeriTelefono(mixed $genitore): void {
+    if (!$genitore) {
+      // genitore non presente: niente da fare
+      return;
+    }
+    $telefono = [];
+    foreach ($genitore->getNumeriTelefono() as $tel) {
+      $tel = preg_replace('/[^+\d]/', '', (string) $tel);
+      $tel = (str_starts_with((string) $tel, '+39')) ? substr((string) $tel, 3) : $tel;
+      if ($tel != '' && $tel != str_repeat('0', strlen((string) $tel))) {
+        $telefono[] = $tel;
+      }
+    }
+    $genitore->setNumeriTelefono($telefono);
+  }
+
+  /**
+   * Memorizza le operazioni da eseguire sugli utenti dell'applicazione esterna
+   * in caso di creazione o modifica dell'alunno
+   *
+   * @param Alunno $alunno Alunno memorizzato
+   * @param int $id Identificativo dell'alunno (se nullo lo crea)
+   * @param array $alunno_old Dati precedenti dell'alunno
+   * @param mixed $classe_old Identificativo della classe precedente
+   */
+  private function aggiornaProvisioning(mixed $alunno, int $id, array $alunno_old, mixed $classe_old): void {
+    if (!$id) {
+      // crea alunno
+      $provisioning = (new Provisioning())
+        ->setUtente($alunno)
+        ->setFunzione('creaUtente')
+        ->setDati(['password' => 'NOPASSWORD']);
+      $this->em->persist($provisioning);
+    } elseif ($alunno->getCognome() != $alunno_old['cognome'] || $alunno->getNome() != $alunno_old['nome'] ||
+              $alunno->getSesso() != $alunno_old['sesso']) {
+      // modifica dati alunno
+      $provisioning = (new Provisioning())
+        ->setUtente($alunno)
+        ->setFunzione('modificaUtente')
+        ->setDati([]);
+      $this->em->persist($provisioning);
+    }
+    if (!$classe_old && $alunno->getClasse()) {
+      // aggiunge alunno a classe
+      $provisioning = (new Provisioning())
+        ->setUtente($alunno)
+        ->setFunzione('aggiungeAlunnoClasse')
+        ->setDati(['classe' => $alunno->getClasse()->getId()]);
+      $this->em->persist($provisioning);
+    } elseif ($classe_old && !$alunno->getClasse()) {
+      // toglie alunno da classe
+      $provisioning = (new Provisioning())
+        ->setUtente($alunno)
+        ->setFunzione('rimuoveAlunnoClasse')
+        ->setDati(['classe' => $classe_old]);
+      $this->em->persist($provisioning);
+    } elseif ($alunno->getClasse() && $classe_old != $alunno->getClasse()->getId()) {
+      // cambia classe ad alunno
+      $provisioning = (new Provisioning())
+        ->setUtente($alunno)
+        ->setFunzione('modificaAlunnoClasse')
+        ->setDati(['classe_origine' => $classe_old, 'classe_destinazione' => $alunno->getClasse()->getId()]);
+      $this->em->persist($provisioning);
+    }
+  }
+
+  /**
+   * Genera le credenziali di accesso degli alunni o dei genitori indicati
+   *
+   * @param iterable $lista Lista degli alunni di cui generare le credenziali
+   * @param int $genitore Vero per generare le credenziali dei genitori
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
+   * @param StaffUtil $staff Funzioni disponibili allo staff
+   * @param LogHandler $dblogger Gestore dei log su database
+   * @param PdfManager $pdf Gestore dei documenti PDF
+   */  private function generaCredenziali(iterable $lista, int $genitore, UserPasswordHasherInterface $hasher, StaffUtil $staff,
+                                      LogHandler $dblogger, PdfManager $pdf): void {
+    foreach ($lista as $alu) {
+      if ($genitore) {
+        // password genitore
+        $utenti = $this->em->getRepository(Genitore::class)->findBy(['alunno' => $alu]);
+      } else {
+        // password alunno
+        $utenti = [$alu];
+      }
+      foreach ($utenti as $utente) {
+        // crea password
+        $password = $staff->creaPassword(8);
+        $utente->setPasswordNonCifrata($password);
+        $pswd = $hasher->hashPassword($utente, $utente->getPasswordNonCifrata());
+        $utente->setPassword($pswd);
+        // provisioning
+        if (!$genitore) {
+          $provisioning = (new Provisioning())
+            ->setUtente($utente)
+            ->setFunzione('passwordUtente')
+            ->setDati(['password' => $utente->getPasswordNonCifrata()]);
+          $this->em->persist($provisioning);
+        }
+        // memorizza su db
+        $this->em->flush();
+        // log azione
+        $dblogger->logAzione('SICUREZZA', 'Generazione Password', [
+          'Username' => $utente->getUsername(),
+          'Ruolo' => $utente->getRoles()[0],
+          'ID' => $utente->getId()]);
+        // contenuto in formato HTML
+        if ($genitore) {
+          $html = $this->renderView('pdf/credenziali_profilo_genitori.html.twig', [
+            'alunno' => $utente->getAlunno(),
+            'genitore' => $utente,
+            'sesso' => ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a'),
+            'username' => $utente->getUsername(),
+            'password' => $password]);
+        } else {
+          $html = $this->renderView('pdf/credenziali_profilo_alunni.html.twig', [
+            'alunno' => $utente,
+            'sesso' => ($utente->getSesso() == 'M' ? 'o' : 'a'),
+            'username' => $utente->getUsername(),
+            'password' => $password]);
+        }
+        $pdf->createFromHtml($html);
+      }
+    }
+  }
+
+  /**
+   * Trova il rappresentante indicato tra alunni e genitori
+   *
+   * @param string $ruolo Ruolo del rappresentante [A=alunno, G=genitore]
+   * @param int $id Identificativo del rappresentante
+   *
+   * @return mixed Rappresentante trovato
+   */
+  private function trovaRappresentante(string $ruolo, int $id): mixed {
+    return ($ruolo == 'A') ?
+      $this->em->getRepository(Alunno::class)->find($id) :
+      $this->em->getRepository(Genitore::class)->find($id);
+  }
+
+  /**
+   * Restituisce la lista dei rappresentanti abilitati del ruolo indicato
+   *
+   * @param string $ruolo Ruolo del rappresentante [A=alunno, G=genitore]
+   *
+   * @return array Lista dei rappresentanti abilitati
+   */
+  private function listaRappresentanti(string $ruolo): array {
+    return ($ruolo == 'A') ?
+      $this->em->getRepository(Alunno::class)->findBy(['abilitato' => 1], ['cognome' => 'ASC', 'nome' => 'ASC']) :
+      $this->em->getRepository(Genitore::class)->findBy(['abilitato' => 1], ['cognome' => 'ASC', 'nome' => 'ASC']);
+  }
+
+  /**
+   * Restituisce la lista dei tipi di rappresentante ammessi per il ruolo indicato
+   *
+   * @param string $ruolo Ruolo del rappresentante [A=alunno, G=genitore]
+   *
+   * @return array Lista dei tipi di rappresentante ammessi
+   */
+  private function listaTipiRappresentante(string $ruolo): array {
+    if ($ruolo == 'A') {
+      // solo per gli alunni
+      return ['label.rappresentante_C' => 'C', 'label.rappresentante_I' => 'I',
+        'label.rappresentante_P' => 'P'];
+    }
+    return ['label.rappresentante_C' => 'C', 'label.rappresentante_I' => 'I'];
+  }
+
+  /**
+   * Restituisce le date di inizio e fine dell'anno scolastico configurato
+   *
+   * @return array Date di inizio e fine dell'anno scolastico
+   */
+  private function anniScolastici(): array {
+    return [
+      'inizio' => DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio')),
+      'fine' => DateTime::createFromFormat('Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'))];
+  }
+
+  /**
+   * Controlla i dati dell'inserimento di un alunno in una classe e calcola le date del cambio
+   *
+   * @param FormInterface $form Form di inserimento del cambio di classe
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param mixed $cambio Cambio di classe da controllare
+   *
+   * @return array Dati del cambio di classe calcolati
+   */
+  private function validaInserimentoClasse(FormInterface $form, TranslatorInterface $trans, mixed $cambio): array {
+    $inizioAnno = $this->anniScolastici()['inizio'];
+    $data = $cambio->getInizio();
+    $inizio = (clone $inizioAnno)->modify('first day of this month');
+    $fine = (clone $data)->modify(self::GIORNO_PRECEDENTE);
+    $note = $trans->trans('message.note_classe_alunno_inserito', ['date' => $data->format(self::FORMATO_DATA)]);
+    if ($cambio->getInizio() < $inizioAnno) {
+      // errore sulla data
+      $form->get('inizio')->addError(new FormError($trans->trans('exception.classe_inizio_invalido')));
+    }
+    if ($this->em->getRepository(Valutazione::class)->numeroValutazioni($cambio->getAlunno(), $inizio, $fine) > 0) {
+      // errore valutazioni presenti
+      $form->addError(new FormError($trans->trans('exception.classe_valutazioni_presenti')));
+    }
+    if ($this->em->getRepository(Nota::class)->numeroNoteIndividuali($cambio->getAlunno(), $inizio, $fine) > 0) {
+      // errore note presenti
+      $form->addError(new FormError($trans->trans('exception.classe_note_presenti')));
+    }
+    return ['data' => $data, 'inizio' => $inizio, 'fine' => $fine, 'note' => $note, 'classe' => null];
+  }
+
+  /**
+   * Controlla i dati del trasferimento di un alunno e calcola le date del cambio di classe
+   *
+   * @param FormInterface $form Form di inserimento del cambio di classe
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param mixed $cambio Cambio di classe da controllare
+   *
+   * @return array Dati del cambio di classe calcolati
+   */
+  private function validaTrasferimentoClasse(FormInterface $form, TranslatorInterface $trans, mixed $cambio): array {
+    $inizioAnno = $this->anniScolastici()['inizio'];
+    $fineAnno = $this->anniScolastici()['fine'];
+    $data = $cambio->getFine();
+    $classe = $cambio->getAlunno()->getClasse();
+    $inizio = $inizioAnno;
+    $fine = (clone $data)->modify(self::GIORNO_PRECEDENTE);
+    $note = $trans->trans('message.note_classe_alunno_trasferito', ['date' => $data->format(self::FORMATO_DATA)]);
+    if ($cambio->getFine() > $fineAnno) {
+      // errore sulla data
+      $form->get('fine')->addError(new FormError($trans->trans('exception.classe_fine_invalido')));
+    }
+    if ($this->em->getRepository(Valutazione::class)->numeroValutazioni($cambio->getAlunno(), $data, $fineAnno) > 0) {
+      // errore valutazioni presenti
+      $form->addError(new FormError($trans->trans('exception.classe_valutazioni_presenti')));
+    }
+    if ($this->em->getRepository(Nota::class)->numeroNoteIndividuali($cambio->getAlunno(), $data, $fineAnno) > 0) {
+      // errore note presenti
+      $form->addError(new FormError($trans->trans('exception.classe_note_presenti')));
+    }
+    return ['data' => $data, 'inizio' => $inizio, 'fine' => $fine, 'note' => $note, 'classe' => $classe];
+  }
+
+  /**
+   * Controlla i dati del cambio di sezione di un alunno e calcola le date del cambio di classe
+   *
+   * @param FormInterface $form Form di inserimento del cambio di classe
+   * @param TranslatorInterface $trans Gestore delle traduzioni
+   * @param mixed $cambio Cambio di classe da controllare
+   *
+   * @return array Dati del cambio di classe calcolati
+   */
+  private function validaSezioneClasse(FormInterface $form, TranslatorInterface $trans, mixed $cambio): array {
+    $inizioAnno = $this->anniScolastici()['inizio'];
+    $fineAnno = $this->anniScolastici()['fine'];
+    $data = $cambio->getFine();
+    $classe = $cambio->getAlunno()->getClasse();
+    $inizio = $inizioAnno;
+    $fine = (clone $data)->modify(self::GIORNO_PRECEDENTE);
+    $note = $trans->trans('message.note_classe_alunno_sezione', ['date' => $data->format(self::FORMATO_DATA)]);
+    if ($cambio->getFine() > $fineAnno) {
+      // errore sulla data
+      $form->get('fine')->addError(new FormError($trans->trans('exception.classe_fine_invalido')));
+    }
+    if ($cambio->getClasse() == $cambio->getAlunno()->getClasse()) {
+      // errore sulla classe
+      $form->get('classe')->addError(new FormError($trans->trans('exception.classe_non_diversa')));
+    }
+    if ($this->em->getRepository(Valutazione::class)->numeroValutazioni($cambio->getAlunno(), $data, $fineAnno, $classe) > 0) {
+      // errore valutazioni presenti
+      $form->addError(new FormError($trans->trans('exception.classe_valutazioni_presenti')));
+    }
+    if ($this->em->getRepository(Nota::class)->numeroNoteIndividuali($cambio->getAlunno(), $data, $fineAnno, $classe) > 0) {
+      // errore note presenti
+      $form->addError(new FormError($trans->trans('exception.classe_note_presenti')));
+    }
+    return ['data' => $data, 'inizio' => $inizio, 'fine' => $fine, 'note' => $note, 'classe' => $classe];
   }
 
 }

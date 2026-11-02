@@ -4,13 +4,13 @@
 <div class="container-fluid">
   <h1 class="text-center gs-h1 gs-mt-2">{{ titolo|trans }}</h1>
   {% if dati.uniche is empty and dati.multiple is empty and dati.consultazioni is empty and dati.autorizzazioni is empty %}
-  <div class="alert alert-warning" role="alert">
+  <div class="alert alert-info" role="alert">
     <strong class="gs-big">{{ 'message.no_moduli_richieste'|trans }}</strong>
   </div>
   {% else %}
-    {% for mk,mv in dati.autorizzazioni %}
+    {% for mk, mv in dati.autorizzazioni %}
     <div class="panel panel-danger">
-    <div class="panel-heading"><h3 class="panel-title gs-h3">Autorizzazione {{ ('label.tipo_attivita_'~mv.tipo)|trans|lower }}: {{ mv.nome }}</h3></div>
+    <div class="panel-heading"><h3 class="panel-title gs-h3">Autorizzazione {{ ('label.tipo_attivita_' ~ mv.tipo)|trans|lower }}: {{ mv.nome }}</h3></div>
     <div class="panel-body">
       <div class="col-sm-12 gs-big">
         <strong>Data dell'attività: </strong>{{ mv.inizio|date('d/m/Y') }} dalle ore {{ mv.inizio|date('G:i') }} alle ore {{ mv.fine|date('G:i') }}.
@@ -21,7 +21,7 @@
       </div>
       <div class="col-sm-12">
         <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: mv.autorizzazione_id}) }}" title="Scarica l'autorizzazione inviata">
-          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'autorizzazione inviata</strong>
+          {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica l'autorizzazione inviata</strong>
         </a>
       </div>
       {% endif %}
@@ -37,7 +37,7 @@
     </div>
   </div>
     {% endfor %}
-    {% for mk,mv in dati.consultazioni %}
+    {% for mk, mv in dati.consultazioni %}
   <div class="panel panel-warning">
     <div class="panel-heading"><h3 class="panel-title gs-h3">Consultazione attiva: {{ mv.nome }}</h3></div>
     <div class="panel-body">
@@ -52,11 +52,11 @@
       </div>
       <div class="col-sm-12">
         <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: mv.id}) }}" title="Scarica la risposta inviata">
-          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica la risposta inviata</strong>
+          {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica la risposta inviata</strong>
         </a>
       </div>
       <div class="text-right">
-        <button class="btn btn-danger gs-modal-confirm-button" title="Cancella la risposta inviata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: mv.id}) }}" data-text="{{ 'message.cancella_risposta'|trans }}"><strong>{{ 'label.cancella_risposta'|trans }}</strong></button>
+        <button class="btn btn-danger gs-modal-confirm-button" title="Cancella la risposta inviata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: mv.id}) }}" data-text="{{ 'message.cancella_risposta'|trans }}" data-csrf="{{ csrf_token('delete') }}"><strong>{{ 'label.cancella_risposta'|trans }}</strong></button>
       </div>
       {% else %}
       <div class="text-right">
@@ -66,7 +66,7 @@
     </div>
   </div>
     {% endfor %}
-    {% for mk,mv in dati.uniche %}
+    {% for mk, mv in dati.uniche %}
   <div class="panel panel-primary">
     <div class="panel-heading"><h3 class="panel-title gs-h3">{{ mv.nome }}</h3></div>
     <div class="panel-body">
@@ -91,19 +91,19 @@
         {% endif %}
       <div class="col-sm-12">
         <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: dati.richieste[mk].nuove[0].id}) }}" title="Scarica il modulo compilato">
-          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong>
+          {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica il modulo compilato</strong>
         </a>
         {% for a in dati.richieste[mk].nuove[0].allegati %}
         <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: dati.richieste[mk].nuove[0].id, documento: loop.index}) }}" title="Scarica l'allegato">
-          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'allegato {{ loop.index }}</strong>
+          {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica l'allegato {{ loop.index }}</strong>
         </a>
         {% endfor %}
       </div>
       <div class="text-right">
         {% if mv.gestione %}
-        <button class="btn btn-danger gs-modal-confirm-button" title="Cancella la richiesta inviata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: dati.richieste[mk].nuove[0].id}) }}" data-text="{{ 'message.cancella_richiesta'|trans }}"><strong>{{ 'label.cancella_richiesta'|trans }}</strong></button>
+        <button class="btn btn-danger gs-modal-confirm-button" title="Cancella la richiesta inviata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: dati.richieste[mk].nuove[0].id}) }}" data-text="{{ 'message.cancella_richiesta'|trans }}" data-csrf="{{ csrf_token('delete') }}"><strong>{{ 'label.cancella_richiesta'|trans }}</strong></button>
         {% else %}
-        <button class="btn btn-danger gs-modal-confirm-button" title="Cancella il modulo inviato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: dati.richieste[mk].nuove[0].id}) }}" data-text="{{ 'message.cancella_modulo'|trans }}"><strong>{{ 'label.cancella_modulo'|trans }}</strong></button>
+        <button class="btn btn-danger gs-modal-confirm-button" title="Cancella il modulo inviato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: dati.richieste[mk].nuove[0].id}) }}" data-text="{{ 'message.cancella_modulo'|trans }}" data-csrf="{{ csrf_token('delete') }}"><strong>{{ 'label.cancella_modulo'|trans }}</strong></button>
         {% endif %}
       </div>
       {% else %}
@@ -118,7 +118,7 @@
     </div>
   </div>
     {% endfor %}
-    {% for mk,mv in dati.multiple %}
+    {% for mk, mv in dati.multiple %}
   <div class="panel panel-primary">
     <div class="panel-heading"><h3 class="panel-title gs-h3">{{ mv.nome }}</h3></div>
       {% if dati.richieste[mk].nuove is defined %}
@@ -143,17 +143,17 @@
           {% endif %}
         <div class="col-sm-12">
           <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: rv.id}) }}" title="Scarica il modulo di richiesta compilato">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong>
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica il modulo compilato</strong>
           </a>
           {% for a in rv.allegati %}
           <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: rv.id, documento: loop.index}) }}" title="Scarica l'allegato alla richiesta">
-            <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'allegato {{ loop.index }}</strong>
+            {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica l'allegato {{ loop.index }}</strong>
           </a>
         </div>
           {% endfor %}
           {% if rv.stato == 'I' %}
           <div class="text-right">
-            <button class="btn btn-danger gs-modal-confirm-button" title="Cancella la richiesta inviata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: rv.id}) }}" data-text="{{ 'message.cancella_richiesta'|trans }}"><strong>{{ 'label.cancella_richiesta'|trans }}</strong></button>
+            <button class="btn btn-danger gs-modal-confirm-button" title="Cancella la richiesta inviata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('richieste_delete', {id: rv.id}) }}" data-text="{{ 'message.cancella_richiesta'|trans }}" data-csrf="{{ csrf_token('delete') }}"><strong>{{ 'label.cancella_richiesta'|trans }}</strong></button>
           </div>
           {% endif %}
       </li>
@@ -165,7 +165,7 @@
         <strong>{{ 'label.invia_richiesta'|trans }}</strong>
       </a>
       {% if dati.richieste[mk].vecchie is defined %}
-      <button class="btn btn-default gs-modal-confirm-button gs-ml-3" title="Visualizza richieste scadute" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ mv.nome}}<br>Visualizza richieste scadute" data-body="gs-richieste-scadute"><strong>{{ 'label.richieste_scadute'|trans }}</strong></button>
+      <button class="btn btn-default gs-modal-confirm-button gs-ml-3" title="Visualizza richieste scadute" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ mv.nome }}<br data-csrf="{{ csrf_token('delete') }}">Visualizza richieste scadute" data-body="gs-richieste-scadute"><strong>{{ 'label.richieste_scadute'|trans }}</strong></button>
       <ul id="gs-richieste-scadute" class="list-group" style="display:none">
         {% for rv in dati.richieste[mk].vecchie %}
         <li class="list-group-item">
@@ -177,11 +177,11 @@
             {% endif %}
           <div>
             <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: rv.id}) }}" title="Scarica il modulo di richiesta compilato">
-              <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica il modulo compilato</strong>
+              {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica il modulo compilato</strong>
             </a>
             {% for a in rv.allegati %}
             <a class="btn btn-xs btn-info gs-mr-2 gs-mb-2" href="{{ path('richieste_download', {id: rv.id, documento: loop.index}) }}" title="Scarica l'allegato alla richiesta">
-              <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>Scarica l'allegato {{ loop.index }}</strong>
+              {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>Scarica l'allegato {{ loop.index }}</strong>
             </a>
           </div>
             {% endfor %}
@@ -193,8 +193,8 @@
   </div>
     {% endfor %}
   {% endif %}
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_richiesta'} %}
-  {% include 'include/modal-info.html.twig' %}
+  {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_richiesta'}) }}
+  {{ include('include/modal-info.html.twig') }}
 </div>
 {% endblock %}
 
@@ -204,10 +204,12 @@
 $(document).ready(function() {
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
-    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var csrf = $(event.relatedTarget).data('csrf');
     var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
     $(this).find('#gs-modal-confirm-msg').text(text);
-  });
+});
   $('#gs-modal-info').on('show.bs.modal', function (event) {
     var title = $(event.relatedTarget).data('title');
     var id = $(event.relatedTarget).data('body');

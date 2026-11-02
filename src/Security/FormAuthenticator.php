@@ -31,6 +31,8 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 
 /**
@@ -48,6 +50,15 @@ use Symfony\Component\Security\Http\SecurityRequestAttributes;
 class FormAuthenticator extends AbstractAuthenticator {
 
   use AuthenticatorTrait;
+
+
+  //==================== COSTANTI DELLA CLASSE  ====================
+
+  /** Numero massimo di tentativi di login falliti prima del blocco temporaneo */
+  private const MAX_TENTATIVI_LOGIN = 5;
+
+  /** Durata del blocco temporaneo dopo troppi tentativi falliti (in secondi) */
+  private const BLOCCO_LOGIN_SECONDI = 900;
 
 
   //==================== METODI DELLA CLASSE ====================
@@ -70,7 +81,8 @@ class FormAuthenticator extends AbstractAuthenticator {
       private OtpUtil $otp,
       private LoggerInterface $logger,
       private LogHandler $dblogger,
-      private ConfigLoader $config) {
+      private ConfigLoader $config,
+      private CacheInterface $throttleCache) {
   }
 
   /**
@@ -99,8 +111,14 @@ class FormAuthenticator extends AbstractAuthenticator {
   public function authenticate(Request $request): Passport {
     // legge le credenziali
     $username = $request->request->get('_username');
+    $password = $request->request->get('_password');
+    // richiesta malformata (_username o _password mancanti o non validi): autenticazione
+    // fallita, per evitare il TypeError (HTTP 500) su valori nulli
+    if (!is_string($username) || !is_string($password)) {
+      throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
+    }
     $credentials = [
-      'password' => $request->request->get('_password'),
+      'password' => $password,
       'otp' => $request->request->get('_otp'),
       'login_speciale' => ($request->attributes->get('_route') === 'login_utente'),
       'ip' => $request->getClientIp()];
@@ -154,6 +172,16 @@ class FormAuthenticator extends AbstractAuthenticator {
    * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
    */
   public function checkCredentials(mixed $credentials, UserInterface $user): bool {
+    // protezione brute-force: blocca la verifica se troppi tentativi falliti recenti
+    $throttleKey = 'login_fail_'.md5(strtolower((string) $user->getUserIdentifier()).'|'.(string) $credentials['ip']);
+    $failCount = (int) $this->throttleCache->get($throttleKey, function (ItemInterface $item) {
+      $item->expiresAfter(self::BLOCCO_LOGIN_SECONDI);
+      return 0;
+    });
+    if ($failCount >= self::MAX_TENTATIVI_LOGIN) {
+      // blocco temporaneo: stesso messaggio generico per non rivelare informazioni
+      throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
+    }
     // controlla modalità manutenzione
     $this->controllaManutenzione($user);
     // legge configurazione e verifica se si è effettuato il login speciale
@@ -184,37 +212,13 @@ class FormAuthenticator extends AbstractAuthenticator {
     }
     // controlla password
     if ($this->hasher->isPasswordValid($user, $credentials['password'])) {
-      // password ok
-      $otpTipo = $this->em->getRepository(Configurazione::class)->getParametro('otp_tipo');
-      // se l'utente ha OTP attivo e il ruolo corretto e non è stato effettuato il login speciale
-      if ($user->getOtp() && $user->controllaRuolo($otpTipo) && !$loginSpeciale) {
-        // controlla otp
-        if ($this->otp->controllaOtp($user->getOtp(), $credentials['otp'])) {
-          // otp corretto
-          if ($credentials['otp'] != $user->getUltimoOtp()) {
-            // ok
-            return true;
-          } else {
-            // otp riusato (replay attack?)
-            $otp_errore_log = 'OTP riusato (replay attack) nella richiesta di login.';
-            $otp_errore_messaggio = 'exception.invalid_credentials';
-          }
-        } elseif (empty($credentials['otp'])) {
-          // no OTP
-          $otp_errore_log = 'OTP non presente nella richiesta di login.';
-          $otp_errore_messaggio = 'exception.missing_otp_credentials';
-        } else {
-          // OTP errato
-          $otp_errore_log = 'OTP errato nella richiesta di login.';
-          $otp_errore_messaggio = 'exception.invalid_credentials';
-        }
-        // validazione fallita
-        $this->logger->error($otp_errore_log, [
-          'username' => $user->getUserIdentifier(),
-          'ruolo' => $user->getCodiceRuolo(),
-          'login_speciale' => $loginSpeciale,
-          'ip' => $credentials['ip']]);
-        throw new CustomUserMessageAuthenticationException($otp_errore_messaggio);
+      // password ok: se previsto, controlla anche l'OTP
+      try {
+        $this->controllaOtp($user, $credentials, $loginSpeciale);
+      } catch (CustomUserMessageAuthenticationException $e) {
+        // protezione brute-force: anche un OTP errato conta come tentativo fallito
+        $this->registraTentativoFallito($throttleKey, $failCount);
+        throw $e;
       }
       // validazione corretta
       return true;
@@ -225,7 +229,110 @@ class FormAuthenticator extends AbstractAuthenticator {
       'ruolo' => $user->getCodiceRuolo(),
       'login_speciale' => $loginSpeciale,
       'ip' => $credentials['ip']]);
+    // protezione brute-force: anche la password errata conta come tentativo fallito
+    $this->registraTentativoFallito($throttleKey, $failCount);
+    // stesso messaggio generico sia per credenziali errate che per blocco temporaneo
     throw new CustomUserMessageAuthenticationException('exception.invalid_credentials');
+  }
+
+  /**
+   * Registra un tentativo di login fallito per la protezione brute-force.
+   * Il blocco temporaneo scatta al superamento di MAX_TENTATIVI_LOGIN tentativi falliti
+   * nella finestra temporale di BLOCCO_LOGIN_SECONDI, per utente+IP.
+   *
+   * @param string $throttleKey Chiave di cache del contatore dei tentativi falliti
+   * @param int $failCount Numero di tentativi falliti già registrati
+   */
+  private function registraTentativoFallito(string $throttleKey, int $failCount): void {
+    // incrementa il contatore e lo salva in cache con la scadenza temporale
+    $failCount++;
+    $this->throttleCache->delete($throttleKey);
+    $this->throttleCache->get($throttleKey, function (ItemInterface $item) use ($failCount) {
+      $item->expiresAfter(self::BLOCCO_LOGIN_SECONDI);
+      return $failCount;
+    });
+  }
+
+  /**
+   * Verifica che il tipo di accesso utilizzato sia compatibile con il tipo di utente.
+   * Se non lo è, registra l'errore e genera un'eccezione di autenticazione.
+   *
+   * @param mixed $spid Modalità di accesso con SPID/CIE
+   * @param mixed $idProvider Ruolo che deve accedere tramite identity provider
+   * @param mixed $idProviderTipo Ruolo previsto per l'accesso con identity provider
+   * @param mixed $loginSpeciale Vero se è stato effettuato il login speciale
+   * @param UserInterface $user Utente da autenticare
+   * @param mixed $credentials Credenziali dell'autenticazione
+   *
+   * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
+   */
+  private function controllaTipoAccesso(mixed $spid, mixed $idProvider, mixed $idProviderTipo, mixed $loginSpeciale, UserInterface $user, mixed $credentials): void {
+    // se SPID/CIE è obbligatorio e non è stato effettuato il login speciale
+    if (!$loginSpeciale && (
+        $spid == 'O' ||
+        (in_array($spid, ['A', 'M']) && !$user->controllaRuolo('A')) ||
+        ($spid == 'M' && $user->controllaRuoloFunzione('AM')))) {
+      // errore: utente deve usare accesso SPID/CIE
+      $this->logger->error('Tipo di accesso non valido per l\'autenticazione tramite form.', [
+        'username' => $user->getUserIdentifier(),
+        'ruolo' => $user->getCodiceRuolo(),
+        'ip' => $credentials['ip']]);
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_form');
+    }
+    // se è utilizzato un ID provider per l'utente e non è stato effettuato il login speciale
+    if ($idProvider && $user->controllaRuolo($idProviderTipo) && !$loginSpeciale) {
+      // errore: utente deve usare accesso con id provider
+      $this->logger->error('Tipo di utente non valido per l\'autenticazione tramite form.', [
+        'username' => $user->getUserIdentifier(),
+        'ruolo' => $user->getCodiceRuolo(),
+        'ip' => $credentials['ip']]);
+      throw new CustomUserMessageAuthenticationException('exception.invalid_user_type_form');
+    }
+  }
+
+  /**
+   * Verifica il codice OTP dell'utente, se previsto per il suo tipo.
+   * Se il codice è errato, registra l'errore e genera un'eccezione di autenticazione.
+   *
+   * @param UserInterface $user Utente da autenticare
+   * @param mixed $credentials Credenziali dell'autenticazione
+   * @param mixed $loginSpeciale Vero se è stato effettuato il login speciale
+   *
+   * @throws CustomUserMessageAuthenticationException Eccezione con il messaggio da mostrare all'utente
+   */
+  private function controllaOtp(UserInterface $user, mixed $credentials, mixed $loginSpeciale): void {
+    $otpTipo = $this->em->getRepository(Configurazione::class)->getParametro('otp_tipo');
+    // se l'utente non ha OTP attivo o non è previsto per il suo ruolo, non c'è nulla da controllare
+    if (!$user->getOtp() || !$user->controllaRuolo($otpTipo) || $loginSpeciale) {
+      return;
+    }
+    // determina l'esito del controllo del codice OTP
+    if ($this->otp->controllaOtp($user->getOtp(), $credentials['otp'])) {
+      // otp corretto
+      if ($credentials['otp'] == $user->getUltimoOtp()) {
+        // otp riusato (replay attack?)
+        $otp_errore_log = 'OTP riusato (replay attack) nella richiesta di login.';
+        $otp_errore_messaggio = 'exception.invalid_credentials';
+      } else {
+        // ok
+        return;
+      }
+    } elseif (empty($credentials['otp'])) {
+      // no OTP
+      $otp_errore_log = 'OTP non presente nella richiesta di login.';
+      $otp_errore_messaggio = 'exception.missing_otp_credentials';
+    } else {
+      // OTP errato
+      $otp_errore_log = 'OTP errato nella richiesta di login.';
+      $otp_errore_messaggio = 'exception.invalid_credentials';
+    }
+    // validazione fallita
+    $this->logger->error($otp_errore_log, [
+      'username' => $user->getUserIdentifier(),
+      'ruolo' => $user->getCodiceRuolo(),
+      'login_speciale' => $loginSpeciale,
+      'ip' => $credentials['ip']]);
+    throw new CustomUserMessageAuthenticationException($otp_errore_messaggio);
   }
 
   /**
@@ -238,6 +345,9 @@ class FormAuthenticator extends AbstractAuthenticator {
    * @return Response|null Pagina di risposta o null per continuare la richiesta come utente autenticato
    */
   public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response {
+    // login riuscito: azzera il contatore dei tentativi falliti (protezione brute-force)
+    $this->throttleCache->delete('login_fail_'.md5(
+      strtolower((string) $token->getUser()->getUserIdentifier()).'|'.(string) $request->getClientIp()));
     // url di destinazione: homepage (necessario un punto di ingresso comune)
     $url = $this->router->generate('login_home');
     // tipo di login

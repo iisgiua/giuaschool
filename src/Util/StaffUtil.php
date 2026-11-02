@@ -788,11 +788,8 @@ class StaffUtil {
         ->getQuery()
         ->getArrayResult();
     } else {
-      // query vuota
-      $stat = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
-        ->where('d.id=:valore')
-			  ->setParameter('valore', -999)
-        ->getQuery();
+      // query vuota: nessun docente selezionato
+      $stat = [];
     }
     // restituisce dati
     return $stat;
