@@ -15,9 +15,11 @@ use App\Entity\Configurazione;
 use App\Entity\Istituto;
 use App\Entity\Docente;
 use App\Entity\Amministratore;
+use App\Entity\Cattedra;
 use App\Entity\Classe;
 use App\Entity\Menu;
 use App\Entity\Sede;
+use App\Entity\Staff;
 
 
 /**
@@ -27,6 +29,8 @@ use App\Entity\Sede;
  */
 class ConfigLoader {
 
+  /** Versione del formato dell'elenco classi memorizzato in sessione */
+  private const VERSIONE_CLASSI = 2;
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -42,6 +46,20 @@ class ConfigLoader {
       private readonly RequestStack $reqstack,
       private readonly Security $security)
   {
+  }
+
+  /**
+   * Legge la configurazione solo se non è già stata caricata nella sessione
+   *
+   * Evita di sovrascrivere la configurazione già presente (es. tema e menu
+   * dell'utente autenticato) quando la richiesta avviene in un contesto in cui
+   * l'utente non è disponibile, come le sotto-richieste di errore 404.
+   */
+  public function caricaSeNecessario() {
+    if ($this->reqstack->getSession()->get('/CONFIG/SISTEMA/versione') === null) {
+      // configurazione assente: la carica
+      $this->carica();
+    }
   }
 
   /**
@@ -141,7 +159,128 @@ class ConfigLoader {
         ->getArrayResult();
       $lista = implode(',', array_column($classi, 'id'));
       $this->reqstack->getSession()->set('/APP/DOCENTE/coordinatore', $lista);
+      // classi per il selettore sede/classe delle sostituzioni
+      $this->precaricaClassiSelettore();
     }
+  }
+
+  /**
+   * Carica in sessione l'elenco delle classi per il selettore sede/classe.
+   *
+   * Usato sia dal caricamento iniziale sia dal caricamento "pigro", quando la
+   * variabile condivisa non è ancora presente (sessioni aperte prima della
+   * modifica): in quel caso viene caricata una sola volta e poi cachata.
+   */
+  private function precaricaClassiSelettore(): void {
+    $utente = $this->security->getUser();
+    if (!$utente instanceof Docente) {
+      // nessuna cattedra: memorizza un elenco vuoto per non ripetere la query
+      $this->reqstack->getSession()->set('/APP/DOCENTE/classi', []);
+      return;
+    }
+    // ordinamento coerente con la tabella: sede, sezione, anno, gruppo.
+    $lista_classi = $this->em->getRepository(Classe::class)->createQueryBuilder('cl')
+      ->select('cl.id AS id, cl.anno AS anno, cl.sezione AS sezione, cl.gruppo AS gruppo, s.citta AS sede')
+      ->join('cl.sede', 's')
+      ->orderBy('cl.sede', 'ASC')
+      ->addOrderBy('cl.sezione', 'ASC')
+      ->addOrderBy('cl.anno', 'ASC')
+      ->addOrderBy('cl.gruppo', 'ASC')
+      ->getQuery()
+      ->getArrayResult();
+    // cattedre attive del docente per classe: con una cattedra propria la
+    // scelta apre i propri dati, altrimenti è una sostituzione
+    $proprie = [];
+    foreach ($this->em->getRepository(Cattedra::class)->cattedreDocente($utente, 'Q') as $cattedra) {
+      $materia = $cattedra->getMateria()->getNomeBreve();
+      if ($cattedra->getAlunno()) {
+        // cattedra di sostegno: distingue l'alunno seguito
+        $materia .= ' (' . $cattedra->getAlunno()->getCognome() . ' ' .
+          $cattedra->getAlunno()->getNome() . ')';
+      }
+      $proprie[$cattedra->getClasse()->getId()][] = ['id' => $cattedra->getId(),
+        'materia' => $materia, 'sostegno' => ($cattedra->getMateria()->getTipo() == 'S')];
+    }
+    // la cattedra di sostegno va per ultima: le pagine che non chiedono la
+    // materia (note, assenze, osservazioni della classe) aprono la prima
+    foreach ($proprie as $id => $lista) {
+      usort($lista, fn ($a, $b) => [(int) $a['sostegno'], $a['materia']] <=> [(int) $b['sostegno'], $b['materia']]);
+      $proprie[$id] = $lista;
+    }
+    foreach ($lista_classi as $k => $c) {
+      $lista_classi[$k]['cattedre'] = $proprie[$c['id']] ?? [];
+      $lista_classi[$k]['propria'] = !empty($lista_classi[$k]['cattedre']);
+      $lista_classi[$k]['versione'] = self::VERSIONE_CLASSI;
+    }
+    $this->reqstack->getSession()->set('/APP/DOCENTE/classi', $lista_classi);
+  }
+
+  /**
+   * Restituisce l'elenco condiviso delle classi per il selettore sede/classe.
+   *
+   * Legge la variabile di sessione; se è assente (sessioni aperte prima del
+   * caricamento) la carica una sola volta e la memorizza in sessione.
+   *
+   * @return array Elenco delle classi [{id, anno, sezione, gruppo, sede, propria}]
+   */
+  public function classiSelettore(): array {
+    $classi = $this->reqstack->getSession()->get('/APP/DOCENTE/classi');
+    // ricarica se manca o se e' nel formato precedente (senza le cattedre),
+    // come accade alle sessioni aperte prima dell'aggiunta della materia
+    if (!is_array($classi) || ($classi !== [] && (($classi[0]['versione'] ?? 0) !== self::VERSIONE_CLASSI))) {
+      $this->precaricaClassiSelettore();
+      $classi = $this->reqstack->getSession()->get('/APP/DOCENTE/classi');
+    }
+    return is_array($classi) ? $classi : [];
+  }
+
+  /**
+   * Elenco delle classi per il selettore della sezione coordinatore.
+   *
+   * Riprende l'elenco della vecchia pagina di scelta classe: il coordinatore
+   * vede solo le sue classi (variabile di sessione /APP/DOCENTE/coordinatore),
+   * lo staff vede le classi della propria sede o tutte se non ha sede assegnata,
+   * il preside solo le classi di cui è coordinatore. L'elenco è filtrato dal
+   * dato condiviso del selettore, che è già ordinato per sede e classe.
+   *
+   * @return array Elenco delle classi [{id, anno, sezione, gruppo, sede, propria}]
+   */
+  public function classiCoordinatore(): array {
+    $classi = $this->classiSelettore();
+    $utente = $this->security->getUser();
+    if ($utente instanceof Staff) {
+      if ($utente->getSede()) {
+        // solo classi della sede dello staff
+        $sede = $utente->getSede()->getCitta();
+        return array_values(array_filter($classi, fn($c) => $c['sede'] === $sede));
+      }
+      // tutte le classi
+      return $classi;
+    }
+    // coordinatore e preside: solo le classi coordinate
+    $ids = array_map('intval', explode(',',
+      (string) $this->reqstack->getSession()->get('/APP/DOCENTE/coordinatore')));
+    return array_values(array_filter($classi, fn($c) => in_array((int) $c['id'], $ids, true)));
+  }
+
+  /**
+   * Restituisce la scelta corrente del selettore sede/classe.
+   *
+   * @return array Scelta in sessione [{cattedra, classe}]
+   */
+  public function sceltaSelettore(): array {
+    $session = $this->reqstack->getSession();
+    $cattedra = (int) $session->get('/APP/DOCENTE/cattedra_lezione', 0);
+    $classe = (int) $session->get('/APP/DOCENTE/classe_lezione', 0);
+    if ($classe == 0 && $cattedra > 0) {
+      // lezione in propria cattedra: risolve la classe della cattedra
+      // (l'entità è già in memoria se la pagina la sta usando)
+      $voce = $this->em->getRepository(Cattedra::class)->find($cattedra);
+      if ($voce) {
+        $classe = $voce->getClasse()->getId();
+      }
+    }
+    return ['cattedra' => $cattedra, 'classe' => $classe];
   }
 
   /**
@@ -153,7 +292,7 @@ class ConfigLoader {
     $utente = $this->security->getUser();
     if ($utente && ($utente instanceOf Amministratore)) {
       // imposta il nuovo tema
-      $tema = 'tema-new';
+      $tema = 'admin';
     }
     // imposta tema
     $this->reqstack->getSession()->set('/APP/APP/tema', $tema);

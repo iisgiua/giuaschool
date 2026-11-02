@@ -74,12 +74,12 @@ class UtentiController extends BaseController {
     // form
     $form = $this->container->get('form.factory')->createNamedBuilder('utenti_email', FormType::class)
       ->add('email', TextType::class, ['label' => 'label.email',
-	      'data' => str_ends_with((string) $this->getUser()->getEmail(), '.local') ? '' : $this->getUser()->getEmail(),
+        'data' => str_ends_with((string) $this->getUser()->getEmail(), '.local') ? '' : $this->getUser()->getEmail(),
         'required' => true])
       ->add('submit', SubmitType::class, ['label' => 'label.submit',
         'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']])
       ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
-	      'attr' => ['widget' => 'gs-button-end',
+        'attr' => ['widget' => 'gs-button-end',
           'onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
       ->getForm();
     $form->handleRequest($request);
@@ -143,7 +143,7 @@ class UtentiController extends BaseController {
       // form
       $form = $this->container->get('form.factory')->createNamedBuilder('utenti_password', FormType::class)
         ->add('current_password', PasswordType::class, ['label' => 'label.current_password',
-	        'required' => true])
+          'required' => true])
         ->add('password', RepeatedType::class, [
           'type' => PasswordType::class,
           'invalid_message' => 'password.nomatch',
@@ -153,7 +153,7 @@ class UtentiController extends BaseController {
         ->add('submit', SubmitType::class, ['label' => 'label.submit',
           'attr' => ['widget' => 'gs-button-start', 'class' => 'btn-primary']])
         ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
-	        'attr' => ['widget' => 'gs-button-end',
+          'attr' => ['widget' => 'gs-button-end',
             'onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
         ->getForm();
       $form->handleRequest($request);
@@ -205,11 +205,12 @@ class UtentiController extends BaseController {
   }
 
   /**
-   * Abilita i docenti all'uso dell'OTP.
+   * Gestione dell'OTP dell'utente connesso: attivazione e disattivazione.
    *
    * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param OtpUtil $otp Gestione del codice OTP
+   * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param LogHandler $dblogger Gestore dei log su database
    *
    * @return Response Pagina di risposta
@@ -218,7 +219,7 @@ class UtentiController extends BaseController {
   #[Route(path: '/utenti/otp/', name: 'utenti_otp', methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_UTENTE')]
   public function otp(Request $request, TranslatorInterface $trans, OtpUtil $otp,
-                      LogHandler $dblogger): Response {
+                      UserPasswordHasherInterface $hasher, LogHandler $dblogger): Response {
     // inizializza
     $reset = false;
     $qrcode = null;
@@ -238,22 +239,31 @@ class UtentiController extends BaseController {
       $reset = true;
       // form reset OTP
       $form = $this->container->get('form.factory')->createNamedBuilder('utenti_otp', FormType::class)
-        ->add('submit', SubmitType::class, ['label' => 'label.submit',
-	        'attr' => ['class' => 'btn btn-primary']])
+        ->add('current_password', PasswordType::class, ['label' => 'label.current_password',
+          'required' => true])
         ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
-	        'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
+          'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
+        ->add('submit', SubmitType::class, ['label' => 'label.submit',
+          'attr' => ['class' => 'btn btn-primary']])
         ->getForm();
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
-        // reset otp
-        $this->getUser()->setOtp(null);
-        $this->em->flush();
-        // log azione
-        $dblogger->logAzione('SICUREZZA', 'Disattivazione OTP');
-        // messaggio di successo
-        $this->addFlash('success', 'message.otp_disabilitato');
-        // redirezione
-        return $this->redirectToRoute('utenti_profilo');
+        // controlla la password prima di disattivare il secondo fattore
+        if (!$hasher->isPasswordValid($this->getUser(), $form->get('current_password')->getData())) {
+          // password errata
+          $form->get('current_password')->addError(
+            new FormError($trans->trans('password.wrong', [], 'validators')));
+        } else {
+          // reset otp
+          $this->getUser()->setOtp(null);
+          $this->em->flush();
+          // log azione
+          $dblogger->logAzione('SICUREZZA', 'Disattivazione OTP');
+          // messaggio di successo
+          $this->addFlash('success', 'message.otp_disabilitato');
+          // redirezione
+          return $this->redirectToRoute('utenti_profilo');
+        }
       }
     } else {
       // prima associazione con un dispositivo
@@ -273,10 +283,10 @@ class UtentiController extends BaseController {
           'attr' => ['class' => 'gs-ml-2'],
           'trim' => true,
           'required' => true])
+        ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
+          'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
         ->add('submit', SubmitType::class, ['label' => 'label.submit',
           'attr' => ['class' => 'btn btn-primary']])
-        ->add('cancel', ButtonType::class, ['label' => 'label.cancel',
-	        'attr' => ['onclick' => "location.href='".$this->generateUrl('utenti_profilo')."'"]])
         ->getForm();
       $form->handleRequest($request);
       if ($form->isSubmitted() && $form->isValid()) {
@@ -326,6 +336,8 @@ class UtentiController extends BaseController {
     $info = [];
     // legge dati
     $notifica = $this->getUser()->getNotifica();
+    // assicura che l'array abbia la struttura corretta
+    $notifica = $this->normalizzaNotifica($notifica);
     // controlla configurazione telegram
     $bot = $this->em->getRepository(Configurazione::class)->getParametro('telegram_bot');
     if (empty($bot) && $notifica['tipo'] == 'telegram') {
@@ -341,22 +353,13 @@ class UtentiController extends BaseController {
       // modifica dati
       $nuovaNotifica = $notifica;
       $nuovaNotifica['tipo'] = $form->get('tipo')->getData();
-      if (empty($bot) && $nuovaNotifica['tipo'] == 'telegram') {
-        // elimina notifica telegram
-        $nuovaNotifica['tipo'] = 'email';
-        unset($nuovaNotifica['telegram_chat']);
-      } elseif ($notifica['tipo'] == 'telegram' && $nuovaNotifica['tipo'] != 'telegram') {
-        // resetta chat Telegram
-        unset($nuovaNotifica['telegram_chat']);
-      }
+      $nuovaNotifica = $this->applicaTipoNotifica($notifica, $nuovaNotifica, $bot);
       $nuovaNotifica['abilitato'] = $form->get('abilitato')->getData();
       $this->getUser()->setNotifica($nuovaNotifica);
       // log e memorizzazione
       $dblogger->logAzione('CONFIGURAZIONE', 'Modifica notifiche');
       // controlla configurazione
-      if (($nuovaNotifica['tipo'] == 'email' && (empty($this->getUser()->getEmail()) ||
-           str_ends_with((string) $this->getUser()->getEmail(), '.local'))) ||
-          ($nuovaNotifica['tipo'] == 'telegram' && empty($nuovaNotifica['telegram_chat']))) {
+      if ($this->notificaDaConfigurare($nuovaNotifica)) {
         // redirect alla configurazione
         return $this->redirectToRoute('utenti_notifiche_configura');
       }
@@ -375,6 +378,61 @@ class UtentiController extends BaseController {
   }
 
   /**
+   * Assicura che la configurazione delle notifiche abbia la struttura corretta
+   *
+   * @param mixed $notifica Configurazione delle notifiche letta dall'utente
+   *
+   * @return mixed Configurazione delle notifiche con la struttura corretta
+   */
+  private function normalizzaNotifica(mixed $notifica): mixed {
+    if (empty($notifica) || !is_array($notifica)) {
+      $notifica = ['tipo' => 'email', 'abilitato' => ['circolare']];
+    }
+    if (!isset($notifica['tipo'])) {
+      $notifica['tipo'] = 'email';
+    }
+    if (!isset($notifica['abilitato'])) {
+      $notifica['abilitato'] = ['circolare'];
+    }
+    return $notifica;
+  }
+
+  /**
+   * Applica alla nuova configurazione delle notifiche il tipo di canale utilizzato,
+   * eliminando il riferimento al bot Telegram se non più necessario
+   *
+   * @param mixed $notifica Configurazione delle notifiche precedente
+   * @param mixed $nuovaNotifica Configurazione delle notifiche modificata dal form
+   * @param mixed $bot Identificativo del bot Telegram configurato
+   *
+   * @return mixed Configurazione delle notifiche con il tipo di canale corretto
+   */
+  private function applicaTipoNotifica(mixed $notifica, mixed $nuovaNotifica, mixed $bot): mixed {
+    if (empty($bot) && $nuovaNotifica['tipo'] == 'telegram') {
+      // elimina notifica telegram
+      $nuovaNotifica['tipo'] = 'email';
+      unset($nuovaNotifica['telegram_chat']);
+    } elseif ($notifica['tipo'] == 'telegram' && $nuovaNotifica['tipo'] != 'telegram') {
+      // resetta chat Telegram
+      unset($nuovaNotifica['telegram_chat']);
+    }
+    return $nuovaNotifica;
+  }
+
+  /**
+   * Indica se l'utente deve ancora configurare il canale di notifica scelto
+   *
+   * @param mixed $notifica Configurazione delle notifiche dell'utente
+   *
+   * @return bool Vero se manca la configurazione del canale di notifica
+   */
+  private function notificaDaConfigurare(mixed $notifica): bool {
+    return ($notifica['tipo'] == 'email' && (empty($this->getUser()->getEmail()) ||
+            str_ends_with((string) $this->getUser()->getEmail(), '.local'))) ||
+           ($notifica['tipo'] == 'telegram' && empty($notifica['telegram_chat']));
+  }
+
+  /**
    * Configura il canale usato per l'invio delle notifiche
    *
    * @return Response Pagina di risposta
@@ -387,7 +445,7 @@ class UtentiController extends BaseController {
     $dati = [];
     $info = [];
     // legge dati
-    $notifica = $this->getUser()->getNotifica();
+    $notifica = $this->normalizzaNotifica($this->getUser()->getNotifica());
     if ($notifica['tipo'] == 'email' &&
         (empty($this->getUser()->getEmail()) || str_ends_with((string) $this->getUser()->getEmail(), '.local'))) {
       // imposta email

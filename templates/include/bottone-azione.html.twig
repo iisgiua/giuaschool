@@ -1,0 +1,46 @@
+{##
+  # bottone-azione: pulsante con la sola icona Tabler a tratti, senza fondo.
+  #
+  # Vale per le pagine degli utenti standard, che stanno su Bootstrap 3: il
+  # bottone non ha piu' il colore, si vede solo il simbolo, colorato a seconda
+  # dello stile richiesto. Il testo resta nel title e in uno span sr-only.
+  #
+  # parametri:
+  #   nome      (obbligatorio) simbolo Tabler, es. eye, pencil, trash
+  #
+  #   corrispondenza usata nelle tabelle, cosi' le azioni si riconoscono a
+  #   colpo d'occhio e non si ripete lo stesso simbolo per cose diverse:
+  #     eye      visualizza, mostra, dettagli, informazioni
+  #     pencil   modifica, correggi
+  #     trash    cancella, elimina
+  #     download scarica (documento, allegato, tabellone)
+  #     plus     inserisci, aggiungi, nuovo
+  #     key      codice di accesso
+  #     archive  archivia
+  #     printer  stampa
+  #     paperclip allegato
+  #     file-text documento
+  #     check    abilita, conferma
+  #     circle-x disabilita
+  #   etichetta (obbligatorio) testo per screen reader e, se manca, per il title
+  #   titolo    (opzionale)    testo della tooltip
+  #   url       (opzionale)    se valorizzato stampa un <a>, altrimenti un <button>
+  #   stile     (opzionale)    primary (default), danger, ...
+  #   attributi (opzionale)    attributi da stampare sul tag
+  #   classi    (opzionale)    classi aggiuntive
+  #   dimensione(opzionale)    'xs' (default) oppure '' per la dimensione normale
+  # ##}
+{%- set stile = stile|default('primary') -%}
+{%- set titolo = titolo|default(etichetta) -%}
+{# 'btn-xs' esiste in Bootstrap 3 ed e' definito anche per Bootstrap 4 in main.css, #}
+{# quindi la stessa classe funziona da entrambe le parti #}
+{%- set classi_base = ['btn', 'btn-' ~ stile, dimensione|default('xs') == 'xs' ? 'btn-xs' : '', 'gs-btn-icona', classi|default('')] -%}
+{%- set classi_bottone = classi_base|join(' ')|split(' ')|filter(v => v)|join(' ') -%}
+{%- if url is defined and url is not empty -%}
+  {# NOSONAR Web:S6819 - role="button" richiesto dall'a11y su un <a> con classe .btn #}
+  {# il secondo false e' with_context = false: senza, l'icona eredita 'titolo' #}
+  {# dal contesto e la tooltip compare due volte #}
+  <a class="{{ classi_bottone }}" href="{{ url }}" role="button" title="{{ titolo }}"{% for attributo, valore in attributi|default({}) %} {{ attributo }}="{{ valore }}"{% endfor %}><span class="sr-only">{{ etichetta }}</span>{{ include('admin/include/icona.html.twig', {nome: nome, stile: 'outline'}, false) }}</a>
+{%- else -%}
+  <button type="button" class="{{ classi_bottone }}" title="{{ titolo }}"{% for attributo, valore in attributi|default({}) %} {{ attributo }}="{{ valore }}"{% endfor %}><span class="sr-only">{{ etichetta }}</span>{{ include('admin/include/icona.html.twig', {nome: nome, stile: 'outline'}, false) }}</button>
+{%- endif -%}

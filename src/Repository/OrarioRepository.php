@@ -52,6 +52,10 @@ class OrarioRepository extends EntityRepository {
    * @return bool Vero se esiste una sovrapposizione, falso altrimenti
    */
   public function sovrapposizioni(Orario $orario) {
+    if (!$orario->getInizio() || !$orario->getFine()) {
+      // dati del periodo mancanti: nessuna sovrapposizione calcolabile
+      return false;
+    }
     $sovrapposizioni = $this->createQueryBuilder('o')
       ->where('o.sede=:sede')
       ->andWhere('(:inizio BETWEEN o.inizio AND o.fine) OR (:fine BETWEEN o.inizio AND o.fine) OR (:inizio <= o.inizio AND :fine >= o.fine)')

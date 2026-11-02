@@ -74,15 +74,6 @@ class TelegramManager {
   }
 
   /**
-   * Restituisce le informazioni sul webhook installato per il bot Telegram
-   *
-   * @return array Informazioni su eventuali errori e lista dei dati ricevuti
-   */
-  public function getWebhook(): array {
-    return $this->request('getWebhookInfo');
-  }
-
-  /**
    * Rimuove il webhook installato per il bot Telegram
    *
    * @return array Informazioni su eventuali errori e lista dei dati ricevuti

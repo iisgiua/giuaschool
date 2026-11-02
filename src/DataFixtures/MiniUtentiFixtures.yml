@@ -1,0 +1,232 @@
+####################
+# MiniUtentiFixtures - 1 utente per ruolo (6 + admin/preside riusati = 8 totali)
+#
+# Login (password = username):
+#   admin / dirigente / staff / docente / ata / genitore / alunno / utente
+####################
+
+
+include:
+  - SedeFixtures.yml
+  - MiniClassiFixtures.yml
+
+
+App\Entity\Staff:
+  staff_mini:
+    sesso: 'F'
+    username: 'staff'
+    nome: 'Staff'
+    cognome: 'Mini'
+    password: '<passwordCodificata($username)>'
+    email: 'staff@lovelace.edu.it'
+    tokenCreato:
+    token: ''
+    abilitato: true
+    spid: true
+    ultimoAccesso:
+    otp: ''
+    ultimoOtp: ''
+    dispositivoId:
+    dispositivoChiave:
+    dispositivoRegistrato:
+    dataNascita: '<dateTimeBetween("-60 years", "-30 years")>'
+    comuneNascita: 'Cagliari'
+    provinciaNascita: 'CA'
+    codiceFiscale: 'STFFMN00A00B354X'
+    citta: 'Cagliari'
+    provincia: 'CA'
+    indirizzo: 'Via Mini 1'
+    numeriTelefono: '<telefono(1)>'
+    notifica: '<(array())>'
+    sede: '@sede_1'
+    responsabileBes: false
+    responsabileBesSede:
+    rspp: false
+    rappresentante: '<(array())>'
+    login_speciale: false
+    dati: '<(array())>'
+
+
+App\Entity\Docente:
+  docente_mini:
+    sesso: 'M'
+    username: 'docente'
+    nome: 'Docente'
+    cognome: 'Mini'
+    password: '<passwordCodificata($username)>'
+    email: 'docente@lovelace.edu.it'
+    tokenCreato:
+    token: ''
+    abilitato: true
+    spid: true
+    ultimoAccesso:
+    otp: ''
+    ultimoOtp: ''
+    dispositivoId:
+    dispositivoChiave:
+    dispositivoRegistrato:
+    dataNascita: '<dateTimeBetween("-60 years", "-30 years")>'
+    comuneNascita: 'Cagliari'
+    provinciaNascita: 'CA'
+    codiceFiscale: 'DCCMN100A00B354Y'
+    citta: 'Cagliari'
+    provincia: 'CA'
+    indirizzo: 'Via Mini 2'
+    numeriTelefono: '<telefono(1)>'
+    notifica: '<(array())>'
+    responsabileBes: true
+    responsabileBesSede: '@sede_1'
+    rspp: false
+    rappresentante: '<(array())>'
+    login_speciale: false
+    dati: '<(array())>'
+
+
+App\Entity\Ata:
+  ata_mini:
+    sesso: 'F'
+    username: 'ata'
+    nome: 'Ata'
+    cognome: 'Mini'
+    password: '<passwordCodificata($username)>'
+    email: 'ata@lovelace.edu.it'
+    tokenCreato:
+    token: ''
+    abilitato: true
+    spid: true
+    ultimoAccesso:
+    otp: ''
+    ultimoOtp: ''
+    dispositivoId:
+    dispositivoChiave:
+    dispositivoRegistrato:
+    dataNascita: '<dateTimeBetween("-60 years", "-30 years")>'
+    comuneNascita: 'Cagliari'
+    provinciaNascita: 'CA'
+    codiceFiscale: 'TAMNNT00A00B354Z'
+    citta: 'Cagliari'
+    provincia: 'CA'
+    indirizzo: 'Via Mini 3'
+    numeriTelefono: '<telefono(1)>'
+    notifica: '<(array())>'
+    tipo: 'A'
+    segreteria: true
+    sede: '@sede_1'
+    rappresentante: '<(array())>'
+    rspp: false
+    login_speciale: false
+    dati: '<(array())>'
+
+
+App\Entity\Alunno:
+  alunno_mini:
+    sesso: 'M'
+    username: 'alunno'
+    nome: 'Alunno'
+    cognome: 'Mini'
+    password: '<passwordCodificata($username)>'
+    email: 'alunno@lovelace.edu.it'
+    tokenCreato:
+    token: ''
+    abilitato: true
+    spid: true
+    ultimoAccesso:
+    otp: ''
+    ultimoOtp: ''
+    dispositivoId:
+    dispositivoChiave:
+    dispositivoRegistrato:
+    dataNascita: '<dateTimeBetween("-20 years", "-18 years")>'
+    comuneNascita: 'Cagliari'
+    provinciaNascita: 'CA'
+    codiceFiscale: 'LNNMN100A00B354K'
+    citta: 'Cagliari'
+    provincia: 'CA'
+    indirizzo: 'Via Mini 4'
+    numeriTelefono: '<telefono(1)>'
+    notifica: '<(array())>'
+    bes: 'H'
+    noteBes: 'Diagnosi demo mini'
+    autorizzaEntrata: ''
+    autorizzaUscita: ''
+    note: ''
+    frequenzaEstero: false
+    religione: 'S'
+    giustificaOnline: true
+    richiestaCertificato: false
+    foto: ''
+    credito3: 0
+    credito4: 0
+    classe: '@classe_1A'
+    genitori: '<collection(@genitore_mini)>'
+    rappresentante: '<(array())>'
+    rspp: false
+    login_speciale: false
+    dati: '<(array())>'
+
+
+App\Entity\Genitore:
+  genitore_mini:
+    sesso: 'F'
+    nome: 'Genitore'
+    cognome: 'Mini'
+    username: 'genitore'
+    email: 'genitore@lovelace.edu.it'
+    password: '<passwordCodificata($username)>'
+    tokenCreato:
+    token: ''
+    abilitato: true
+    spid: true
+    ultimoAccesso:
+    otp: ''
+    ultimoOtp: ''
+    dispositivoId:
+    dispositivoChiave:
+    dispositivoRegistrato:
+    dataNascita:
+    comuneNascita: ''
+    provinciaNascita: ''
+    codiceFiscale: 'GNTRMN00A00B354J'
+    citta: ''
+    provincia: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(1)>'
+    notifica: '<(array())>'
+    giustificaOnline: true
+    alunno: '@alunno_mini'
+    rappresentante: '<(array())>'
+    rspp: false
+    login_speciale: false
+    dati: '<(array())>'
+
+
+App\Entity\Utente:
+  utente_mini:
+    sesso: 'M'
+    username: 'utente'
+    nome: 'Utente'
+    cognome: 'Mini'
+    password: '<passwordCodificata($username)>'
+    email: 'utente@lovelace.edu.it'
+    tokenCreato:
+    token: ''
+    abilitato: true
+    spid: true
+    ultimoAccesso:
+    otp: ''
+    ultimoOtp: ''
+    dispositivoId:
+    dispositivoChiave:
+    dispositivoRegistrato:
+    dataNascita:
+    comuneNascita: ''
+    provinciaNascita: ''
+    codiceFiscale: 'TNTMN100A00B354W'
+    citta: ''
+    provincia: ''
+    indirizzo: ''
+    numeriTelefono: '<telefono(1)>'
+    notifica: '<(array())>'
+    rspp: false
+    login_speciale: false
+    dati: '<(array())>'

@@ -140,6 +140,10 @@ class DocumentoRepository extends BaseRepository {
    * @return array Dati formattati come array associativo
    */
   public function docenti(array $criteri, int $pagina, ?Sede $sede=null): array {
+    // normalizza il tipo di documento: solo L/P/R/M prevedono la join dell'alias 'd'
+    if (!in_array($criteri['tipo'] ?? '', ['L', 'P', 'R', 'M'], true)) {
+      $criteri['tipo'] = 'L';
+    }
     // compatibilità MySQL >= 5.7
     $mode = $this->getEntityManager()->getConnection()->executeQuery('SELECT @@sql_mode')->fetchOne();
     if (str_contains((string) $mode, 'ONLY_FULL_GROUP_BY')) {
@@ -163,11 +167,6 @@ class DocumentoRepository extends BaseRepository {
       $cattedre
         ->andWhere('s.id=:sede')
         ->setParameter('sede', $sede);
-    }
-    // tipo di lista
-    if ($criteri['filtro'] != 'T') {
-      $cattedre
-        ->andWhere('d IS '.($criteri['filtro'] == 'D' ? 'NOT ' : '').'NULL');
     }
     // filtra tipo di documento
     switch ($criteri['tipo']) {
@@ -202,6 +201,11 @@ class DocumentoRepository extends BaseRepository {
           ->leftJoin(Documento::class, 'd', 'WITH', "d.tipo='M' AND d.classe=cl.id AND d.stato='P'")
           ->andWhere("cl.anno=5 AND cl.coordinatore=c.docente");
         break;
+    }
+    // tipo di lista (documenti presenti/mancanti), solo se il documento è stato collegato
+    if ($criteri['filtro'] != 'T' && in_array($criteri['tipo'], ['L', 'P', 'R', 'M'], true)) {
+      $cattedre
+        ->andWhere('d IS '.($criteri['filtro'] == 'D' ? 'NOT ' : '').'NULL');
     }
     // filtro su classe
     if ($criteri['classe']) {

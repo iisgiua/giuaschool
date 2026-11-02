@@ -11,13 +11,13 @@
 {% endif %}
 </p>
 <p>&nbsp;</p>
-{% for mese,v in dati.mese  %}
+{% for mese, v in dati.mese %}
 <div style="text-align:center"><strong>{{ v.nome }}</strong></div>
 <table border="1">
   <tr>
   {% set vuota = true %}
-  {% for giorno in v.inizio .. v.fine %}
-    {% if (date(v.anno~'-'~mese~'-'~giorno)|date('w') != 0) and v[giorno] is not defined %}
+  {% for giorno in v.inizio..v.fine %}
+    {% if (date(v.anno ~ '-' ~ mese ~ '-' ~ giorno)|date('w') != 0) and v[giorno] is not defined %}
       {% set vuota = false %}
     <td style="text-align:center; font-family:arial; font-size:10pt"><strong>{{ giorno }}</strong></td>
     {% endif %}
@@ -27,8 +27,8 @@
   {% endif %}
   </tr>
   <tr>
-  {% for giorno in v.inizio .. v.fine %}
-    {% if (date(v.anno~'-'~mese~'-'~giorno)|date('w') != 0) and v[giorno] is not defined %}
+  {% for giorno in v.inizio..v.fine %}
+    {% if (date(v.anno ~ '-' ~ mese ~ '-' ~ giorno)|date('w') != 0) and v[giorno] is not defined %}
       {% if dati.iscritto[mese][giorno] is defined and dati.iscritto[mese][giorno] == 'N' %}
     <td style="background-color:#AAAAAA">&nbsp;</td>
       {% else %}

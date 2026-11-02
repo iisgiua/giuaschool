@@ -16,6 +16,7 @@ use App\Util\LogHandler;
 use App\Util\OtpUtil;
 use DateTime;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\RouterInterface;
@@ -88,6 +89,11 @@ class FormAuthenticatorTest extends DatabaseTestCase {
    */
   private $mockedSession;
 
+  /**
+   * @var $mockedCache Gestore della cache dei tentativi di accesso (moked)
+   */
+  private $mockedCache;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -137,9 +143,12 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // session: inserisce in coda session
     $this->mockedSession = $this->createMock(Session::class);
     $this->mockedSession->method('get')->willReturnCallback(
-      function($key, $default=null) { return $this->session[$key] ?? $default; });
+      fn($key, $default=null) => $this->session[$key] ?? $default);
     $this->mockedSession->method('set')->willReturnCallback(
       function($key, $val) { $this->session[$key] = $val; });
+    // cache: adattatore in memoria, così la logica di blocco dei tentativi si comporta
+    // come in produzione (il callback viene eseguito in caso di cache miss)
+    $this->mockedCache = new ArrayAdapter();
     $this->mockedSession->method('remove')->willReturnCallback(
       function($key) { unset($this->session[$key]); });
   }
@@ -155,7 +164,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     // richiesta corretta: login standard
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
@@ -214,7 +223,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-    $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+    $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     // login standard
     $req = new Request([], ['_username' => 'user', '_password' => 'pass', '_otp' => 'otp', '_csrf_token' => 'TOKEN'],
       ['_route' => 'login_form'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], null);
@@ -260,7 +269,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     // utente inesistente
     try {
       $exception = null;
@@ -353,7 +362,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     // SPID obbligatorio, login standard
@@ -602,7 +611,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     // login form, no profili
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
@@ -716,7 +725,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
@@ -728,6 +737,47 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->assertCount(1, $this->session);
     $this->assertSame($exc, $this->session[SecurityRequestAttributes::AUTHENTICATION_ERROR]);
     $this->assertSame('login_form', $res->getTargetUrl());
+  }
+
+  /**
+   * Test della protezione brute-force sui codici OTP errati: gli OTP sbagliati devono
+   * contare come tentativi falliti e portare al blocco temporaneo come le password errate.
+   *
+   */
+  public function testProtezioneBruteForceConOtpErrato(): void {
+    // init
+    $this->em->getRepository(Configurazione::class)->setParametro('spid', 'no');
+    $this->em->getRepository(Configurazione::class)->setParametro('otp_tipo', 'G');
+    $utente = $this->getReference('genitore1_2A_1');
+    $utente->setOtp('otp1234');
+    $utente->setUltimoOtp('');
+    $this->em->flush();
+    $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
+    $credenziali = ['password' => $utente->getUsername(), 'otp' => 'errato', 'login_speciale' => false,
+      'ip' => '1.2.3.4'];
+    // i primi 5 tentativi con OTP errato falliscono, registrando l'errore
+    for ($i = 1; $i <= 5; $i++) {
+      $this->logs = [];
+      $exception = null;
+      try {
+        $fa->checkCredentials($credenziali, $utente);
+      } catch (CustomUserMessageAuthenticationException $e) {
+        $exception = $e->getMessage();
+      }
+      $this->assertSame('exception.invalid_credentials', $exception, 'tentativo '.$i);
+      $this->assertCount(1, $this->logs, 'tentativo '.$i);
+    }
+    // il sesto tentativo è bloccato prima di verificare le credenziali (nessun log)
+    $this->logs = [];
+    $exception = null;
+    try {
+      $fa->checkCredentials($credenziali, $utente);
+    } catch (CustomUserMessageAuthenticationException $e) {
+      $exception = $e->getMessage();
+    }
+    $this->assertSame('exception.invalid_credentials', $exception);
+    $this->assertCount(0, $this->logs);
   }
 
 }

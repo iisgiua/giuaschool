@@ -54,7 +54,7 @@ class AllegatoTest extends EntityTestCase {
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
       $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
-        $this->entity.' - Initializated');
+        $this->entity.' - Initialized');
     }
   }
 
@@ -89,7 +89,6 @@ class AllegatoTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['titolo'] = $this->faker->passthrough(substr($this->faker->text(), 0, 255));
       $o[$i]->setTitolo($data[$i]['titolo']);
       $this->em->flush();
@@ -118,6 +117,16 @@ class AllegatoTest extends EntityTestCase {
     $existent = $this->em->getRepository($this->entity)->findOneBy([]);
     // toString
     $this->assertSame($existent->getTitolo(), (string) $existent, $this->entity.'::toString');
+    // visualizzabile nel browser solo per i formati che i browser mostrano
+    $allegato = new Allegato();
+    $allegato->setEstensione('pdf');
+    $this->assertTrue($allegato->isVisualizzabile(), $this->entity.'::isVisualizzabile - PDF');
+    $allegato->setEstensione('JPG');
+    $this->assertTrue($allegato->isVisualizzabile(), $this->entity.'::isVisualizzabile - JPG');
+    $allegato->setEstensione('docx');
+    $this->assertFalse($allegato->isVisualizzabile(), $this->entity.'::isVisualizzabile - DOCX');
+    $allegato->setEstensione('zip');
+    $this->assertFalse($allegato->isVisualizzabile(), $this->entity.'::isVisualizzabile - ZIP');
   }
 
   /**

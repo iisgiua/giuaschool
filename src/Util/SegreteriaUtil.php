@@ -19,7 +19,6 @@ use App\Entity\Esito;
 use App\Entity\Alunno;
 use App\Entity\Scrutinio;
 use App\Entity\StoricoEsito;
-use App\Util\RegistroUtil;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Filesystem\Filesystem;
@@ -41,13 +40,11 @@ class SegreteriaUtil {
    *
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
-   * @param RegistroUtil $regUtil Funzioni di utilità per il registro
    * @param string $dirProgetto Percorso per i file dell'applicazione
    */
   public function __construct(
       private readonly EntityManagerInterface $em,
       private readonly RequestStack $reqstack,
-      private readonly RegistroUtil $regUtil,
       private $dirProgetto)
   {
   }
@@ -112,10 +109,12 @@ class SegreteriaUtil {
       ->getQuery()
       ->getArrayResult();
     foreach ($uscite as $u) {
-      if (isset($lista[$u['data']])) {
-        $dati['lista'][intval($u['data']->format('m'))][intval($u['data']->format('d'))] .= 'U';
+      $m = intval($u['data']->format('m'));
+      $d = intval($u['data']->format('d'));
+      if (isset($dati['lista'][$m][$d])) {
+        $dati['lista'][$m][$d] .= 'U';
       } else {
-        $dati['lista'][intval($u['data']->format('m'))][intval($u['data']->format('d'))] = 'U';
+        $dati['lista'][$m][$d] = 'U';
       }
     }
     // cambio classe
@@ -200,8 +199,8 @@ class SegreteriaUtil {
       // controlla presenza alunno in scrutinio
       $periodi = [];
       foreach ($scrutini as $sc) {
-        $alunni = (($sc->getPeriodo() == 'G' || $sc->getPeriodo() == 'R') ? $sc->getDato('sospesi') :
-          ($sc->getPeriodo() == 'X' ? $sc->getDato('alunni') : $sc->getDato('alunni')));
+        $alunni = (($sc->getPeriodo() == 'G' || $sc->getPeriodo() == 'R') ?
+          $sc->getDato('sospesi') : $sc->getDato('alunni')) ?? [];
         if (in_array($alu->getId(), $alunni)) {
           $periodi[] = [$sc->getPeriodo(), $sc->getId()];
         }
@@ -235,7 +234,7 @@ class SegreteriaUtil {
     $dati = [];
     // legge dati
     $dati_scrutinio = $scrutinio->getDati();
-    $alunni = ($scrutinio->getPeriodo() == 'G' ? $dati_scrutinio['sospesi'] : $dati_scrutinio['alunni']);
+    $alunni = ($scrutinio->getPeriodo() == 'G' ? $dati_scrutinio['sospesi'] : $dati_scrutinio['alunni']) ?? [];
     // controlla alunno
     if (in_array($alunno->getId(), $alunni)) {
       // alunno in scrutinio

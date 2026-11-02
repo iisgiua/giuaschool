@@ -301,7 +301,7 @@ class Utente implements UserInterface, PasswordAuthenticatedUserInterface, Strin
    * @return string Identificativo dell'utente
    */
   public function getUserIdentifier(): string {
-    return $this->username;
+    return $this->username ?? '';
   }
 
   /**

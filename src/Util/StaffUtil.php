@@ -16,9 +16,6 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Query\Parameter;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use App\Util\RegistroUtil;
 use App\Util\GenitoriUtil;
 use App\Entity\Classe;
@@ -49,18 +46,12 @@ class StaffUtil {
   /**
    * Costruttore
    *
-   * @param RouterInterface $router Gestore delle URL
    * @param EntityManagerInterface $em Gestore delle entità
-   * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param RegistroUtil $regUtil Funzioni di utilità per il registro
    * @param GenitoriUtil $genUtil Funzioni di utilità per i genitori
    */
   public function __construct(
-      private readonly RouterInterface $router,
       private readonly EntityManagerInterface $em,
-      private readonly TranslatorInterface $trans,
-      private readonly RequestStack $reqstack,
       private readonly RegistroUtil $regUtil,
       private readonly GenitoriUtil $genUtil)
   {
@@ -454,55 +445,6 @@ class StaffUtil {
   }
 
   /**
-   * Restituisce la scansione oraria per le sedi della scuola.
-   *
-   * @return array Dati restituiti come array associativo
-   */
-  public function orarioPerSede() {
-    $dati = [];
-    // legge orario
-    $ore = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('so')
-      ->select('s.citta,o.id,so.giorno,so.ora,so.inizio,so.fine,so.durata')
-      ->join('so.orario', 'o')
-      ->join('o.sede', 's')
-      ->where(':data BETWEEN o.inizio AND o.fine')
-      ->orderBy('s.id,so.giorno,so.ora', 'ASC')
-			->setParameter('data', (new DateTime())->format('Y-m-d'))
-      ->getQuery()
-      ->getArrayResult();
-    foreach ($ore as $o) {
-      $dati[$o['citta']][$o['giorno']][$o['ora']] = [$o['inizio']->format('H:i'), $o['fine']->format('H:i'),
-        $o['durata'], $o['id']];
-    }
-    return $dati;
-  }
-
-  /**
-   * Restituisce i docenti per ognuna delle sedi della scuola.
-   *
-   * @return array Dati restituiti come array associativo
-   */
-  public function docentiPerSede() {
-    $dati = [];
-    // legge docenti
-    $docenti = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
-      ->select('DISTINCT s.citta,d.id,d.cognome,d.nome')
-      ->join('c.docente', 'd')
-      ->join('c.classe', 'cl')
-      ->join('cl.sede', 's')
-      ->where('c.attiva=:attiva AND d.abilitato=:abilitato')
-      ->orderBy('d.cognome,d.nome', 'ASC')
-			->setParameter('attiva', 1)
-			->setParameter('abilitato', 1)
-      ->getQuery()
-      ->getArrayResult();
-    foreach ($docenti as $d) {
-      $dati[$d['citta']][$d['id']] = $d['cognome'].' '.$d['nome'];
-    }
-    return $dati;
-  }
-
-  /**
    * Restituisce i dati degli alunni della classe indicata.
    *
    * @param Classe $classe Classe degli alunni
@@ -788,11 +730,8 @@ class StaffUtil {
         ->getQuery()
         ->getArrayResult();
     } else {
-      // query vuota
-      $stat = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
-        ->where('d.id=:valore')
-			  ->setParameter('valore', -999)
-        ->getQuery();
+      // query vuota: nessun docente selezionato
+      $stat = [];
     }
     // restituisce dati
     return $stat;

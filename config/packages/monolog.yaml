@@ -9,18 +9,21 @@ when@prod:
     handlers:
       main:
         type: rotating_file
+        file_permission: 0640
         max_files: 30
         path: '%kernel.logs_dir%/app_%kernel.environment%.log'
         level: '%env(LOG_LEVEL)%'
         channels: ['!command', '!console', '!messenger_logger']
       command:
         type: rotating_file
+        file_permission: 0640
         max_files: 30
         path: '%kernel.logs_dir%/command_%kernel.environment%.log'
         level: '%env(LOG_LEVEL)%'
         channels: ['command', 'console']
       messenger:
         type: rotating_file
+        file_permission: 0640
         max_files: 30
         path: '%kernel.logs_dir%/messenger_%kernel.environment%.log'
         level: '%env(LOG_LEVEL)%'
@@ -37,24 +40,28 @@ when@dev:
     handlers:
       main:
         type: rotating_file
+        file_permission: 0640
         max_files: 10
         path: '%kernel.logs_dir%/app_%kernel.environment%.log'
         level: '%env(LOG_LEVEL)%'
         channels: ['!command', '!deprecation', '!console', '!event', '!messenger_logger']
       command:
         type: rotating_file
+        file_permission: 0640
         max_files: 10
         path: '%kernel.logs_dir%/command_%kernel.environment%.log'
         level: debug
         channels: ['command', 'console']
       deprecation:
         type: rotating_file
+        file_permission: 0640
         max_files: 10
         path: '%kernel.logs_dir%/deprecation_%kernel.environment%.log'
         level: debug
         channels: ['deprecation']
       messenger:
         type: rotating_file
+        file_permission: 0640
         max_files: 10
         path: '%kernel.logs_dir%/messenger_%kernel.environment%.log'
         level: debug
@@ -71,24 +78,28 @@ when@test:
     handlers:
       main:
         type: rotating_file
+        file_permission: 0640
         max_files: 10
         path: '%kernel.logs_dir%/app_%kernel.environment%.log'
         level: error
         channels: ['!command', '!deprecation', '!console', '!messenger_logger']
       command:
         type: rotating_file
+        file_permission: 0640
         max_files: 10
         path: '%kernel.logs_dir%/command_%kernel.environment%.log'
         level: error
         channels: ['command', 'console']
       deprecation:
         type: rotating_file
+        file_permission: 0640
         max_files: 10
         path: '%kernel.logs_dir%/deprecation_%kernel.environment%.log'
         level: debug
         channels: ['deprecation']
       messenger:
         type: rotating_file
+        file_permission: 0640
         max_files: 10
         path: '%kernel.logs_dir%/messenger_%kernel.environment%.log'
         level: debug

@@ -61,7 +61,7 @@ class UtenteTest extends EntityTestCase {
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
       $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
-        $this->entity.' - Initializated');
+        $this->entity.' - Initialized');
     }
   }
 
@@ -119,7 +119,6 @@ class UtenteTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['username'] = $this->faker->unique()->passthrough(substr($this->faker->text(), 0, 128));
       $o[$i]->setUsername($data[$i]['username']);
       $this->em->flush();

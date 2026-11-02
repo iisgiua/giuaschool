@@ -25,4 +25,6 @@ App\Entity\Esito:
     creditoPrecedente: '50%? <numberBetween(6, 20)>: 0'
     dati: '<array_combine(<words(3)>, <sentences(3)>)>'
     scrutinio: '@scrutinio_<current()>'
-    alunno: '@alunno_*'
+    # alunno distinto per ogni scrutinio e diverso da quelli usati dai test
+    # delle entità (1B..5B), così che la coppia (scrutinio, alunno) resti univoca
+    alunno: '@alunno_<($current == "P" ? "1A_1" : ($current == "S" ? "1A_2" : ($current == "F" ? "2A_1" : ($current == "G" ? "2A_2" : ($current == "R" ? "3A_1" : "3A_2")))))>'

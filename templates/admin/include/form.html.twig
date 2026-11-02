@@ -1,0 +1,22 @@
+{## # form: generico form # ##}
+{## #    parametri: form, form_help # ##}
+{% form_theme form with 'admin/layout-form.html.twig' only %}
+
+{## # i messaggi flash hanno la precedenza su quelli generati dal form, come prima # ##}
+{% if app.session.flashbag.peekAll() is not empty %}
+{{ include('admin/include/flash.html.twig') }}
+{% elseif form.vars.submitted and form.vars.valid %}
+{{ include('admin/include/flash.html.twig', {tipo: 'success', messaggio: 'message.update_ok'}) }}
+{% elseif form.vars.submitted and not form.vars.valid and form.vars.errors|length == 0 %}
+{{ include('admin/include/flash.html.twig', {tipo: 'danger', messaggio: 'exception.update_errors'}) }}
+{% endif %}
+<div class="card-wrapper card-space">
+  <div class="card border rounded card-bg">
+  {% if form_help %}
+    <div class="card-header bg-secondary text-white">{{ form_help|trans|raw }}</div>
+  {% endif %}
+    <div class="card-body">
+      {{ form(form) }}
+    </div>
+  </div>
+</div>

@@ -8,7 +8,6 @@
 
 namespace App\Tests;
 
-use DateTime;
 use DateTimeInterface;
 use Doctrine\DBAL\Logging\DebugStack;
 use PhpMyAdmin\SqlParser\Parser;

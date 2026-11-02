@@ -1,0 +1,208 @@
+####################
+# DemoComunicazioniFixtures - dati demo per avvisi, circolari e documenti
+#
+# Aggiunge comunicazioni destinate a tutti i ruoli (admin, preside, staff, ATA,
+# docenti, genitori, alunni, utenti) e a tutte le classi, così che le bacheche
+# di ogni utente risultino popolate.
+####################
+
+
+App\Entity\Avviso:
+
+  avviso_demo_{1..3}:
+    tipo: 'U'
+    cifrato:
+    firma: '<boolean(50)>'
+    stato: 'P'
+    titolo: 'Avviso demo <current()> - comunicazione per tutti'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    anno: 0
+    autore: '@staff_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1, @sede_2)>'
+    speciali: ''
+    ata: 'ATC'
+    coordinatori: 'T'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'T'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'T'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra:
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+
+
+App\Entity\Circolare:
+
+  circolare_demo_{1..3}:
+    tipo: 'G'
+    cifrato:
+    firma: '<boolean(50)>'
+    stato: 'P'
+    titolo: 'Circolare demo <current()> - per tutti'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    anno: 0
+    autore: '@staff_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1, @sede_2)>'
+    speciali: ''
+    ata: 'ATC'
+    coordinatori: 'T'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'T'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'T'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    numero: '<($current + 100)>'
+
+
+App\Entity\Documento:
+
+  documento_demo_{1..3}:
+    tipo: 'L'
+    cifrato:
+    firma: '<boolean(50)>'
+    stato: 'P'
+    titolo: 'Documento demo <current()> - per tutti'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1, @sede_2)>'
+    speciali: ''
+    ata: 'ATC'
+    coordinatori: 'T'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'T'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'T'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    materia:
+    classe: '@classe_1A'
+    alunno:
+
+
+App\Entity\ComunicazioneUtente:
+
+  comunicazione_utente_demo_avviso_amm:
+    comunicazione: '@avviso_demo_1'
+    utente: '@amministratore'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+    firmato: '<dateTimeBetween("-2 month", "now")>'
+  comunicazione_utente_demo_avviso_pre:
+    comunicazione: '@avviso_demo_1'
+    utente: '@preside'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+    firmato:
+  comunicazione_utente_demo_avviso_sta:
+    comunicazione: '@avviso_demo_1'
+    utente: '@staff_1'
+    letto:
+    firmato:
+  comunicazione_utente_demo_avviso_ata:
+    comunicazione: '@avviso_demo_1'
+    utente: '@ata_A'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+    firmato: '<dateTimeBetween("-2 month", "now")>'
+  comunicazione_utente_demo_avviso_doc:
+    comunicazione: '@avviso_demo_1'
+    utente: '@docente_curricolare_1'
+    letto:
+    firmato:
+  comunicazione_utente_demo_avviso_gen:
+    comunicazione: '@avviso_demo_1'
+    utente: '@genitore1_1A_1'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+    firmato:
+  comunicazione_utente_demo_avviso_alu:
+    comunicazione: '@avviso_demo_1'
+    utente: '@alunno_1A_1'
+    letto:
+    firmato:
+  comunicazione_utente_demo_avviso_ute:
+    comunicazione: '@avviso_demo_1'
+    utente: '@utente_1'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+    firmato: '<dateTimeBetween("-2 month", "now")>'
+
+  comunicazione_utente_demo_circolare_amm:
+    comunicazione: '@circolare_demo_1'
+    utente: '@amministratore'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+    firmato:
+  comunicazione_utente_demo_circolare_doc:
+    comunicazione: '@circolare_demo_1'
+    utente: '@docente_curricolare_1'
+    letto:
+    firmato:
+  comunicazione_utente_demo_circolare_gen:
+    comunicazione: '@circolare_demo_1'
+    utente: '@genitore1_1A_1'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+    firmato:
+  comunicazione_utente_demo_circolare_alu:
+    comunicazione: '@circolare_demo_1'
+    utente: '@alunno_1A_1'
+    letto:
+    firmato:
+
+  comunicazione_utente_demo_documento_doc:
+    comunicazione: '@documento_demo_1'
+    utente: '@docente_curricolare_1'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+    firmato: '<dateTimeBetween("-2 month", "now")>'
+  comunicazione_utente_demo_documento_gen:
+    comunicazione: '@documento_demo_1'
+    utente: '@genitore1_1A_1'
+    letto:
+    firmato:
+  comunicazione_utente_demo_documento_alu:
+    comunicazione: '@documento_demo_1'
+    utente: '@alunno_1A_1'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+    firmato:
+
+
+App\Entity\ComunicazioneClasse:
+
+  comunicazione_classe_demo_avviso_1A:
+    comunicazione: '@avviso_demo_1'
+    classe: '@classe_1A'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+  comunicazione_classe_demo_avviso_2A:
+    comunicazione: '@avviso_demo_1'
+    classe: '@classe_2A'
+    letto:
+  comunicazione_classe_demo_circolare_1A:
+    comunicazione: '@circolare_demo_1'
+    classe: '@classe_1A'
+    letto: '<dateTimeBetween("-2 month", "now")>'
+  comunicazione_classe_demo_circolare_1B:
+    comunicazione: '@circolare_demo_1'
+    classe: '@classe_1B'
+    letto:

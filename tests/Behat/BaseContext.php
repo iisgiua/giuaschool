@@ -573,7 +573,7 @@ abstract class BaseContext extends RawMinkContext implements Context {
     $fixturesName = substr(self::$fixtures, 0, strrpos(self::$fixtures, '.'));
     $sqlPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixturesName.'.sql';
     $mapPath = $this->kernel->getProjectDir().'/tests/temp/'.$fixturesName.'.map';
-    // svuota il database
+    // svuota il database (TRUNCATE azzera anche i contatori AUTO_INCREMENT)
     $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0; TRUNCATE gs_messenger_messages;');
     $purger = new ORMPurger($this->em);
     $purger->setPurgeMode(ORMPurger::PURGE_MODE_TRUNCATE);

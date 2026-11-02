@@ -1,0 +1,21 @@
+{## # Form theme della scansione oraria settimanale # ##}
+{## # Estende il theme generale dell'applicazione e cambia un solo blocco: i campi # ##}
+{## # TimeType con widget=single_text (inizio e fine di ogni ora) diventano input # ##}
+{## # nativi <input type="time">. Nella pagina servono campi compatti e allineati # ##}
+{## # in una griglia: il timepicker a rotelle e il pulsante con l'icona # ##}
+{## # dell'orologio del blocco time_row di admin/layout-form.html.twig non sono # ##}
+{## # adatti a una tabella con una riga per ora, quindi restano fuori. # ##}
+{## # # ##}
+{## # NB: il valore del campo e' gia' nel formato "HH:MM" (html5=false usa il # ##}
+{## # formato del transformer), quindi si passa direttamente all'input nativo. # ##}
+{% extends 'admin/layout-form.html.twig' %}
+
+{%- block time_widget -%}
+{%- if widget == 'single_text' -%}
+{%- set type = 'time' -%}
+{%- set attr = attr|merge({class: (attr.class|default('') ~ ' gs-time')|trim}) -%}
+{{ block('form_widget_simple') }}
+{%- else -%}
+{{ parent() }}
+{%- endif -%}
+{%- endblock time_widget -%}

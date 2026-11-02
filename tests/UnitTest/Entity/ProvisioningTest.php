@@ -54,7 +54,7 @@ class ProvisioningTest extends EntityTestCase {
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
       $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
-        $this->entity.' - Initializated');
+        $this->entity.' - Initialized');
     }
   }
 
@@ -87,7 +87,6 @@ class ProvisioningTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['utente'] = $this->getReference("utente_2");
       $o[$i]->setUtente($data[$i]['utente']);
       $this->em->flush();

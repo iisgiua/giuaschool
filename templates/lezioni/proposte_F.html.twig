@@ -7,23 +7,30 @@
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   {% elseif not cattedra %}
   <h1 class="text-center gs-h1 gs-mt-2">{{ 'title.lezioni_proposte'|trans }}</h1>
+  {# selettore sede/classe per le sostituzioni: c'e' anche qui, cosi' dalla
+     classe sbagliata si puo' passare subito a un'altra senza tornare indietro #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.voti_sostituzione'|trans }}</strong>
   </div>
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_proposte'|trans }} {{ classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>{% endif %}</em></h2>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   <div class="row gs-mb-1">
     <div class="col-sm-4">
       <strong class="gs-big">Periodo:</strong>
       <div style="display:inline-block" class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo"><strong>{{ (periodo ? ('label.periodo_'~periodo) : 'label.scegli_periodo')|trans }}</strong><span class="caret gs-ml-3"></span></button>
+        <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo"><strong>{{ (periodo ? ('label.periodo_' ~ periodo) : 'label.scegli_periodo')|trans }}</strong><span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p in ['P','S','F','G','R','X'] %}
+    {% for p in ['P', 'S', 'F', 'G', 'R', 'X'] %}
       {% if lista_periodi[p] is defined %}
-          <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_proposte', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': p}) }}">{{ ('label.periodo_'~p)|trans }}</a></li>
+          <li{{ periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_scrutinio_proposte', {cattedra: cattedra.id, classe: classe.id, periodo: p}) }}">{{ ('label.periodo_' ~ p)|trans }}</a></li>
       {% endif %}
     {% endfor %}
         </ul>
@@ -31,11 +38,11 @@
     </div>
     <div class="col-sm-4 text-center">
     {% if cattedra and periodo in ['P', 'S', 'F'] and lista_periodi[periodo] == 'N' %}
-      <a class="btn btn-default" href="{{ path('lezioni_scrutinio_medie', {'cattedra': cattedra.id, 'periodo': periodo}) }}" role="button" title="Inserisci le medie dei voti generate automaticamente"><strong>Inserisci media automatica</strong></a>
+      <a class="btn btn-default" href="{{ path('lezioni_scrutinio_medie', {cattedra: cattedra.id, periodo: periodo}) }}" role="button" title="Inserisci le medie dei voti generate automaticamente"><strong>Inserisci media automatica</strong></a>
     {% endif %}
     </div>
     <div class="col-sm-4 text-right">
-      <a class="btn btn-success" href="{{ path('lezioni_scrutinio_svolto', {'cattedra': cattedra.id, 'classe': classe.id, 'periodo': (periodo ? periodo : 0)}) }}" role="button" title="Visualizza il tabellone dei voti degli scrutini svolti"><span class="glyphicon glyphicon-list gs-mr-3"></span><strong>Tabellone</strong></a>
+      <a class="btn btn-success" href="{{ path('lezioni_scrutinio_svolto', {cattedra: cattedra.id, classe: classe.id, periodo: (periodo ? periodo : 0)}) }}" role="button" title="Visualizza il tabellone dei voti degli scrutini svolti">{{ include('admin/include/icona.html.twig', {nome: 'list', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>Tabellone</strong></a>
     </div>
   </div>
     {% if periodo == 'F' %}
@@ -48,7 +55,7 @@
     <div class="panel-body">
         {% if form.vars.submitted and form.vars.valid %}
       <div class="alert alert-success" role="alert">
-        <strong><span class="glyphicon glyphicon-ok-sign gs-mr-3"></span>{{ 'message.update_ok'|trans }}</strong>
+        <strong>{{ include('admin/include/icona.html.twig', {nome: 'circle-check', stile: 'outline', classe: 'gs-mr-3'}) }}{{ 'message.update_ok'|trans }}</strong>
       </div>
         {% endif %}
         {{ form_start(form) }}
@@ -62,19 +69,19 @@
             <div class="col-sm-3">
               <strong>{{ proposte.alunni[prop.alunno.vars.value][0] }} {{ proposte.alunni[prop.alunno.vars.value][1] }} ({{ proposte.alunni[prop.alunno.vars.value][2]|date('d/m/Y') }})</strong>
           {% if proposte.alunni[prop.alunno.vars.value][3] != 'N' %}
-              <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ proposte.alunni[prop.alunno.vars.value][0] }} {{ proposte.alunni[prop.alunno.vars.value][1] }} ({{ proposte.alunni[prop.alunno.vars.value][2]|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+              <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ proposte.alunni[prop.alunno.vars.value][0] }} {{ proposte.alunni[prop.alunno.vars.value][1] }} ({{ proposte.alunni[prop.alunno.vars.value][2]|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline'}) }}</button>
               <div id="alunno-{{ loop.index }}" style="display:none">
                 <div class="list-group-item">
                   <div class="list-group-item-text">
                     <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>
-                    <p>Tipologia: {{ ('label.bes_'~proposte.alunni[prop.alunno.vars.value][3])|trans }}</p>
+                    <p>Tipologia: {{ ('label.bes_' ~ proposte.alunni[prop.alunno.vars.value][3])|trans }}</p>
                     {% if proposte.alunni[prop.alunno.vars.value][4] %}<p>Descrizione:<br><em>{{ proposte.alunni[prop.alunno.vars.value][4]|raw }}</em></p>{% endif %}
                   </div>
                 </div>
               </div>
           {% endif %}
               <br>
-              <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli delle valutazioni" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('scheda_voti_materia', {'cattedra': cattedra.id, 'alunno': prop.alunno.vars.value, 'periodo': periodo}) }}"><span class="glyphicon glyphicon-zoom-in gs-mr-2" ></span>Dettaglio voti</button>
+              <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli delle valutazioni" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('scheda_voti_materia', {cattedra: cattedra.id, alunno: prop.alunno.vars.value, periodo: periodo}) }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}Dettaglio voti</button>
             </div>
           {{ form_widget(prop) }}
           </div>
@@ -91,18 +98,18 @@
     </div>
     <div class="panel-body">
       <ul id="gs-form-collection" class="list-group">
-        {% for k,alu in proposte.alunni %}
+        {% for k, alu in proposte.alunni %}
         <li class="list-group-item">
           <div class="row">
             <div class="col-sm-3">
               <strong>{{ alu[0] }} {{ alu[1] }} ({{ alu[2]|date('d/m/Y') }})</strong>
           {% if alu[3] != 'N' %}
-              <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ alu[0] }} {{ alu[1] }} ({{ alu[2]|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+              <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ alu[0] }} {{ alu[1] }} ({{ alu[2]|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline'}) }}</button>
               <div id="alunno-{{ loop.index }}" style="display:none">
                 <div class="list-group-item">
                   <div class="list-group-item-text">
                     <h3 class="gs-h3 text-center gs-mt-1">Bisogni Educativi Speciali</h3>
-                    <p>Tipologia: {{ ('label.bes_'~alu[3])|trans }}</p>
+                    <p>Tipologia: {{ ('label.bes_' ~ alu[3])|trans }}</p>
                     {% if alu[4] %}<p>Descrizione:<br><em>{{ alu[4]|raw }}</em></p>{% endif %}
                   </div>
                 </div>
@@ -116,7 +123,7 @@
             {% else %}
                 <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-ml-4 gs-big">--</span>
             {% endif %}
-                <span class="label label-default gs-big gs-ml-4">{{ proposte.proposte[k].recupero ? ('label.recupero_'~proposte.proposte[k].recupero)|trans }}</span>
+                <span class="label label-default gs-big gs-ml-4">{{ proposte.proposte[k].recupero ? ('label.recupero_' ~ proposte.proposte[k].recupero)|trans }}</span>
               </div>
             {% if proposte.proposte[k].debito is not empty %}
               <div class="alert alert-info gs-mt-1 gs-mb-0 gs-pt-2 gs-pb-2"><em>{{ proposte.proposte[k].debito }}</em></div>
@@ -129,8 +136,8 @@
     </div>
   </div>
       {% endif %}
-      {% include 'include/modal-remote.html.twig' %}
-      {% include 'include/modal-info.html.twig' %}
+      {{ include('include/modal-remote.html.twig') }}
+      {{ include('include/modal-info.html.twig') }}
     {% elseif lista_periodi|length == 0 %}
   <div class="alert alert-info gs-mt-4" role="alert">
     <strong class="gs-big">{{ 'message.no_proposte'|trans }}</strong>
@@ -260,16 +267,16 @@ window.setInterval(function(){
       <div class="col-sm-10">
   {% if form.unico.vars.value is not empty %}
         <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label {{ form.unico.vars.value < app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').med ? 'label-danger' : (form.unico.vars.value < app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').suff ? 'label-warning' : 'label-success') }} gs-mr-4 gs-big">{{ app.session.get('/APP/ROUTE/lezioni_scrutinio_proposte/valutazioni').lista[form.unico.vars.value] }}</span>
-        <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+        <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
     {% if form.vars.data.materia.tipo == 'E' %}
-        <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
+        <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}Cancella</button>
     {% endif %}
         <div style="display:inline"><input id="{{ form.unico.vars.id }}" name="{{ form.unico.vars.full_name }}" class="slider" type="text" value="{{ form.unico.vars.value }}" data-slider-value="{{ form.unico.vars.value }}"></div>
   {% else %}
         <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-mr-4 gs-big">--</span>
-        <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+        <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi una proposta di voto">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
     {% if form.vars.data.materia.tipo == 'E' %}
-        <button style="display:none" class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
+        <button style="display:none" class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}Cancella</button>
     {% endif %}
         <div style="display:none"><input id="{{ form.unico.vars.id }}" name="{{ form.unico.vars.full_name }}" type="text" value=""></div>
   {% endif %}
@@ -280,7 +287,7 @@ window.setInterval(function(){
     <div class="form-group">
       <label class="control-label col-sm-2 text-danger" for="{{ form.recupero.vars.id }}">Recupero</label>
       <div class="col-sm-10">
-        {{ form_widget(form.recupero, {'placeholder': 'label.scegli_recupero', 'choices': [form.recupero.vars.choices[0],form.recupero.vars.choices[3]] }) }}
+        {{ form_widget(form.recupero, {placeholder: 'label.scegli_recupero', choices: [form.recupero.vars.choices[0], form.recupero.vars.choices[3]]}) }}
       </div>
     </div>
     <div class="form-group">

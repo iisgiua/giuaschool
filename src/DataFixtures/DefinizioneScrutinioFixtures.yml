@@ -12,9 +12,9 @@
 App\Entity\DefinizioneScrutinio:
   definizione_scrutinio_{P, S, F, G, R, X}:
     data: '<dateTimeBetween("-1 month", "now")>'
-    argomenti: '<array_combine(<words(3)>, <sentences(3)>)>'
+    argomenti: {0: 'Premessa', 1: 'Andamento didattico', 2: 'Note finali'}
     dati: '<array_combine(<words(3)>, <sentences(3)>)>'
     periodo: '<current()>'
     dataProposte: '<dateTimeBetween("-1 month", "now")>'
-    struttura: '<array_combine([1, 2, 3], <sentences(3)>)>'
+    struttura: {1: ['Argomento', true, {argomento: 0, sezione: 'Premessa', obbligatorio: false, default: ''}]}
     classiVisibili: '<array_combine([1, 2, 3, 4, 5], [<date()>, <date()>, <date()>, <date()>, <date()>])>'

@@ -1,0 +1,32 @@
+####################
+# DemoOrarioFixtures - validità dell'orario nell'anno scolastico demo
+#
+# Ridefinisce le chiavi di OrarioFixtures.yml portando le date di validità
+# dell'orario (provvisorio e definitivo) all'anno scolastico corrente 2026/2027.
+# Senza questa sovrascrittura le scansioni orarie non coprono le date demo e le
+# pagine del registro (lezioni, assenze, argomenti, ...) risultano vuote.
+####################
+
+
+App\Entity\Orario:
+
+  orario_provvisorio_1:
+    nome: 'Orario Provvisorio - @sede_1->nomeBreve'
+    inizio: '<date_create("2026-09-15")>'
+    fine: '<date_create("2026-10-04")>'
+    sede: '@sede_1'
+  orario_provvisorio_2:
+    nome: 'Orario Provvisorio - @sede_2->nomeBreve'
+    inizio: '<date_create("2026-09-15")>'
+    fine: '<date_create("2026-10-04")>'
+    sede: '@sede_2'
+  orario_definitivo_1:
+    nome: 'Orario Definitivo - @sede_1->nomeBreve'
+    inizio: '<date_create("2026-10-05")>'
+    fine: '<date_create("2027-06-10")>'
+    sede: '@sede_1'
+  orario_definitivo_2:
+    nome: 'Orario Definitivo - @sede_2->nomeBreve'
+    inizio: '<date_create("2026-10-05")>'
+    fine: '<date_create("2027-06-10")>'
+    sede: '@sede_2'

@@ -46,7 +46,9 @@
 !var/sessions/.gitkeep
 /vendor/*
 !/vendor/.gitkeep
+/.env
 /.env.*.local
 /.env.local
 /.env.local.php
+/.gs-updating
 /last_deploy.date

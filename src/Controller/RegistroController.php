@@ -22,7 +22,6 @@ use App\Entity\Lezione;
 use App\Entity\Materia;
 use App\Entity\ModuloFormativo;
 use App\Entity\Nota;
-use App\Entity\ScansioneOraria;
 use App\Entity\Valutazione;
 use App\Form\MessageType;
 use App\Message\AvvisoMessage;
@@ -56,6 +55,15 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class RegistroController extends BaseController
 {
+
+  /** Pattern per la data estesa delle lezioni */
+  private const FORMATO_DATA_LEZIONE = 'EEEE d MMMM yyyy';
+  /** Pattern per la data numerica breve */
+  private const FORMATO_DATA = 'd/m/Y';
+  /** Condizione DQL che identifica la lezione nel giorno */
+  private const DQL_LEZIONE = 'l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione';
+  /** Condizione DQL che identifica una lezione dal suo identificativo */
+  private const DQL_LEZIONE_ID = 'f.lezione=:lezione';
 
   /**
    * Gestione del registro delle lezioni
@@ -112,7 +120,7 @@ class RegistroController extends BaseController
     }
     // data in formato stringa
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
+    $formatter->setPattern(self::FORMATO_DATA_LEZIONE);
     $info['data_label'] = $formatter->format($dataObj);
     // data inizio e fine vista
     if ($vista == 'M') {
@@ -169,15 +177,9 @@ class RegistroController extends BaseController
       $errore = $reg->controlloData($dataObj, $classe->getSede());
       if (!$errore) {
         // non festivo
-        $oggi = new DateTime();
-        $adesso = $oggi->format('H:i');
-        if ($oggi->format('w') != 0 &&
-            $adesso >= $this->em->getRepository(ScansioneOraria::class)->inizioLezioni($oggi, $classe->getSede()) &&
-            $adesso <= $this->em->getRepository(ScansioneOraria::class)->fineLezioni($oggi, $classe->getSede())) {
-          // avvisi alla classe
-          $num_avvisi = $this->em->getRepository(Avviso::class)->numeroClasse($classe);
-          $lista_circolari = $this->em->getRepository(Circolare::class)->listaCircolariClasse($classe);
-        }
+        // avvisi e circolari da leggere (la consultazione non dipende da giorno e ora correnti)
+        $num_avvisi = $this->em->getRepository(Avviso::class)->numeroClasse($classe);
+        $lista_circolari = $this->em->getRepository(Circolare::class)->listaCircolariClasse($classe);
         // recupera dati
         $dati = $reg->tabellaFirmeVista($data_inizio, $data_fine, $this->getUser(), $classe, $cattedra);
         if ($vista == 'G') {
@@ -195,8 +197,8 @@ class RegistroController extends BaseController
       'cattedra' => $cattedra,
       'classe' => $classe,
       'data' => $dataObj->format('Y-m-d'),
-      'data_inizio' => $data_inizio->format('d/m/Y'),
-      'data_fine' => $data_fine->format('d/m/Y'),
+      'data_inizio' => $data_inizio->format(self::FORMATO_DATA),
+      'data_fine' => $data_fine->format(self::FORMATO_DATA),
       'data_succ' => $data_succ,
       'data_prec' => $data_prec,
       'settimana' => $settimana,
@@ -266,7 +268,7 @@ class RegistroController extends BaseController
     $firmeLezioni = [];
     $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
       ->join('l.classe', 'c')
-      ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+      ->where(self::DQL_LEZIONE)
       ->setParameter('data', $data)
       ->setParameter('ora', $ora)
       ->setParameter('anno', $classe->getAnno())
@@ -279,7 +281,7 @@ class RegistroController extends BaseController
       $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
       $firme = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
         ->join('f.docente', 'd')
-        ->where('f.lezione=:lezione')
+        ->where(self::DQL_LEZIONE_ID)
         ->setParameter('lezione', $lezione)
         ->getQuery()
         ->getResult();
@@ -311,7 +313,7 @@ class RegistroController extends BaseController
     }
     // dati in formato stringa
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
+    $formatter->setPattern(self::FORMATO_DATA_LEZIONE);
     $label['data'] = $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
@@ -322,6 +324,10 @@ class RegistroController extends BaseController
       $label['materiaNome'] .= ' ('.$cattedra->getAlunno()->getCognome().' '.$cattedra->getAlunno()->getNome().')';
     }
     $dati = $reg->lezioneOreConsecutive($dataObj, $ora, $this->getUser(), $classe, $materia);
+    if (empty($dati['inizio'])) {
+      // errore: orario non definito per la data indicata
+      throw $this->createNotFoundException('exception.orario_sede_invalido');
+    }
     $label['inizio'] = $dati['inizio'];
     $oraFine = $dati['fine'];
     // lista moduli formativi
@@ -350,7 +356,7 @@ class RegistroController extends BaseController
       $form = $form
         ->add('materia', ChoiceType::class, ['label' => 'label.materia',
           'data' => count($lezioni) > 0 ? $lezioni[0]->getMateria() : $materia,
-          'choices' => array_merge([$materia->getNome() => $materia], $materie),
+          'choices' => array_merge([($materia->getNome() ?? '') => $materia], $materie),
           'choice_value' => 'id',
           'choice_attr' => fn(): array => ['class' => 'gs-no-placeholder'],
           'attr' => ['class' => 'gs-placeholder'],
@@ -432,6 +438,10 @@ class RegistroController extends BaseController
                 ->getQuery()
                 ->setMaxResults(1)
                 ->getOneOrNullResult();
+            }
+            if (!$classeComune) {
+              // dati di classe incompleti: manca la classe comune del gruppo
+              throw $this->createNotFoundException('exception.invalid_params');
             }
             $lezione
               ->setClasse($classeComune)
@@ -602,7 +612,7 @@ class RegistroController extends BaseController
     $firmeLezioni = [];
     $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
       ->join('l.classe', 'c')
-      ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+      ->where(self::DQL_LEZIONE)
       ->setParameter('data', $data)
       ->setParameter('ora', $ora)
       ->setParameter('anno', $classe->getAnno())
@@ -615,7 +625,7 @@ class RegistroController extends BaseController
       $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
       $firme = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
         ->join('f.docente', 'd')
-        ->where('f.lezione=:lezione')
+        ->where(self::DQL_LEZIONE_ID)
         ->setParameter('lezione', $lezione)
         ->getQuery()
         ->getResult();
@@ -643,7 +653,7 @@ class RegistroController extends BaseController
     }
     // dati in formato stringa
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
+    $formatter->setPattern(self::FORMATO_DATA_LEZIONE);
     $label['data'] = $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$lezioneDocente->getClasse();
@@ -915,7 +925,7 @@ class RegistroController extends BaseController
     $firmeLezioni = [];
     $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
       ->join('l.classe', 'c')
-      ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+      ->where(self::DQL_LEZIONE)
       ->setParameter('data', $data)
       ->setParameter('ora', $ora)
       ->setParameter('anno', $classe->getAnno())
@@ -928,7 +938,7 @@ class RegistroController extends BaseController
       $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
       $firme = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
         ->join('f.docente', 'd')
-        ->where('f.lezione=:lezione')
+        ->where(self::DQL_LEZIONE_ID)
         ->setParameter('lezione', $lezione)
         ->getQuery()
         ->getResult();
@@ -956,7 +966,7 @@ class RegistroController extends BaseController
     }
     // dati in formato stringa
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
+    $formatter->setPattern(self::FORMATO_DATA_LEZIONE);
     $label['data'] = $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$lezioneDocente->getClasse();
@@ -1022,10 +1032,14 @@ class RegistroController extends BaseController
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/registro/delete/{classe}/{data}/{ora}', name: 'lezioni_registro_delete', requirements: ['classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'ora' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/registro/delete/{classe}/{data}/{ora}', name: 'lezioni_registro_delete', requirements: ['classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'ora' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(TranslatorInterface $trans, RegistroUtil $reg,
+  public function delete(Request $request, TranslatorInterface $trans, RegistroUtil $reg,
                          LogHandler $dblogger, int $classe, string $data, int $ora): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla classe
     $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
@@ -1048,7 +1062,7 @@ class RegistroController extends BaseController
     $firmeLezioni = [];
     $lezioni = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
       ->join('l.classe', 'c')
-      ->where('l.data=:data AND l.ora=:ora AND c.anno=:anno AND c.sezione=:sezione')
+      ->where(self::DQL_LEZIONE)
       ->setParameter('data', $data)
       ->setParameter('ora', $ora)
       ->setParameter('anno', $classe->getAnno())
@@ -1061,7 +1075,7 @@ class RegistroController extends BaseController
       $gruppo = $lezione->getTipoGruppo().':'.$lezione->getGruppo();
       $firme = $this->em->getRepository(Firma::class)->createQueryBuilder('f')
         ->join('f.docente', 'd')
-        ->where('f.lezione=:lezione')
+        ->where(self::DQL_LEZIONE_ID)
         ->setParameter('lezione', $lezione)
         ->getQuery()
         ->getResult();
@@ -1295,7 +1309,7 @@ class RegistroController extends BaseController
     }
     // dati in formato stringa
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
+    $formatter->setPattern(self::FORMATO_DATA_LEZIONE);
     $label['data'] = $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
@@ -1322,7 +1336,7 @@ class RegistroController extends BaseController
       ->add('filtroIndividuale', EntityType::class, ['label' => false,
         'data' => $alunni,
         'class' => Alunno::class,
-        'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')',
+        'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format(self::FORMATO_DATA).')',
         'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')
           ->where('a.id IN (:lista)')
           ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1441,10 +1455,14 @@ class RegistroController extends BaseController
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/registro/annotazione/delete/{id}', name: 'lezioni_registro_annotazione_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/registro/annotazione/delete/{id}', name: 'lezioni_registro_annotazione_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function annotazioneDelete(RegistroUtil $reg, ComunicazioniUtil $com,
+  public function annotazioneDelete(Request $request, RegistroUtil $reg, ComunicazioniUtil $com,
                                     LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla annotazione
     $annotazione = $this->em->getRepository(Annotazione::class)->find($id);
     if (!$annotazione) {
@@ -1589,7 +1607,7 @@ class RegistroController extends BaseController
     }
     // dati in formato stringa
     $formatter = new IntlDateFormatter('it_IT', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
-    $formatter->setPattern('EEEE d MMMM yyyy');
+    $formatter->setPattern(self::FORMATO_DATA_LEZIONE);
     $label['data'] = $formatter->format($dataObj);
     $label['docente'] = $this->getUser()->getNome().' '.$this->getUser()->getCognome();
     $label['classe'] = ''.$classe;
@@ -1611,7 +1629,7 @@ class RegistroController extends BaseController
           'required' => true])
         ->add('alunni', EntityType::class, ['label' => 'label.alunni',
           'class' => Alunno::class,
-          'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format('d/m/Y').')',
+          'choice_label' => fn($obj) => $obj->getCognome().' '.$obj->getNome().' ('.$obj->getDataNascita()->format(self::FORMATO_DATA).')',
           'query_builder' => fn(EntityRepository $er) => $er->createQueryBuilder('a')
             ->where('a.id IN (:lista)')
             ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
@@ -1702,9 +1720,13 @@ class RegistroController extends BaseController
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/registro/nota/delete/{id}', name: 'lezioni_registro_nota_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/registro/nota/delete/{id}', name: 'lezioni_registro_nota_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function notaDelete(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+  public function notaDelete(Request $request, RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla nota
     $nota = $this->em->getRepository(Nota::class)->find($id);
     if (!$nota) {
@@ -1742,9 +1764,13 @@ class RegistroController extends BaseController
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/registro/nota/cancel/{id}', name: 'lezioni_registro_nota_cancel', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/registro/nota/cancel/{id}', name: 'lezioni_registro_nota_cancel', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function notaCancel(RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+  public function notaCancel(Request $request, RegistroUtil $reg, LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla nota
     $nota = $this->em->getRepository(Nota::class)->find($id);
     if (!$nota) {

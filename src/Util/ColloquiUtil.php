@@ -19,7 +19,6 @@ use App\Entity\Colloquio;
 use App\Entity\Docente;
 use App\Entity\Genitore;
 use App\Entity\Sede;
-use App\Util\LogHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -41,13 +40,11 @@ class ColloquiUtil {
    * @param EntityManagerInterface $em Gestore delle entità
    * @param RequestStack $reqstack Gestore dello stack delle variabili globali
    * @param TranslatorInterface $trans Gestore delle traduzioni
-   * @param LogHandler $dblogger Gestore dei log su database
    */
   public function __construct(
       private readonly EntityManagerInterface $em,
       private readonly RequestStack $reqstack,
-      private readonly TranslatorInterface $trans,
-      private readonly LogHandler $dblogger)
+      private readonly TranslatorInterface $trans)
   {
   }
 

@@ -1,0 +1,437 @@
+####################
+# DemoCompitiSostegnoFixtures - verifiche/compiti per sostegno, alternativa e classe 3C
+####################
+
+
+App\Entity\Avviso:
+  avviso_verifica_demo_3C_1:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica 3C - demo 1'
+    data: '<(new DateTime("2027-02-15"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3C'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_verifica_demo_3C_2:
+    tipo: 'V'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Verifica 3C - demo 2'
+    data: '<(new DateTime("2027-04-12"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3C'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_3C_3:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito 3C - demo 3'
+    data: '<(new DateTime("2026-11-20"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3C'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+  avviso_compito_demo_3C_4:
+    tipo: 'P'
+    cifrato:
+    firma: false
+    stato: 'P'
+    titolo: 'Compito 3C - demo 4'
+    data: '<(new DateTime("2027-03-08"))>'
+    anno: 0
+    autore: '@docente_curricolare_1'
+    allegati: '<collection()>'
+    sedi: '<collection(@sede_1)>'
+    speciali: ''
+    ata: ''
+    coordinatori: 'N'
+    filtroCoordinatori: []
+    docenti: 'T'
+    filtroDocenti: []
+    genitori: 'T'
+    filtroGenitori: []
+    rappresentantiGenitori: 'N'
+    filtroRappresentantiGenitori: []
+    alunni: 'T'
+    filtroAlunni: []
+    rappresentantiAlunni: 'N'
+    filtroRappresentantiAlunni: []
+    esterni: []
+    cattedra: '@cattedra_demo_3C'
+    classe:
+    materia:
+    annotazioni: '<collection()>'
+    testo: '<text()>'
+    sostituzioni: []
+
+
+App\Entity\ComunicazioneUtente:
+  cu_avviso_verifica_demo_A1_1_alunno_sostegno_1:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@alunno_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_alunno_sostegno_2:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@alunno_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_alunno_alternativa_1:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@alunno_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_genitore1_sostegno_1:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@genitore1_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_genitore2_sostegno_1:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@genitore2_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_genitore1_sostegno_2:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@genitore1_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_genitore2_sostegno_2:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@genitore2_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_genitore1_alternativa_1:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@genitore1_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_1_genitore2_alternativa_1:
+    comunicazione: '@avviso_verifica_demo_A1_1'
+    utente: '@genitore2_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_alunno_sostegno_1:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@alunno_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_alunno_sostegno_2:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@alunno_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_alunno_alternativa_1:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@alunno_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_genitore1_sostegno_1:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@genitore1_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_genitore2_sostegno_1:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@genitore2_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_genitore1_sostegno_2:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@genitore1_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_genitore2_sostegno_2:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@genitore2_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_genitore1_alternativa_1:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@genitore1_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_A1_2_genitore2_alternativa_1:
+    comunicazione: '@avviso_verifica_demo_A1_2'
+    utente: '@genitore2_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_alunno_sostegno_1:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@alunno_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_alunno_sostegno_2:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@alunno_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_alunno_alternativa_1:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@alunno_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_genitore1_sostegno_1:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@genitore1_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_genitore2_sostegno_1:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@genitore2_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_genitore1_sostegno_2:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@genitore1_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_genitore2_sostegno_2:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@genitore2_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_genitore1_alternativa_1:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@genitore1_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_3_genitore2_alternativa_1:
+    comunicazione: '@avviso_compito_demo_A1_3'
+    utente: '@genitore2_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_alunno_sostegno_1:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@alunno_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_alunno_sostegno_2:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@alunno_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_alunno_alternativa_1:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@alunno_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_genitore1_sostegno_1:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@genitore1_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_genitore2_sostegno_1:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@genitore2_sostegno_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_genitore1_sostegno_2:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@genitore1_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_genitore2_sostegno_2:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@genitore2_sostegno_2'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_genitore1_alternativa_1:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@genitore1_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_A1_4_genitore2_alternativa_1:
+    comunicazione: '@avviso_compito_demo_A1_4'
+    utente: '@genitore2_alternativa_1'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_1_alunno_sostegno_3:
+    comunicazione: '@avviso_verifica_demo_3CCHI_1'
+    utente: '@alunno_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_1_genitore1_sostegno_3:
+    comunicazione: '@avviso_verifica_demo_3CCHI_1'
+    utente: '@genitore1_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_1_genitore2_sostegno_3:
+    comunicazione: '@avviso_verifica_demo_3CCHI_1'
+    utente: '@genitore2_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_2_alunno_sostegno_3:
+    comunicazione: '@avviso_verifica_demo_3CCHI_2'
+    utente: '@alunno_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_2_genitore1_sostegno_3:
+    comunicazione: '@avviso_verifica_demo_3CCHI_2'
+    utente: '@genitore1_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CCHI_2_genitore2_sostegno_3:
+    comunicazione: '@avviso_verifica_demo_3CCHI_2'
+    utente: '@genitore2_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_3_alunno_sostegno_3:
+    comunicazione: '@avviso_compito_demo_3CCHI_3'
+    utente: '@alunno_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_3_genitore1_sostegno_3:
+    comunicazione: '@avviso_compito_demo_3CCHI_3'
+    utente: '@genitore1_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_3_genitore2_sostegno_3:
+    comunicazione: '@avviso_compito_demo_3CCHI_3'
+    utente: '@genitore2_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_4_alunno_sostegno_3:
+    comunicazione: '@avviso_compito_demo_3CCHI_4'
+    utente: '@alunno_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_4_genitore1_sostegno_3:
+    comunicazione: '@avviso_compito_demo_3CCHI_4'
+    utente: '@genitore1_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CCHI_4_genitore2_sostegno_3:
+    comunicazione: '@avviso_compito_demo_3CCHI_4'
+    utente: '@genitore2_sostegno_3'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_1_alunno_sostegno_4:
+    comunicazione: '@avviso_verifica_demo_3CAMB_1'
+    utente: '@alunno_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_1_genitore1_sostegno_4:
+    comunicazione: '@avviso_verifica_demo_3CAMB_1'
+    utente: '@genitore1_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_1_genitore2_sostegno_4:
+    comunicazione: '@avviso_verifica_demo_3CAMB_1'
+    utente: '@genitore2_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_2_alunno_sostegno_4:
+    comunicazione: '@avviso_verifica_demo_3CAMB_2'
+    utente: '@alunno_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_2_genitore1_sostegno_4:
+    comunicazione: '@avviso_verifica_demo_3CAMB_2'
+    utente: '@genitore1_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_verifica_demo_3CAMB_2_genitore2_sostegno_4:
+    comunicazione: '@avviso_verifica_demo_3CAMB_2'
+    utente: '@genitore2_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_3_alunno_sostegno_4:
+    comunicazione: '@avviso_compito_demo_3CAMB_3'
+    utente: '@alunno_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_3_genitore1_sostegno_4:
+    comunicazione: '@avviso_compito_demo_3CAMB_3'
+    utente: '@genitore1_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_3_genitore2_sostegno_4:
+    comunicazione: '@avviso_compito_demo_3CAMB_3'
+    utente: '@genitore2_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_4_alunno_sostegno_4:
+    comunicazione: '@avviso_compito_demo_3CAMB_4'
+    utente: '@alunno_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_4_genitore1_sostegno_4:
+    comunicazione: '@avviso_compito_demo_3CAMB_4'
+    utente: '@genitore1_sostegno_4'
+    letto:
+    firmato:
+  cu_avviso_compito_demo_3CAMB_4_genitore2_sostegno_4:
+    comunicazione: '@avviso_compito_demo_3CAMB_4'
+    utente: '@genitore2_sostegno_4'
+    letto:
+    firmato:

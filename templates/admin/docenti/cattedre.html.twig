@@ -1,0 +1,54 @@
+{% extends 'admin/layout-sidebar.html.twig' %}
+
+{% import 'admin/include/tabella.html.twig' as t %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {# pulsanti di pagina sotto il titolo, non in fondo alla tabella #}
+  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('docenti_cattedre_edit', {id: 0}), etichetta: 'label.add'|trans, titolo: 'Nuova cattedra', classe: 'btn btn-primary btn-sm mr-3'}, {url: path('docenti_cattedre_supplenza'), etichetta: 'Aggiungi supplenza', titolo: 'Nuova cattedra di supplenza'}]}) }}
+  {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
+  {% set colonne = [
+    {titolo: 'label.stato'|trans, chiave: 'attiva', tipo: 'stato',
+      titolo_vero: 'label.cattedra_attiva'|trans, titolo_falso: 'label.cattedra_disabilitata'|trans},
+    {titolo: 'label.classe'|trans, chiave: 'classe'},
+    {titolo: 'label.materia'|trans, chiave: 'materia'},
+    {titolo: 'label.docente'|trans, chiave: 'docente'},
+    {titolo: 'label.tipo'|trans, chiave: 'tipo'},
+  ] %}
+  {% set righe = [] %}
+  {% set azioni = [] %}
+  {% for c in dati.lista %}
+    {% set righe = righe|merge([{
+      attiva: c.attiva,
+      classe: c.classe,
+      materia: c.materia.nomeBreve,
+      docente: c.docente.cognome ~ ' ' ~ c.docente.nome ~ ' (' ~ c.docente.username ~ ')',
+      tipo: ('label.tipo_' ~ c.tipo)|trans ~ (c.docenteSupplenza ? ' (supplente di ' ~ c.docenteSupplenza.cognome ~ ' ' ~ c.docenteSupplenza.nome ~ ')' : ''),
+    }]) %}
+    {% set voci = [
+      {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati della cattedra',
+        url: path('docenti_cattedre_edit', {id: c.id})},
+    ] %}
+    {% if c.attiva %}
+      {% set voci = voci|merge([{tipo: 'conferma', stile: 'danger', etichetta: 'label.disable'|trans, titolo: 'Disabilita la cattedra',
+        titolo_modale: c, contenuto: 'message.disabilita_cattedra'|trans,
+        url: path('docenti_cattedre_abilita', {id: c.id, abilita: 0})}]) %}
+    {% else %}
+      {% set voci = voci|merge([{tipo: 'conferma', stile: 'success', etichetta: 'label.enable'|trans, titolo: 'Abilita la cattedra',
+        titolo_modale: c, contenuto: 'message.abilita_cattedra'|trans,
+        url: path('docenti_cattedre_abilita', {id: c.id, abilita: 1})}]) %}
+    {% endif %}
+    {% set azioni = azioni|merge([{voci: voci}]) %}
+  {% endfor %}
+  {{ t.tabella(colonne, righe, {
+    vuoto: 'Nessuna cattedra trovata',
+    mappa: {chiave: 'attiva', valori: {1: '', 0: 'table-danger'}},
+    azioni: azioni,
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'docenti_cattedre'},
+  }) }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('admin/include/tabella-js.html.twig', {url_paginazione: 'docenti_cattedre'}) }}
+{% endblock %}

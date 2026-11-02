@@ -2,57 +2,55 @@
 
 {% block pagina_contenuto %}
 <div class="container-fluid">
-  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_assenze'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome~' '~alunno.cognome }}</h1>
+  <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.genitori_assenze'|trans({'%sex%': (alunno.sesso == 'M' ? 'o' : 'a')}) }} {{ alunno.nome ~ ' ' ~ alunno.cognome }}</h1>
   {% if errore %}
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-    {% include 'include/modal-error.html.twig' %}
+    {{ include('include/modal-error.html.twig') }}
     {% if dati.giustifica and
       ((dati.evidenza.assenza is defined and dati.evidenza.assenza|length > 0) or
       (dati.evidenza.ritardo is defined and dati.evidenza.ritardo|length > 0) or
       (dati.evidenza.uscita is defined and dati.evidenza.uscita|length > 0)) %}
-  <table class="table table-bordered table-hover table-striped table-condensed gs-mb-5">
-    <caption class="text-danger text-center gs-big"><strong>Da giustificare</strong></caption>
-    <thead class="bg-warning">
-      <tr>
-        <th>Data</th>
-        <th>Tipo</th>
-        <th>Giustificazione</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for tipo,e in dati.evidenza %}
+  {% set intestazione = [
+      {contenuto: 'Data', scope: 'col'},
+      {contenuto: 'Tipo', scope: 'col'},
+      {contenuto: 'Giustificazione', scope: 'col'},
+    ] %}
+    {% set corpo_grezzo_0 %}
+      {% for tipo, e in dati.evidenza %}
         {% for v in e %}
       <tr>
           {% if tipo == 'assenza' %}
         <td class="text-danger"><strong>{{ v.data }}{% if v.giorni > 1 %} - {{ v.data_fine }}{% endif %}</strong></td>
         <td><strong>Assenza{% if v.giorni > 1 %} di più giorni{% endif %}</strong></td>
         <td>
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {'assenza': v.id}) }}" title="Giustifica l'assenza"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Giustifica', titolo: 'Giustifica l\'assenza', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('genitori_giustifica_assenza', {assenza: v.id})}}) }}
         </td>
           {% elseif tipo == 'ritardo' %}
         <td class="text-danger"><strong>{{ v.data }}</strong></td>
         <td><strong>Ritardo</strong> ({{ v.ora|date('H:i') }})</td>
         <td>
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {'entrata': v.id}) }}" title="Giustifica il ritardo"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Giustifica', titolo: 'Giustifica il ritardo', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('genitori_giustifica_ritardo', {entrata: v.id})}}) }}
         </td>
           {% elseif tipo == 'uscita' %}
         <td class="text-danger"><strong>{{ v.data }}</strong></td>
         <td><strong>Uscita anticipata</strong> ({{ v.ora|date('H:i') }})</td>
         <td>
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {'uscita': v.id}) }}" title="Giustifica l'uscita anticipata"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Giustifica', titolo: 'Giustifica l\'uscita anticipata', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('genitori_giustifica_uscita', {uscita: v.id})}}) }}
         </td>
           {% endif %}
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped table-condensed gs-mb-5'}) }}
     {% endif %}
+  {# didascalia fuori dalla cornice: vedi include/tabella.html.twig e main.css #}
+  <div class="gs-table-caption text-info text-center gs-big" aria-hidden="true"><strong>Situazione globale</strong></div>
   <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>Situazione globale</strong></caption>
+    <caption class="sr-only">Situazione globale</caption>
     <tbody>
       <tr>
         <th class="gs-big">Totale ore di assenza</th>
@@ -75,30 +73,26 @@
     </tbody>
   </table>
   <div id="gs-giustificazioni"></div>
-    {% for periodo,v in dati.lista %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th>Data</th>
-        <th>Tipo</th>
-        <th>Annotazioni</th>
-        <th>Giustificazione</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for data,v1 in v %}
-        {% for tipo,e in v1 %}
+    {% for periodo, v in dati.lista %}
+  {% set intestazione = [
+      {contenuto: 'Data', scope: 'col'},
+      {contenuto: 'Tipo', scope: 'col'},
+      {contenuto: 'Annotazioni', scope: 'col'},
+      {contenuto: 'Giustificazione', scope: 'col'},
+    ] %}
+    {% set corpo_grezzo_1 %}
+      {% for data, v1 in v %}
+        {% for tipo, e in v1 %}
       <tr>
           {% if tipo == 'assenza' %}
         <td><strong>{{ e.data }}{% if e.giorni > 1 %} - {{ e.data_fine }}{% endif %}</strong></td>
         <td><strong>Assenza</strong></td>
-        <td><small>{{ e.motivazione ? 'Motivazione assenza: '~e.motivazione }}</small></td>
+        <td><small>{{ e.motivazione ? 'Motivazione assenza: ' ~ e.motivazione }}</small></td>
         <td>
             {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
-          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {'assenza': e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica la giustificazione', stile: 'default', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('genitori_giustifica_assenza', {assenza: e.id})}}) }}
             {% elseif not e.giustificato and e.permesso and dati.giustifica %}
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_assenza', {'assenza': e.id}) }}" title="Giustifica l'assenza"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Giustifica', titolo: 'Giustifica l\'assenza', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('genitori_giustifica_assenza', {assenza: e.id})}}) }}
             {% elseif not e.giustificato %}
           <span class="label label-danger">Da giustificare</span>
             {% endif %}
@@ -115,9 +109,9 @@
         </td>
         <td>
             {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
-          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {'entrata': e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica la giustificazione', stile: 'default', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('genitori_giustifica_ritardo', {entrata: e.id})}}) }}
             {% elseif not e.giustificato and e.permesso and dati.giustifica %}
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_ritardo', {'entrata': e.id}) }}" title="Giustifica il ritardo"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Giustifica', titolo: 'Giustifica il ritardo', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('genitori_giustifica_ritardo', {entrata: e.id})}}) }}
             {% elseif not e.giustificato %}
           <span class="label label-danger">Da giustificare</span>
             {% endif %}
@@ -132,9 +126,9 @@
         </td>
         <td>
             {% if e.giustificato == 'G' and e.permesso and dati.giustifica %}
-          <button class="btn btn-default btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {'uscita': e.id}) }}" title="Modifica la giustificazione"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Modifica</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Modifica', titolo: 'Modifica la giustificazione', stile: 'default', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('genitori_giustifica_uscita', {uscita: e.id})}}) }}
             {% elseif not e.giustificato and e.permesso and dati.giustifica %}
-          <button class="btn btn-primary btn-xs gs-button-remote" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('genitori_giustifica_uscita', {'uscita': e.id}) }}" title="Giustifica l'uscita anticipata"><span class="glyphicon glyphicon-pencil gs-mr-2"></span><strong>Giustifica</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'pencil', etichetta: 'Giustifica', titolo: 'Giustifica l\'uscita anticipata', classi: 'gs-button-remote', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-remote', 'data-href': path('genitori_giustifica_uscita', {uscita: e.id})}}) }}
             {% elseif not e.giustificato %}
           <span class="label label-danger">Da giustificare</span>
             {% endif %}
@@ -143,22 +137,23 @@
         <td><strong>{{ e.data }}</strong></td>
         <td><strong>Fuori classe</strong> ({% if e.inizio %}dalle {{ e.inizio|date('H:i') }}{% if e.fine %} alle {{ e.fine|date('H:i') }}{% endif %}{% else %}tutto il giorno{% endif %})</td>
         <td>
-          <small>{{ ('label.presenza_tipo_'~e.tipo)|trans }}: {{e.descrizione}}</small>
+          <small>{{ ('label.presenza_tipo_' ~ e.tipo)|trans }}: {{ e.descrizione }}</small>
         </td>
         <td>&nbsp;</td>
           {% endif %}
       </tr>
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
-      {% include 'include/modal-remote.html.twig' %}
+    {% endset %}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ periodo ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_1, classi: 'table table-bordered table-hover table-striped'}) }}
+      {{ include('include/modal-remote.html.twig') }}
     {% else %}
   <div class="alert alert-info" role="alert">
     <strong class="gs-big">Non sono presenti assenze</strong>
   </div>
     {% endfor %}
   {% endif %}
+  <div id="gs-pagina-dati" data-posizione="{{ posizione|default(0) }}" data-errori="{{ app.flashes('errore')|json_encode }}" hidden></div>
 </div>
 {% endblock %}
 
@@ -175,20 +170,23 @@ $(document).ready(function() {
     $('#gs-modal-remote-content').html('<div class="modal-content"><div class="modal-header"><h3 class="modal-title">Attendere prego...</h3></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 100%"></div></div></div></div>');
   });
   // init
-  {% if posizione > 0 %}
-  $('html').scrollTop({{ posizione }});
-  {% endif %}
+  var posizione = parseInt($('#gs-pagina-dati').attr('data-posizione'), 10) || 0;
+  if (posizione > 0) {
+    $('html').scrollTop(posizione);
+  }
   // init
-  {% for messaggio in app.flashes('errore') %}
-    {% if loop.first %}
-  var m = '';
-    {% endif %}
-  m = m + "{{ messaggio|raw }}<br>";
-    {% if loop.last %}
-  $('#gs-modal-error-text').html(m);
-  $('#gs-modal-error').modal('show');
-    {% endif %}
-  {% endfor %}
+  var errori = $('#gs-pagina-dati').data('errori') || [];
+  if (typeof errori === 'string') {
+    try {
+      errori = JSON.parse(errori);
+    } catch (e) {
+      errori = [];
+    }
+  }
+  if (errori.length > 0) {
+    $('#gs-modal-error-text').html(errori.join('<br>'));
+    $('#gs-modal-error').modal('show');
+  }
 });
 </script>
 {% endblock %}

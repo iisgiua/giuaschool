@@ -12,7 +12,8 @@ use App\Entity\Istituto;
 use App\Entity\Utente;
 use App\Message\NotificaMessage;
 use App\Util\TelegramManager;
-use DateTime;
+use DateTimeImmutable;
+use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -132,7 +133,9 @@ class NotificaMessageHandler {
    * @return bool Restituisce vero se la notifica è stata aggiornata
    */
   public static function update(EntityManagerInterface $em, string $tag, string $queue, int $delay): bool {
-    $ora = (new DateTime())->modify('+'.$delay.' seconds');
+    // NB: available_at è gestito in UTC dal transport Doctrine (DelayStamp):
+    // usare l'ora locale la farebbe slittare dell'offset del fuso orario
+    $ora = (new DateTimeImmutable('now', new DateTimeZone('UTC')))->modify('+'.$delay.' seconds');
     $connection = $em->getConnection();
     $sql = "UPDATE gs_messenger_messages SET available_at=:ora WHERE queue_name=:queue AND body LIKE :tag AND delivered_at IS NULL";
     $res = $connection->prepare($sql)->executeStatement(['ora' => $ora->format('Y-m-d H:i:s'),

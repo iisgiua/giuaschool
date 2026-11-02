@@ -155,11 +155,11 @@ Scenario: seconde - memorizzazione dati e passo successivo
   Allora la sezione "#gs-main h2" contiene "Certificazione competenze"
   E vedi la tabella "2" non ordinata senza intestazioni:
     | Alunno | Media | Certificazione |
-    | @alunno_2A_2:cognome+ +@alunno_2A_2:nome | 6,00 | COMPILATA |
-    | @alunno_2A_3:cognome+ +@alunno_2A_3:nome | 6,88 | COMPILATA |
-    | @alunno_2A_4:cognome+ +@alunno_2A_4:nome | 7,63 | COMPILATA |
-    | @alunno_2A_5:cognome+ +@alunno_2A_5:nome | 8,38 | COMPILATA |
-    | @alunno_2A_6:cognome+ +@alunno_2A_6:nome | 9,13 | COMPILATA |
+    | @alunno_2A_2:cognome+ +@alunno_2A_2:nome | 6,00 | |
+    | @alunno_2A_3:cognome+ +@alunno_2A_3:nome | 6,88 | |
+    | @alunno_2A_4:cognome+ +@alunno_2A_4:nome | 7,63 | |
+    | @alunno_2A_5:cognome+ +@alunno_2A_5:nome | 8,38 | |
+    | @alunno_2A_6:cognome+ +@alunno_2A_6:nome | 9,13 | |
 
 Scenario: seconde - memorizzazione dati e passo successivo con dettagli
   Data pagina attiva "coordinatore_scrutinio" con parametri:

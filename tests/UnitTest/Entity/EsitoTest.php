@@ -57,7 +57,7 @@ class EsitoTest extends EntityTestCase {
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
       $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
-        $this->entity.' - Initializated');
+        $this->entity.' - Initialized');
     }
   }
 
@@ -93,7 +93,6 @@ class EsitoTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['credito'] = $data[$i]['credito'] + 1;
       $o[$i]->setCredito($data[$i]['credito']);
       $this->em->flush();

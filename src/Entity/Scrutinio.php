@@ -97,7 +97,7 @@ class Scrutinio implements Stringable {
    *
    */
   #[ORM\JoinColumn(nullable: false)]
-  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[ORM\ManyToOne(targetEntity: Classe::class)]
   #[Assert\NotBlank(message: 'field.notblank')]
   private ?Classe $classe = null;
 
@@ -115,9 +115,7 @@ class Scrutinio implements Stringable {
   private ?DateTime $visibile = null;
 
   /**
-   * @var string|null $stato Stato della sincronizzazione dei dati dello scrutinio [E=esportato, C=caricato, V=validato, B=bloccato]
-   *
-   *
+   * Stato della sincronizzazione dei dati dello scrutinio [E=esportato, C=caricato, V=validato, B=bloccato]
    */
   #[ORM\Column(type: Types::STRING, length: 1, nullable: true)]
   #[Assert\Choice(choices: ['E', 'C', 'V', 'B'], strict: true, message: 'field.choice')]

@@ -8,10 +8,10 @@
 
 namespace App\Controller;
 
+use Throwable;
 use App\Entity\Allegato;
 use App\Entity\Alunno;
 use App\Entity\Avviso;
-use App\Entity\CambioClasse;
 use App\Entity\Cattedra;
 use App\Entity\Circolare;
 use App\Entity\Classe;
@@ -34,11 +34,13 @@ use App\Form\ConfigurazioneType;
 use App\Form\ModuloType;
 use App\Form\UtenteType;
 use App\Util\ArchiviazioneUtil;
+use App\Util\EnvFile;
 use App\Util\LogHandler;
 use App\Util\TelegramManager;
 use DateTime;
 use Doctrine\DBAL\ArrayParameterType;
 use Exception;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -308,11 +310,13 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    */
   #[Route(path: '/sistema/alias/exit', name: 'sistema_alias_exit', methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
   public function aliasExit(LogHandler $dblogger): Response  {
     // log azione
+    $utente = $this->getUser();
     $dblogger->logAzione('ACCESSO', 'Alias Exit', [
-      'Username' => $this->getUser()->getUserIdentifier(),
-      'Ruolo' => $this->getUser()->getRoles()[0],
+      'Username' => $utente ? $utente->getUserIdentifier() : '---',
+      'Ruolo' => $utente ? ($utente->getRoles()[0] ?? '---') : '---',
       'Username reale' => $this->reqstack->getSession()->get('/APP/UTENTE/username_reale'),
       'Ruolo reale' => $this->reqstack->getSession()->get('/APP/UTENTE/ruolo_reale'),
       'ID reale' => $this->reqstack->getSession()->get('/APP/UTENTE/id_reale')]);
@@ -1312,9 +1316,14 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/manutenzione/cache/', name: 'sistema_manutenzione_cache', methods: ['GET'])]
+  #[Route(path: '/sistema/manutenzione/cache/', name: 'sistema_manutenzione_cache', methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function manutenzioneCache(TranslatorInterface $trans, KernelInterface $kernel): Response {
+  public function manutenzioneCache(Request $request, TranslatorInterface $trans,
+                                    KernelInterface $kernel): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // comandi per la pulizia della cache del database
@@ -1349,9 +1358,13 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/manutenzione/logout/', name: 'sistema_manutenzione_logout', methods: ['GET'])]
+  #[Route(path: '/sistema/manutenzione/logout/', name: 'sistema_manutenzione_logout', methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneLogout(Request $request): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // nome del file di sessione in uso
@@ -1439,28 +1452,23 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/manutenzione/debug/', name: 'sistema_manutenzione_debug', methods: ['GET'])]
+  #[Route(path: '/sistema/manutenzione/debug/', name: 'sistema_manutenzione_debug', methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneDebug(Request $request, TranslatorInterface $trans,
                                     KernelInterface $kernel): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
+    // legge la configurazione corrente
+    $projectDir = (string) $this->getParameter('kernel.project_dir');
+    $envData = EnvFile::leggi($projectDir);
     // imposta nuovo livello di log
-    $logLevel = ($request->server->get('LOG_LEVEL') == 'warning') ? 'debug' : 'warning';
-    // legge .env
-    $envPath = $this->getParameter('kernel.project_dir').'/.env';
-    $envData = file($envPath);
-    // modifica impostazione
-    foreach ($envData as $row=>$text) {
-      if (str_starts_with($text, 'LOG_LEVEL')) {
-        // modifica valore
-        $envData[$row] = "LOG_LEVEL='".$logLevel."'\n";
-        break;
-      }
-    }
-    // scrive nuovo .env
-    unlink($envPath);
-    file_put_contents($envPath, $envData);
+    $logLevel = (($envData['LOG_LEVEL'] ?? '') == 'warning') ? 'debug' : 'warning';
+    // scrive l'impostazione nel file della macchina
+    EnvFile::imposta($projectDir.'/'.EnvFile::ENV_LOCAL, ['LOG_LEVEL' => $logLevel]);
     // cancella cache
     $command = new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]);
     // esegue comando
@@ -1488,9 +1496,18 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET'])]
+  #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function aggiorna(int $step): Response {
+  public function aggiorna(Request $request, CacheItemPoolInterface $cache, int $step): Response {
+    // controllo dei parametri (i passi validi sono 0, 1 e 2)
+    if ($step < 0 || $step > 2) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controllo CSRF (il passo 0 effettua solo controlli, gli altri modificano il sistema)
+    if ($step > 0 && (!$request->isMethod('POST') ||
+        !$this->isCsrfTokenValid('sistema_aggiorna', $request->request->get('_csrf_token')))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // inizializza
     $dati = [];
     $info = [];
@@ -1501,10 +1518,11 @@ class SistemaController extends BaseController {
     $info['prossimo'] = 0;
     switch($step) {
       case 0:   // controlli iniziali
-        // legge ultima versione
+        // legge ultima versione (il risultato resta in cache per pochi minuti,
+        // per non ripetere il download ad ogni apertura della pagina)
         $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/version.yml';
-        $pagina = file_get_contents($url);
-        preg_match('/^tag:\s*([0-9\.]+)$/m', $pagina, $trovati);
+        $pagina = $this->scaricaUrlCache($cache, 'sistema_aggiorna_version', $url);
+        preg_match('/^tag:\s*([0-9\.]+)$/m', (string) $pagina, $trovati);
         if (count($trovati) != 2) {
           // errore recupero versione
           $info['tipo'] = 'danger';
@@ -1514,8 +1532,8 @@ class SistemaController extends BaseController {
         $nuovaVersione = $trovati[1];
         // legge ultima build
         $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/build.yml';
-        $pagina = file_get_contents($url);
-        preg_match('/^tag:\s*(.*)$/m', $pagina, $trovati);
+        $pagina = $this->scaricaUrlCache($cache, 'sistema_aggiorna_build', $url);
+        preg_match('/^tag:\s*(.*)$/m', (string) $pagina, $trovati);
         $nuovaBuild = $trovati[1] ?? '0';
         // controlla versione
         $versione = $this->em->getRepository(Configurazione::class)->getParametro('versione', '0');
@@ -1593,8 +1611,9 @@ class SistemaController extends BaseController {
           $nuovaVersione .= '-build';
         }
         $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.'.zip';
-        // scarica file
-        $bytes = file_put_contents($file, file_get_contents($url));
+        // scarica file (timeout più lungo: il pacchetto può essere di diversi MB)
+        $contenuto = $this->scaricaUrl($url, 120);
+        $bytes = ($contenuto === null) ? 0 : file_put_contents($file, $contenuto);
         if ($bytes == 0) {
           $info['tipo'] = 'danger';
           $info['messaggio'] = 'exception.aggiornamento_errore_file';
@@ -1615,13 +1634,69 @@ class SistemaController extends BaseController {
           'build="'.$nuovaBuild.'"'."\n";
         file_put_contents(dirname(__DIR__, 2).'/.gs-updating', $contenuto);
         // reindirizza a pagina di installazione
-        $urlPath = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
-          '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-        $urlPath = substr($urlPath, 0, - strlen('/sistema/aggiorna/2'));
-        return $this->redirect($urlPath."/install/update.php?token=$token&step=1");
+        $urlPath = $request->getSchemeAndHttpHost().$request->getBaseUrl().'/install/update.php';
+        return $this->redirect($urlPath.'?token='.$token.'&step=1');
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'aggiorna', $dati, $info);
+  }
+
+  /**
+   * Scarica il contenuto di una URL esterna
+   *
+   * Il download usa un timeout esplicito e non emette warning: in caso di errore
+   * restituisce null, così il chiamante mostra un messaggio controllato invece di
+   * lasciare che il warning diventi un errore fatale.
+   *
+   * @param string $url URL da scaricare
+   * @param int $timeout Secondi di attesa per ogni lettura
+   *
+   * @return string|null Contenuto scaricato, oppure null in caso di errore
+   *
+   */
+  private function scaricaUrl(string $url, int $timeout = 5): ?string {
+    $contesto = stream_context_create([
+      'http' => ['timeout' => $timeout, 'ignore_errors' => false],
+      'ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
+    $contenuto = @file_get_contents($url, false, $contesto);
+    // restituisce il contenuto, o null in caso di errore
+    return ($contenuto === false) ? null : $contenuto;
+  }
+
+  /**
+   * Scarica il contenuto di una URL esterna, memorizzandolo per pochi minuti in cache.
+   *
+   * Usato per il controllo della versione: il download non deve rallentare ogni
+   * apertura della pagina, ma un errore di rete non viene memorizzato in cache.
+   *
+   * @param CacheItemPoolInterface $cache Gestore della cache dell'applicazione
+   * @param string $chiave Chiave di memorizzazione in cache
+   * @param string $url URL da scaricare
+   *
+   * @return string|null Contenuto scaricato, oppure null in caso di errore
+   *
+   */
+  private function scaricaUrlCache(CacheItemPoolInterface $cache, string $chiave, string $url): ?string {
+    try {
+      $item = $cache->getItem($chiave);
+      if (!$item->isHit()) {
+        // scarica il contenuto
+        $contenuto = $this->scaricaUrl($url);
+        if ($contenuto === null) {
+          // errore di rete: non memorizza il fallimento
+          return null;
+        }
+        // memorizza per pochi minuti
+        $item->set($contenuto);
+        $item->expiresAfter(300);
+        $cache->save($item);
+      }
+      // restituisce il contenuto
+      return $item->get();
+    } catch (Throwable) {
+      // errore della cache: scarica direttamente
+      return $this->scaricaUrl($url);
+    }
   }
 
   /**
@@ -1646,9 +1721,9 @@ class SistemaController extends BaseController {
       // inizializza sessione
       $this->reqstack->getSession()->set('/APP/ROUTE/sistema_email/invio', '');
     }
-    // legge .env
-    $envPath = $this->getParameter('kernel.project_dir').'/.env';
-    $envData = parse_ini_file($envPath);
+    // legge la configurazione corrente
+    $projectDir = (string) $this->getParameter('kernel.project_dir');
+    $envData = EnvFile::leggi($projectDir);
     // estrae configurazione
     $dsn = parse_url($envData['MAILER_DSN'] ?? '');
     $info['server'] = (in_array($dsn['scheme'] ?? '', ['smtp', 'sendmail', 'gmail+smtp', 'php'], true) ?
@@ -1698,20 +1773,9 @@ class SistemaController extends BaseController {
             $dsn = $server.'://'.$user.':'.$password.'@'.
               ($server == 'smtp' ? $host.':'.$port : 'default');
           }
-          // legge .env
-          $envData = file($envPath);
-          // modifica impostazione
-          foreach ($envData as $row => $text) {
-            if (preg_match('/^\s*MAILER_DSN\s*=/', $text)) {
-              // modifica valore
-              $envData[$row] = "MAILER_DSN='".$dsn."'\n";
-              break;
-            }
-          }
-          // scrive nuovo .env
-          unlink($envPath);
-          file_put_contents($envPath, $envData);
-          // cancella cache e ricarica .env
+          // scrive l'impostazione nel file della macchina
+          EnvFile::imposta($projectDir.'/'.EnvFile::ENV_LOCAL, ['MAILER_DSN' => $dsn]);
+          // cancella cache e ricarica .env.local
           $command = new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]);
           // esegue comando
           $application = new Application($kernel);
@@ -1843,9 +1907,9 @@ class SistemaController extends BaseController {
     // inizializza
     $dati = [];
     $info = [];
-    // legge .env
-    $envPath = $this->getParameter('kernel.project_dir').'/.env';
-    $envData = parse_ini_file($envPath);
+    // legge la configurazione corrente
+    $projectDir = (string) $this->getParameter('kernel.project_dir');
+    $envData = EnvFile::leggi($projectDir);
     // estrae configurazione
     $info['abilitato'] = $this->em->getRepository(Configurazione::class)->getParametro('spid');
     $info['client'] = $envData['MIMSPID_CLIENT_ID'] ?? '';
@@ -1867,22 +1931,11 @@ class SistemaController extends BaseController {
       if ($form->isValid()) {
         // memorizza dati
         $this->em->getRepository(Configurazione::class)->setParametro('spid', $abilitato);
-        // legge .env
-        $envData = file($envPath);
-        // modifica impostazioni
-        foreach ($envData as $row => $text) {
-          if (preg_match('/^\s*MIMSPID_CLIENT_ID\s*=/', $text)) {
-            // modifica valore
-            $envData[$row] = "MIMSPID_CLIENT_ID='".$client."'\n";
-          } elseif (preg_match('/^\s*MIMSPID_CLIENT_SECRET\s*=/', $text)) {
-            // modifica valore
-            $envData[$row] = "MIMSPID_CLIENT_SECRET='".$secret."'\n";
-          }
-        }
-        // scrive nuovo .env
-        unlink($envPath);
-        file_put_contents($envPath, $envData);
-        // cancella cache e ricarica .env
+        // scrive le impostazioni nel file della macchina
+        EnvFile::imposta($projectDir.'/'.EnvFile::ENV_LOCAL, [
+          'MIMSPID_CLIENT_ID' => $client,
+          'MIMSPID_CLIENT_SECRET' => $secret]);
+        // cancella cache e ricarica .env.local
         $command = new ArrayInput(['command' => 'cache:clear', '--no-warmup' => true, '-n' => true, '-q' => true]);
         // esegue comando
         $application = new Application($kernel);

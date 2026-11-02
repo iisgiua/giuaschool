@@ -7,5 +7,5 @@ framework:
     only_exceptions: false
     collect_serializer_data: true
 web_profiler:
-  toolbar: true
+  toolbar: false
   intercept_redirects: false

@@ -20,7 +20,7 @@ Contesto: login docente senza cattedre
 # Bisogna controllare prerequisiti per cancellazione di documento
 
 Scenario: visualizza errore per pagina cancellazione di documento non esistente
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | 12345     |
   Allora vedi errore pagina "404"
@@ -38,7 +38,7 @@ Scenario: visualizza errore per cancellazione piano di lavoro di cattedra inesis
   E istanze di tipo "Documento":
     | id  | classe | materia | autore | tipo |
     | $d1 | $cl1   | $m1     | #other | L    |
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "404"
@@ -56,7 +56,7 @@ Scenario: visualizza errore per cancellazione piano di lavoro di cattedra altrui
   E istanze di tipo "Documento":
     | id  | classe | materia | autore | tipo |
     | $d1 | $cl1   | $m1     | #other | L    |
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "404"
@@ -74,7 +74,7 @@ Scenario: visualizza errore per cancellazione programma di cattedra inesistente
   E istanze di tipo "Documento":
     | id  | classe | materia | autore | tipo |
     | $d1 | $cl1   | $m1     | #other | P    |
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "404"
@@ -92,7 +92,7 @@ Scenario: visualizza errore per cancellazione programma di cattedra altrui
   E istanze di tipo "Documento":
     | id  | classe | materia | autore | tipo |
     | $d1 | $cl1   | $m1     | #other | P    |
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "404"
@@ -110,7 +110,7 @@ Scenario: visualizza errore per cancellazione relazione di cattedra inesistente
   E istanze di tipo "Documento":
     | id  | classe | materia | autore | tipo |
     | $d1 | $cl1   | $m1     | #other | R    |
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "404"
@@ -128,7 +128,7 @@ Scenario: visualizza errore per cancellazione relazione di cattedra altrui
   E istanze di tipo "Documento":
     | id  | classe | materia | autore | tipo |
     | $d1 | $cl1   | $m1     | #other | R    |
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "404"
@@ -143,7 +143,7 @@ Scenario: visualizza errore per cancellazione documento del 15 maggio di cattedr
   E istanze di tipo "Documento":
     | id  | classe | autore | tipo |
     | $d1 | $c1    | #other | M    |
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "404"
@@ -158,7 +158,7 @@ Scenario: visualizza errore per cancellazione documento del 15 maggio di cattedr
   E istanze di tipo "Documento":
     | id  | classe | autore | tipo |
     | $d1 | $c1    | #other | M    |
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "404"
@@ -176,7 +176,7 @@ Scenario: visualizza errore per cancellazione documento BES da non responsabile 
   E istanze di tipo "Documento":
     | id  | classe | alunno | tipo | autore |
     | $d1 | $cl1   | $a1    | B    | #other |
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "404"
@@ -198,7 +198,7 @@ Scenario: visualizza errore per cancellazione documento BES da responsabile BES 
   E istanze di tipo "Documento":
     | id  | classe | alunno | tipo | autore |
     | $d1 | $cl1   | $a1    | B    | #other |
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "404"
@@ -221,9 +221,9 @@ Scenario: cancella piano di lavoro inserito in precedenza e torna alla visualizz
     | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | L    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/1B/documento-xlsx.xlsx"
-  Quando pagina attiva "documenti_delete" con parametri:
-    | documento |
-    | $d1:id    |
+  Quando pagina attiva "documenti_piani"
+  E premi pulsante "Cancella"
+  E premi pulsante "Continua"
   Allora pagina attiva "documenti_piani"
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
@@ -266,9 +266,9 @@ Scenario: cancella programma inserito in precedenza e torna alla visualizzazione
     | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | P    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/1B/documento-xlsx.xlsx"
-  Quando pagina attiva "documenti_delete" con parametri:
-    | documento |
-    | $d1:id    |
+  Quando pagina attiva "documenti_programmi"
+  E premi pulsante "Cancella"
+  E premi pulsante "Continua"
   Allora pagina attiva "documenti_programmi"
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
@@ -311,9 +311,9 @@ Scenario: cancella relazione inserita in precedenza e torna alla visualizzazione
     | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | R    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/1B/documento-xlsx.xlsx"
-  Quando pagina attiva "documenti_delete" con parametri:
-    | documento |
-    | $d1:id    |
+  Quando pagina attiva "documenti_relazioni"
+  E premi pulsante "Cancella"
+  E premi pulsante "Continua"
   Allora pagina attiva "documenti_relazioni"
   E vedi la tabella:
     | classe e materia                                 | documento              | azione   |
@@ -353,9 +353,9 @@ Scenario: cancella documento 15 maggio inserito in precedenza e torna alla visua
     | id  | classe | autore  | tipo |
     | $d1 | $c1    | #logged | M    |
   E copia file "tests/data/documento-xlsx.xlsx" in "FILES/archivio/classi/5A/documento-xlsx.xlsx"
-  Quando vai alla pagina "documenti_delete" con parametri:
-    | documento |
-    | $d1:id    |
+  Quando pagina attiva "documenti_maggio"
+  E premi pulsante "Cancella"
+  E premi pulsante "Continua"
   Allora pagina attiva "documenti_maggio"
   E vedi la tabella:
     | classe                      | documento              | azione   |
@@ -394,9 +394,9 @@ Schema dello scenario: cancella documento BES inserito in precedenza e torna all
   E istanze di tipo "Documento":
     | id  | classe | alunno | tipo   |
     | $d1 | $cl1   | $a1    | <tipo> |
-  Quando vai alla pagina "documenti_delete" con parametri:
-    | documento |
-    | $d1:id    |
+  Quando pagina attiva "documenti_bes"
+  E premi pulsante "Cancella"
+  E premi pulsante "Continua"
   Allora pagina attiva "documenti_bes"
   E non vedi la tabella:
     | classe | alunno | documento | azione |
@@ -460,7 +460,7 @@ Scenario: accesso pagina cancellazione documenti senza utente
     | id  | classe | materia | autore  | tipo |
     | $d1 | $cl1   | $m1     | #logged | L    |
   E logout utente
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi la pagina "login_form"
@@ -480,7 +480,7 @@ Schema dello scenario: accesso pagina cancellazione documenti con altri utenti
     | $d1 | $cl1   | $m1     | #logged | L    |
   E logout utente
   E login utente con ruolo esatto <ruolo>
-  Quando vai alla pagina "documenti_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "documenti_delete" con parametri:
     | documento |
     | $d1:id    |
   Allora vedi errore pagina "403"

@@ -11,6 +11,7 @@ namespace App\Controller;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
 use App\Entity\Utente;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use App\Entity\Alunno;
 use App\Entity\Amministratore;
@@ -27,6 +28,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -38,6 +40,8 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 
@@ -47,6 +51,20 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  * @author Antonello Dessì
  */
 class LoginController extends BaseController {
+
+  /** Numero massimo di richieste di recupero password ogni ora per IP */
+  private const MAX_RECOVERY_ORARIE = 5;
+
+  /** Durata della finestra di throttling per il recupero password (in secondi) */
+  private const RECOVERY_FINESTRA_SECONDI = 3600;
+
+
+  public function __construct(
+      EntityManagerInterface $em,
+      RequestStack $reqstack,
+      private readonly CacheInterface $throttleCache) {
+    parent::__construct($em, $reqstack);
+  }
 
   /**
    * Login dell'utente attraverso username e password
@@ -152,6 +170,26 @@ class LoginController extends BaseController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
+      // protezione anti-enumeration e anti-bombing: massimo N richieste ogni ora per IP;
+      // la risposta mostrata e' sempre identica, a prescindere dall'esito
+      $recoveryKey = 'recovery_'.md5((string) $request->getClientIp());
+      $recoveryCount = (int) $this->throttleCache->get($recoveryKey, function (ItemInterface $item) {
+        $item->expiresAfter(self::RECOVERY_FINESTRA_SECONDI);
+        return 0;
+      });
+      if ($recoveryCount >= self::MAX_RECOVERY_ORARIE) {
+        // limite superato: risposta generica identica, nessuna operazione
+        $logger->error('Troppe richieste di recupero password dallo stesso IP.', [
+          'ip' => $request->getClientIp()]);
+        $successo = 'message.recovery_ok';
+      } else {
+      // registra la richiesta nella finestra di throttling oraria
+      $nuovoConteggio = $recoveryCount + 1;
+      $this->throttleCache->delete($recoveryKey);
+      $this->throttleCache->get($recoveryKey, function (ItemInterface $item) use ($nuovoConteggio) {
+        $item->expiresAfter(self::RECOVERY_FINESTRA_SECONDI);
+        return $nuovoConteggio;
+      });
       $email = $form->get('email')->getData();
       $utente = $this->em->getRepository(Utente::class)->findOneBy(['email' => $email, 'abilitato' => 1]);
       // legge configurazione: id_provider
@@ -159,64 +197,34 @@ class LoginController extends BaseController {
       $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
       $spid = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/spid', 'N');
       if (!$utente) {
-        // utente non esiste
+        // utente non esiste: risposta generica identica (anti-enumeration), solo log interno
         $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', [
           'email' => $email,
           'ip' => $request->getClientIp()]);
-        $errore = 'exception.invalid_recovery_email';
+        $successo = 'message.recovery_ok';
       } elseif (!$utente->getLoginSpeciale() &&
                 $spid == 'O' ||
                 (in_array($spid, ['A', 'M']) && !$utente->controllaRuolo('A')) ||
                 ($spid == 'M' && $utente->controllaRuoloFunzione('AM'))) {
-        // errore: niente recupero password se SPID/CIE obbligatorio
+        // niente recupero password se SPID/CIE obbligatorio: risposta generica
         $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
           'email' => $email,
           'ip' => $request->getClientIp()]);
-        $errore = 'exception.invalid_user_type_recovery';
+        $successo = 'message.recovery_ok';
       } elseif ($idProvider && $utente->controllaRuolo($idProviderTipo)) {
-        // errore: niente recupero password per utente su id provider
+        // niente recupero password per utente su id provider: risposta generica
         $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
           'email' => $email,
           'ip' => $request->getClientIp()]);
-        $errore = 'exception.invalid_user_type_recovery';
+        $successo = 'message.recovery_ok';
       } else {
         // effettua il recupero password
-        if ($utente instanceOf Amministratore) {
-          // amministratore
-          $num_pwdchars = 12;
-          $template_html = 'email/credenziali_recupero_ata.html.twig';
-          $template_txt = 'email/credenziali_recupero_ata.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceOf Docente) {
-          // docenti/staff/preside
-          $num_pwdchars = 10;
-          $template_html = 'email/credenziali_recupero_docenti.html.twig';
-          $template_txt = 'email/credenziali_recupero_docenti.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'Prof.' : 'Prof.ssa');
-        } elseif ($utente instanceOf Ata) {
-          // ATA
-          $num_pwdchars = 8;
-          $template_html = 'email/credenziali_recupero_ata.html.twig';
-          $template_txt = 'email/credenziali_recupero_ata.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceOf Genitore) {
-          // genitori
-          $num_pwdchars = 8;
-          $template_html = 'email/credenziali_alunni.html.twig';
-          $template_txt = 'email/credenziali_alunni.txt.twig';
-          $utente_mail = $utente->getAlunno();
-          $sesso = ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceOf Alunno) {
-          // alunni
-          $num_pwdchars = 8;
-          $template_html = 'email/credenziali_alunni.html.twig';
-          $template_txt = 'email/credenziali_alunni.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        }
+        $datiUtente = $this->datiTemplateRecupero($utente);
+        $num_pwdchars = $datiUtente['num_pwdchars'];
+        $template_html = $datiUtente['template_html'];
+        $template_txt = $datiUtente['template_txt'];
+        $utente_mail = $datiUtente['utente_mail'];
+        $sesso = $datiUtente['sesso'];
         // ok: genera password
         $password = $staff->creaPassword($num_pwdchars);
         $utente->setPasswordNonCifrata($password);
@@ -260,6 +268,7 @@ class LoginController extends BaseController {
           $errore = 'exception.error_recovery';
         }
       }
+      }
     }
     // mostra la pagina di risposta
     return $this->render('login/recovery.html.twig', [
@@ -268,6 +277,55 @@ class LoginController extends BaseController {
       'errore' => $errore,
       'successo' => $successo,
       'manutenzione' => $manutenzione]);
+  }
+
+  /**
+   * Determina i dati necessari per generare i template di recupero delle credenziali
+   * in funzione del tipo di utente che ha richiesto il recupero
+   *
+   * @param Utente $utente Utente che ha richiesto il recupero delle credenziali
+   *
+   * @return array Numero di caratteri della password, template, utente da indicare nel messaggio e sesso
+   */
+  private function datiTemplateRecupero(Utente $utente): array {
+    $dati = [];
+    if ($utente instanceof Amministratore) {
+      // amministratore
+      $dati['num_pwdchars'] = 12;
+      $dati['template_html'] = 'email/credenziali_recupero_ata.html.twig';
+      $dati['template_txt'] = 'email/credenziali_recupero_ata.txt.twig';
+      $dati['utente_mail'] = $utente;
+      $dati['sesso'] = ($utente->getSesso() == 'M' ? 'o' : 'a');
+    } elseif ($utente instanceof Docente) {
+      // docenti/staff/preside
+      $dati['num_pwdchars'] = 10;
+      $dati['template_html'] = 'email/credenziali_recupero_docenti.html.twig';
+      $dati['template_txt'] = 'email/credenziali_recupero_docenti.txt.twig';
+      $dati['utente_mail'] = $utente;
+      $dati['sesso'] = ($utente->getSesso() == 'M' ? 'Prof.' : 'Prof.ssa');
+    } elseif ($utente instanceof Ata) {
+      // ATA
+      $dati['num_pwdchars'] = 8;
+      $dati['template_html'] = 'email/credenziali_recupero_ata.html.twig';
+      $dati['template_txt'] = 'email/credenziali_recupero_ata.txt.twig';
+      $dati['utente_mail'] = $utente;
+      $dati['sesso'] = ($utente->getSesso() == 'M' ? 'o' : 'a');
+    } elseif ($utente instanceof Genitore) {
+      // genitori
+      $dati['num_pwdchars'] = 8;
+      $dati['template_html'] = 'email/credenziali_alunni.html.twig';
+      $dati['template_txt'] = 'email/credenziali_alunni.txt.twig';
+      $dati['utente_mail'] = $utente->getAlunno();
+      $dati['sesso'] = ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a');
+    } else {
+      // alunni
+      $dati['num_pwdchars'] = 8;
+      $dati['template_html'] = 'email/credenziali_alunni.html.twig';
+      $dati['template_txt'] = 'email/credenziali_alunni.txt.twig';
+      $dati['utente_mail'] = $utente;
+      $dati['sesso'] = ($utente->getSesso() == 'M' ? 'o' : 'a');
+    }
+    return $dati;
   }
 
   /**

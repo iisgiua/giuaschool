@@ -10,6 +10,7 @@ namespace App\Security;
 
 use App\Entity\AutenticazioneDispositivo;
 use App\Entity\Utente;
+use App\Exception\AutenticazioneDispositivoException;
 use App\Util\ConfigLoader;
 use App\Util\LogHandler;
 use DateTime;
@@ -17,6 +18,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -70,7 +72,7 @@ class AuthConnectAuthenticator extends AbstractAuthenticator {
    */
   public function supports(Request $request): ?bool {
     // solo se vero continua con l'autenticazione
-    return ($request->attributes->get('_route') === 'api_authConnect' && $request->isMethod('GET'));
+    return $request->attributes->get('_route') === 'api_authConnect' && $request->isMethod('GET');
   }
 
   /**
@@ -110,7 +112,7 @@ class AuthConnectAuthenticator extends AbstractAuthenticator {
         // errore: token non presente
         $this->logger->error('Connessione al registro non riuscita: token nullo.',
           ['ip' => $attributes['ip']]);
-        throw new Exception();
+        throw new AutenticazioneDispositivoException();
       }
       // controlla la richiesta di autenticazione esistente
       $autenticazione = $this->em->getRepository(AutenticazioneDispositivo::class)->trovaToken($token);
@@ -118,7 +120,7 @@ class AuthConnectAuthenticator extends AbstractAuthenticator {
         // errore: token non presente nel sistema
         $this->logger->error('Connessione al registro non riuscita: token non presente nel sistema.',
           ['ip' => $attributes['ip']]);
-        throw new Exception();
+        throw new AutenticazioneDispositivoException();
       }
       if ($autenticazione->getScadenzaToken() < new DateTimeImmutable() || $autenticazione->getTokenUsato()) {
         // errore: token scaduto o già usato
@@ -127,14 +129,14 @@ class AuthConnectAuthenticator extends AbstractAuthenticator {
           'utente' => $autenticazione->getUtente() ? $autenticazione->getUtente()->getUserIdentifier() : '---',
           'scadenza' => $autenticazione->getScadenzaToken()->format('d/m/Y H:i:s'),
           'usata' => (int) $autenticazione->getTokenUsato(), 'richiesta' => $autenticazione->getid()]);
-        throw new Exception();
+        throw new AutenticazioneDispositivoException();
       }
       // token valido: lo segna subito come usato
       $autenticazione->setTokenUsato(true);
       $this->em->flush();
       // fine transazione
       $this->em->commit();
-    } catch (Exception $e) {
+    } catch (Exception) {
       // elimina eventuali modifiche
       $this->em->rollback();
       throw new CustomUserMessageAuthenticationException('exception.api_auth.richiesta_invalida');
@@ -199,6 +201,11 @@ class AuthConnectAuthenticator extends AbstractAuthenticator {
    * @return Response|null Pagina di risposta o null per continuare la richiesta della pagina senza autenticazione
    */
   public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response {
+    // richiesta API: risposta in formato JSON
+    if ($request->attributes->get('_route') === 'api_authConnect') {
+      return new JsonResponse(['error' => 'exception.api_auth.richiesta_invalida'],
+        Response::HTTP_UNAUTHORIZED);
+    }
     // messaggio di errore
     $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
     // redirect alla pagina di login

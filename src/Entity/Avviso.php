@@ -50,7 +50,7 @@ class Avviso extends Comunicazione implements Stringable {
   private ?Materia $materia = null;
 
   /**
-   * @var Collection|null $annotazioni Annotazioni associate all'avviso (solo per alcuni tipi di avviso)
+   * @var Collection<int, Annotazione> $annotazioni Annotazioni associate all'avviso (solo per alcuni tipi di avviso)
    */
   #[ORM\OneToMany(targetEntity: Annotazione::class, mappedBy: 'avviso')]
   private ?Collection $annotazioni;
@@ -63,7 +63,7 @@ class Avviso extends Comunicazione implements Stringable {
   private ?string $testo = '';
 
   /**
-   * @var string $sostituzioni Array associativo con le variabili segnaposto e il testo sostitutivo
+   * @var array $sostituzioni Array associativo con le variabili segnaposto e il testo sostitutivo
    */
   #[ORM\Column(type: Types::JSON, nullable: false)]
   private array $sostituzioni = [];
@@ -137,7 +137,7 @@ class Avviso extends Comunicazione implements Stringable {
   /**
    * Restituisce le annotazioni associate all'avviso (solo per alcuni tipi di avviso)
    *
-   * @return Collection|null Annotazioni associate all'avviso
+   * @return Collection<int, Annotazione> Annotazioni associate all'avviso
    */
   public function getAnnotazioni(): ?Collection {
     return $this->annotazioni;

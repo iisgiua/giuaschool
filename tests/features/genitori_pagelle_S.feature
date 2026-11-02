@@ -34,7 +34,7 @@ Scenario: pagina dati con visualizzazione abilitata
     | S       |
   Allora la sezione "#gs-main table caption" contiene "Secondo Trimestre"
   E la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat()"
-  E la sezione "#gs-main table:nth-child(4) caption" contiene "Scrutinio del Secondo Trimestre"
+  E la sezione "#gs-main table#gs-pagella-voti caption" contiene "Scrutinio del Secondo Trimestre"
   E vedi la tabella "1":
     | Materia                     |	Voto                                             | Ore di assenza       |
     | @materia_RELIGIONE:nome     |	--                                               |                      |
@@ -46,7 +46,7 @@ Scenario: pagina dati con visualizzazione abilitata
     | @materia_curricolare_5:nome |	#cas(@voto_S_1A_4:unico,0,NC,@voto_S_1A_4:unico) | @voto_S_1A_4:assenze |
     | @materia_EDCIVICA:nome      |	#cas(@voto_S_1A_6:unico,2,NC,@voto_S_1A_6:unico) | @voto_S_1A_6:assenze |
     | @materia_CONDOTTA:nome      |	#cas(@voto_S_1A_7:unico,4,NC,@voto_S_1A_7:unico) |                      |
-  E la sezione "#gs-main table:nth-child(5) caption" contiene "Recupero dei debiti formativi"
+  E la sezione "#gs-main table#gs-pagella-debiti caption" contiene "Recupero dei debiti formativi"
   E vedi la tabella "2":
     | Materia                     |	Argomenti da recuperare | Modalità di recupero |
     | @materia_curricolare_1:nome | Argomento               | Studio individuale   |
@@ -112,7 +112,7 @@ Scenario: pagina dati con visualizzazione abilitata per la classe articolata
     | S       |
   Allora la sezione "#gs-main table caption" contiene "Secondo Trimestre"
   E la sezione "#gs-main div:nth-child(3)" contiene "#str(Presa) #str(visione) #dat()"
-  E la sezione "#gs-main table:nth-child(4) caption" contiene "Scrutinio del Secondo Trimestre"
+  E la sezione "#gs-main table#gs-pagella-voti caption" contiene "Scrutinio del Secondo Trimestre"
   E vedi la tabella "1":
     | Materia                     |	Voto                                                   | Ore di assenza          |
     | @materia_RELIGIONE:nome     |	--                                                     |                         |
@@ -124,7 +124,7 @@ Scenario: pagina dati con visualizzazione abilitata per la classe articolata
     | @materia_curricolare_5:nome |	#cas(@voto_S_3CAMB_4:unico,0,NC,@voto_S_3CAMB_4:unico) | @voto_S_3CAMB_4:assenze |
     | @materia_EDCIVICA:nome      |	#cas(@voto_S_3CAMB_6:unico,2,NC,@voto_S_3CAMB_6:unico) | @voto_S_3CAMB_6:assenze |
     | @materia_CONDOTTA:nome      |	#cas(@voto_S_3CAMB_7:unico,4,NC,@voto_S_3CAMB_7:unico) |                         |
-  E la sezione "#gs-main table:nth-child(5) caption" contiene "Recupero dei debiti formativi"
+  E la sezione "#gs-main table#gs-pagella-debiti caption" contiene "Recupero dei debiti formativi"
   E vedi la tabella "2":
     | Materia                     |	Argomenti da recuperare | Modalità di recupero |
     | @materia_curricolare_1:nome | Argomento               | Studio individuale   |

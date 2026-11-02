@@ -1,0 +1,443 @@
+####################
+# DemoCoperturaFixtures - dati demo per la copertura completa degli utenti
+#
+# Completa i dati per gli alunni di sostegno/attività alternativa, per i docenti
+# rimanenti e per tutti i genitori, così che nessun utente resti senza contenuti.
+####################
+
+
+App\Entity\Cattedra:
+
+  cattedra_demo_A_{1..5}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_curricolare_<current()>'
+    docente: '@docente_curricolare_<current()>'
+    classe: '@classe_<($current . "A")>'
+    alunno:
+    docenteSupplenza:
+  cattedra_demo_A_itp_{1..5}:
+    attiva: true
+    supplenza: false
+    tipo: 'I'
+    materia: '@materia_itp_<current()>'
+    docente: '@docente_itp_<current()>'
+    classe: '@classe_<($current . "A")>'
+    alunno:
+    docenteSupplenza:
+  cattedra_demo_B_{1..5}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_curricolare_<current()>'
+    docente: '@docente_curricolare_<current()>'
+    classe: '@classe_<($current . "B")>'
+    alunno:
+    docenteSupplenza:
+  cattedra_demo_B_itp_{1..5}:
+    attiva: true
+    supplenza: false
+    tipo: 'I'
+    materia: '@materia_itp_<current()>'
+    docente: '@docente_itp_<current()>'
+    classe: '@classe_<($current . "B")>'
+    alunno:
+    docenteSupplenza:
+  cattedra_demo_C_{1..2}:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_curricolare_<current()>'
+    docente: '@docente_curricolare_<current()>'
+    classe: '@classe_<($current . "C")>'
+    alunno:
+    docenteSupplenza:
+  cattedra_demo_3C:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_curricolare_1'
+    docente: '@docente_curricolare_1'
+    classe: '@classe_3C'
+    alunno:
+    docenteSupplenza:
+  cattedra_demo_3CAMB:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_curricolare_2'
+    docente: '@docente_curricolare_2'
+    classe: '@classe_3CAMB'
+    alunno:
+    docenteSupplenza:
+  cattedra_demo_3CCHI:
+    attiva: true
+    supplenza: false
+    tipo: 'N'
+    materia: '@materia_curricolare_3'
+    docente: '@docente_curricolare_3'
+    classe: '@classe_3CCHI'
+    alunno:
+    docenteSupplenza:
+
+
+App\Entity\Lezione:
+
+  lezione_demo_3C_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: 8
+    classe: '@classe_3C'
+    materia: '@materia_curricolare_<current()>'
+    argomento: '<paragraph(2, false)>'
+    attivita: '<paragraph(2, false)>'
+    gruppo:
+    tipoGruppo: 'N'
+    moduloFormativo:
+    sostituzione: false
+
+
+App\Entity\Valutazione:
+
+  valutazione_demo_sostegno_{1..4}:
+    tipo: 'O'
+    visibile: true
+    media: true
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_sostegno_<current()>'
+    alunno: '@alunno_sostegno_<current()>'
+    lezione: '@lezione_demo_sostegno_<current()>'
+    materia: '<($lezione->getMateria())>'
+
+  valutazione_demo_alternativa_1:
+    tipo: 'O'
+    visibile: true
+    media: true
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_1'
+    alunno: '@alunno_alternativa_1'
+    lezione: '@lezione_demo_A2_1'
+    materia: '<($lezione->getMateria())>'
+
+
+App\Entity\Assenza:
+
+  assenza_demo_sostegno_{1..4}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    giustificato: '50%? <dateTimeBetween($data, "2027-06-05")>'
+    motivazione: '<sentence(3)>'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_sostegno_<current()>'
+    docente: '@docente_sostegno_<current()>'
+    docenteGiustifica: '@docente_sostegno_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+  assenza_demo_alternativa_1:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    giustificato: '50%? <dateTimeBetween($data, "2027-06-05")>'
+    motivazione: '<sentence(3)>'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_alternativa_1'
+    docente: '@docente_curricolare_1'
+    docenteGiustifica: '@docente_curricolare_1'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+
+App\Entity\Entrata:
+
+  entrata_demo_sostegno_{1..4}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("08:30", "10:30")>'
+    ritardoBreve: '<boolean(50)>'
+    note: '50%? <paragraph(1, true)>: <strval("")>'
+    valido: '<boolean(50)>'
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_sostegno_<current()>'
+    docente: '@docente_sostegno_<current()>'
+    docenteGiustifica: '@docente_sostegno_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+
+App\Entity\Uscita:
+
+  uscita_demo_sostegno_{1..4}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("10:00", "12:00")>'
+    note: '50%? <text()>: <strval("")>'
+    valido: '<boolean(50)>'
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_sostegno_<current()>'
+    docente: '@docente_sostegno_<current()>'
+    docenteGiustifica: '@docente_sostegno_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+
+App\Entity\Nota:
+
+  nota_demo_sostegno_1:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_1A'
+    docente: '@docente_sostegno_1'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_sostegno_1)>'
+  nota_demo_sostegno_2:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_1A'
+    docente: '@docente_sostegno_2'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_sostegno_2)>'
+  nota_demo_sostegno_3:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_3CCHI'
+    docente: '@docente_sostegno_3'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_sostegno_3)>'
+  nota_demo_sostegno_4:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_3CAMB'
+    docente: '@docente_sostegno_4'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_sostegno_4)>'
+
+  nota_demo_alternativa_1:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_1A'
+    docente: '@docente_curricolare_1'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_alternativa_1)>'
+
+
+App\Entity\Colloquio:
+
+  colloquio_demo_religione_{1..5}:
+    docente: '@docente_religione_<current()>'
+    sede: '<randomElement([@sede_1, @sede_2])>'
+    data: '<dateTimeBetween("2026-11-01", "2027-05-30")>'
+    inizio: '<dateTimeBetween("08:30", "13:00")>'
+    fine: '<dateTimeBetween("13:00", "18:00")>'
+    tipo: 'P'
+    luogo: 'Aula docenti'
+    durata: '<numberBetween(5, 30)>'
+    numero: '<numberBetween(2, 6)>'
+    abilitato: true
+
+  colloquio_demo_sostegno_{1..5}:
+    docente: '@docente_sostegno_<current()>'
+    sede: '<randomElement([@sede_1, @sede_2])>'
+    data: '<dateTimeBetween("2026-11-01", "2027-05-30")>'
+    inizio: '<dateTimeBetween("08:30", "13:00")>'
+    fine: '<dateTimeBetween("13:00", "18:00")>'
+    tipo: 'D'
+    luogo: 'https://meet.example.org/demo-<current()>'
+    durata: '<numberBetween(5, 30)>'
+    numero: '<numberBetween(2, 6)>'
+    abilitato: true
+
+  colloquio_demo_nocattedra_{1..5}:
+    docente: '@docente_nocattedra_<current()>'
+    sede: '<randomElement([@sede_1, @sede_2])>'
+    data: '<dateTimeBetween("2026-11-01", "2027-05-30")>'
+    inizio: '<dateTimeBetween("08:30", "13:00")>'
+    fine: '<dateTimeBetween("13:00", "18:00")>'
+    tipo: 'P'
+    luogo: 'Aula magna'
+    durata: '<numberBetween(5, 30)>'
+    numero: '<numberBetween(2, 6)>'
+    abilitato: true
+
+
+App\Entity\RichiestaColloquio:
+
+  richiesta_colloquio_demo_g1A_1_{1..5}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore1_<($current . "A_1")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: '<randomElement(["R", "C", "N"])>'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_g1A_2_{1..5}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore1_<($current . "A_2")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: '<randomElement(["R", "C", "N"])>'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_g2A_1_{1..5}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore2_<($current . "A_1")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: '<randomElement(["R", "C", "N"])>'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_g2A_2_{1..5}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore2_<($current . "A_2")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: '<randomElement(["R", "C", "N"])>'
+    messaggio: '<strval("")>'
+
+  richiesta_colloquio_demo_g1B_1_{1..5}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore1_<($current . "B_1")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: '<randomElement(["R", "C", "N"])>'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_g1B_2_{1..5}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore1_<($current . "B_2")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: '<randomElement(["R", "C", "N"])>'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_g2B_1_{1..5}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore2_<($current . "B_1")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: '<randomElement(["R", "C", "N"])>'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_g2B_2_{1..5}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore2_<($current . "B_2")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: '<randomElement(["R", "C", "N"])>'
+    messaggio: '<strval("")>'
+
+  richiesta_colloquio_demo_g1C_1_{1..2}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore1_<($current . "C_1")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_g1C_2_{1..2}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore1_<($current . "C_2")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_g2C_1_{1..2}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore2_<($current . "C_1")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_g2C_2_{1..2}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore2_<($current . "C_2")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+
+  richiesta_colloquio_demo_speciale_1:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_sostegno_1'
+    genitore: '@genitore1_3CAMB_1'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_speciale_2:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_sostegno_2'
+    genitore: '@genitore2_3CAMB_1'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_speciale_3:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_sostegno_3'
+    genitore: '@genitore1_3CCHI_1'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_speciale_4:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_sostegno_4'
+    genitore: '@genitore2_3CCHI_1'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_speciale_5:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_sostegno_1'
+    genitore: '@genitore1_sostegno_1'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_speciale_6:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_sostegno_2'
+    genitore: '@genitore2_sostegno_1'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_speciale_7:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_1'
+    genitore: '@genitore1_alternativa_1'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'
+  richiesta_colloquio_demo_speciale_8:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_1'
+    genitore: '@genitore2_alternativa_1'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: 'R'
+    messaggio: '<strval("")>'

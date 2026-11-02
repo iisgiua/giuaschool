@@ -5,8 +5,8 @@
   <strong>CLASSE {{ dati.classe }} {{ dati.classe.corso.nomeBreve }} - {{ dati.classe.sede.citta }}</strong>
 </p>
 <div style="text-align:justify;font-family:times;font-size:11pt">
-{% for num,str in dati.definizione.struttura %}
-{#============================== SCRUTINIO INIZIO ==============================#}
+{% for num, str in dati.definizione.struttura %}
+{# ============================== SCRUTINIO INIZIO ============================== #}
   {% if str[0] == 'ScrutinioInizio' %}
   <p>Il giorno {{ dati.scrutinio.data|date('j') }}
     del mese di {{ dati.nomi_mesi[dati.scrutinio.data|date('n')] }} dell'anno {{ dati.scrutinio.data|date('Y') }}
@@ -17,7 +17,7 @@
     il Consiglio di Classe della {{ dati.classe }} per discutere il seguente Ordine del Giorno:
   </p>
   <ol>
-    {% for num,arg in dati.definizione.argomenti %}
+    {% for num, arg in dati.definizione.argomenti %}
     <li><strong>{{ arg }}{{ loop.last ? '.' : ';' }}</strong></li>
     {% endfor %}
   </ol>
@@ -29,36 +29,36 @@
       <td width="40%" align="center"><strong>DOCENTE</strong></td>
       <td width="60%" align="center"><strong>MATERIA</strong></td>
     </tr>
-    {% set assenti=0 %}
-    {% for kdoc,doc in dati.scrutinio.dati.presenze %}
+    {% set assenti = 0 %}
+    {% for kdoc, doc in dati.scrutinio.dati.presenze %}
       {% if doc.presenza %}
     <tr>
       <td>{{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}</td>
       <td align="left">
-        {% for kv,v in dati.docenti[doc.docente].materie %}
+        {% for kv, v in dati.docenti[doc.docente].materie %}
         <br>&bull; {{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}
         {% endfor %}
       </td>
     </tr>
       {% else %}
-        {% set assenti=assenti+1 %}
+        {% set assenti = assenti + 1 %}
       {% endif %}
     {% endfor %}
   </table>
     {% if assenti %}
   <p>Sono assenti i seguenti docenti:</p>
   <ul>
-      {% for kdoc,doc in dati.scrutinio.dati.presenze %}
+      {% for kdoc, doc in dati.scrutinio.dati.presenze %}
         {% if not doc.presenza %}
-          {% set assenti=assenti-1 %}
-    <li>{{ dati.docenti[doc.docente].sesso == 'M' ? 'Prof.' : 'Prof.ssa'}}
+          {% set assenti = assenti - 1 %}
+    <li>{{ dati.docenti[doc.docente].sesso == 'M' ? 'Prof.' : 'Prof.ssa' }}
       {{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}
-      sostituit{{ dati.docenti[doc.docente].sesso == 'M' ? 'o' : 'a'}}
+      sostituit{{ dati.docenti[doc.docente].sesso == 'M' ? 'o' : 'a' }}
       con nomina del Dirigente Scolastico
       (prot. n. {{ doc.surrogaProtocollo }} del {{ doc.surrogaData|date('d/m/Y') }})
       dal{{ doc.sessoSostituto == 'M' ? ' Prof.' : 'la Prof.ssa' }}
       {{ doc.sostituto|title }} per
-      {% for kv,v in dati.docenti[doc.docente].materie %}{{ not loop.first ? ', '}}{{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}{% endfor %}{{ assenti > 0 ? ';' : '.' }}
+      {% for kv, v in dati.docenti[doc.docente].materie %}{{ not loop.first ? ', ' }}{{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}{% endfor %}{{ assenti > 0 ? ';' : '.' }}
     </li>
         {% endif %}
       {% endfor %}
@@ -71,7 +71,7 @@
     dichiarando aperta la seduta e procedendo con la trattazione dei punti all'ordine del giorno.
   </p>
   <p>&nbsp;</p>
-{#============================== SCRUTINIO SVOLGIMENTO ==============================#}
+{# ============================== SCRUTINIO SVOLGIMENTO ============================== #}
   {% elseif str[0] == 'ScrutinioSvolgimento' %}
   <p><strong>{{ str[2]['sezione'] }}. {{ dati.definizione.argomenti[str[2]['argomento']] }}.</strong></p>
   <p>Preliminarmente, per ciascun alunno, viene deliberato il voto di Educazione Civica, su proposta del Coordinatore,
@@ -84,7 +84,7 @@
       <td width="48%" align="center"><strong>Descrittori</strong></td>
       <td width="16%" align="center"><strong>Delibera</strong></td>
     </tr>
-    {% for kalu,alu in dati.alunni %}
+    {% for kalu, alu in dati.alunni %}
     <tr>
       <td align="left">{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</td>
       <td align="center">{{ dati.scrutinio.dati.valutazioni['C'].lista[dati.voti[kalu].unico] }}</td>
@@ -105,7 +105,7 @@
     I voti proposti sono approvati all'unanimità.</p>
   <p>Il riepilogo dei voti deliberati per ciascun alunno viene allegato al presente verbale, di cui fa parte integrante.</p>
   <p>&nbsp;</p>
-{#============================== ARGOMENTO ==============================#}
+{# ============================== ARGOMENTO ============================== #}
   {% elseif str[0] == 'Argomento' %}
   <p><strong>{{ str[2]['sezione'] }}. {{ dati.definizione.argomenti[str[2]['argomento']] }}</strong></p>
     {% if dati.scrutinio.dati.argomento[str[2]['argomento']] is not empty %}
@@ -119,7 +119,7 @@
   <p>{{ str[2]['fine']|nl2br }}</p>
     {% endif %}
   <p>&nbsp;</p>
-{#============================== SCRUTINIO FINE ==============================#}
+{# ============================== SCRUTINIO FINE ============================== #}
   {% elseif str[0] == 'ScrutinioFine' %}
   <p>Esaurito l'ordine del giorno, il Presidente rammenta ai presenti l'obbligo della stretta osservanza
     del segreto d'ufficio.</p>
@@ -130,7 +130,7 @@
   <p>&nbsp;</p>
   {% endif %}
 {% endfor %}
-{#============================== FIRMA ==============================#}
+{# ============================== FIRMA ============================== #}
   <table border="0" cellpadding="3" nobr="true">
     <tr nobr="true">
       <td width="45%" align="center">Il Segretario</td>

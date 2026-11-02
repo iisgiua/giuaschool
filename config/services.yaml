@@ -45,9 +45,21 @@ services:
   # explicit commands registration
   App\Command\:
     resource: '../src/Command/*'
+    # il comando delle fixture richiede Faker e Alice, disponibili solo in dev e test
+    exclude: '../src/Command/AliceLoadCommand.php'
     tags:
       - { name: console.command }
       - { name: monolog.logger, channel: command }
+
+  # necessario per passare il segreto in uso al comando di rotazione
+  App\Command\AppSecretCommand:
+    arguments:
+      $appSecret: '%env(APP_SECRET)%'
+
+  # necessario per specificare il renderer predefinito degli errori del framework
+  App\Controller\ErrorController:
+    arguments:
+      $errorRenderer: '@error_renderer'
 
   # necessario per evitare warning di servizio deprecato
   App\Util\CsvImporter:

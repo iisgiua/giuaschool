@@ -56,7 +56,7 @@ class CattedraTest extends EntityTestCase {
     // verifica inizializzazione
     foreach (array_merge($this->fields, $this->noStoredFields, $this->generatedFields) as $field) {
       $this->assertTrue($obj->{'get'.ucfirst((string) $field)}() === null || $obj->{'get'.ucfirst((string) $field)}() !== null,
-        $this->entity.' - Initializated');
+        $this->entity.' - Initialized');
     }
   }
 
@@ -93,7 +93,6 @@ class CattedraTest extends EntityTestCase {
         $data[$i][$field] = $o[$i]->{'get'.ucfirst((string) $field)}();
       }
       // controlla dati dopo l'aggiornamento
-      sleep(1);
       $data[$i]['materia'] = $this->getReference("materia_curricolare_2");
       $o[$i]->setMateria($data[$i]['materia']);
       $this->em->flush();

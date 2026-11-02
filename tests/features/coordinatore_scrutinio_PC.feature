@@ -103,7 +103,7 @@ Scenario: controllo riepilogo dei voti
   E vedi testo "#str(Ass.) @voto_P_1A_36:assenze @voto_P_1A_30:assenze @voto_P_1A_31:assenze @voto_P_1A_32:assenze @voto_P_1A_33:assenze @voto_P_1A_35:assenze @voto_P_1A_34:assenze @voto_P_1A_37:assenze #med(@voto_P_1A_30:unico,@voto_P_1A_31:unico,@voto_P_1A_32:unico,@voto_P_1A_33:unico,@voto_P_1A_34:unico,@voto_P_1A_35:unico,@voto_P_1A_37:unico,@voto_P_1A_38:unico)" in PDF analizzato in una riga
   E vedi testo "@alunno_alternativa_1:cognome #str(Voto) #cas(@voto_P_1A_46:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) #cas(@voto_P_1A_40:unico,0,NC,@voto_P_1A_40:unico) #cas(@voto_P_1A_41:unico,0,NC,@voto_P_1A_41:unico) #cas(@voto_P_1A_42:unico,0,NC,@voto_P_1A_42:unico) #cas(@voto_P_1A_43:unico,0,NC,@voto_P_1A_43:unico) #cas(@voto_P_1A_45:unico,0,NC,@voto_P_1A_45:unico) #cas(@voto_P_1A_44:unico,0,NC,@voto_P_1A_44:unico) #cas(@voto_P_1A_47:unico,2,NC,@voto_P_1A_47:unico) #cas(@voto_P_1A_48:unico,4,NC,@voto_P_1A_48:unico)" in PDF analizzato in una riga
   E vedi testo "#str(Ass.) @voto_P_1A_46:assenze @voto_P_1A_40:assenze @voto_P_1A_41:assenze @voto_P_1A_42:assenze @voto_P_1A_43:assenze @voto_P_1A_45:assenze @voto_P_1A_44:assenze @voto_P_1A_47:assenze #med(@voto_P_1A_40:unico,@voto_P_1A_41:unico,@voto_P_1A_42:unico,@voto_P_1A_43:unico,@voto_P_1A_44:unico,@voto_P_1A_45:unico,@voto_P_1A_47:unico,@voto_P_1A_48:unico)" in PDF analizzato in una riga
-  E vedi testo "?#str(Bianchi)+ Maria?@docente_curricolare_2:cognome+ +@docente_curricolare_2:nome?@docente_curricolare_3:cognome+ +@docente_curricolare_3:nome?@docente_curricolare_4:cognome+ +@docente_curricolare_4:nome?@docente_curricolare_5:cognome+ +@docente_curricolare_5:nome?@docente_religione_1:cognome+ +@docente_religione_1:nome?@docente_itp_1:cognome+ +@docente_itp_1:nome?@docente_itp_2:cognome+ +@docente_itp_2:nome?@docente_sostegno_1:cognome+ +@docente_sostegno_1:nome?@docente_sostegno_2:cognome+ +@docente_sostegno_2:nome?@docente_nocattedra_1:cognome+ +@docente_nocattedra_1:nome" in PDF analizzato in "7" righe
+  E vedi testo "?#str(Bianchi)?@docente_curricolare_2:cognome?@docente_curricolare_3:cognome?@docente_curricolare_4:cognome?@docente_curricolare_5:cognome?@docente_religione_1:cognome?@docente_itp_1:cognome?@docente_itp_2:cognome?@docente_sostegno_1:cognome?@docente_sostegno_2:cognome?@docente_nocattedra_1:cognome" in PDF analizzato
   E vedi poi testo "/Data +01\/01\/2020 +Il Presidente +\(Prof.ssa Bianchi Maria\)/" in PDF analizzato in "2" righe
 
 Scenario: controllo riepilogo dei voti per la classe articolata
@@ -119,7 +119,7 @@ Scenario: controllo riepilogo dei voti per la classe articolata
   E vedi testo "#str(Ass.) @voto_P_3CAMB_15:assenze @voto_P_3CAMB_10:assenze @voto_P_3CAMB_11:assenze @voto_P_3CAMB_12:assenze @voto_P_3CAMB_13:assenze @voto_P_3CAMB_16:assenze @voto_P_3CAMB_14:assenze @voto_P_3CAMB_17:assenze #med(@voto_P_3CAMB_10:unico,@voto_P_3CAMB_11:unico,@voto_P_3CAMB_12:unico,@voto_P_3CAMB_13:unico,@voto_P_3CAMB_14:unico,@voto_P_3CAMB_16:unico,@voto_P_3CAMB_17:unico,@voto_P_3CAMB_18:unico)" in PDF analizzato in una riga
   E vedi testo "@alunno_sostegno_4:cognome,nome #str(Voto) #cas(@voto_P_3CAMB_25:unico,20:21:22:23:24:25:26:27,NC:Insufficiente:Mediocre:Sufficiente:Discreto:Buono:Distinto:Ottimo,0) #cas(@voto_P_3CAMB_20:unico,0,NC,@voto_P_3CAMB_20:unico) #cas(@voto_P_3CAMB_21:unico,0,NC,@voto_P_3CAMB_21:unico) #cas(@voto_P_3CAMB_22:unico,0,NC,@voto_P_3CAMB_22:unico) #cas(@voto_P_3CAMB_23:unico,0,NC,@voto_P_3CAMB_23:unico) #cas(@voto_P_3CAMB_26:unico,0,NC,@voto_P_3CAMB_26:unico) #cas(@voto_P_3CAMB_24:unico,0,NC,@voto_P_3CAMB_24:unico) #cas(@voto_P_3CAMB_27:unico,2,NC,@voto_P_3CAMB_27:unico) #cas(@voto_P_3CAMB_28:unico,4,NC,@voto_P_3CAMB_28:unico)" in PDF analizzato in una riga
   E vedi testo "#dat(@alunno_sostegno_4:dataNascita) #str(Ass.) @voto_P_3CAMB_25:assenze @voto_P_3CAMB_20:assenze @voto_P_3CAMB_21:assenze @voto_P_3CAMB_22:assenze @voto_P_3CAMB_23:assenze @voto_P_3CAMB_26:assenze @voto_P_3CAMB_24:assenze @voto_P_3CAMB_27:assenze #med(@voto_P_3CAMB_20:unico,@voto_P_3CAMB_21:unico,@voto_P_3CAMB_22:unico,@voto_P_3CAMB_23:unico,@voto_P_3CAMB_24:unico,@voto_P_3CAMB_26:unico,@voto_P_3CAMB_27:unico,@voto_P_3CAMB_28:unico)" in PDF analizzato in una riga
-  E vedi testo "?@docente_curricolare_1:cognome+ +@docente_curricolare_1:nome?@docente_curricolare_2:cognome+ +@docente_curricolare_2:nome?@docente_curricolare_3:cognome+ +@docente_curricolare_3:nome?@docente_curricolare_4:cognome+ +@docente_curricolare_4:nome?@docente_curricolare_5:cognome+ +@docente_curricolare_5:nome?@docente_religione_1:cognome+ +@docente_religione_1:nome?@docente_itp_2:cognome+ +@docente_itp_2:nome" in PDF analizzato in "5" righe
+  E vedi testo "?@docente_curricolare_1:cognome?@docente_curricolare_2:cognome?@docente_curricolare_3:cognome?@docente_curricolare_4:cognome?@docente_curricolare_5:cognome?@docente_religione_1:cognome?@docente_itp_2:cognome" in PDF analizzato
   E vedi poi testo "#str(Data) #str(01/01/2020) #str(Presidente) @preside:nome,cognome" in PDF analizzato in "2" righe
 
 Scenario: controllo foglio firme registro dei voti
@@ -129,14 +129,14 @@ Scenario: controllo foglio firme registro dei voti
   Quando click su "Scarica" in sezione "#gs-main table tbody tr" che contiene "Foglio firme Registro dei voti"
   E analizzi PDF "archivio/scrutini/primo/1A/1A-firme-registro-primo-quadrimestre.pdf"
   Allora vedi testo "/FOGLIO FIRME REGISTRO +CLASSE 1ª A/" in PDF analizzato alla riga "1"
-  E vedi testo "@materia_curricolare_1:nome @materia_EDCIVICA:nome #str(Bianchi) #str(Maria)" in PDF analizzato in una riga
-  E vedi testo "@materia_curricolare_2:nome @materia_EDCIVICA:nome @docente_curricolare_2:cognome,nome" in PDF analizzato in una riga
-  E vedi testo "@materia_curricolare_3:nome @materia_EDCIVICA:nome @docente_curricolare_3:cognome,nome" in PDF analizzato in una riga
-  E vedi testo "@materia_curricolare_4:nome @materia_EDCIVICA:nome @docente_curricolare_4:cognome,nome" in PDF analizzato in una riga
-  E vedi testo "@materia_curricolare_5:nome @materia_EDCIVICA:nome @docente_curricolare_5:cognome,nome" in PDF analizzato in una riga
-  E vedi testo "#str(Religione) #str(Educazione)?@docente_religione_1:cognome?@docente_nocattedra_1:cognome" in PDF analizzato in "2" righe
-  E vedi testo "@materia_itp_1:nome+, +@materia_EDCIVICA:nome?@docente_itp_1:cognome+ +@docente_itp_1:nome?@docente_itp_2:cognome" in PDF analizzato in una riga
-  E vedi testo "@materia_SOSTEGNO:nome+, +@materia_EDCIVICA:nome?@docente_sostegno_1:cognome?@docente_sostegno_2:cognome" in PDF analizzato in una riga
+  E vedi testo "@materia_curricolare_1:nome @materia_EDCIVICA:nome #str(Bianchi) #str(Maria)" in PDF analizzato in "3" righe
+  E vedi testo "@materia_curricolare_2:nome @materia_EDCIVICA:nome @docente_curricolare_2:cognome,nome" in PDF analizzato in "3" righe
+  E vedi testo "@materia_curricolare_3:nome @materia_EDCIVICA:nome @docente_curricolare_3:cognome,nome" in PDF analizzato in "3" righe
+  E vedi testo "@materia_curricolare_4:nome @materia_EDCIVICA:nome @docente_curricolare_4:cognome,nome" in PDF analizzato in "3" righe
+  E vedi testo "@materia_curricolare_5:nome @materia_EDCIVICA:nome @docente_curricolare_5:cognome,nome" in PDF analizzato in "3" righe
+  E vedi testo "#str(Religione) #str(Educazione)?@docente_religione_1:cognome?@docente_nocattedra_1:cognome" in PDF analizzato in "3" righe
+  E vedi testo "@materia_itp_1:nome+, +@materia_EDCIVICA:nome?@docente_itp_1:cognome+ +@docente_itp_1:nome?@docente_itp_2:cognome" in PDF analizzato in "3" righe
+  E vedi testo "@materia_SOSTEGNO:nome+, +@materia_EDCIVICA:nome?@docente_sostegno_1:cognome?@docente_sostegno_2:cognome" in PDF analizzato in "3" righe
 
 Scenario: controllo foglio firme registro dei voti per la classe articolata
   Data pagina attiva "coordinatore_scrutinio" con parametri:
@@ -145,13 +145,13 @@ Scenario: controllo foglio firme registro dei voti per la classe articolata
   Quando click su "Scarica" in sezione "#gs-main table tbody tr" che contiene "Foglio firme Registro dei voti"
   E analizzi PDF "archivio/scrutini/primo/3CAMB/3CAMB-firme-registro-primo-quadrimestre.pdf"
   Allora vedi testo "/FOGLIO FIRME REGISTRO +CLASSE 3ª C-AMB/" in PDF analizzato alla riga "1"
-  E vedi testo "@materia_curricolare_1:nome @materia_EDCIVICA:nome @docente_curricolare_1:cognome,nome" in PDF analizzato in una riga
-  E vedi testo "@materia_curricolare_2:nome @materia_EDCIVICA:nome @docente_curricolare_2:cognome,nome" in PDF analizzato in una riga
-  E vedi testo "@materia_curricolare_3:nome @materia_EDCIVICA:nome @docente_curricolare_3:cognome,nome" in PDF analizzato in una riga
-  E vedi testo "@materia_curricolare_4:nome @materia_EDCIVICA:nome @docente_curricolare_4:cognome,nome" in PDF analizzato in una riga
-  E vedi testo "@materia_curricolare_5:nome @materia_EDCIVICA:nome @docente_curricolare_5:cognome,nome" in PDF analizzato in una riga
-  E vedi testo "#str(Religione) #str(Educazione)?@docente_religione_1:cognome+ +@docente_religione_1:nome" in PDF analizzato in una riga
-  E vedi testo "@materia_itp_2:nome @materia_EDCIVICA:nome @docente_itp_2:cognome,nome" in PDF analizzato in una riga
+  E vedi testo "@materia_curricolare_1:nome @materia_EDCIVICA:nome @docente_curricolare_1:cognome,nome" in PDF analizzato in "3" righe
+  E vedi testo "@materia_curricolare_2:nome @materia_EDCIVICA:nome @docente_curricolare_2:cognome,nome" in PDF analizzato in "3" righe
+  E vedi testo "@materia_curricolare_3:nome @materia_EDCIVICA:nome @docente_curricolare_3:cognome,nome" in PDF analizzato in "3" righe
+  E vedi testo "@materia_curricolare_4:nome @materia_EDCIVICA:nome @docente_curricolare_4:cognome,nome" in PDF analizzato in "3" righe
+  E vedi testo "@materia_curricolare_5:nome @materia_EDCIVICA:nome @docente_curricolare_5:cognome,nome" in PDF analizzato in "3" righe
+  E vedi testo "#str(Religione) #str(Educazione)?@docente_religione_1:cognome+ +@docente_religione_1:nome" in PDF analizzato in "3" righe
+  E vedi testo "@materia_itp_2:nome @materia_EDCIVICA:nome @docente_itp_2:cognome,nome" in PDF analizzato in "3" righe
 
 Scenario: controllo verbale
   Data pagina attiva "coordinatore_scrutinio" con parametri:

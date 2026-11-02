@@ -1,0 +1,169 @@
+####################
+# DemoPresenzeFixtures - dati demo per assenze, entrate, uscite e presenze
+#
+# Popola le pagine di rilevazione presenze di tutte le classi. Le date sono
+# comprese nell'anno scolastico configurato (2022/2023).
+####################
+
+
+App\Entity\Assenza:
+
+  assenza_demo_A_{1..5}_1:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    giustificato: '50%? <dateTimeBetween($data, "2027-06-05")>'
+    motivazione: '<sentence(3)>'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_<($current . "A_1")>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica: '50%? @docente_curricolare_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+  assenza_demo_A_{1..5}_2:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    giustificato:
+    motivazione: ''
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_<($current . "A_2")>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica:
+    utenteGiustifica:
+
+  assenza_demo_B_{1..5}_1:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    giustificato: '50%? <dateTimeBetween($data, "2027-06-05")>'
+    motivazione: '<sentence(3)>'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_<($current . "B_1")>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica: '50%? @docente_curricolare_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+  assenza_demo_B_{1..5}_2:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    giustificato:
+    motivazione: ''
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_<($current . "B_2")>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica:
+    utenteGiustifica:
+
+  assenza_demo_C_{1..2}_1:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    giustificato: '50%? <dateTimeBetween($data, "2027-06-05")>'
+    motivazione: '<sentence(3)>'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_<($current . "C_1")>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica: '50%? @docente_curricolare_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+  assenza_demo_3CAMB_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    giustificato: '50%? <dateTimeBetween($data, "2027-06-05")>'
+    motivazione: '<sentence(3)>'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_3CAMB_<current()>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica: '50%? @docente_curricolare_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+  assenza_demo_3CCHI_{1..2}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    giustificato: '50%? <dateTimeBetween($data, "2027-06-05")>'
+    motivazione: '<sentence(3)>'
+    dichiarazione: '<(array())>'
+    certificati: '<(array())>'
+    alunno: '@alunno_3CCHI_<current()>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica: '50%? @docente_curricolare_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+
+App\Entity\Entrata:
+
+  entrata_demo_A_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("08:30", "10:30")>'
+    ritardoBreve: '<boolean(50)>'
+    note: '50%? <paragraph(1, true)>: <strval("")>'
+    valido: '<boolean(50)>'
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_<($current . "A_1")>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica: '@docente_curricolare_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+  entrata_demo_B_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("08:30", "10:30")>'
+    ritardoBreve: '<boolean(50)>'
+    note: '50%? <paragraph(1, true)>: <strval("")>'
+    valido: '<boolean(50)>'
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_<($current . "B_1")>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica: '@docente_curricolare_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+
+App\Entity\Uscita:
+
+  uscita_demo_A_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("10:00", "12:00")>'
+    note: '50%? <text()>: <strval("")>'
+    valido: '<boolean(50)>'
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_<($current . "A_2")>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica: '@docente_curricolare_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+  uscita_demo_B_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    ora: '<dateTimeBetween("10:00", "12:00")>'
+    note: '50%? <text()>: <strval("")>'
+    valido: '<boolean(50)>'
+    motivazione: '<sentence(3)>'
+    giustificato: '<dateTimeBetween($data, "2027-06-05")>'
+    alunno: '@alunno_<($current . "B_2")>'
+    docente: '@docente_curricolare_<current()>'
+    docenteGiustifica: '@docente_curricolare_<current()>'
+    utenteGiustifica: '<($alunno->getGenitori()[0])>'
+
+
+App\Entity\Presenza:
+
+  presenza_demo_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    oraInizio: '<dateTimeBetween("08:30", "10:00")>'
+    oraFine: '<dateTimeBetween("11:30", "13:00")>'
+    tipo: '<randomElement(["P", "S", "E"])>'
+    descrizione: '<substr(<text()>, 0, 255)>'
+    alunno: '@alunno_<($current . "A_1")>'
+
+  presenza_demo_B_{1..5}:
+    data (unique): '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    oraInizio: '<dateTimeBetween("08:30", "10:00")>'
+    oraFine: '<dateTimeBetween("11:30", "13:00")>'
+    tipo: '<randomElement(["P", "S", "E"])>'
+    descrizione: '<substr(<text()>, 0, 255)>'
+    alunno: '@alunno_<($current . "B_1")>'
+
+
+App\Entity\DerogaAssenza:
+
+  deroga_assenza_demo_{1..5}:
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    alunno: '@alunno_<($current . "A_1")>'
+    motivazione: '<text()>'

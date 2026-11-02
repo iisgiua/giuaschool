@@ -3,11 +3,9 @@
 # terminazione immediata sugli errori
 set -e
 
-# avvia MySql in background
-service mariadb start
+# imposta configurazione per sistemi ARM (operazione idempotente)
+echo 'Mutex posixsem' > /etc/apache2/conf-available/giuaschool-arm.conf
+ln -sf ../conf-available/giuaschool-arm.conf /etc/apache2/conf-enabled/giuaschool-arm.conf
 
-# imposta configurazione per sistemi ARM
-echo 'Mutex posixsem' >> /etc/apache2/apache2.conf
-
-# avvia Apache in foreground
-exec /usr/sbin/apache2ctl -D FOREGROUND
+# delega all'entrypoint standard (gestione degli argomenti inclusa)
+exec /var/www/giuaschool/tests/docker/entrypoint.sh "$@"

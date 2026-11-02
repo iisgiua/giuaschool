@@ -1,26 +1,22 @@
 <div class="modal-header">
   <button type="button" class="close" data-dismiss="modal">
-    <span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span>
+    {{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}
     <span class="sr-only">{{ 'label.close'|trans }}</span>
   </button>
   <h3 class="modal-title gs-h3">Classe {{ info.classe }} - {{ info.classe.sede.nomeBreve }}</h3>
 </div>
 <div class="modal-body">
-  {% for periodo,v in dati %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-1">Data</th>
-        <th class="col-sm-3">Destinatari</th>
-        <th class="col-sm-5">Nota</th>
-        <th class="col-sm-3">Provvedimento</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for data,v1 in v %}
-        {% for tipo,v2 in v1 %}
-          {% for k,e in v2 %}
+  {% for periodo, v in dati %}
+  {% set intestazione = [
+      {contenuto: 'Data', classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'Destinatari', classi: 'col-sm-3', scope: 'col'},
+      {contenuto: 'Nota', classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'Provvedimento', classi: 'col-sm-3', scope: 'col'},
+    ] %}
+    {% set corpo_grezzo_0 %}
+      {% for data, v1 in v %}
+        {% for tipo, v2 in v1 %}
+          {% for k, e in v2 %}
       <tr>
         <td><strong>{{ e.data }}</strong></td>
           {% if tipo == 'classe' %}
@@ -34,12 +30,12 @@
         <td>{% for alu in e.alunni %}{{ alu }}{{ not loop.last ? ',<br>' }}{% endfor %}</td>
           {% endif %}
         <td><small>{{ e.nota|raw|nl2br }}<br><em>({{ e.nota_doc }})</em></small></td>
-        <td><small>{{ e.provvedimento|raw|nl2br ? (e.provvedimento~'<br><em>('~e.provvedimento_doc~')</em>')|raw }}</small></td>
+        <td><small>{{ e.provvedimento|raw|nl2br ? (e.provvedimento ~ '<br><em>(' ~ e.provvedimento_doc ~ ')</em>')|raw }}</small></td>
       </tr>
           {% endfor %}
         {% endfor %}
       {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ periodo ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
   {% endfor %}
 </div>

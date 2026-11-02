@@ -150,6 +150,7 @@ label.descrizione_verifica: Descrizione o argomenti
 label.destinatari: Destinatari
 label.disabilitato: Disabilitato
 label.disable: Disabilita
+label.domenica: Domenica
 label.maggio: Documenti del 15 maggio
 label.docente: Docente
 label.docenti_classe: Docenti della classe
@@ -207,7 +208,7 @@ label.inserisci_motivazione: Inserisci la motivazione predefinita
 label.invia: Invia
 label.invio_notifiche: Invio delle notifiche
 label.leggere_in_classe: Leggere agli alunni
-label.login_otp: Codice OTP<br>(solo per gli utenti abilitati)
+label.login_otp: Codice OTP (solo per gli utenti abilitati)
 label.login: Accedi
 label.logout: Esci
 label.lunedi: Lunedì
@@ -369,6 +370,7 @@ label.next: Continua
 label.successiva: Successiva
 label.successivo: Successivo
 label.testo: Testo
+label.torna_indietro: Torna indietro
 label.tipo_documento: Tipo di documenti
 label.tipo_I: ITP
 label.tipo_N: Normale
@@ -769,6 +771,8 @@ page.info.cookie: Informativa sui cookie
 title.info.cookie: Informativa sui cookie
 page.info.credits: Credits
 title.info.credits: Credits
+page.error.404: Pagina non trovata
+title.error.404: Pagina non trovata
 page.ata.importa: Importa ATA
 title.ata.importa: Importa i dati del personale ATA
 page.ata.modifica: Modifica ATA
@@ -964,7 +968,7 @@ title.autorizzazioni.dettagli: Dettagli per l'autorizzazione dell'attività
 page.sistema.spid: Configura SPID/CIE
 title.sistema.spid: Configurazione accesso SPID/CIE tramite gateway del MIM
 page.richieste.coordinatore: Designazioni Evacuazione
-title.richieste.coordinatore: Designazioni studenti per l'evacuazione
+title.richieste.coordinatore: Designazioni studenti per l'evacuazione della {classe}
 page.richieste.coordinatore_add: Designazioni Evacuazione
 title.richieste.coordinatore_add: Designazioni studenti per l'evacuazione
 
@@ -992,7 +996,6 @@ page.circolari_gestione: Gestione Circolari
 page.colloqui_edit: Risposta Colloquio Richiesto
 page.coordinatore_assenze: Assenze della Classe
 page.coordinatore_avvisi: Gestione Avvisi
-page.coordinatore_classe: Classe
 page.coordinatore_note: Note della Classe
 page.coordinatore_scrutinio: Gestione Scrutinio
 page.coordinatore_situazione: Situazione Alunni
@@ -1105,7 +1108,6 @@ title.circolari_bacheca: Lista delle circolari
 title.circolari_gestione: Gestione delle circolari
 title.coordinatore_assenze: Assenze della classe
 title.coordinatore_avvisi: Gestione degli avvisi per la classe
-title.coordinatore_classe: Scegli la classe
 title.coordinatore_note: Note della classe
 title.coordinatore_scrutinio: Scrutinio della classe
 title.coordinatore_situazione_alunno: Situazione dell'alunn{sex}
@@ -1245,6 +1247,7 @@ title.lezioni_voti_configura: Configura la visualizzazione della pagina con i vo
 
 ##### MESSAGGI #####
 message.required_fields: I campi contrassegnati con l'asterisco (*) sono obbligatori.
+message.error_404_descrizione: La pagina richiesta non esiste, oppure non è più disponibile.
 message.update_ok: La modifica è stata memorizzata correttamente.
 message.delete_ok: La cancellazione è stata effettuata correttamente.
 message.importa_cattedre: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
@@ -1264,6 +1267,7 @@ message.osservazioni_sostituzione: Non è possibile inserire osservazioni per un
 message.cancella_osservazione: Verrà cancellata l'osservazione inserita. Vuoi continuare?
 message.recovery_ok: Procedura eseguita senza errori. Tra qualche minuto riceverai, all'indirizzo indicato, un'email con le nuove credenziali di accesso al Registro Elettronico.
 message.no_proposte: Non è ancora possibile inserire le proposte di voto
+message.periodo_non_selezionato: Non è attivo alcun periodo di scrutinio per l'inserimento delle proposte di voto.
 message.proposte: Inserisci la proposta di voto, indicando anche la modalità e gli argomenti del recupero nel caso di insufficienza.
 message.proposte_sospesi: Inserisci la proposta di voto, sulla base dell'esito della verifica del recupero del debito formativo.
 message.proposte_religione: Inserisci la proposta di voto, scegliendola tra i giudizi possibili.
@@ -1274,48 +1278,48 @@ message.scrutinio_non_presente: Non sono presenti dati sugli scrutini.
 message.scrutinio_non_attivo: Non è possibile inserire o modificare i dati dello scrutinio.
 message.giudizio_condotta_NC: "Non ci sono elementi di valutazione."
 message.giudizio_condotta_5: "Ha assunto comportamenti di particolare gravità
-riconducibili alle fattispecie per le quali lo Statuto delle studentesse e degli
-studenti, nonché il regolamento di Istituto prevedano l’irrogazione di sanzioni
-disciplinari che comportino l’allontanamento temporaneo dello studente dalla
-comunità scolastica per periodi superiori a 15 giorni e qualora lo studente non
-abbia dimostrato apprezzabili e concreti cambiamenti nel comportamento, tali da
-evidenziare un sufficiente livello di miglioramento nel suo percorso di crescita
-e di maturazione in ordine alle finalità educative della scuola."
+  riconducibili alle fattispecie per le quali lo Statuto delle studentesse e degli
+  studenti, nonché il regolamento di Istituto prevedano l’irrogazione di sanzioni
+  disciplinari che comportino l’allontanamento temporaneo dello studente dalla
+  comunità scolastica per periodi superiori a 15 giorni e qualora lo studente non
+  abbia dimostrato apprezzabili e concreti cambiamenti nel comportamento, tali da
+  evidenziare un sufficiente livello di miglioramento nel suo percorso di crescita
+  e di maturazione in ordine alle finalità educative della scuola."
 message.giudizio_condotta_6: "* Mantiene un atteggiamento scarsamente collaborativo nei confronti dei compagni e tende ad assumere un comportamento poco rispettoso nei confronti dei docenti e/o del personale d’Istituto;\\n
-* non è puntuale nello svolgimento degli impegni scolastici;\\n
-* non frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento;\\n
-* spesso ha un comportamento poco responsabile durante l’attività scolastica e/o durante le attività didattiche al di fuori dell’Istituto, opportunamente rilevato e sanzionato;\\n
-* ha scarso rispetto dell’integrità delle strutture e degli spazi dell’Istituto;\\n
-* non partecipa al dialogo educativo, spesso non mostra interesse per l’apprendimento, non sempre esegue i compiti assegnati;\\n
-* non sempre rispetta le norme di sicurezza."
+  * non è puntuale nello svolgimento degli impegni scolastici;\\n
+  * non frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento;\\n
+  * spesso ha un comportamento poco responsabile durante l’attività scolastica e/o durante le attività didattiche al di fuori dell’Istituto, opportunamente rilevato e sanzionato;\\n
+  * ha scarso rispetto dell’integrità delle strutture e degli spazi dell’Istituto;\\n
+  * non partecipa al dialogo educativo, spesso non mostra interesse per l’apprendimento, non sempre esegue i compiti assegnati;\\n
+  * non sempre rispetta le norme di sicurezza."
 message.giudizio_condotta_7: "* Mantiene un atteggiamento scarsamente collaborativo nei confronti dei compagni e tende ad assumere un comportamento non sempre rispettoso nei confronti dei docenti e/o del personale dell’Istituto;\\n
-* non è sempre costante nell’espletamento degli impegni scolastici;\\n
-* la frequenza all’attività didattica non è sempre continua, non frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento;\\n
-* talvolta ha un comportamento poco responsabile durante l’attività scolastica e/o durante le attività didattiche al di fuori dell’Istituto, anche rilevato;\\n
-* talvolta non rispetta le consegne, i regolamenti e le cose comuni;\\n
-* non partecipa al dialogo educativo, spesso non mostrando interesse per l’apprendimento, non sempre esegue i compiti assegnati;\\n
-* non sempre rispetta le norme di sicurezza."
+  * non è sempre costante nell’espletamento degli impegni scolastici;\\n
+  * la frequenza all’attività didattica non è sempre continua, non frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento;\\n
+  * talvolta ha un comportamento poco responsabile durante l’attività scolastica e/o durante le attività didattiche al di fuori dell’Istituto, anche rilevato;\\n
+  * talvolta non rispetta le consegne, i regolamenti e le cose comuni;\\n
+  * non partecipa al dialogo educativo, spesso non mostrando interesse per l’apprendimento, non sempre esegue i compiti assegnati;\\n
+  * non sempre rispetta le norme di sicurezza."
 message.giudizio_condotta_8: "* Si relaziona correttamente con i docenti, i collaboratori scolastici e i compagni e dimostra maturità a partire dal rispetto per la propria persona;\\n
-* ha un atteggiamento responsabile durante le attività didattiche, svolte anche al di fuori dell’Istituto;\\n
-* è puntuale nell’adempimento degli impegni scolastici, rispetta l’integrità delle strutture e degli spazi contribuendo alla qualità della vita scolastica;\\n
-* frequenta le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
-* partecipa all’attività educativo-didattica, è interessato all’apprendimento, ma non sempre esegue i compiti assegnati;\\n
-* è spesso disponibile alla collaborazione con docenti e/o compagni durante l’attività didattica;\\n
-* rispetta le norme di sicurezza."
+  * ha un atteggiamento responsabile durante le attività didattiche, svolte anche al di fuori dell’Istituto;\\n
+  * è puntuale nell’adempimento degli impegni scolastici, rispetta l’integrità delle strutture e degli spazi contribuendo alla qualità della vita scolastica;\\n
+  * frequenta le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
+  * partecipa all’attività educativo-didattica, è interessato all’apprendimento, ma non sempre esegue i compiti assegnati;\\n
+  * è spesso disponibile alla collaborazione con docenti e/o compagni durante l’attività didattica;\\n
+  * rispetta le norme di sicurezza."
 message.giudizio_condotta_9: "* Si relaziona correttamente con i docenti, i collaboratori scolastici e i compagni e dimostra maturità a partire dal rispetto per la propria persona;\\n
-* dimostra autocontrollo e civismo durante le attività didattiche, svolte anche al di fuori dell’Istituto;\\n
-* rispetta le consegne, i regolamenti, le strutture e gli spazi dell’Istituto, contribuendo alla qualità della vita scolastica;\\n
-* frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
-* partecipa in modo costruttivo all’attività educativo-didattica, è interessato e motivato all’apprendimento, esegue i compiti assegnati;\\n
-* è disponibile alla collaborazione con docenti e/o compagni durante l’attività didattica;\\n
-* rispetta le norme di sicurezza."
+  * dimostra autocontrollo e civismo durante le attività didattiche, svolte anche al di fuori dell’Istituto;\\n
+  * rispetta le consegne, i regolamenti, le strutture e gli spazi dell’Istituto, contribuendo alla qualità della vita scolastica;\\n
+  * frequenta con regolarità le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
+  * partecipa in modo costruttivo all’attività educativo-didattica, è interessato e motivato all’apprendimento, esegue i compiti assegnati;\\n
+  * è disponibile alla collaborazione con docenti e/o compagni durante l’attività didattica;\\n
+  * rispetta le norme di sicurezza."
 message.giudizio_condotta_10: "* Si relaziona sempre correttamente con i docenti, i collaboratori scolastici e i compagni e dimostra maturità a partire dal rispetto per la propria persona;\\n
-* dimostra autocontrollo e civismo durante le attività didattiche, svolte anche al di fuori dell’Istituto;\\n
-* rispetta le consegne, i regolamenti, le strutture e gli spazi dell’Istituto, contribuendo alla qualità della vita scolastica;\\n
-* è sempre puntuale e frequenta assiduamente le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
-* mostra interesse costruttivo per il mondo della scuola, ruolo propositivo all’interno della classe, solidarietà e collaborazione nei confronti dei compagni;\\n
-* è interessato e motivato all’apprendimento, esegue sempre i compiti assegnati;\\n
-* rispetta le norme di sicurezza."
+  * dimostra autocontrollo e civismo durante le attività didattiche, svolte anche al di fuori dell’Istituto;\\n
+  * rispetta le consegne, i regolamenti, le strutture e gli spazi dell’Istituto, contribuendo alla qualità della vita scolastica;\\n
+  * è sempre puntuale e frequenta assiduamente le lezioni, le attività integrative, di recupero e/o di potenziamento, svolte anche al di fuori dell’Istituto;\\n
+  * mostra interesse costruttivo per il mondo della scuola, ruolo propositivo all’interno della classe, solidarietà e collaborazione nei confronti dei compagni;\\n
+  * è interessato e motivato all’apprendimento, esegue sempre i compiti assegnati;\\n
+  * rispetta le norme di sicurezza."
 message.no_scrutini_svolti: Non esistono ancora scrutini svolti.
 message.docenti_colloqui_importa: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
   \"Docente, Username, Sede, Giorno, Ora, Frequenza, Note\".
@@ -1342,6 +1346,7 @@ message.avviso_attivita_testo: "Si comunica che il giorno {data}, dalle ore {ini
 message.attivita_edit: Il testo dell'avviso utilizza i campi <strong>{DATA}</strong>, <strong>{INIZIO}</strong> e <strong>{FINE}</strong> che verranno sostituiti automaticamente con la data e l'ora di inizio e fine dell'attività indicata.
 message.presenti_avvisi: "{num, plural, one {È presente un avviso da leggere alla classe} other {Sono presenti # avvisi da leggere alla classe}}"
 message.presenti_nuovi_avvisi: "{num, plural, one {È presente un nuovo avviso da leggere} other {Sono presenti # nuovi avvisi da leggere}}"
+message.nessuna_notifica_home: Non ci sono notifiche, avvisi o richieste da mostrare al momento.
 message.avviso_coordinatore_oggetto: Messaggio dal coordinatore della classe {classe}
 message.avviso_predefinito_info: Il testo dell'avviso è predeterminato e utilizza i dati inseriti al suo interno. Usare il pulsante di ANTEPRIMA per visualizzare il testo finale.
 message.avviso_individuale_oggetto: "Comunicazione del{docente}"
@@ -1367,22 +1372,22 @@ message.motivazione_deroga_P: Vista la partecipazione ad attività sportive, ade
 message.motivazione_deroga_R: Vista l'adesione a una confessione religiosa che considera il sabato come giorno di riposo, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
 message.motivazione_deroga_L: Vista la condizione di studente lavoratore, adeguatamente documentata, e considerato che il Consiglio di Classe dichiara che tali assenze non pregiudicano la possibilità di procedere alla valutazione dell'alunn
 message.giudizio_non_ammissione: "L'alunn{sex},\\n
-con frequenza irregolare e numero elevato di assenze,\\n
-benché siano state svolte attività di recupero in orario curricolare ed extracurricolare,\\n
-pur essendo stata informata la famiglia,\\n
-considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrata nel corso dell’anno scolastico,\\n
-non ha raggiunto gli obiettivi minimi per un numero eccessivo di discipline e non possiede competenze e conoscenze adeguate per affrontare {classe}."
+  con frequenza irregolare e numero elevato di assenze,\\n
+  benché siano state svolte attività di recupero in orario curricolare ed extracurricolare,\\n
+  pur essendo stata informata la famiglia,\\n
+  considerata la scarsa partecipazione al dialogo educativo e la mancanza di impegno nello studio mostrata nel corso dell’anno scolastico,\\n
+  non ha raggiunto gli obiettivi minimi per un numero eccessivo di discipline e non possiede competenze e conoscenze adeguate per affrontare {classe}."
 message.giudizio_non_ammissione_invalsi: "L'alunn{sex} non ha svolto le prove INVALSI, come da documentazione agli atti."
 message.giudizio_non_ammissione_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di FSL, come da documentazione agli atti."
 message.giudizio_non_ammissione_invalsi_pcto: "L'alunn{sex} non ha svolto il numero minimo di ore di FSL e le prove INVALSI, come da documentazione agli atti."
 message.giudizio_non_ammissione_sospeso: "L'alunn{sex},\\n
-con giudizio sospeso nello scrutinio finale di giugno,\\n
-benché siano stati segnalati alla famiglia i relativi debiti formativi,\\n
-pur essendo state svolte dalla scuola attività di recupero,\\n
-considerata anche la scarsa partecipazione a tali attività di recupero,\\n
-accertato che persistono le gravi carenze segnalate,\\n
-non ha raggiunto gli obiettivi minimi per le discipline indicate
-e non possiede competenze e conoscenze adeguate per affrontare la classe successiva."
+  con giudizio sospeso nello scrutinio finale di giugno,\\n
+  benché siano stati segnalati alla famiglia i relativi debiti formativi,\\n
+  pur essendo state svolte dalla scuola attività di recupero,\\n
+  considerata anche la scarsa partecipazione a tali attività di recupero,\\n
+  accertato che persistono le gravi carenze segnalate,\\n
+  non ha raggiunto gli obiettivi minimi per le discipline indicate
+  e non possiede competenze e conoscenze adeguate per affrontare la classe successiva."
 message.giudizio_scrutinio_rinviato: Poiché l’alunn{sex} è risultato assente alle prove di verifica del debito formativo per motivi di salute, debitamente documentati, il Consiglio di Classe rimanda il suo scrutinio a data da definirsi, presumibilmente prima dell’inizio delle lezioni.
 message.motivazione_ammissione: "Sebbene permangano alcune carenze in una disciplina, considerato che l'alunn{sex} dispone di sufficienti capacità critiche ed espressive, valutato che sono stati complessivamente raggiunti gli obiettivi formativi fondamentali dell'indirizzo di studio, il Consiglio di classe ritiene che l’alunn{sex} possieda competenze e conoscenze adeguate per affrontare l'Esame di maturità."
 message.otp_abilitato: Codice OTP attivato.
@@ -1522,6 +1527,10 @@ message.documenti_archivio_bes: "Scarica, elimina o ripristina i documenti degli
 message.documento_bes_ripristinato: Il documento dell'alunn{sex} {alunno} è stato ripristinato.
 message.documento_bes_archiviato: Il documento dell'alunn{sex} {alunno} è stato archiviato.
 message.cancella_documenti_bes: Verrà cancellato il documento relativo all'alunno BES. Vuoi continuare?
+message.archivia_documento_bes: Verrà archiviato il documento relativo all'alunno BES. Vuoi continuare?
+message.ripristina_documento_bes: Verrà ripristinato il documento relativo all'alunno BES. Vuoi continuare?
+message.abilita_ricevimento: Verrà riabilitato il ricevimento indicato. Vuoi continuare?
+message.disabilita_ricevimento: Verrà disabilitato il ricevimento indicato. Vuoi continuare?
 message.alunno_assente_in_data: "ATTENZIONE: L'alunno risulta assente alla lezione della data indicata."
 message.modifica_data_o_conferma: "Puoi modificare la data o confermare i dati inseriti."
 message.alunni_assenti_in_data: "ATTENZIONE: Gli alunni seguenti risultano assenti alla lezione della data indicata:"
@@ -1532,6 +1541,16 @@ message.cancella_materia: Verrà cancellata la materia scolastica indicata. Vuoi
 message.cancella_classe: Verrà cancellata la classe indicata. Vuoi continuare?
 message.cancella_festivita: Verrà cancellata la festività indicata. Vuoi continuare?
 message.cancella_orario: Verrà cancellato l'orario indicato. Vuoi continuare?
+message.cancella_staff: Verrà tolto il ruolo di staff al docente indicato. Vuoi continuare?
+message.cancella_responsabileBes: Verrà tolto l'incarico di responsabile BES al docente indicato. Vuoi continuare?
+message.cancella_coordinatore: Verrà tolto l'incarico di coordinatore di classe al docente indicato. Vuoi continuare?
+message.cancella_segretario: Verrà tolto l'incarico di segretario di classe al docente indicato. Vuoi continuare?
+message.cancella_rappresentante_docenti: Verrà tolto l'incarico di rappresentante dei docenti al docente indicato. Vuoi continuare?
+message.cancella_rappresentante_alunni: Verrà tolto l'incarico di rappresentante di classe all'alunno indicato. Vuoi continuare?
+message.cancella_rappresentante_genitori: Verrà tolto l'incarico di rappresentante dei genitori all'utente indicato. Vuoi continuare?
+message.cancella_rappresentante_ata: Verrà tolto l'incarico di rappresentante del personale ATA al dipendente indicato. Vuoi continuare?
+message.cancella_cambio_classe: Verranno cancellati i dati del cambio di classe indicato. Vuoi continuare?
+message.cancella_presenza: Verrà rimossa la presenza fuori classe indicata. Vuoi continuare?
 message.scansione_oraria: "Inserisci la scansione oraria per ogni giorno della settimana. Usa i pulsanti per aggiungere o rimuovere un elemento.<br>La durata è indicata come frazioni dell'unità oraria."
 message.svuota_cache_ok: La cache di sistema è stata cancellata.
 message.avviso_svuota_cache: "Attenzione: l'operazione può comportare dei malfunzionamenti per gli utenti attualmente collegati."
@@ -1543,6 +1562,22 @@ message.avviso_disattiva_log_level: "Attenzione: l'operazione disattiverà la mo
 message.modifica_log_level_ok: La modalità di debug è stata modificata.
 message.tutte_operazioni_ok: Tutte le operazioni sono state eseguite senza errori.
 message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
+message.cancella_voto: Verrà cancellata la valutazione indicata. Vuoi continuare?
+message.reset_otp: Verrà azzerato il codice OTP del docente indicato, che dovrà riattivarlo al prossimo accesso. Vuoi continuare?
+message.abilita_docente: Verrà riabilitato l'account del docente indicato. Vuoi continuare?
+message.disabilita_docente: Verrà disabilitato l'account del docente indicato, che non potrà più accedere al registro. Vuoi continuare?
+message.abilita_alunno: Verrà riabilitato l'account dell'alunno indicato e quelli dei suoi genitori. Vuoi continuare?
+message.disabilita_alunno: Verrà disabilitato l'account dell'alunno indicato e quelli dei suoi genitori. Vuoi continuare?
+message.abilita_ata: Verrà riabilitato l'account del dipendente indicato. Vuoi continuare?
+message.disabilita_ata: Verrà disabilitato l'account del dipendente indicato, che non potrà più accedere al registro. Vuoi continuare?
+message.abilita_cattedra: Verrà riabilitata la cattedra indicata. Vuoi continuare?
+message.disabilita_cattedra: Verrà disabilitata la cattedra indicata, che verrà rimossa dal registro. Vuoi continuare?
+message.abilita_modulo: Verrà riabilitato il modulo indicato. Vuoi continuare?
+message.disabilita_modulo: Verrà disabilitato il modulo indicato, che non potrà più essere richiesto. Vuoi continuare?
+message.abilita_autorizzazione: Verrà riabilitato il modulo di autorizzazione indicato. Vuoi continuare?
+message.disabilita_autorizzazione: Verrà disabilitato il modulo di autorizzazione indicato, che non potrà più essere richiesto. Vuoi continuare?
+message.abilita_consultazione: Verrà riabilitata la consultazione indicata. Vuoi continuare?
+message.disabilita_consultazione: Verrà disabilitata la consultazione indicata, che non potrà più essere richiesta. Vuoi continuare?
 message.cancella_consultazione: Verrà cancellata la consultazione indicata. Vuoi continuare?
 message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
 message.no_moduli_classe: Non sono presenti moduli per la classe.
@@ -1595,6 +1630,7 @@ message.cattedra_esistente_non_creata: Alcune cattedre non sono state inserite p
 message.comunicazione_cittadinanza: "L'elaborato dovrà essere trasmesso alla scuola in formato PDF e inviato tramite email all'indirizzo ..., indicando come oggetto 'ELABORATO CITTADINANZA ATTIVA - CLASSE - COGNOME NOME', entro e non oltre il giorno ..."
 message.autorizzazioni_edit: Inserisci tutti i dati richiesti per il modulo di autorizzazione dell'attività
 message.autorizzazioni_autorizza: Leggi i dettagli dell'attività e invia l'autorizzazione
+message.autorizzazione_senza_modulo: "Il modulo di autorizzazione non è disponibile: contatta l'amministratore."
 message.sistema_spid: Per configurare l'accesso SPID/CIE che utilizza il gateway delle identità del MIM, inserisci il codice del client e il codice segreto che è stato configurato attraverso il portale SIDI (aggregazione scuole).
 message.modifica_modulo_formativo_dopo_scrutinio: Non è possibile modificare i moduli formativi.
 
@@ -1624,6 +1660,7 @@ exception.cattedra_sostegno: Non puoi inserire una verifica per una cattedra di 
 exception.classe_errata: La classe non è corretta.
 exception.colloqui_errore: È presente un errore nell'impostazione dell'orario del colloquio del docente.
 exception.colloqui_esiste: Esiste già una richiesta per il colloquio con il docente.
+exception.colloqui_esauriti: Non ci sono più posti disponibili per il ricevimento indicato.
 exception.colloqui_sospesi: Il ricevimento dei genitori è sospeso sino al termine delle lezioni.
 exception.conferma_invalida: "Procedura terminata con errore:<br>&nbsp;&nbsp;Utente sconosciuto"
 exception.conferma_scaduta: "Procedura terminata con errore:<br>&nbsp;&nbsp;La richiesta di attivazione è stata inviata più di 48 ore fa.<br><br>Effettua una nuova richiesta di attivazione e confermala entro 48 ore."
@@ -1724,6 +1761,7 @@ exception.prima_inizio_anno: La data è precedente all'inizio dell'anno scolasti
 exception.quinta_sospeso_esito: Impossibile sospendere il giudizio per una classe quinta.
 exception.scrutinio_data: Data dello scrutinio non valida.
 exception.scrutinio_fine: Ora della fine dello scrutinio non valida.
+exception.scrutinio_definizionemancante: "Mancanza della definizione dello scrutinio: non è possibile verbalizzare."
 exception.scrutinio_numero_verbale: Numero del verbale non valido.
 exception.scrutinio_inizio: Ora di inizio dello scrutinio non valida.
 exception.scrutinio_lista_no_scrutinabili: Si è verificato un errore di sistema. Riprova ad inviare i dati.
@@ -1869,6 +1907,7 @@ exception.modulo_campo_senza_nome: Non possono esistere campi del modulo senza n
 exception.modulo_campo_senza_tipo: Non possono esistere campi del modulo senza tipo.
 exception.campo_obbligatorio_vuoto: Non hai inserito un valore accettabile in un campo obbligatorio.
 exception.modulo_allegati_mancanti: Non hai caricato gli allegati richiesti.
+exception.modulo_template_mancante: "Il template del modulo non è disponibile: contatta l'amministratore."
 exception.modulo_campo_nome_riservato: Non puoi inserire un campo con il nome "data".
 exception.campo_data_vuoto: Non hai inserito un valore per la data.
 exception.campo_data_successivo_oggi: Non puoi inserire una data successiva a quella di oggi.
@@ -1917,7 +1956,9 @@ exception.documento_bes_non_autorizzato: Non hai i permessi per caricare documen
 exception.tipo_filtro_invalido: Il tipo di filtro non è valido
 exception.consultazione_intervallo_date_invalido: La data e ora iniziale deve precedere quella finale
 exception.consultazione_nessuna_classe: Devi indicare almeno una classe di destinazione
+exception.consultazione_template_mancante: "Il template della consultazione non è disponibile: contatta l'amministratore."
 exception.impossibile_creare_zip: Impossibile creare il file compresso
+exception.nessun_allegato_archivio: "Nessun documento presente: non c'è nulla da archiviare."
 exception.autorizzazione_intervallo_date_invalido: L'ora iniziale deve precedere quella finale
 exception.autorizzazione_nessuna_classe: Devi indicare almeno una classe di destinazione
 exception.autorizzazione_no_descrizione: Devi indicare la descrizione dell'attività

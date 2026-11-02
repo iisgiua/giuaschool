@@ -21,9 +21,9 @@ use DateTime;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -151,11 +151,14 @@ class DocumentiController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/documenti/delete/{documento}', name: 'documenti_delete', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/documenti/delete/{documento}', name: 'documenti_delete', requirements: ['documento' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(LogHandler $dblogger, ComunicazioniUtil $com,
-                         #[MapEntity] Documento $documento
-                         ): Response {
+  public function delete(Request $request, LogHandler $dblogger, ComunicazioniUtil $com,
+                         #[MapEntity] Documento $documento): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo permessi
     if (!$com->azioneDocumento('delete', $this->getUser(), $documento)) {
       // errore
@@ -529,21 +532,30 @@ class DocumentiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db
-    $com->leggeUtente($this->getUser(), $documento);
-    $this->em->flush();
     // invia il file
     $file = $documento->getAllegati()[$allegato];
     $nomefile = $com->dirDocumento($documento).'/'.$file->getFile().'.'.$file->getEstensione();
     if (!file_exists($nomefile)) {
-      // compatibilità con vecchi documenti
-      $nomefile = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
-        $documento->getAlunno()->getClasse()->getAnno().$documento->getAlunno()->getClasse()->getSezione().
-        $documento->getAlunno()->getClasse()->getGruppo().'/riservato/'.
-        $file->getFile().'.'.$file->getEstensione();
+      // compatibilità solo se il documento ha un alunno ed è uno dei casi storici
+      $alunno = $documento->getAlunno();
+      if ($alunno && $alunno->getClasse()) {
+        $nomefile = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
+          $alunno->getClasse()->getAnno().$alunno->getClasse()->getSezione().
+          $alunno->getClasse()->getGruppo().'/riservato/'.
+          $file->getFile().'.'.$file->getEstensione();
+      } else {
+        // errore: non posso ricavare il percorso senza un alunno e una classe
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
     }
-    return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
-      ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
+    if (!file_exists($nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // segna lettura e memorizza su db solo dopo aver verificato il file
+    $com->leggeUtente($this->getUser(), $documento);
+    $this->em->flush();
+    return $this->rispostaAllegato($nomefile, $file->getNome().'.'.$file->getEstensione(), $tipo == 'V');
   }
 
   /**
@@ -563,6 +575,8 @@ class DocumentiController extends BaseController {
     $criteri = [];
     $criteri['filtro'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/tipo', 'L');
+    // sanifica il tipo: un valore non previsto non consente di completare la query
+    $criteri['tipo'] = in_array($criteri['tipo'], ['L', 'P', 'R', 'M'], true) ? $criteri['tipo'] : 'L';
     $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/classe', 0));
     if ($pagina == 0) {
@@ -705,20 +719,7 @@ class DocumentiController extends BaseController {
     // controlla azione
     $listaTipi = ['H', 'D', 'B', 'C'];
     if ($alunno) {
-      $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunno,
-        'stato' => 'P']);
-      $tipiEsistenti = [];
-      foreach ($documentiEsistenti as $des) {
-        if ($des->getTipo() == 'H' || $des->getTipo() == 'D') {
-          // PEI o PDP
-          $tipiEsistenti[] = 'H';
-          $tipiEsistenti[] = 'D';
-        } else {
-          // altro tipo
-          $tipiEsistenti[] = $des->getTipo();
-        }
-      }
-      $listaTipi = array_diff($listaTipi, $tipiEsistenti);
+      $listaTipi = $this->tipiDisponibili($alunno, $listaTipi);
       if (empty($listaTipi)) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -758,50 +759,17 @@ class DocumentiController extends BaseController {
       'values' => [$opzioniClassi, $opzioniTipi]]);
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      // controllo errori
+      // dati del documento
       $allegati = $this->reqstack->getSession()->get($varSessione, []);
       $tipo = $form->get('tipo')->getData();
       $alunnoIndividuale = $alunno ? null :
         $this->em->getRepository(Alunno::class)->findOneBy(['abilitato' => 1,
         'id' => $form->get('alunno')->getData()]);
       if (!$alunno) {
-        $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunnoIndividuale,
-          'stato' => 'P']);
-        $tipiEsistenti = [];
-        foreach ($documentiEsistenti as $des) {
-          if ($des->getTipo() == 'H' || $des->getTipo() == 'D') {
-            // PEI o PDP
-            $tipiEsistenti[] = 'H';
-            $tipiEsistenti[] = 'D';
-          } else {
-            // altro tipo
-            $tipiEsistenti[] = $des->getTipo();
-          }
-        }
-        $listaTipi = array_diff($listaTipi, $tipiEsistenti);
+        $listaTipi = $this->tipiDisponibili($alunnoIndividuale, $listaTipi);
       }
-      if (count($allegati) < 1) {
-        // errore: numero allegati
-        $form->addError(new FormError($trans->trans('exception.file_mancante')));
-      }
-      if (empty($tipo)) {
-        // errore: tipo mancante
-        $form->addError(new FormError($trans->trans('exception.documento_tipo_mancante')));
-      }
-      if (!$alunno && (empty($alunnoIndividuale) || empty($alunnoIndividuale->getClasse()))) {
-        // errore: alunno mancante o non abilitato e iscritto
-        $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
-      }
-      if (!$alunno && $alunnoIndividuale && $alunnoIndividuale->getClasse() &&
-          $this->getUser()->getResponsabileBesSede() &&
-          $alunnoIndividuale->getClasse()->getSede() != $this->getUser()->getResponsabileBesSede()) {
-        // errore: alunno di sede non ammessa
-        $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
-      }
-      if (!$alunno && $tipo && $alunnoIndividuale && !in_array($tipo, $listaTipi)) {
-        // errore: documento già presente
-        $form->addError(new FormError($trans->trans('exception.documento_esistente')));
-      }
+      // controllo errori
+      $this->aggiungiErrori($form, $trans, $allegati, $tipo, $alunno, $alunnoIndividuale, $listaTipi);
       if ($form->isValid()) {
         // imposta documento
         $documento->setTipo($tipo);
@@ -837,6 +805,72 @@ class DocumentiController extends BaseController {
       'form' => $form,
       'form_title' => 'title.nuovo_documento_bes',
       'info' => $info]);
+  }
+
+  /**
+   * Determina i tipi di documento BES che non sono gi\u00e0 presenti per l'alunno indicato
+   *
+   * @param Alunno|null $alunno Alunno di cui controllare i documenti
+   * @param array $listaTipi Lista dei tipi di documento previsti
+   *
+   * @return array Lista dei tipi di documento non ancora presenti
+   */
+  private function tipiDisponibili(?Alunno $alunno, array $listaTipi): array {
+    if (!$alunno) {
+      return $listaTipi;
+    }
+    // legge i documenti già inseriti
+    $documentiEsistenti = $this->em->getRepository(Documento::class)->findBy(['alunno' => $alunno,
+      'stato' => 'P']);
+    $tipiEsistenti = [];
+    foreach ($documentiEsistenti as $des) {
+      if ($des->getTipo() == 'H' || $des->getTipo() == 'D') {
+        // PEI o PDP
+        $tipiEsistenti[] = 'H';
+        $tipiEsistenti[] = 'D';
+      } else {
+        // altro tipo
+        $tipiEsistenti[] = $des->getTipo();
+      }
+    }
+    return array_diff($listaTipi, $tipiEsistenti);
+  }
+
+  /**
+   * Aggiunge al form gli errori relativi ai dati inseriti per il documento
+   *
+   * @param FormInterface $form Form di inserimento del documento
+   * @param TranslatorInterface $trans Traduttore dei messaggi di errore
+   * @param array $allegati Allegati caricati nella pagina
+   * @param mixed $tipo Tipo di documento indicato nel form
+   * @param Alunno|null $alunno Alunno indicato nella pagina, se presente
+   * @param mixed $alunnoIndividuale Alunno indicato nel form, se non \u00e8 indicato nella pagina
+   * @param array $listaTipi Lista dei tipi di documento non ancora presenti
+   */
+  private function aggiungiErrori(FormInterface $form, TranslatorInterface $trans, array $allegati, mixed $tipo,
+                                 ?Alunno $alunno, mixed $alunnoIndividuale, array $listaTipi): void {
+    if (count($allegati) < 1) {
+      // errore: numero allegati
+      $form->addError(new FormError($trans->trans('exception.file_mancante')));
+    }
+    if (empty($tipo)) {
+      // errore: tipo mancante
+      $form->addError(new FormError($trans->trans('exception.documento_tipo_mancante')));
+    }
+    if (!$alunno && (empty($alunnoIndividuale) || empty($alunnoIndividuale->getClasse()))) {
+      // errore: alunno mancante o non abilitato e iscritto
+      $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
+    }
+    if (!$alunno && $alunnoIndividuale && $alunnoIndividuale->getClasse() &&
+        $this->getUser()->getResponsabileBesSede() &&
+        $alunnoIndividuale->getClasse()->getSede() != $this->getUser()->getResponsabileBesSede()) {
+      // errore: alunno di sede non ammessa
+      $form->addError(new FormError($trans->trans('exception.documento_alunno_mancante')));
+    }
+    if (!$alunno && $tipo && $alunnoIndividuale && !in_array($tipo, $listaTipi)) {
+      // errore: documento già presente
+      $form->addError(new FormError($trans->trans('exception.documento_esistente')));
+    }
   }
 
   /**
@@ -1052,18 +1086,23 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/documenti/bes/restore/{documento}', name: 'documenti_bes_restore', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/documenti/bes/restore/{documento}', name: 'documenti_bes_restore', requirements: ['documento' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function besRestore(TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
+  public function besRestore(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
+                             LogHandler $dblogger,
                              #[MapEntity] Documento $documento
                              ): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // controlla alunno
-    $codiceFiscale = trim(substr($documento->getTitolo(), strpos($documento->getTitolo(), '- C.F. ') + 7));
+    $codiceFiscale = trim(substr((string) $documento->getTitolo(), strpos((string) $documento->getTitolo(), '- C.F. ') + 7));
     $alunno = $this->em->getRepository(Alunno::class)->findOneBy(['codiceFiscale' => $codiceFiscale,
       'abilitato' => 1]);
     if (!$alunno) {
@@ -1126,11 +1165,16 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/documenti/bes/archive/{documento}', name: 'documenti_bes_archive', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/documenti/bes/archive/{documento}', name: 'documenti_bes_archive', requirements: ['documento' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function besArchive(TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
+  public function besArchive(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
+                             LogHandler $dblogger,
                              #[MapEntity] Documento $documento
                              ): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore
@@ -1159,7 +1203,7 @@ class DocumentiController extends BaseController {
       ->setStato('A')
       ->setTitolo($vecchioAlunno->getCognome().' '.$vecchioAlunno->getNome().' - C.F. '.
         $vecchioAlunno->getCodiceFiscale())
-      ->setAnno((int) substr($this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4));
+      ->setAnno((int) substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_scolastico'), 0, 4));
     // cancella lista destinatari
     $com->cancellaDestinatari($documento);
     // ok: memorizzazione e log

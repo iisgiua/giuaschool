@@ -15,6 +15,8 @@ COPY --chown=www-data:www-data public/install/ ./public/install/
 COPY --chown=www-data:www-data src/Command/ ./src/Command/
 COPY --chown=www-data:www-data src/DataFixtures/ ./src/DataFixtures/
 COPY --chown=www-data:www-data src/Install/ ./src/Install/
+# il nuovo Updater usa EnvFile già nel primo passo, prima di estrarre lo zip di aggiornamento
+COPY --chown=www-data:www-data src/Util/EnvFile.php ./src/Util/EnvFile.php
 COPY --chown=www-data:www-data tests/ ./tests/
 
 # set test environment
@@ -30,7 +32,7 @@ RUN \
   mkdir -p var/sessions/prod && \
   mkdir -p tests/temp/download && \
   chmod 777 tests/temp/download && \
-  chown -R www-data:www-data src/* public/* tests/* var/* && \
+  find src public tests var -user root -exec chown www-data:www-data {} + && \
   echo "UPDATE gs_configurazione SET valore='$VERSION' WHERE parametro='versione';" > .gs-updating && \
   service mariadb start && \
   mysql -uroot -proot giuaschool < .gs-updating && \

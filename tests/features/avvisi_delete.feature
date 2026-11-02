@@ -14,21 +14,21 @@ Funzionalità: Cancellazione di un avviso
 
 Scenario: visualizza errore per cancellazione di avviso non esistente
   Dato login utente "@staff_4:username"
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso |
     | 123456 |
   Allora vedi errore pagina "404"
 
 Scenario: visualizza errore per cancellazione di avviso senza permessi
   Dato login utente "@docente_curricolare_1:username"
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso       |
     | @avviso_E:id |
   Allora vedi errore pagina "404"
 
 Scenario: visualizza errore per cancellazione di avviso con annotazione senza permessi
   Dato login utente "@staff_4:username"
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso                      |
     | @avviso_non_modificabile:id |
   Allora vedi errore pagina "404"
@@ -37,12 +37,12 @@ Scenario: visualizza errore per cancellazione di avviso con annotazione senza pe
 ################################################################################
 # Bisogna poter cancellare un avviso esistente
 
-Scenario: cancella avviso direttamente da URL
+Scenario: la cancellazione diretta da URL non è consentita
   Dato login utente "@staff_4:username"
   Quando vai alla pagina "avvisi_delete" con parametri:
     | avviso       |
     | @avviso_C:id |
-  Allora vedi la pagina "avvisi_gestione"
+  Allora vedi errore pagina "405"
 
 Schema dello scenario: cancella avviso da gestione
   Dato login utente "@staff_4:username"
@@ -62,8 +62,9 @@ Schema dello scenario: cancella avviso da gestione
 
 Scenario: cancella avviso da coordinatore
   Dato login utente "@staff_4:username"
-  E pagina attiva "coordinatore_classe"
-  Quando click su "2ª A"
+  E pagina attiva "coordinatore"
+  Quando selezioni opzione "2º A" da lista "gs-selettore-classe"
+  Allora vedi la pagina "coordinatore_assenze"
   E vai alla pagina "avvisi_coordinatore"
   E click su "Cancella" in sezione "#gs-main table tbody tr" che contiene "@avviso_O:titolo"
   E click su "Continua"
@@ -95,9 +96,10 @@ Scenario: cancella avviso compito da agenda
 Scenario: cancella avviso con allegato
   Dato login utente "@staff_4:username"
   E copia file "tests/data/documento-pdf.pdf" in "FILES/upload/avvisi/documento-pdf.pdf"
-  Quando vai alla pagina "avvisi_delete" con parametri:
-    | avviso                |
-    | @avviso_C_allegato:id |
+  E pagina attiva "avvisi_gestione"
+  Quando selezioni opzione "C" da lista "avviso_filtro_tipo"
+  E click su "Cancella" in sezione "#gs-main table tbody tr" che contiene "@avviso_C_allegato:titolo"
+  E click su "Continua"
   Allora vedi la pagina "avvisi_gestione"
   E non vedi file "upload/avvisi/documento-pdf.pdf"
 
@@ -106,14 +108,14 @@ Scenario: cancella avviso con allegato
 # Bisogna controllare accesso a pagina
 
 Scenario: accesso pagina cancellazione senza utente
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso       |
     | @avviso_C:id |
   Allora vedi la pagina "login_form"
 
 Schema dello scenario: accesso pagina cancellazione con altri utenti
   Dato login utente con ruolo esatto <ruolo>
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso       |
     | @avviso_C:id |
   Allora vedi errore pagina "403"

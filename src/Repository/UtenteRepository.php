@@ -71,7 +71,24 @@ class UtenteRepository extends EntityRepository {
       $profili[0]->setListaProfili([]);
       return $profili[0];
     }
-    // crea un vettore con i dati dei profili e lo restituisce
+    // estrae i dati dei profili e restituisce il primo profilo utente
+    $datiProfili = $this->estraiDatiProfili($profili);
+    // restituisce primo profilo utente e memorizza la lista di profili
+    if ($datiProfili['utente']) {
+      // solo se esitono più profili
+      $datiProfili['utente']->setListaProfili($datiProfili['numDati'] > 1 ? $datiProfili['dati'] : []);
+    }
+    return $datiProfili['utente'];
+  }
+
+  /**
+   * Crea un vettore con i dati dei profili indicati, raggruppati per tipo.
+   *
+   * @param array $profili Lista dei profili attivi
+   *
+   * @return array Dati dei profili, numero dei tipi presenti e primo utente trovato
+   */
+  private function estraiDatiProfili(array $profili): array {
     $dati = [];
     $numDati = 0;
     $utente = null;
@@ -80,36 +97,31 @@ class UtenteRepository extends EntityRepository {
         // può essercene solo uno
         $dati['ATA'][] = $profilo->getId();
         $numDati++;
-        $utente = $utente ?? $profilo;
+        $utente ??= $profilo;
       } elseif (($profilo instanceOf Docente) && !isset($dati['DOCENTE'])) {
         // comprende anche STAFF e PRESIDE
         // può essercene solo uno
         $dati['DOCENTE'][] = $profilo->getId();
         $numDati++;
-        $utente = $utente ?? $profilo;
+        $utente ??= $profilo;
       } elseif ($profilo instanceOf Genitore) {
         // ce ne possono essere più di uno (più figli nella stessa scuola)
         $dati['GENITORE'][] = $profilo->getId();
         $numDati++;
-        $utente = $utente ?? $profilo;
+        $utente ??= $profilo;
       } elseif (($profilo instanceOf Alunno) && !isset($dati['ALUNNO'])) {
         // può essercene solo uno
         $dati['ALUNNO'][] = $profilo->getId();
         $numDati++;
-        $utente = $utente ?? $profilo;
+        $utente ??= $profilo;
       } elseif (($profilo instanceOf Amministratore) && !isset($dati['AMMINISTRATORE'])) {
         // può essercene solo uno
         $dati['AMMINISTRATORE'][] = $profilo->getId();
         $numDati++;
-        $utente = $utente ?? $profilo;
+        $utente ??= $profilo;
       }
     }
-    // restituisce primo profilo utente e memorizza la lista di profili
-    if ($utente) {
-      // solo se esitono più profili
-      $utente->setListaProfili($numDati > 1 ? $dati : []);
-    }
-    return $utente;
+    return ['dati' => $dati, 'numDati' => $numDati, 'utente' => $utente];
   }
 
   /**
@@ -231,7 +243,7 @@ class UtenteRepository extends EntityRepository {
     $giorni = (int) $this->getEntityManager()->getRepository(Configurazione::class)
       ->getParametro('durata_registrazione_dispositivo');
     $scadenza = $utente->getDispositivoRegistrato()->modify('+'.$giorni.' days');
-    return ($scadenza >= new DateTimeImmutable());
+    return $scadenza >= new DateTimeImmutable();
   }
 
 }

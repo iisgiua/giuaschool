@@ -33,7 +33,7 @@ Scenario: visualizzazione pagina passo 5 per classi quinte
     | classe        |
     | @classe_5A:id |
   Allora la sezione "#gs-main h2" contiene "Requisiti di ammissione all'esame"
-  E la sezione "#gs-main form label" contiene "Alunni che hanno i requisiti di ammissione"
+  E la sezione "#gs-main form[name=scrutinio]" contiene "Alunni che hanno i requisiti di ammissione"
   E vedi opzione "T" in pulsanti radio "scrutinio[requisiti]"
 
 Scenario: visualizzazione passo precedente

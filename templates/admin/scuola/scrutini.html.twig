@@ -1,0 +1,127 @@
+{% extends 'admin/layout-sidebar.html.twig' %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  <h1 class="text-center mb-4">{{ titolo|trans }}</h1>
+  {{ include('admin/include/flash.html.twig') }}
+  <div class="w-100 px-4 py-1 bg-light rounded">
+    <strong class="mr-2">Periodo:</strong>
+    <div class="btn-group gs-menu-select">
+      <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        {{ info.listaPeriodi[info.periodo] }}
+        {{ include('admin/include/icona.html.twig', {nome: 'caret-down', classe: 'icon-xs'}) }}
+        <span class="sr-only"> attivo</span>
+      </button>
+      <div class="dropdown-menu">
+        <div class="link-list-wrapper">
+          <ul class="link-list" role="menu" aria-label="Scelta del periodo dello scrutinio">
+  {% for pk, pv in info.listaPeriodi %}
+            <li role="none"><a class="list-item" role="menuitem" href="{{ path('scuola_scrutini', {periodo: pk}) }}"><strong>{{ pv|replace({' ': '&nbsp;'})|raw }}</strong><span class="sr-only"> attivo</span></a></li>
+  {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{ include('admin/include/form-noflash.html.twig', {form: form[0], form_help: form[1]}) }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('admin/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_data', dp_disabled: null, dp_week: '[0]', dp_min: null, dp_max: null}) }}
+{{ include('admin/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_dataProposte', dp_disabled: null, dp_week: '[0]', dp_min: null, dp_max: null}) }}
+{{ include('admin/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_classiVisibiliData1', dp_disabled: null, dp_week: null, dp_min: date()|date('d/m/Y'), dp_max: null}) }}
+{{ include('admin/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_classiVisibiliData2', dp_disabled: null, dp_week: null, dp_min: date()|date('d/m/Y'), dp_max: null}) }}
+{{ include('admin/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_classiVisibiliData3', dp_disabled: null, dp_week: null, dp_min: date()|date('d/m/Y'), dp_max: null}) }}
+{{ include('admin/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_classiVisibiliData4', dp_disabled: null, dp_week: null, dp_min: date()|date('d/m/Y'), dp_max: null}) }}
+{{ include('admin/include/datepicker.html.twig', {dp_field: 'definizione_scrutinio_classiVisibiliData5', dp_disabled: null, dp_week: null, dp_min: date()|date('d/m/Y'), dp_max: null}) }}
+<script>
+$(document).ready(function() {
+  // L'orario delle classi visibili non puo' essere nel passato: se la data
+  // scelta e' oggi, l'ora minima e' l'ora corrente; le date future non hanno
+  // vincoli sul minuto. Il timepicker vendor non espone opzioni min/max, quindi
+  // il limite e' applicato disabilitando i pulsanti di decremento e correggendo
+  // il valore digitato. Le soglie arrivano da PHP per essere coerenti con dp_min.
+  var oggi = "{{ date()|date('d/m/Y') }}";
+  var minOra = "{{ date()|date('H:i') }}";
+  var min = minOra.split(':');
+  var minH = parseInt(min[0], 10);
+  var minM = parseInt(min[1], 10);
+
+  function aDueCifre(n) {
+    return ('0' + n).slice(-2);
+  }
+
+  function applicaLimite(data, ora) {
+    // nessun limite se la data non e' oggi
+    var attivo = data.val() === oggi;
+    var spinner = ora.closest('.time-spinner');
+    var h = spinner.find('.spinnerHour');
+    var m = spinner.find('.spinnerMin');
+    var hDown = spinner.find('.btnHourDown');
+    var mDown = spinner.find('.btnMinDown');
+    // ricava i valori correnti dagli spinner, ripiegando sul testo
+    var testo = ora.val() || '';
+    var parti = testo.indexOf(':') > -1 ? testo.split(':') : [];
+    var vH = parseInt(h.val(), 10);
+    var vM = parseInt(m.val(), 10);
+    if (isNaN(vH)) {
+      vH = parseInt(parti[0], 10);
+    }
+    if (isNaN(vM)) {
+      vM = parseInt(parti[1], 10);
+    }
+    if (isNaN(vH) || isNaN(vM)) {
+      vH = minH;
+      vM = minM;
+    }
+    // decremento dell'ora vietato a partire dall'ora minima
+    hDown.prop('disabled', attivo && vH <= minH).toggleClass('disabled', attivo && vH <= minH);
+    // decremento dei minuti vietato finche' l'ora resta quella minima
+    var bloccaMin = attivo && vH === minH && vM <= minM;
+    mDown.prop('disabled', bloccaMin).toggleClass('disabled', bloccaMin);
+  }
+
+  function correggi(ora) {
+    // solleva al minimo un orario nel passato digitato a mano
+    var testo = ora.val() || '';
+    var parti = testo.split(':');
+    var vH = parseInt(parti[0], 10);
+    var vM = parseInt(parti[1], 10);
+    if (isNaN(vH) || isNaN(vM)) {
+      return;
+    }
+    if (vH < minH || (vH === minH && vM < minM)) {
+      ora.val(aDueCifre(minH) + ':' + aDueCifre(minM));
+    }
+  }
+
+  // cinque coppie data/ora (classi 1..5): le tappe sono generate qui,
+  // senza tag Twig, cosi' lo script resta JavaScript valido anche nel sorgente
+  for (var n = 1; n <= 5; n++) {
+    // la IIFE fissa il valore corrente di n per i gestori di evento
+    (function (n) {
+      var data = $('#definizione_scrutinio_classiVisibiliData' + n);
+      var ora = $('#definizione_scrutinio_classiVisibiliOra' + n);
+      if (!data.length || !ora.length) {
+        return;
+      }
+      // il click sui pulsanti cambia i valori solo al termine: ricalcola il limite
+      data.on('change', function () {
+        applicaLimite(data, ora);
+      });
+      ora.on('change', function () {
+        if (data.val() === oggi) {
+          correggi(ora);
+        }
+        applicaLimite(data, ora);
+      });
+      ora.closest('.time-spinner').find('.spinner-control button').on('click', function () {
+        applicaLimite(data, ora);
+      });
+      applicaLimite(data, ora);
+    })(n);
+  }
+});
+</script>
+{% endblock %}

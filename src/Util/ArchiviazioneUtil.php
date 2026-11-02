@@ -40,7 +40,6 @@ use App\Entity\Classe;
 use App\Entity\Docente;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
@@ -377,9 +376,9 @@ class ArchiviazioneUtil {
     $dati['osservazioni'] = [];
     $dati['personali'] = [];
     // valutazioni
-    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
-    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
+    $valutazioni['R'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_R');
+    $valutazioni['E'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_E');
+    $valutazioni['N'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_N');
     // crea lista voti
     $listaValori = explode(',', (string) $valutazioni['R']['valori']);
     $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
@@ -546,9 +545,9 @@ class ArchiviazioneUtil {
             $gs = $nomesett[$g->format('w')];
             $gg = $g->format('j');
             $gm = $nomemesi[$g->format('n')];
-            $strore = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
+            $store = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
             $html .= '<td style="width:10mm"><b>'.$gs.'<br>'.$gg.'<br>'.$gm.'</b></td>';
-            $html_col .= '<td><i>'.$strore.'</i></td>';
+            $html_col .= '<td><i>'.$store.'</i></td>';
           }
           if ($np == $numeropagine - 1) {
             $rspan = ($html_col == '' ? '' : ' rowspan="2"');
@@ -1030,9 +1029,9 @@ class ArchiviazioneUtil {
           $gs = $nomesett[$g->format('w')];
           $gg = $g->format('j');
           $gm = $nomemesi[$g->format('n')];
-          $strore = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
+          $store = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
           $html .= '<td style="width:10mm"><b>'.$gs.'<br>'.$gg.'<br>'.$gm.'</b></td>';
-          $html_col .= '<td><i>'.$strore.'</i></td>';
+          $html_col .= '<td><i>'.$store.'</i></td>';
         }
         if ($np == $numeropagine - 1) {
           $rspan = ($html_col == '' ? '' : ' rowspan="2"');
@@ -1363,7 +1362,7 @@ class ArchiviazioneUtil {
             (array_key_first($lez['materia']) == 'R:S' ? 'Gruppo: Religione<br>' :
             (array_key_first($lez['materia']) == 'R:N' ? 'Gruppo: N.A.<br>' :
             (array_key_first($lez['materia']) == 'R:A' ? 'Gruppo: Mat. Alt.<br>' :
-            (array_key_first($lez['materia']) && array_key_first($lez['materia'])[0] == 'C' ? ('Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.substr(array_key_first($lez['materia']), 2).'<br>') : '')))).
+            (str_starts_with((string) array_key_first($lez['materia']), 'C') ? ('Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.substr(array_key_first($lez['materia']), 2).'<br>') : '')))).
             '</b>'.$lez['materia'][array_key_first($lez['materia'])];
         }
         $html .= '<td align="left">'.$testo.'</td>';
@@ -2233,7 +2232,7 @@ class ArchiviazioneUtil {
             (array_key_first($lez['materia']) == 'R:S' ? 'Gruppo: Religione<br>' :
             (array_key_first($lez['materia']) == 'R:N' ? 'Gruppo: N.A.<br>' :
             (array_key_first($lez['materia']) == 'R:A' ? 'Gruppo: Mat. Alt.<br>' :
-            (array_key_first($lez['materia']) && array_key_first($lez['materia'])[0] == 'C' ? ('Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.substr(array_key_first($lez['materia']), 2).'<br>') : '')))).
+            (str_starts_with((string) array_key_first($lez['materia']), 'C') ? ('Gruppo: '.$classe->getAnno().$classe->getSezione().'-'.substr(array_key_first($lez['materia']), 2).'<br>') : '')))).
             '</b>'.$lez['materia'][array_key_first($lez['materia'])];
         }
         $html .= '<td align="left">'.$testo.'</td>';
@@ -2726,9 +2725,9 @@ class ArchiviazioneUtil {
     $dati['osservazioni'] = [];
     $dati['personali'] = [];
     // valutazioni
-    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
-    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
+    $valutazioni['R'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_R');
+    $valutazioni['E'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_E');
+    $valutazioni['N'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_N');
     // crea lista voti
     $listaValori = explode(',', (string) $valutazioni['R']['valori']);
     $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
@@ -2892,9 +2891,9 @@ class ArchiviazioneUtil {
             $gs = $nomesett[$g->format('w')];
             $gg = $g->format('j');
             $gm = $nomemesi[$g->format('n')];
-            $strore = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
+            $store = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
             $html .= '<td style="width:10mm"><b>'.$gs.'<br>'.$gg.'<br>'.$gm.'</b></td>';
-            $html_col .= '<td><i>'.$strore.'</i></td>';
+            $html_col .= '<td><i>'.$store.'</i></td>';
           }
           if ($np == $numeropagine - 1) {
             $rspan = ($html_col == '' ? '' : ' rowspan="2"');
@@ -3300,9 +3299,9 @@ class ArchiviazioneUtil {
           $gs = $nomesett[$g->format('w')];
           $gg = $g->format('j');
           $gm = $nomemesi[$g->format('n')];
-          $strore = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
+          $store = rtrim(rtrim(number_format($dati['lezioni'][$g->format('n')][$g->format('j')]['durata'], 1, ',', ''), '0'), ',');
           $html .= '<td style="width:10mm"><b>'.$gs.'<br>'.$gg.'<br>'.$gm.'</b></td>';
-          $html_col .= '<td><i>'.$strore.'</i></td>';
+          $html_col .= '<td><i>'.$store.'</i></td>';
         }
         if ($np == $numeropagine - 1) {
           $rspan = ($html_col == '' ? '' : ' rowspan="2"');

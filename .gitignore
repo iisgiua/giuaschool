@@ -29,6 +29,8 @@
 /public/app/*
 !/public/app/.gitkeep
 !/public/app/giuaschool-app-v*
+# APK compilato in locale: le release stanno nelle GitHub Releases
+/public/app/giuaschool-app-v*.apk
 /public/bundles/
 /src/Command/Argo/
 /src/Controller/GiuaController.php
@@ -44,7 +46,40 @@
 !var/sessions/.gitkeep
 /vendor/*
 !/vendor/.gitkeep
+/.env
 /.env.*.local
 /.env.local
 /.env.local.php
+/.env-dist
 /last_deploy.date
+/.gs-updating
+client_secret_*.json
+
+###> vincentlanglet/twig-cs-fixer ###
+/.twig-cs-fixer.cache
+###< vincentlanglet/twig-cs-fixer ###
+
+.psalm-cache
+
+###> artefatti locali di analisi ###
+/about.txt
+/risultato.txt
+/security_issues.json
+/CREDENZIALI_TEST.md
+/PIANO_SICUREZZA.md
+/PIANO_COMMIT.md
+/audit_qa.py
+/gen_fixtures.py
+/security_qa.py
+/semgrep.json
+/routes.json
+/fixtures_ids.json
+/graifcbug.txt
+/report_qa/
+/tools/
+/docs/manuali/
+/var/server_dev.log
+###< artefatti locali di analisi ###
+
+/__pycache__/
+opencode.json

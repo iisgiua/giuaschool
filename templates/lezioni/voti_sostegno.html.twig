@@ -7,44 +7,44 @@
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_voti_dettagli'|trans }} {{ classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ alunno.cognome~' '~alunno.nome }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ alunno.cognome ~ ' ' ~ alunno.nome }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>{% endif %}</em></h2>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   <div class="row gs-mb-1">
     <div class="col-sm-8">
       <strong class="gs-big">Materia:</strong>
       <div style="display:inline-block" class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere la materia">{{ info.materia_scelta }}<span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for k,v in materie %}
-          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('lezioni_voti_sostegno', {'cattedra': cattedra.id, 'materia': v.id}) }}">{{ v.nomeBreve }}</a></li>
+    {% for k, v in materie %}
+          <li{{ v.id == idmateria ? ' class="active"' }}><a href="{{ path('lezioni_voti_sostegno', {cattedra: cattedra.id, materia: v.id}) }}">{{ v.nomeBreve }}</a></li>
     {% endfor %}
         </ul>
       </div>
     </div>
     <div class="col-sm-4 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_quadro_sostegno') }}" role="button" title="Visualizza le medie dei voti degli alunni"><strong>Medie voti</strong></a>
+      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_quadro_sostegno', {cattedra: cattedra.id}) }}" role="button" title="Visualizza le medie dei voti degli alunni"><strong>Medie voti</strong></a>
     </div>
   </div>
     {% if idmateria %}
-      {% for periodo,v in dati %}
-        {% for materia,v1 in v %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-info text-center gs-big"><strong>{{ periodo }}</strong></caption>
-    <thead class="bg-success">
-      <tr>
-        <th>Data</th>
-        <th>Tipo</th>
-        <th>Argomenti o descrizione della prova</th>
-        <th>Valutazione</th>
-      </tr>
-    </thead>
-    <tbody>
-          {% for data,v2 in v1 %}
+      {% for periodo, v in dati %}
+        {% for materia, v1 in v %}
+  {% set intestazione = [
+      {contenuto: 'Data', scope: 'col'},
+      {contenuto: 'Tipo', scope: 'col'},
+      {contenuto: 'Argomenti o descrizione della prova', scope: 'col'},
+      {contenuto: 'Valutazione', scope: 'col'},
+    ] %}
+    {% set corpo_grezzo_0 %}
+          {% for data, v2 in v1 %}
             {% for e in v2 %}
       <tr>
         <td><strong>{{ e.data }}</strong></td>
-        <td>{{ ('label.voti_'~e.tipo)|trans }}</td>
+        <td>{{ ('label.voti_' ~ e.tipo)|trans }}</td>
         <td><small>{{ e.argomento }}</small></td>
         <td>
           {% if e.voto > 0 %}<span class="label {{ not e.media ? 'gs-label-secondary' : (e.voto < 5 ? 'label-danger' : (e.voto < 6 ? 'label-warning' : 'label-success')) }} gs-big">{{ e.voto_str }}</span>{{ not e.media ? '<br><strong>NON IN MEDIA</strong>' }}{{ e.giudizio is not empty ? '<br>' }}{% endif %}
@@ -53,8 +53,8 @@
       </tr>
             {% endfor %}
           {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>' ~ periodo ~ ' - ' ~ materia ~ '</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
         {% endfor %}
       {% else %}
   <div class="alert alert-info gs-mt-4" role="alert">

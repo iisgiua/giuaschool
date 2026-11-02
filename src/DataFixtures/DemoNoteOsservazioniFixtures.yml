@@ -1,0 +1,174 @@
+####################
+# DemoNoteOsservazioniFixtures - dati demo per note, osservazioni e annotazioni
+#
+# Popola le pagine delle note disciplinari, delle osservazioni sul registro e
+# delle annotazioni di classe per tutte le classi.
+####################
+
+
+App\Entity\Nota:
+
+  nota_demo_1A:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '50%? <text()>: <strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_1A'
+    docente: '@docente_curricolare_1'
+    docenteProvvedimento: '50%? @staff_1'
+    alunni: '<collection(@alunno_1A_1, @alunno_1A_2)>'
+  nota_demo_2A:
+    tipo: 'C'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_2A'
+    docente: '@docente_curricolare_2'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_2A_1)>'
+  nota_demo_3A:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '50%? <text()>: <strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_3A'
+    docente: '@docente_curricolare_3'
+    docenteProvvedimento: '50%? @staff_2'
+    alunni: '<collection(@alunno_3A_1)>'
+  nota_demo_4A:
+    tipo: 'C'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_4A'
+    docente: '@docente_curricolare_4'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_4A_1)>'
+  nota_demo_5A:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '50%? <text()>: <strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_5A'
+    docente: '@docente_curricolare_5'
+    docenteProvvedimento: '50%? @staff_3'
+    alunni: '<collection(@alunno_5A_1)>'
+
+  nota_demo_1B:
+    tipo: 'C'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_1B'
+    docente: '@docente_curricolare_1'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_1B_1, @alunno_1B_2)>'
+  nota_demo_2B:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '50%? <text()>: <strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_2B'
+    docente: '@docente_curricolare_2'
+    docenteProvvedimento: '50%? @staff_4'
+    alunni: '<collection(@alunno_2B_1)>'
+  nota_demo_3B:
+    tipo: 'C'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_3B'
+    docente: '@docente_curricolare_3'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_3B_1)>'
+  nota_demo_4B:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '50%? <text()>: <strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_4B'
+    docente: '@docente_curricolare_4'
+    docenteProvvedimento: '50%? @staff_5'
+    alunni: '<collection(@alunno_4B_1)>'
+  nota_demo_5B:
+    tipo: 'C'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_5B'
+    docente: '@docente_curricolare_5'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_5B_1)>'
+
+  nota_demo_1C:
+    tipo: 'C'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '<strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_1C'
+    docente: '@docente_curricolare_1'
+    docenteProvvedimento:
+    alunni: '<collection(@alunno_1C_1)>'
+  nota_demo_2C:
+    tipo: 'I'
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    provvedimento: '50%? <text()>: <strval("")>'
+    annullata: '<(null)>'
+    classe: '@classe_2C'
+    docente: '@docente_curricolare_2'
+    docenteProvvedimento: '50%? @staff_1'
+    alunni: '<collection(@alunno_2C_1)>'
+
+
+App\Entity\OsservazioneAlunno:
+
+  osservazione_alunno_demo_{1..5}:
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    cattedra: '@cattedra_curricolare_<current()>'
+    alunno: '@alunno_<($current . "A_1")>'
+
+  osservazione_alunno_demo_B_{1..5}:
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    cattedra: '@cattedra_curricolare_<current()>'
+    alunno: '@alunno_<($current . "B_1")>'
+
+
+App\Entity\OsservazioneClasse:
+
+  osservazione_classe_demo_{1..5}:
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    cattedra: '@cattedra_curricolare_<current()>'
+
+
+App\Entity\Annotazione:
+
+  annotazione_demo_{1..5}:
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    visibile: true
+    avviso:
+    classe: '@classe_<($current . "A")>'
+    docente: '@docente_curricolare_<current()>'
+
+  annotazione_demo_B_{1..5}:
+    data: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    testo: '<text()>'
+    visibile: '<boolean(50)>'
+    avviso:
+    classe: '@classe_<($current . "B")>'
+    docente: '@docente_curricolare_<current()>'

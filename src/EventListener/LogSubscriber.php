@@ -32,8 +32,8 @@ class LogSubscriber {
    * @param EntityManagerInterface $em Gestore delle entità
   */
   public function __construct(
-      private LogListener $log,
-      private EntityManagerInterface $em) {
+      private readonly LogListener $log,
+      private readonly EntityManagerInterface $em) {
   }
 
   /**

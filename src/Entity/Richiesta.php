@@ -116,7 +116,7 @@ class Richiesta implements Stringable {
    * @var Classe $classe Classe di riferimento della richiesta
    */
   #[ORM\JoinColumn(nullable: true)]
-  #[ORM\ManyToOne(targetEntity: \Classe::class)]
+  #[ORM\ManyToOne(targetEntity: Classe::class)]
   private ?Classe $classe = null;
 
   /**

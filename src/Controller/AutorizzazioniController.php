@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Exception;
 use App\Entity\Classe;
 use App\Entity\DefinizioneAutorizzazione;
 use App\Entity\Richiesta;
@@ -260,11 +261,15 @@ class AutorizzazioniController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/autorizzazioni/abilita/{autorizzazione}/{abilita}', name: 'autorizzazioni_abilita', requirements: ['autorizzazione' => '\d+', 'abilita' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/autorizzazioni/abilita/{autorizzazione}/{abilita}', name: 'autorizzazioni_abilita', requirements: ['autorizzazione' => '\d+', 'abilita' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_STAFF')]
-  public function abilita(LogHandler $dblogger,
+  public function abilita(Request $request, LogHandler $dblogger,
                           #[MapEntity] DefinizioneAutorizzazione $autorizzazione,
                           int $abilita): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // abilita o disabilita
     $autorizzazione->setAbilitata($abilita == 1);
     // memorizza modifiche
@@ -291,6 +296,10 @@ class AutorizzazioniController extends BaseController {
                             ): Response {
     // legge template
     $percorso = $this->getParameter('kernel.project_dir').'/PERSONAL/data/autorizzazioni/';
+    if (!is_file($percorso.$autorizzazione->getModulo())) {
+      // errore: template del modulo non disponibile
+      throw $this->createNotFoundException('exception.modulo_template_mancante');
+    }
     $template = file_get_contents($percorso.$autorizzazione->getModulo());
     // toglie dati personali
     $template = preg_replace('/\{\{\s*app\.[^\}]*\}\}/', '<strong>***</strong>', $template);
@@ -319,44 +328,42 @@ class AutorizzazioniController extends BaseController {
   #[Route(path: '/autorizzazioni/autorizza/{modulo}', name: 'autorizzazioni_autorizza', requirements: ['modulo' => '\d+'], methods: ['GET', 'POST'])]
   #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
   public function autorizza(Request $request, RichiesteUtil $ric, LogHandler $dblogger,
+                            TranslatorInterface $trans,
                             #[MapEntity] DefinizioneAutorizzazione $modulo
                             ): Response {
     // inizializza
     $info = [];
     $dati = [];
     $utente = $this->getUser();
-    // controlla modulo
-    if (!$modulo->getAbilitata() || (new DateTime('today')) > $modulo->getInizio()) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla sede
-    $classe = $utente->getCodiceRuolo() == 'A' ? $utente->getClasse() :
-      ($utente->getCodiceRuolo() == 'G' ? $utente->getAlunno()->getClasse() : null);
-    $sedi = $classe ? [$classe->getSede()->getId()] : [];
-    if ($modulo->getSede() && !in_array($modulo->getSede()->getId(), $sedi, true)) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla classe
-    if (!empty($modulo->getClassi()) && (!$classe || !in_array($classe->getId(), $modulo->getClassi()))) {
-      // errore
-      throw $this->createNotFoundException('exception.id_notfound');
-    }
-    // controlla accesso a modulo richiesta
-    if (!$this->getUser()->controllaRuoloFunzione($modulo->getRichiedenti())) {
-      // errore: azione non permessa
-      throw $this->createNotFoundException('exception.not_allowed');
-    }
+    // controlla modulo, sede, classe e permessi di accesso
+    $classe = $this->controllaModuloAutorizzazione($modulo, $utente);
     // trova autorizzazioni firmate
     $esistenti = $this->em->getRepository(Richiesta::class)->autorizzazioni($modulo,
       $utente->getCodiceRuolo() == 'G' ? $utente->getAlunno() : $utente);
     // controlla se esiste già una risposta dell'utente
+    $orfana = null;
     foreach ($esistenti as $altra) {
       if ($altra->getUtente()->getId() == $utente->getId()) {
+        if ($altra->getStato() === 'I' && $altra->getDocumento() === '') {
+          // autorizzazione incompleta (invio precedente non riuscito): la elimina
+          $orfana = $altra;
+          continue;
+        }
         // errore: esiste già altra risposta
         throw $this->createNotFoundException('exception.not_allowed');
       }
+    }
+    if ($orfana) {
+      // elimina l'autorizzazione incompleta e aggiorna la lista
+      $rimaste = [];
+      foreach ($esistenti as $esistente) {
+        if ($esistente !== $orfana) {
+          $rimaste[] = $esistente;
+        }
+      }
+      $esistenti = $rimaste;
+      $this->em->remove($orfana);
+      $this->em->flush();
     }
     // crea autorizzazione
     $autorizzazione = (new Richiesta())
@@ -365,15 +372,22 @@ class AutorizzazioniController extends BaseController {
       ->setClasse($classe);
     $this->em->persist($autorizzazione);
     // informazioni per la visualizzazione
-    $info['modulo'] = '@data/autorizzazioni/'.$modulo->getModulo();
+    $moduloTemplate = '@data/autorizzazioni/'.$modulo->getModulo();
+    $percorsoModulo = $this->getParameter('kernel.project_dir').'/PERSONAL/data/autorizzazioni/'.$modulo->getModulo();
+    $info['modulo'] = file_exists($percorsoModulo) ? $moduloTemplate : 'autorizzazioni/default.html.twig';
     $info['ruolo'] = $utente->getCodiceRuolo() == 'G' ? 'GN' :
       ($utente->controllaRuoloFunzione('AM') ? 'AM' : '');
     $info['autorizzazione'] = $modulo;
     $info['sedi'] = $this->em->getRepository(Sede::class)->lista();
+    $info['modulo_sconosciuto'] = !file_exists($percorsoModulo);
     // form di inserimento
     $form = $this->createForm(RichiestaType::class, null, ['form_mode' => 'add',
       'values' => [$modulo->getCampi(), $modulo->getUnica()]]);
     $form->handleRequest($request);
+    if ($form->isSubmitted() && !$ric->esisteTemplate('autorizzazioni', $modulo->getModulo())) {
+      // il template del modulo non è disponibile: evita un errore 500 in fase di invio
+      $form->addError(new FormError($trans->trans('exception.modulo_template_mancante')));
+    }
     if ($form->isSubmitted() && $form->isValid()) {
       $invio = new DateTime();
       // memorizza risposta
@@ -383,20 +397,28 @@ class AutorizzazioniController extends BaseController {
         ->setStato('I')
         ->setMessaggio('');
       $this->em->flush();
-      // crea documento PDF
-      if (count($esistenti) == 0) {
-        // crea una nuova autorizzazione
-        $documento = $ric->autorizzazionePdf($modulo, $info['ruolo'], $info['sedi'], $autorizzazione->getId(),
-          $classe, $invio);
-        $msgLog = 'Invio autorizzazione';
-      } else {
-        // firma un'autorizzazione esistente
-        $documento = $ric->firmaAutorizzazionePdf($esistenti[0], $info['ruolo'], $info['sedi'], $autorizzazione->getId(), $classe, $invio);
-        $msgLog = 'Firma autorizzazione';
+      try {
+        // crea documento PDF
+        if (count($esistenti) == 0) {
+          // crea una nuova autorizzazione
+          $documento = $ric->autorizzazionePdf($modulo, $info['ruolo'], $info['sedi'], $autorizzazione->getId(),
+            $classe, $invio);
+          $msgLog = 'Invio autorizzazione';
+        } else {
+          // firma un'autorizzazione esistente
+          $documento = $ric->firmaAutorizzazionePdf($esistenti[0], $info['ruolo'], $info['sedi'], $autorizzazione->getId(), $classe, $invio);
+          $msgLog = 'Firma autorizzazione';
+        }
+      } catch (Exception $e) {
+        // errore: elimina l'autorizzazione incompleta per non bloccare un nuovo invio
+        $this->em->remove($autorizzazione);
+        $this->em->flush();
+        throw $e;
       }
       // ok: memorizzazione e log
       $autorizzazione
         ->setDocumento($documento);
+      $this->em->flush();
       $dblogger->logAzione('AUTORIZZAZIONI', $msgLog);
       // redirezione
       return $this->redirectToRoute('richieste_lista');
@@ -441,6 +463,42 @@ class AutorizzazioniController extends BaseController {
       return $pdf->send($nomefile);
     }
     return $this->renderHtml('autorizzazioni', 'dettagli', $dati, $info);
+  }
+
+  /**
+   * Verifica che il modulo di autorizzazione sia utilizzabile dall'utente e restituisce
+   * la classe di riferimento dell'utente
+   *
+   * @param mixed $modulo Definizione del modulo di autorizzazione
+   * @param mixed $utente Utente che sta effettuando l'autorizzazione
+   *
+   * @return mixed Classe di riferimento dell'utente, null se non applicabile
+   */
+  private function controllaModuloAutorizzazione(mixed $modulo, mixed $utente): mixed {
+    // controlla modulo
+    if (!$modulo->getAbilitata() || (new DateTime('today')) > $modulo->getInizio()) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla sede
+    $classe = $utente->getCodiceRuolo() == 'A' ? $utente->getClasse() :
+      ($utente->getCodiceRuolo() == 'G' ? $utente->getAlunno()->getClasse() : null);
+    $sedi = $classe ? [$classe->getSede()->getId()] : [];
+    if ($modulo->getSede() && !in_array($modulo->getSede()->getId(), $sedi, true)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla classe
+    if (!empty($modulo->getClassi()) && (!$classe || !in_array($classe->getId(), $modulo->getClassi()))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla accesso a modulo richiesta
+    if (!$this->getUser()->controllaRuoloFunzione($modulo->getRichiedenti())) {
+      // errore: azione non permessa
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    return $classe;
   }
 
 }

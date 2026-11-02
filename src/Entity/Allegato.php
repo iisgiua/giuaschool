@@ -8,6 +8,7 @@
 
 namespace App\Entity;
 
+use DateTimeInterface;
 use App\Repository\AllegatoRepository;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
@@ -38,13 +39,13 @@ class Allegato implements Stringable {
   private ?int $id = null;
 
   /**
-   * @var DateTime|null $creato Data e ora della creazione iniziale dell'istanza
+   * @var DateTimeInterface|null $creato Data e ora della creazione iniziale dell'istanza
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $creato = null;
 
   /**
-   * @var DateTime|null $modificato Data e ora dell'ultima modifica dei dati
+   * @var DateTimeInterface|null $modificato Data e ora dell'ultima modifica dei dati
    */
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: false)]
   private ?DateTime $modificato = null;
@@ -208,6 +209,20 @@ class Allegato implements Stringable {
   public function setEstensione(?string $estensione): self {
     $this->estensione = $estensione;
     return $this;
+  }
+
+  /**
+   * Indica se il file è visualizzabile direttamente nel browser.
+   *
+   * I formati che i browser non sanno mostrare (documenti di testo, fogli di
+   * calcolo, archivi) possono solo essere scaricati: per questi file non ha
+   * senso offrire il pulsante di anteprima.
+   *
+   * @return bool Vero se il file è visualizzabile nel browser, falso altrimenti
+   */
+  public function isVisualizzabile(): bool {
+    return in_array(strtolower((string) $this->estensione),
+      ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'txt'], true);
   }
 
   /**

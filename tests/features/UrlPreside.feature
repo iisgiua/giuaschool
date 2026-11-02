@@ -16,7 +16,6 @@ Schema dello scenario: Controlla la visualizzazione delle pagine per l'utente pr
   Allora vedi la pagina "<route>"
   Esempi:
     | route                      |
-    | lezioni_classe             |
     | lezioni_registro_firme     |
     | lezioni_assenze_quadro     |
     | lezioni_note               |

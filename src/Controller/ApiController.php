@@ -14,6 +14,7 @@ use App\Entity\Cattedra;
 use App\Entity\Configurazione;
 use App\Entity\Docente;
 use App\Entity\Utente;
+use App\Exception\AutenticazioneDispositivoException;
 use App\Util\LogHandler;
 use DateTimeImmutable;
 use Exception;
@@ -181,7 +182,7 @@ class ApiController extends BaseController {
     if (!$chiavePubblica || !openssl_pkey_get_public($chiavePem)) {
       // errore: chiave non valida
       $logger->error('Registrazione dispositivo non riuscita: chiave pubblica non valida.');
-      return new JsonResponse($risposta, 422); // 422 Unprocessable Entity
+      return new JsonResponse($risposta, Response::HTTP_UNPROCESSABLE_ENTITY); // 422 Unprocessable Entity
     }
     // associa (o sostituisce) il dispositivo dell'utente
     $utente
@@ -223,7 +224,7 @@ class ApiController extends BaseController {
       // errore: ID dispositivo non valido
       $logger->error('Revoca dispositivo non riuscita: ID dispositivo non valido.',
         ['utente' => $utente->getUserIdentifier(), 'dispositivoId' => $dispositivoId]);
-      return new JsonResponse($risposta, 422); // 422 Unprocessable Entity
+      return new JsonResponse($risposta, Response::HTTP_UNPROCESSABLE_ENTITY); // 422 Unprocessable Entity
     }
     // revoca il dispositivo dell'utente
     $utente
@@ -256,7 +257,7 @@ class ApiController extends BaseController {
     if ($dispositivoId === '') {
       // errore: ID dispositivo non valido
       $logger->error('Richiesta di autenticazione non riuscita: ID dispositivo non valido.');
-      return new JsonResponse($risposta, 404); // 404 Not Found
+      return new JsonResponse($risposta, Response::HTTP_NOT_FOUND); // 404 Not Found
     }
     // controlla che il dispositivo sia associato ad un utente abilitato
     $utente = $this->em->getRepository(Utente::class)->findOneBy(['dispositivoId' => $dispositivoId,
@@ -265,7 +266,7 @@ class ApiController extends BaseController {
       // errore: utente non trovato o disabilitato
       $logger->error('Richiesta di autenticazione non riuscita: utente non trovato o disabilitato.',
         ['dispositivoId' => $dispositivoId]);
-      return new JsonResponse($risposta, 404); // 404 Not Found
+      return new JsonResponse($risposta, Response::HTTP_NOT_FOUND); // 404 Not Found
     }
     // controlla se il dispositivo è ancora valido
     if (!$this->em->getRepository(Utente::class)->dispositivoValido($utente)) {
@@ -273,7 +274,7 @@ class ApiController extends BaseController {
       $logger->error('Richiesta di autenticazione non riuscita: dispositivo non più valido.',
         ['utente' => $utente->getUserIdentifier(), 'dispositivoId' => $dispositivoId]);
       // segnala al client che la registrazione del dispositivo non è più valida e deve essere rifatta
-      return new JsonResponse(['errore' => 'DISPOSITIVO_NON_VALIDO'], 404); // 404 Not Found
+      return new JsonResponse(['errore' => 'DISPOSITIVO_NON_VALIDO'], Response::HTTP_NOT_FOUND); // 404 Not Found
     }
     // crea nuova richiesta di autenticazione (challenge) per il dispositivo
     $autenticazione = (new AutenticazioneDispositivo())
@@ -317,7 +318,7 @@ class ApiController extends BaseController {
         // errore: richiesta di autenticazione non valida
         $logger->error('Validazione richiesta di autenticazione non riuscita: richiesta non valida.',
           ['idPubblico' => $id]);
-        throw new Exception();
+        throw new AutenticazioneDispositivoException();
       }
       if ($autenticazione->getScadenzaRichiesta() < new DateTimeImmutable() || $autenticazione->getRichiestaUsata()) {
         // errore: richiesta di autenticazione scaduta o già usata
@@ -325,17 +326,17 @@ class ApiController extends BaseController {
           ['utente' => $autenticazione->getUtente() ? $autenticazione->getUtente()->getUserIdentifier() : '---',
           'scadenza' => $autenticazione->getScadenzaRichiesta()->format('d/m/Y H:i:s'),
           'usata' => (int) $autenticazione->getRichiestaUsata(), 'richiesta' => $autenticazione->getid()]);
-        throw new Exception();
+        throw new AutenticazioneDispositivoException();
       }
       // richiesta valida: la segna subito come usata
       $autenticazione->setRichiestaUsata(true);
       $this->em->flush();
       // fine transazione
       $this->em->commit();
-    } catch (Exception $e) {
+    } catch (Exception) {
       // elimina eventuali modifiche
       $this->em->rollback();
-      return new JsonResponse($risposta, 404); // 404 Not Found
+      return new JsonResponse($risposta, Response::HTTP_NOT_FOUND); // 404 Not Found
     }
     // controlla il dispositivo associato all'utente
     $utente = $autenticazione->getUtente();
@@ -344,7 +345,7 @@ class ApiController extends BaseController {
       $logger->error('Validazione richiesta di autenticazione non riuscita: dispositivo non più valido.',
         ['utente' => $utente->getUserIdentifier(), 'dispositivoId' => $utente->getDispositivoId(),
         'richiesta' => $autenticazione->getid()]);
-      return new JsonResponse($risposta, 404); // 404 Not Found
+      return new JsonResponse($risposta, Response::HTTP_NOT_FOUND); // 404 Not Found
     }
     // decodifica la firma
     $firmaBinaria = base64_decode($firma, true);
@@ -352,7 +353,7 @@ class ApiController extends BaseController {
       // errore: firma non valida (non base64)
       $logger->error('Validazione richiesta di autenticazione non riuscita: firma non decodificabile.',
         ['utente' => $utente->getUserIdentifier(), 'richiesta' => $autenticazione->getid()]);
-      return new JsonResponse($risposta, 404); // 404 Not Found
+      return new JsonResponse($risposta, Response::HTTP_NOT_FOUND); // 404 Not Found
     }
     // controlla la chiave pubblica del dispositivo
     $chiave = openssl_pkey_get_public($utente->getDispositivoChiave());
@@ -360,7 +361,7 @@ class ApiController extends BaseController {
       // errore: chiave pubblica del dispositivo non valida
       $logger->error('Validazione richiesta di autenticazione non riuscita: chiave pubblica non valida.',
         ['utente' => $utente->getUserIdentifier(), 'richiesta' => $autenticazione->getid()]);
-      return new JsonResponse($risposta, 404); // 404 Not Found
+      return new JsonResponse($risposta, Response::HTTP_NOT_FOUND); // 404 Not Found
     }
     // validazione della firma
     $protocollo = $this->em->getRepository(Configurazione::class)->getParametro('protocollo_app', '');
@@ -369,7 +370,7 @@ class ApiController extends BaseController {
       // errore: firma non valida
       $logger->error('Validazione richiesta di autenticazione non riuscita: firma non valida.',
         ['utente' => $utente->getUserIdentifier(), 'richiesta' => $autenticazione->getid()]);
-      return new JsonResponse($risposta, 404); // 404 Not Found
+      return new JsonResponse($risposta, Response::HTTP_NOT_FOUND); // 404 Not Found
     }
     // firma valida: crea un token di accesso monouso per l'utente
     $autenticazione->setToken(bin2hex(random_bytes(32)));

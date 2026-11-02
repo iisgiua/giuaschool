@@ -109,7 +109,7 @@ class DefinizioneConsultazioneRepository extends BaseRepository {
         $dati[$consultazione['id']]['stato'] = 'C'; // closed
       }
       $destinatari = [];
-      foreach (explode(',', $consultazione['richiedenti']) as $destinatario) {
+      foreach (explode(',', (string) $consultazione['richiedenti']) as $destinatario) {
         $destinatari[] = ($destinatario == 'AN' ? 'label.alunni' : ($destinatario == 'GN' ? 'label.genitori' : ''));
       }
       $dati[$consultazione['id']]['destinatari'] = $destinatari;

@@ -8,7 +8,7 @@
   <tr style="height:30mm">
     <td align="center" style="width:6mm">&nbsp;<br style="line-height:20mm"><strong>Pr.</strong></td>
     <td align="center" style="width:50mm" colspan="2">&nbsp;<br style="line-height:20mm"><strong>Alunno</strong></td>
-{% for idmat,mat in dati.materie %}
+{% for idmat, mat in dati.materie %}
     <td style="width:{{ mat.tipo == 'R' ? 12 : 6 }}mm;font-size:1pt">&nbsp;<br style="line-height:22.5mm"><span style="font-size:{{ mat.tipo == 'R' ? 24 : 12 }}pt">&nbsp;</span><strong style="font-size:8pt">{% for t in dati.tcpdf[idmat] %}<tcpdf data="{{ t }}" />{% endfor %}</strong></td>
 {% endfor %}
 {% if dati.classe.anno >= 3 %}
@@ -22,7 +22,7 @@
 {% set dimEsito = 190 - (6 + 50 + 12 + 6 * ((dati.materie|length) - 1) + 6 * (dati.classe.anno == 3 ? 1 : (dati.classe.anno >= 4 ? 3 : 0)) + 12) %}
     <td align="center" style="width:{{ dimEsito }}mm">&nbsp;<br style="line-height:20mm"><strong>Esito</strong></td>
   </tr>
-{% for id,alu in dati.alunni %}
+{% for id, alu in dati.alunni %}
   <tr nobr="true">
     <td align="center"><span style="line-height:24pt;">{{ loop.index }}</span></td>
     <td style="width:45mm;border-right-color:white;border-top-color:black;border-bottom-color:black">&nbsp;{{ alu.cognome|upper }} {{ alu.nome|upper }}
@@ -30,7 +30,7 @@
   {% if id in dati.scrutinati %}
     <td align="center" style="width:5mm;border-left-color:white;border-right-color:black;border-top-color:black;border-bottom-color:black;"><span style="font-size:6pt;line-height:10pt;">Voto</span>
       <br><span style="font-size:6pt;line-height:10pt;">Ass.</span></td>
-    {% for idmat,mat in dati.materie %}
+    {% for idmat, mat in dati.materie %}
       {% if mat.tipo == 'R' and alu.religione != 'S' and alu.religione != 'A' %}
     <td align="center"><span style="line-height:24pt;">///</span></td>
       {% else %}
@@ -56,7 +56,7 @@
   {% elseif id in dati.no_scrutinabili %}
     <td align="center" style="width:5mm;border-left-color:white;border-right-color:black;border-top-color:black;border-bottom-color:black;"><span style="font-size:6pt;line-height:10pt;">&nbsp;</span>
       <br><span style="font-size:6pt;line-height:10pt;">Ass.</span></td>
-    {% for idmat,mat in dati.materie %}
+    {% for idmat, mat in dati.materie %}
       {% if mat.tipo == 'R' and alu.religione != 'S' and alu.religione != 'A' %}
     <td align="center"><span style="line-height:24pt;">///</span></td>
       {% else %}
@@ -75,7 +75,7 @@
     <td align="center"><span style="{{ dimEsito < 20 ? 'font-size:6pt;' }}line-height:12pt;">NON<br>AMMESS{{ alu.sesso == 'M' ? 'O' : 'A' }}</span></td>
   {% elseif id in dati.estero %}
   <td align="center" style="width:5mm;border-left-color:white;border-right-color:black;border-top-color:black;border-bottom-color:black;">&nbsp;</td>
-    {% for idmat,mat in dati.materie %}
+    {% for idmat, mat in dati.materie %}
   <td align="center">&nbsp;</td>
     {% endfor %}
     {% if dati.classe.anno >= 3 %}
@@ -93,7 +93,7 @@
 </table>
 <p>&nbsp;</p>
 <table border="0" cellpadding="0" style="font-family:helvetica;font-size:9pt">
-{% for iddoc,doc in dati.docenti %}
+{% for iddoc, doc in dati.docenti %}
   {% if loop.index0 % 3 == 0 %}
   <tr nobr="true">
   {% endif %}

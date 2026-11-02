@@ -10,7 +10,6 @@ namespace App\Repository;
 
 use App\Entity\Cattedra;
 use App\Entity\Classe;
-use App\Entity\Sede;
 use App\Entity\Docente;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -21,29 +20,6 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  * @author Antonello Dessì
  */
 class DocenteRepository extends BaseRepository {
-
-  /**
-   * Restituisce la lista dei docenti abilitati, secondo i criteri di ricerca indicati
-   *
-   * @param array $search Lista dei criteri di ricerca
-   * @param int $page Pagina corrente
-   * @param int $limit Numero di elementi per pagina
-   *
-   * @return Paginator Oggetto Paginator
-   */
-  public function findEnabled($search=null, $page=1, $limit=10): Paginator {
-    // crea query
-    $query = $this->createQueryBuilder('d')
-      ->where('d.nome LIKE :nome AND d.cognome LIKE :cognome AND (NOT d INSTANCE OF App\Entity\Preside) AND d.abilitato=:abilitato')
-      ->orderBy('d.cognome, d.nome, d.username', 'ASC')
-      ->setParameter('nome', $search['nome'].'%')
-      ->setParameter('cognome', $search['cognome'].'%')
-      ->setParameter('abilitato', 1)
-      ->getQuery();
-    // crea lista con pagine
-    $res = $this->paginazione($query, $page);
-    return $res['lista'];
-  }
 
   /**
    * Restituisce la lista degli ID di docenti corretti o l'errore nell'apposito parametro
@@ -85,16 +61,17 @@ class DocenteRepository extends BaseRepository {
   public function listaDocenti($lista, $attr): string {
     // legge docenti validi
     $docenti = $this->createQueryBuilder('d')
-      ->select("CONCAT('<span id=',:quote,:attr,d.id,:quote,'>',d.cognome,' ',d.nome,'</span>') AS nome")
+      ->select('d.id AS id, d.cognome AS cognome, d.nome AS nome')
       ->where('d.id IN (:lista) AND d.abilitato=:abilitato')
-			->setParameter('lista', $lista)
-			->setParameter('abilitato', 1)
-			->setParameter('attr', $attr)
-			->setParameter('quote', '\\"')
+      ->setParameter('lista', $lista)
+      ->setParameter('abilitato', 1)
       ->orderBy('d.cognome,d.nome', 'ASC')
       ->getQuery()
       ->getArrayResult();
-    $lista_docenti = array_column($docenti, 'nome');
+    // costruisce la lista codificando i valori (evita iniezione di markup nei nomi)
+    $lista_docenti = array_map(
+      fn($d) => '<span id=\"'.htmlspecialchars($attr.$d['id'], ENT_QUOTES).'\">'.
+        htmlspecialchars($d['cognome'].' '.$d['nome'], ENT_QUOTES).'</span>', $docenti);
     // restituisce lista
     return implode(', ', $lista_docenti);
   }

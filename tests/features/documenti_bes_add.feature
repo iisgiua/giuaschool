@@ -34,8 +34,8 @@ Scenario: visualizza pagina inserimento documento BES di nuovo alunno
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "P.D.P."
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(3) select" contiene "P.E.I."
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(4) label" contiene "Documento"
-  E la sezione "#gs-main .panel-body form button:nth-of-type(1)" contiene "Conferma"
-  E la sezione "#gs-main .panel-body form button:nth-of-type(2)" contiene "Annulla"
+  E la sezione "#gs-main .panel-body form button#documento_submit" contiene "Conferma"
+  E la sezione "#gs-main .panel-body form button#documento_cancel" contiene "Annulla"
 
 Schema dello scenario: visualizza pagina inserimento nuovo documento BES di alunno con altro documento
   Data ricerca istanze di tipo "Classe":
@@ -61,8 +61,8 @@ Schema dello scenario: visualizza pagina inserimento nuovo documento BES di alun
   Ma la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" non contiene "<opzione4>"
   Ma la sezione "#gs-main .panel-body form .form-group:nth-of-type(1) select" non contiene "<opzione5>"
   E la sezione "#gs-main .panel-body form .form-group:nth-of-type(2) label" contiene "Documento"
-  E la sezione "#gs-main .panel-body form button:nth-of-type(1)" contiene "Conferma"
-  E la sezione "#gs-main .panel-body form button:nth-of-type(2)" contiene "Annulla"
+  E la sezione "#gs-main .panel-body form button#documento_submit" contiene "Conferma"
+  E la sezione "#gs-main .panel-body form button#documento_cancel" contiene "Annulla"
   Ma la sezione "#gs-main .panel-body form label" non contiene "Classe"
   Ma la sezione "#gs-main .panel-body form label" non contiene "Alunno"
   Esempi:
@@ -249,7 +249,7 @@ Schema dello scenario: inserisce documento BES e controlla la sua codifica
   E ricerca istanze di tipo "Documento":
     | id  | tipo      | alunno  |
     | $d1 | <tipodoc> | $a1     |
-  Allora la sezione "#gs-main table tbody tr td button span.sr-only" contiene "$d1:cifrato"
+  Allora la sezione "#gs-main table tbody" contiene nel sorgente "$d1:cifrato"
   E vedi "/Michele Giua \(Castelsardo, 26 aprile 1889/" in PDF "upload/documenti/riservato/{{$d1:allegati[0].file}}.pdf" con password "$d1:cifrato"
   Esempi:
     | tipo           | tipodoc | alunno                 |

@@ -8,6 +8,7 @@
 
 namespace App\Tests\Behat;
 
+use ReflectionClass;
 use DMore\ChromeDriver\ChromeDriver;
 
 
@@ -26,7 +27,7 @@ class ExtendedChromeDriver extends ChromeDriver {
    */
   public function sendCommand(string $method, array $params = []): void {
     // rende accessibile la proprietà 'page' della classe padre per inviare il comando
-    $ref = new \ReflectionClass($this);
+    $ref = new ReflectionClass($this);
     $ref = $ref->getParentClass();
     $property = $ref->getProperty('page');
     $property->setAccessible(true);

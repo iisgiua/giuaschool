@@ -8,8 +8,8 @@ rm -f -r bin/
 rm -f -r tests/
 rm -f -r var/cache/* var/log/* var/sessions/*
 
-# rinomina .env per evitare sia sovrascritto in aggiornamento
-mv .env .env-dist
+# la configurazione della macchina e quella di test non devono finire nell'archivio
+rm -f .env .env.local .env.local.php .env.test .env-dist
 
 # crea l'archivio con i file modificati e aggiunti
 wget -q -P ../ https://github.com/iisgiua/giuaschool/releases/download/$1/giuaschool-release-$1.md5.zip

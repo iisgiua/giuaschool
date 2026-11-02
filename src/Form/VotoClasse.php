@@ -180,7 +180,7 @@ class VotoClasse implements Stringable {
   /**
    * Modifica il voto rappresentato come testo (es: 6-,6,6+,6½)
    *
-   * @param string|null $voto Voto rappresentato come testo
+   * @param string|null $votoTesto Voto rappresentato come testo
    *
    * @return VotoClasse Oggetto modificato
    */

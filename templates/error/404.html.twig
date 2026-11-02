@@ -1,0 +1,29 @@
+{# pagina di errore generica: mostra le richieste non soddisfatte (404) #}
+{% extends autenticato ? 'base.html.twig' : 'base-login.html.twig' %}
+
+{# un solo pulsante in pagina, dentro il riquadro: quello predefinito di
+   base-login (che riporta all'accesso) va azzerato, altrimenti si duplica #}
+{% block pagina_back_button %}
+{% endblock %}
+
+{% block pagina_contenuto %}
+{% set contenitore = autenticato ? 'container-fluid' : 'gs-login-main gs-mt-4' %}
+<div class="{{ contenitore }}">
+  <div class="panel panel-danger">
+    <div class="panel-heading">
+      <div class="panel-title text-center"><strong>{{ 'page.error.404'|trans }} [Errore 404]</strong></div>
+    </div>
+    <div class="panel-body text-center">
+      <p class="gs-big gs-mb-4">{{ 'message.error_404_descrizione'|trans }}</p>
+      {% if messaggio %}
+      <p class="gs-mb-4"><em>{{ messaggio }}</em></p>
+      {% endif %}
+      {# ritorna alla pagina precedente; se il JavaScript e' disattivato il
+         collegamento resta valido e porta alla pagina principale/accesso #}
+      <p class="gs-mb-4"><a href="{{ path(rotta_principale) }}" class="btn btn-primary" onclick="history.back(); return false;">
+          {{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline', classe: 'gs-mr-2', titolo: ''}) }}{{ 'label.torna_indietro'|trans }}
+        </a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

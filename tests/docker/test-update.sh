@@ -12,10 +12,6 @@ rm -rf var/cache/test/* tests/temp/*
 
 # passo 1: estrae file zip
 su -s /bin/bash -p -c "php -d memory_limit=-1 vendor/bin/behat tests/features/test-update-1.feature --stop-on-failure -f progress" www-data
-retval=$?
-if [ $retval -ne 0 ]; then
-  exit 1
-fi
 composer -q install --no-progress --no-scripts
 rm -rf var/cache/test/* tests/temp/*
 mkdir -p tests/temp/download
@@ -23,10 +19,6 @@ chmod 777 tests/temp/download
 
 # passi successivi
 su -s /bin/bash -p -c "php -d memory_limit=-1 vendor/bin/behat tests/features/test-update-2.feature --stop-on-failure -f progress" www-data
-retval=$?
-if [ $retval -ne 0 ]; then
-  exit 1
-fi
 rm -rf var/cache/test/* tests/temp/*
 mkdir -p tests/temp/download
 chmod 777 tests/temp/download

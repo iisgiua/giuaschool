@@ -14,6 +14,7 @@ use App\Form\MessageType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -143,8 +144,19 @@ class VotoScrutinioType extends AbstractType {
     }
     // aggiunge data transform
     $builder->get('alunno')->addModelTransformer(new CallbackTransformer(
-      fn($alunno) => $alunno->getId(),
-      fn($id) => $this->em->getRepository(Alunno::class)->find($id)));
+      fn($alunno) => $alunno?->getId(),
+      function ($id) {
+        // un identificativo mancante o non valido rende il form non valido,
+        // senza interrogare il database con un valore nullo
+        if (!is_scalar($id) || (int) $id <= 0) {
+          throw new TransformationFailedException('alunno_non_valido');
+        }
+        $alunno = $this->em->getRepository(Alunno::class)->find((int) $id);
+        if (!$alunno) {
+          throw new TransformationFailedException('alunno_non_trovato');
+        }
+        return $alunno;
+      }));
   }
 
   /**

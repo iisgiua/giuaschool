@@ -1,0 +1,61 @@
+####################
+# DemoColloquiFixtures - dati demo per i colloqui
+#
+# Programma ricevimenti per tutti i docenti e relative richieste di colloquio da
+# parte dei genitori, oltre a richieste generiche inviate dagli utenti.
+####################
+
+
+App\Entity\Colloquio:
+
+  colloquio_demo_curricolare_{1..5}:
+    docente: '@docente_curricolare_<current()>'
+    sede: '<randomElement([@sede_1, @sede_2])>'
+    data: '<dateTimeBetween("2026-11-01", "2027-05-30")>'
+    inizio: '<dateTimeBetween("08:30", "13:00")>'
+    fine: '<dateTimeBetween("13:00", "18:00")>'
+    tipo: '<randomElement(["D", "P"])>'
+    luogo: 'Aula docenti - <city()>'
+    durata: '<numberBetween(5, 30)>'
+    numero: '<numberBetween(2, 6)>'
+    abilitato: true
+
+  colloquio_demo_itp_{1..5}:
+    docente: '@docente_itp_<current()>'
+    sede: '@sede_1'
+    data: '<dateTimeBetween("2026-11-01", "2027-05-30")>'
+    inizio: '<dateTimeBetween("08:30", "13:00")>'
+    fine: '<dateTimeBetween("13:00", "18:00")>'
+    tipo: 'P'
+    luogo: 'Laboratorio'
+    durata: '<numberBetween(5, 30)>'
+    numero: '<numberBetween(2, 6)>'
+    abilitato: true
+
+
+App\Entity\RichiestaColloquio:
+
+  richiesta_colloquio_demo_{1..5}:
+    appuntamento: '<dateTimeBetween("08:30", "16:00")>'
+    colloquio: '@colloquio_demo_curricolare_<current()>'
+    genitore: '@genitore1_<($current . "A_1")>'
+    alunno: '<($genitore->getAlunno())>'
+    genitoreAnnulla:
+    stato: '<randomElement(["R", "C", "N"])>'
+    messaggio: '50%? <text()>: <strval("")>'
+
+
+App\Entity\Richiesta:
+
+  richiesta_demo_{1..5}:
+    inviata: '<dateTimeBetween("2026-09-20", "2027-05-30")>'
+    gestita: '50%? <dateTimeBetween($inviata, "2027-06-05")>: <(null)>'
+    data: '50%? <dateTimeBetween("2026-09-20", "2027-05-30")>: <(null)>'
+    valori: '<array_combine(<words(3)>, <sentences(3)>)>'
+    documento: '<substr(<text()>, 0, 255)>'
+    allegati: '<(array())>'
+    stato: '<randomElement(["I", "G", "A", "C"])>'
+    messaggio: '<text()>'
+    utente: '@utente_<current()>'
+    classe: '@classe_<($current . "A")>'
+    definizioneRichiesta: '@definizione_richiesta_<current()>'

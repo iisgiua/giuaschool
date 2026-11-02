@@ -98,10 +98,12 @@ jobs:
             ghcr.io/iisgiua/giuaschool-test:${{ github.event.inputs.version }}
 
       - name: Create archive for release code
+        env:
+          VERSION: ${{ github.event.inputs.version }}
         run: |
-          docker run --name gs_release ghcr.io/iisgiua/giuaschool:${{ github.event.inputs.version }} tests/docker/release.sh
-          docker cp gs_release:/var/www/giuaschool-release.zip giuaschool-release-v${{ github.event.inputs.version }}.zip
-          docker cp gs_release:/var/www/giuaschool-release.md5.zip giuaschool-release-v${{ github.event.inputs.version }}.md5.zip
+          docker run --name gs_release ghcr.io/iisgiua/giuaschool:"$VERSION" tests/docker/release.sh
+          docker cp gs_release:/var/www/giuaschool-release.zip giuaschool-release-v"$VERSION".zip
+          docker cp gs_release:/var/www/giuaschool-release.md5.zip giuaschool-release-v"$VERSION".md5.zip
           docker rm gs_release
 
       - name: Publish release code
@@ -114,11 +116,14 @@ jobs:
 
       - name: Create version tag and changelog page
         if: ${{ inputs.prerelease == false }}
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+          CHANGELOG: ${{ steps.changelog.outputs.changelog }}
         run: |
           mkdir -p docs/_data
-          echo "tag: ${{ github.event.inputs.version }}" > docs/_data/version.yml
+          echo "tag: $VERSION" > docs/_data/version.yml
           echo "tag: 0" > docs/_data/build.yml
-          export CHANGELOG="${{ steps.changelog.outputs.changelog }}"
+          export CHANGELOG
           export TIMESTAMP="`TZ='Europe/Rome' date +'%d/%m/%Y %H:%M'`"
           envsubst < .github/templates/latest-release.md.tmpl > docs/latest-release.md
           envsubst < .github/templates/latest-build_void.md.tmpl > docs/latest-build.md
@@ -147,7 +152,9 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Test update procedure
+        env:
+          TAG: ${{ needs.release.outputs.tag }}
+          NEWVERSION: ${{ github.event.inputs.version }}
         run: |
-          TAG="${{ needs.release.outputs.tag }}"
-          docker build --build-arg VERSION=${TAG:1} --build-arg NEWVERSION="${{ github.event.inputs.version }}" --build-arg NEWBUILD="0" -t gs:test2 -f tests/docker/TestUpdateDockerfile .
+          docker build --build-arg VERSION="${TAG:1}" --build-arg NEWVERSION="$NEWVERSION" --build-arg NEWBUILD="0" -t gs:test2 -f tests/docker/TestUpdateDockerfile .
           docker run --rm --name gs_test2 --add-host=giuaschool_test:127.0.0.1 --add-host=chrome_headless:127.0.0.1 gs:test2

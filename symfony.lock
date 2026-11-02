@@ -338,5 +338,8 @@
     },
     "twig/extra-bundle": {
         "version": "v3.4.0"
+    },
+    "vincentlanglet/twig-cs-fixer": {
+        "version": "4.1.1"
     }
 }

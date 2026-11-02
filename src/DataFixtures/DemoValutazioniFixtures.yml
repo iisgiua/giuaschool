@@ -1,0 +1,132 @@
+####################
+# DemoValutazioniFixtures - dati demo per le valutazioni
+#
+# Aggiunge valutazioni (con voto e con giudizio) agli alunni di tutte le classi,
+# collegate alle lezioni demo. Popola le pagine dei voti di alunni, genitori e
+# docenti.
+####################
+
+
+App\Entity\Valutazione:
+
+  # ----- classi del gruppo A -----
+  valutazione_demo_A1_{1..5}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_<current()>'
+    alunno: '@alunno_<($current . "A_1")>'
+    lezione: '@lezione_demo_A1_<current()>'
+    materia: '<($lezione->getMateria())>'
+
+  valutazione_demo_A2_{1..5}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_<current()>'
+    alunno: '@alunno_<($current . "A_2")>'
+    lezione: '@lezione_demo_A2_<current()>'
+    materia: '<($lezione->getMateria())>'
+
+  # ----- classi del gruppo B -----
+  valutazione_demo_B1_{1..5}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_<current()>'
+    alunno: '@alunno_<($current . "B_1")>'
+    lezione: '@lezione_demo_B1_<current()>'
+    materia: '<($lezione->getMateria())>'
+
+  valutazione_demo_B2_{1..5}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_<current()>'
+    alunno: '@alunno_<($current . "B_2")>'
+    lezione: '@lezione_demo_B2_<current()>'
+    materia: '<($lezione->getMateria())>'
+
+  # ----- classi del gruppo C -----
+  valutazione_demo_C1_{1..2}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_<current()>'
+    alunno: '@alunno_<($current . "C_1")>'
+    lezione: '@lezione_demo_C1_<current()>'
+    materia: '<($lezione->getMateria())>'
+
+  valutazione_demo_C2_{1..2}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_itp_<current()>'
+    alunno: '@alunno_<($current . "C_2")>'
+    lezione: '@lezione_demo_C2_<current()>'
+    materia: '<($lezione->getMateria())>'
+
+  # ----- classi articolate del triennio -----
+  valutazione_demo_3CAMB_{1..2}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_<current()>'
+    alunno: '@alunno_3CAMB_<current()>'
+    lezione: '@lezione_demo_3CAMB_<current()>'
+    materia: '<($lezione->getMateria())>'
+
+  valutazione_demo_3CCHI_{1..2}:
+    tipo: '<randomElement(["S", "O", "P"])>'
+    visibile: true
+    media: '<boolean(80)>'
+    voto: '<numberBetween(4, 10)>'
+    giudizio: '<strval("")>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_<current()>'
+    alunno: '@alunno_3CCHI_<current()>'
+    lezione: '@lezione_demo_3CCHI_<current()>'
+    materia: '<($lezione->getMateria())>'
+
+  # ----- valutazioni con giudizio (classi prime e seconde) -----
+  valutazione_giudizio_demo_A_{1..5}:
+    tipo: 'O'
+    visibile: true
+    media: false
+    voto: 0
+    giudizio: '<text()>'
+    argomento: '<text()>'
+    ordine: 0
+    docente: '@docente_curricolare_<current()>'
+    alunno: '@alunno_<($current . "A_1")>'
+    lezione: '@lezione_demo_A1_<current()>'
+    materia: '<($lezione->getMateria())>'

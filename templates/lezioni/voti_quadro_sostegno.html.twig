@@ -7,35 +7,36 @@
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ 'message.cattedra_mancante'|trans }}</strong>
   </div>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">{{ 'title.lezioni_medie'|trans }} {{ cattedra.classe }}</h1>
-  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno.cognome~' '~info.alunno.nome }}"><span class="glyphicon glyphicon-info-sign"></span></button>{% endif %}</em></h2>
-  <div class="row gs-mb-1">
-    <div class="col-sm-4">
-      <strong class="gs-big">Periodo:</strong>
-      <div style="display:inline-block" class="dropdown">
+  <h2 class="text-center gs-h2 gs-mt-0 gs-mb-5"><em>{{ info.materia }}{% if info.alunno %}<button type="button" class="btn btn-xs btn-default gs-ml-3" title="Informazioni sulla cattedra" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ info.alunno.cognome ~ ' ' ~ info.alunno.nome }}">{{ include('admin/include/icona.html.twig', {nome: 'info-circle', stile: 'outline'}) }}</button>{% endif %}</em></h2>
+  {# selettore sede/classe per le sostituzioni #}
+  {{ include('include/selettore-classe.html.twig', {}, with_context: false) }}
+  <div class="gs-voti-toolbar">
+    <div class="gs-voti-toolbar-main">
+      <span class="gs-voti-toolbar-label">Periodo:</span>
+      <div class="dropdown">
         <button class="btn btn-primary dropdown-toggle" id="gs-dropdown-menu" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" title="Clicca per scegliere il periodo"><strong>{{ info.periodo ? info.listaPeriodi[info.periodo].nome : 'Scegli' }}</strong><span class="caret gs-ml-3"></span></button>
         <ul class="dropdown-menu" aria-labelledby="gs-dropdown-menu">
-    {% for p,d in info.listaPeriodi %}
+    {% for p, d in info.listaPeriodi %}
       {% if d.nome %}
-          <li{{ info.periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_voti_quadro_sostegno', {'classe': classe.id, 'periodo': p}) }}">{{ d.nome }}</a></li>
+          <li{{ info.periodo == p ? ' class="active"' }}><a href="{{ path('lezioni_voti_quadro_sostegno', {cattedra: cattedra.id, periodo: p}) }}">{{ d.nome }}</a></li>
       {% endif %}
     {% endfor %}
         </ul>
       </div>
+      <button id="gs-filtro" class="btn btn-default btn-sm" role="button" title="Filtra gli alunni da visualizzare">{{ include('admin/include/icona.html.twig', {nome: 'filter', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Visualizza solo il tuo alunno</strong></button>
     </div>
-    <div class="col-sm-4 text-center">
-      <button id="gs-filtro" class="btn btn-default btn-sm" role="button" title="Filtra gli alunni da visualizzare"><span class="glyphicon glyphicon-filter gs-mr-3"></span><strong>Visualizza solo il tuo alunno</strong></button>
-    </div>
-    <div class="col-sm-4 text-right">
     {% if info.periodo %}
-      <a class="btn btn-success btn-sm" href="{{ path('lezioni_voti_sostegno') }}" role="button" title="Visualizza i dettagli delle valutazioni"><span class="glyphicon glyphicon-zoom-in gs-mr-3"></span><strong>Dettagli voti</strong></a>
-    {% endif %}
+    <div class="gs-voti-toolbar-actions">
+      <a class="btn btn-default btn-sm" href="{{ path('lezioni_voti_sostegno', {cattedra: cattedra.id}) }}" role="button" title="Visualizza i dettagli delle valutazioni">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Dettagli voti</strong></a>
     </div>
+    {% endif %}
   </div>
   <div class="gs-table-sticky-wrapper">
-    <table id="gs-medie" class="gs-table-sticky">
-      <thead>
+  {% set intestazione_grezza_0 %}      <thead>
         <tr>
           <th class="gs-col-sticky gs-color-1">Alunno</th>
     {% for m in dati.materie %}
@@ -43,25 +44,26 @@
     {% endfor %}
           <th class="gs-color-3">Media</th>
         </tr>
-      </thead>
-      <tbody>
-  {% for ka,a in dati.alunni %}
+      </thead>{% endset %}
+
+{% set corpo_grezzo_0 %}
+  {% for ka, a in dati.alunni %}
         <tr {{ ka == info.alunno.id ? 'id="gs-alunno"' : 'style="display: none;"' }}>
           <td class="gs-col-sticky gs-pt-1 gs-pb-1">
-            <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+            <button type="button" class="btn btn-xs btn-default pull-left gs-mr-2" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline'}) }}</button>
             <span{{ ka == info.alunno.id ? ' style="display: none;"' }}><strong>{{ a.cognome }} {{ a.nome }}</strong> <small>({{ a.dataNascita|date('d/m/Y') }})</small></span>
-            {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
+            {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a, g: dati.genitori[a.id]}) }}
           </td>
-    {% for km,m in dati.materie %}
+    {% for km, m in dati.materie %}
           <td><span class="gs-big label label-{{ dati.medie[ka][km] < 5 ? 'danger' : (dati.medie[ka][km] < 6 ? 'warning' : 'success') }}">{{ dati.medie[ka][km] ? dati.medie[ka][km]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') : '--' }}</span></td>
     {% endfor %}
           <td class="gs-color-3"><span class="gs-big label label-{{ dati.medie[ka][0] < 5 ? 'danger' : (dati.medie[ka][0] < 6 ? 'warning' : 'success') }}">{{ dati.medie[ka][0] ? dati.medie[ka][0]|number_format(app.session.get('/CONFIG/SISTEMA/precisione_media'), ',') : '--' }}</span></td>
         </tr>
   {% endfor %}
-      </tbody>
-    </table>
+      {% endset %}
+    {{ include('include/tabella.html.twig', {intestazione_grezza: intestazione_grezza_0, corpo_grezzo: corpo_grezzo_0, id: 'gs-medie', classi: 'gs-table-sticky'}) }}
   </div>
-    {% include 'include/modal-info.html.twig' %}
+    {{ include('include/modal-info.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}
@@ -85,11 +87,15 @@ $(document).ready(function() {
       if (el.is(':visible')) {
         el.fadeOut();
         $(this).attr('title', 'Apre la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-full gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize');
       } else {
         el.fadeIn();
         $(this).attr('title', 'Chiude la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize');
       }
     });
   });

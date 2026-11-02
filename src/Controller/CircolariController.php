@@ -92,54 +92,9 @@ class CircolariController extends BaseController {
       throw $this->createNotFoundException('exception.id_notfound');
     }
     // legge file
-    $documento = [];
-    $allegati = [];
-    if ($request->isMethod('POST')) {
-      // pagina inviata
-      foreach ($this->reqstack->getSession()->get($var_sessione.'documento', []) as $f) {
-        if ($f['type'] != 'removed') {
-          // aggiunge allegato
-          $documento[] = $f;
-        }
-      }
-      foreach ($this->reqstack->getSession()->get($var_sessione.'allegati', []) as $f) {
-        if ($f['type'] != 'removed') {
-          // aggiunge allegato
-          $allegati[] = $f;
-        }
-      }
-    } else {
-      // pagina iniziale
-      $cnt = 0;
-      foreach ($circolare->getAllegati() as $file) {
-        if ($cnt == 0) {
-          $documento[0]['type'] = 'existent';
-          $documento[0]['name'] = $file->getTitolo();
-          $documento[0]['temp'] = $file->getFile();
-          $documento[0]['ext'] = $file->getEstensione();
-          $documento[0]['size'] = $file->getDimensione();
-        } else {
-          $allegati[$cnt - 1]['type'] = 'existent';
-          $allegati[$cnt - 1]['name'] = $file->getTitolo();
-          $allegati[$cnt - 1]['temp'] = $file->getFile();
-          $allegati[$cnt - 1]['ext'] = $file->getEstensione();
-          $allegati[$cnt - 1]['size'] = $file->getDimensione();
-        }
-        $cnt++;
-      }
-      // modifica dati sessione
-      $this->reqstack->getSession()->remove($var_sessione.'documento');
-      $this->reqstack->getSession()->remove($var_sessione.'allegati');
-      $this->reqstack->getSession()->set($var_sessione.'documento', $documento);
-      $this->reqstack->getSession()->set($var_sessione.'allegati', $allegati);
-      // elimina file temporanei
-      $fs = new Filesystem();
-      $finder = new Finder();
-      $finder->files()->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
-      foreach ($finder as $f) {
-        $fs->remove($f);
-      }
-    }
+    $file = $this->leggiFile($request, $circolare, $var_sessione);
+    $documento = $file['documento'];
+    $allegati = $file['allegati'];
     // informazioni da visualizzare sui destinatari
     $dati = $com->infoDestinatari($circolare);
     // form di inserimento
@@ -169,22 +124,7 @@ class CircolariController extends BaseController {
           $this->reqstack->getSession()->get($var_sessione.'documento', []),
           $this->reqstack->getSession()->get($var_sessione.'allegati', [])));
         // imposta nomi file
-        $primo = true;
-        foreach ($circolare->getAllegati() as $allegato) {
-          if ($primo) {
-            // nome documento principale
-            $allegato->setTitolo('Circolare n. '.$circolare->getNumero());
-            $allegato->setNome($com->normalizzaNome('Circolare-'.$circolare->getNumero()));
-            $primo = false;
-          } else {
-            // nome allegati
-            $prefisso = 'Circolare n. '.$circolare->getNumero().' - Allegato ';
-            $nomefile = str_starts_with($allegato->getTitolo(), $prefisso) ?
-              trim(substr($allegato->getTitolo(), strlen($prefisso))) : $allegato->getTitolo();
-            $allegato->setTitolo($prefisso.$nomefile);
-            $allegato->setNome($com->normalizzaNome('Circolare-'.$circolare->getNumero().'-Allegato-'.$nomefile));
-          }
-        }
+        $this->impostaNomiAllegati($circolare, $com);
         // ok: memorizzazione e log
         $dblogger->logAzione('CIRCOLARI', $edit ? 'Modifica circolare' : 'Crea circolare');
         // redirezione
@@ -202,6 +142,99 @@ class CircolariController extends BaseController {
   }
 
   /**
+   * Determina il documento principale e gli allegati associati alla circolare.
+   * I dati sono letti dalla sessione se la pagina è stata inviata, altrimenti
+   * sono ricostruiti a partire dagli allegati già presenti nella circolare.
+   *
+   * @param Request $request Pagina richiesta
+   * @param Circolare $circolare Circolare da modificare
+   * @param string $var_sessione Prefisso delle variabili di sessione utilizzate
+   *
+   * @return array Lista del documento principale e lista degli allegati
+   */
+  private function leggiFile(Request $request, Circolare $circolare, string $var_sessione): array {
+    $documento = [];
+    $allegati = [];
+    if ($request->isMethod('POST')) {
+      // pagina inviata
+      $this->filtraAllegatiSessione($var_sessione.'documento', $documento);
+      $this->filtraAllegatiSessione($var_sessione.'allegati', $allegati);
+      return ['documento' => $documento, 'allegati' => $allegati];
+    }
+    // pagina iniziale
+    $cnt = 0;
+    foreach ($circolare->getAllegati() as $file) {
+      if ($cnt == 0) {
+        $documento[0]['type'] = 'existent';
+        $documento[0]['name'] = $file->getTitolo();
+        $documento[0]['temp'] = $file->getFile();
+        $documento[0]['ext'] = $file->getEstensione();
+        $documento[0]['size'] = $file->getDimensione();
+      } else {
+        $allegati[$cnt - 1]['type'] = 'existent';
+        $allegati[$cnt - 1]['name'] = $file->getTitolo();
+        $allegati[$cnt - 1]['temp'] = $file->getFile();
+        $allegati[$cnt - 1]['ext'] = $file->getEstensione();
+        $allegati[$cnt - 1]['size'] = $file->getDimensione();
+      }
+      $cnt++;
+    }
+    // modifica dati sessione
+    $this->reqstack->getSession()->remove($var_sessione.'documento');
+    $this->reqstack->getSession()->remove($var_sessione.'allegati');
+    $this->reqstack->getSession()->set($var_sessione.'documento', $documento);
+    $this->reqstack->getSession()->set($var_sessione.'allegati', $allegati);
+    // elimina file temporanei
+    $fs = new Filesystem();
+    $finder = new Finder();
+    $finder->files()->in($this->getParameter('dir_tmp'))->date('< 1 day ago');
+    foreach ($finder as $f) {
+      $fs->remove($f);
+    }
+    return ['documento' => $documento, 'allegati' => $allegati];
+  }
+
+  /**
+   * Copia nella lista indicata gli allegati di sessione non ancora rimossi
+   *
+   * @param string $chiave Chiave di sessione degli allegati
+   * @param array $lista Lista nella quale copiare gli allegati
+   */
+  private function filtraAllegatiSessione(string $chiave, array &$lista): void {
+    foreach ($this->reqstack->getSession()->get($chiave, []) as $f) {
+      if ($f['type'] != 'removed') {
+        // aggiunge allegato
+        $lista[] = $f;
+      }
+    }
+  }
+
+  /**
+   * Imposta il titolo e il nome dei file allegati alla circolare
+   *
+   * @param Circolare $circolare Circolare con gli allegati
+   * @param ComunicazioniUtil $com Funzioni di utilità per le comunicazioni
+   */
+  private function impostaNomiAllegati(Circolare $circolare, ComunicazioniUtil $com): void {
+    $primo = true;
+    foreach ($circolare->getAllegati() as $allegato) {
+      if ($primo) {
+        // nome documento principale
+        $allegato->setTitolo('Circolare n. '.$circolare->getNumero());
+        $allegato->setNome($com->normalizzaNome('Circolare-'.$circolare->getNumero()));
+        $primo = false;
+      } else {
+        // nome allegati
+        $prefisso = 'Circolare n. '.$circolare->getNumero().' - Allegato ';
+        $nomefile = str_starts_with((string) $allegato->getTitolo(), $prefisso) ?
+          trim(substr((string) $allegato->getTitolo(), strlen($prefisso))) : $allegato->getTitolo();
+        $allegato->setTitolo($prefisso.$nomefile);
+        $allegato->setNome($com->normalizzaNome('Circolare-'.$circolare->getNumero().'-Allegato-'.$nomefile));
+      }
+    }
+  }
+
+  /**
    * Cancella circolare
    *
    * @param LogHandler $dblogger Gestore dei log su database
@@ -210,11 +243,14 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/circolari/delete/{circolare}', name: 'circolari_delete', requirements: ['circolare' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/circolari/delete/{circolare}', name: 'circolari_delete', requirements: ['circolare' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_STAFF')]
-  public function delete(LogHandler $dblogger, ComunicazioniUtil $com,
-                         #[MapEntity] Circolare $circolare
-                         ): Response {
+  public function delete(Request $request, LogHandler $dblogger, ComunicazioniUtil $com,
+                         #[MapEntity] Circolare $circolare): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo permessi
     if (!$com->azioneCircolare('delete', $circolare->getData(), $this->getUser(), $circolare)) {
       // errore
@@ -307,6 +343,7 @@ class CircolariController extends BaseController {
   /**
    * Pubblica la circolare o ne rimuove la pubblicazione (la mette in bozza)
    *
+   * @param Request $request Pagina richiesta
    * @param MessageBusInterface $msg Gestione delle notifiche
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ComunicazioniUtil $com Funzioni di utilità per le circolari
@@ -315,11 +352,16 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/circolari/publish/{circolare}/{pubblica}', name: 'circolari_publish', requirements: ['circolare' => '\d+', 'pubblica' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/circolari/publish/{circolare}/{pubblica}', name: 'circolari_publish', requirements: ['circolare' => '\d+', 'pubblica' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_STAFF')]
-  public function publish(MessageBusInterface $msg, LogHandler $dblogger, ComunicazioniUtil $com,
+  public function publish(Request $request, MessageBusInterface $msg, LogHandler $dblogger, ComunicazioniUtil $com,
                           #[MapEntity] Circolare $circolare,
                           int $pubblica): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('circolari_publish', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // controllo permessi
     if (!$com->azioneCircolare(($pubblica ? 'publish' : 'unpublish'), $circolare->getData(), $this->getUser(), $circolare)) {
       // errore
@@ -406,13 +448,17 @@ class CircolariController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db
-    $com->leggeUtente($this->getUser(), $circolare);
-    $this->em->flush();
     // invia il file
     $file = $circolare->getAllegati()[$allegato];
     $dir = $this->getParameter('dir_circolari').($circolare->getStato() == 'A' ? '/'.$circolare->getAnno() : '');
     $nomefile = $dir.'/'.$file->getFile().'.'.$file->getEstensione();
+    if (!file_exists($nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // segna lettura e memorizza su db solo dopo aver verificato il file
+    $com->leggeUtente($this->getUser(), $circolare);
+    $this->em->flush();
     return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
       ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
   }
@@ -420,15 +466,21 @@ class CircolariController extends BaseController {
   /**
    * Conferma la lettura della circolare da parte dell'utente
    *
+   * @param Request $request Pagina richiesta
    * @param Circolare $circolare Circolare da firmare
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/circolari/firma/{circolare}', name: 'circolari_firma', requirements: ['circolare' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/circolari/firma/{circolare}', name: 'circolari_firma', requirements: ['circolare' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function firma(
+  public function firma(Request $request,
                         #[MapEntity] Circolare $circolare
                         ): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('circolari_firma', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // firma
     $this->em->getRepository(ComunicazioneUtente::class)->firma($circolare, $this->getUser());
     // redirect
@@ -500,18 +552,29 @@ class CircolariController extends BaseController {
   /**
    * Conferma la lettura della circolare alla classe
    *
+   * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param Classe $classe Classe a cui è destinata la circolare
    * @param Circolare $circolare Circolare da firmare
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/circolari/firma/classe/{classe}/{circolare}', name: 'circolari_firma_classe', requirements: ['classe' => '\d+', 'circolare' => '\d+'], defaults: ['circolare' => 0], methods: ['GET'])]
+  #[Route(path: '/circolari/firma/classe/{classe}/{circolare}', name: 'circolari_firma_classe', requirements: ['classe' => '\d+', 'circolare' => '\d+'], defaults: ['circolare' => 0], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function firmaClasse(TranslatorInterface $trans,
+  public function firmaClasse(Request $request, TranslatorInterface $trans,
                               #[MapEntity] Classe $classe,
                               #[MapEntity] ?Circolare $circolare=null
                               ): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('circolari_firma', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     $numeri = [];
     // lista circolari da firmare
     $circolari = $circolare ? [$circolare] :

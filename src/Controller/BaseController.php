@@ -8,11 +8,18 @@
 
 namespace App\Controller;
 
+use finfo;
+use App\Entity\Cattedra;
+use App\Entity\Classe;
+use App\Entity\Docente;
 use App\Entity\MenuOpzione;
+use App\Entity\Staff;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 
 /**
@@ -35,6 +42,31 @@ class BaseController extends AbstractController {
     protected EntityManagerInterface $em,
     protected RequestStack $reqstack)
   {
+  }
+
+  /**
+   * Controlla se il docente può operare sulla classe indicata.
+   *
+   * L'accesso è consentito ai membri dello staff, ai docenti titolari di una
+   * cattedra attiva nella classe e ai docenti che stanno operando sulla classe
+   * in regime di sostituzione (classe selezionata nella sessione corrente).
+   *
+   * @param Docente $docente Docente di cui controllare l'accesso
+   * @param Classe $classe Classe di riferimento
+   *
+   * @return bool Vero se l'accesso alla classe è consentito
+   */
+  protected function accessoClasse(Docente $docente, Classe $classe): bool {
+    // membri dello staff: accesso completo
+    if ($docente instanceof Staff) {
+      return true;
+    }
+    // cattedra attiva nella classe
+    if ($this->em->getRepository(Cattedra::class)->docenteClasse($docente, $classe)) {
+      return true;
+    }
+    // sostituzione: la classe è quella selezionata nella sessione corrente
+    return (int) $this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione', 0) === $classe->getId();
   }
 
   /**
@@ -68,6 +100,80 @@ class BaseController extends AbstractController {
       'dati' => $dati,
       'info' => $info,
       'form' => $form]);
+  }
+
+  /**
+   * Genera un file CSV come risposta, con codifica UTF-8 e BOM.
+   *
+   * Il BOM (Byte Order Mark) iniziale e' necessario perche i fogli di calcolo su
+   * Windows, se non lo riconoscono, interpretano il contenuto con la codepage
+   * locale anziche' con UTF-8, rendendo illeggibili gli accenti dei nomi.
+   *
+   * @param string $categoria Categoria a cui appartiene la pagina
+   * @param string $azione Azione svolta dalla pagina
+   * @param string $nomefile Nome del file da scaricare
+   * @param array $dati Lista di dati tabellari da passare alla vista
+   * @param array $info Lista di informazioni singole da passare alla vista
+   *
+   * @return Response Pagina di risposta
+   */
+  protected function renderCsv(string $categoria, string $azione, string $nomefile,
+                               array $dati=[], array $info=[]): Response {
+    $tema = $this->reqstack->getSession()->get('/APP/APP/tema', '');
+    $template = ($tema ? $tema.'/' : '').$categoria.'/'.$azione.'.csv.twig';
+    // antepone il BOM UTF-8 al contenuto
+    $csv = "\xEF\xBB\xBF".$this->renderView($template, ['dati' => $dati, 'info' => $info]);
+    // invia il documento
+    $response = new Response($csv);
+    $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
+    $response->headers->set('Content-Disposition', $disposition);
+    $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+    return $response;
+  }
+
+  /**
+   * Invia un allegato scaricabile o visualizzabile.
+   *
+   * La visualizzazione inline è consentita solo per i file che risultano realmente
+   * in formato PDF: altri contenuti (es. pagine HTML con estensione ".pdf") vengono
+   * forzati come download, per non poter essere eseguiti nell'origine dell'applicazione.
+   *
+   * @param string $nomefile Percorso completo del file da inviare
+   * @param string $nome Nome da mostrare nel download
+   * @param bool $inline Vero se l'utente ha richiesto la visualizzazione inline
+   *
+   * @return Response Risposta con il file allegato
+   */
+  protected function rispostaAllegato(string $nomefile, string $nome, bool $inline): Response {
+    // inline solo per i PDF effettivamente validati
+    $inline = $inline && $this->isPdf($nomefile);
+    $response = $this->file($nomefile, $nome, $inline ?
+      ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT);
+    // impedisce l'interpretazione del contenuto in base all'estensione
+    $response->headers->set('X-Content-Type-Options', 'nosniff');
+    $response->headers->set('Content-Type', $inline ? 'application/pdf' : 'application/octet-stream');
+    return $response;
+  }
+
+  /**
+   * Controlla se il file indicato è realmente un PDF.
+   *
+   * @param string $nomefile Percorso completo del file da controllare
+   *
+   * @return bool Vero se il contenuto del file è in formato PDF
+   */
+  private function isPdf(string $nomefile): bool {
+    if (!is_file($nomefile)) {
+      return false;
+    }
+    $tipo = '';
+    if (class_exists('finfo')) {
+      $finfo = new finfo(FILEINFO_MIME_TYPE);
+      $tipo = (string) $finfo->file($nomefile);
+    } else {
+      $tipo = (string) @mime_content_type($nomefile);
+    }
+    return $tipo === 'application/pdf';
   }
 
 }

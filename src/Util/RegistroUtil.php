@@ -81,33 +81,36 @@ class RegistroUtil {
    *
    * @param DateTime $data Data da controllare
    * @param Sede $sede Sede da controllare (se nullo, festività di entrambe le sedi)
+   * @param bool $controllaAnno Indica se verificare i limiti dell'anno scolastico
    *
    * @return string|null Stringa di errore o null se tutto ok
    */
-  public function controlloData(DateTime $data, Sede $sede=null) {
+  public function controlloData(DateTime $data, Sede $sede=null, bool $controllaAnno=true) {
     // query
     $lista = $this->em->getRepository(Festivita::class)->createQueryBuilder('f')
       ->where('(f.sede IS NULL OR f.sede=:sede) AND f.tipo=:tipo AND f.data=:data')
-			->setParameter('sede', $sede)
-			->setParameter('tipo', 'F')
-			->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('sede', $sede)
+      ->setParameter('tipo', 'F')
+      ->setParameter('data', $data->format('Y-m-d'))
       ->getQuery()
       ->getResult();
     if (count($lista) > 0) {
       // giorno festivo
       return $lista[0]->getDescrizione();
     }
-    // controllo inizio anno scolastico
-    $inizio = $this->em->getRepository(Configurazione::class)->findOneByParametro('anno_inizio');
-    if ($inizio && $data->format('Y-m-d') < $inizio->getValore()){
-      // prima inizio anno
-      return $this->trans->trans('exception.prima_inizio_anno');
-    }
-    // controllo fine anno scolastico
-    $fine = $this->em->getRepository(Configurazione::class)->findOneByParametro('anno_fine');
-    if ($fine && $data->format('Y-m-d') > $fine->getValore()){
-      // dopo fine anno
-      return $this->trans->trans('exception.dopo_fine_anno');
+    if ($controllaAnno) {
+      // controllo inizio anno scolastico
+      $inizio = $this->em->getRepository(Configurazione::class)->findOneByParametro('anno_inizio');
+      if ($inizio && $data->format('Y-m-d') < $inizio->getValore()){
+        // prima inizio anno
+        return $this->trans->trans('exception.prima_inizio_anno');
+      }
+      // controllo fine anno scolastico
+      $fine = $this->em->getRepository(Configurazione::class)->findOneByParametro('anno_fine');
+      if ($fine && $data->format('Y-m-d') > $fine->getValore()){
+        // dopo fine anno
+        return $this->trans->trans('exception.dopo_fine_anno');
+      }
     }
     // controllo riposo settimanale (domenica e altri)
     $weekdays = $this->em->getRepository(Configurazione::class)->findOneByParametro('giorni_festivi_istituto');
@@ -133,8 +136,8 @@ class RegistroUtil {
     // query
     $lista = $this->em->getRepository(Festivita::class)->createQueryBuilder('f')
       ->where('(f.sede IS NULL OR f.sede=:sede) AND f.tipo=:tipo')
-			->setParameter('sede', $sede)
-			->setParameter('tipo', 'F')
+      ->setParameter('sede', $sede)
+      ->setParameter('tipo', 'F')
       ->orderBy('f.data', 'ASC')
       ->getQuery()
       ->getResult();
@@ -219,10 +222,10 @@ class RegistroUtil {
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno AND s.ora>=:ora')
       ->orderBy('s.ora', 'ASC')
-			->setParameter('data', $data->format('Y-m-d'))
-			->setParameter('sede', $classe->getSede())
-			->setParameter('giorno', $data->format('w'))
-			->setParameter('ora', $ora)
+      ->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('sede', $classe->getSede())
+      ->setParameter('giorno', $data->format('w'))
+      ->setParameter('ora', $ora)
       ->getQuery()
       ->getResult();
     // lista ore
@@ -476,7 +479,7 @@ class RegistroUtil {
               ->join('f.docente', 'd')
               ->where('f.lezione=:lezione')
               ->orderBy('d.cognome,d.nome', 'ASC')
-			        ->setParameter('lezione', $lezione)
+              ->setParameter('lezione', $lezione)
               ->getQuery()
               ->getResult();
             // docenti
@@ -538,10 +541,10 @@ class RegistroUtil {
       ->where('a.data BETWEEN :inizio AND :fine AND c.anno=:anno AND c.sezione=:sezione')
       ->orderBy('a.data', 'ASC')
       ->addOrderBy('a.modificato', 'DESC')
-			->setParameter('inizio', $inizio->format('Y-m-d'))
-			->setParameter('fine', $fine->format('Y-m-d'))
-			->setParameter('anno', $classe->getAnno())
-			->setParameter('sezione', $classe->getSezione())
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
       ->getQuery()
       ->getResult();
     // predispone dati per la visualizzazione
@@ -647,10 +650,10 @@ class RegistroUtil {
       ->where('n.data BETWEEN :inizio AND :fine AND c.anno=:anno AND c.sezione=:sezione')
       ->orderBy('n.data', 'ASC')
       ->addOrderBy('n.modificato', 'DESC')
-			->setParameter('inizio', $inizio->format('Y-m-d'))
-			->setParameter('fine', $fine->format('Y-m-d'))
-			->setParameter('anno', $classe->getAnno())
-			->setParameter('sezione', $classe->getSezione())
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
       ->getQuery()
       ->getResult();
     // predispone dati per la visualizzazione
@@ -1013,7 +1016,7 @@ class RegistroUtil {
         ->select('a.id AS id_alunno,a.cognome,a.nome,a.dataNascita,a.bes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione')
         ->where('a.id IN (:lista)')
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-			  ->setParameter('lista', $lista_alunni)
+        ->setParameter('lista', $lista_alunni)
         ->getQuery()
         ->getArrayResult();
       $dati['alunni'] = $alunni;
@@ -1037,9 +1040,9 @@ class RegistroUtil {
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno')
       ->orderBy('s.ora', 'ASC')
-			->setParameter('data', $data->format('Y-m-d'))
-			->setParameter('sede', $sede)
-			->setParameter('giorno', $data->format('w'))
+      ->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('sede', $sede)
+      ->setParameter('giorno', $data->format('w'))
       ->getQuery()
       ->getScalarResult();
     return $scansioneOraria;
@@ -1075,7 +1078,7 @@ class RegistroUtil {
       $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
         ->select('a.id')
         ->where('a.classe=:classe AND a.frequenzaEstero=0')
-			  ->setParameter('classe', $classe)
+        ->setParameter('classe', $classe)
         ->getQuery()
         ->getScalarResult();
     } else {
@@ -1121,8 +1124,8 @@ class RegistroUtil {
     $assenti = $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
       ->select('(a.alunno) as id')
       ->where('a.alunno IN (:lista) AND a.data=:data')
-			->setParameter('lista', $lista)
-			->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('lista', $lista)
+      ->setParameter('data', $data->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     $idAssenti = array_column($assenti, 'id');
@@ -1213,8 +1216,8 @@ class RegistroUtil {
       ->join(Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno')
       ->where('a.id=:alunno AND ass.data<:data')
       ->orderBy('ass.data', 'DESC')
-			->setParameter('alunno', $alunno)
-			->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('alunno', $alunno)
+      ->setParameter('data', $data->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo per assenze
@@ -1296,8 +1299,8 @@ class RegistroUtil {
     // ritardi da giustificare
     $ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
       ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('alunno', $alunno->getId())
+      ->setParameter('data', $data->format('Y-m-d'))
       ->orderBy('e.data', 'DESC')
       ->getQuery()
       ->getResult();
@@ -1305,9 +1308,9 @@ class RegistroUtil {
     // ritardi da convalidare
     $convalida_ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
       ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NOT NULL AND e.docenteGiustifica IS NULL AND e.ritardoBreve!=:breve')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-			->setParameter('breve', 1)
+      ->setParameter('alunno', $alunno->getId())
+      ->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('breve', 1)
       ->orderBy('e.data', 'DESC')
       ->getQuery()
       ->getResult();
@@ -1315,8 +1318,8 @@ class RegistroUtil {
     // uscite da giustificare
     $uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
       ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('alunno', $alunno->getId())
+      ->setParameter('data', $data->format('Y-m-d'))
       ->orderBy('u.data', 'DESC')
       ->getQuery()
       ->getResult();
@@ -1324,8 +1327,8 @@ class RegistroUtil {
     // uscite da convalidare
     $convalida_uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
       ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('alunno', $alunno->getId())
+      ->setParameter('data', $data->format('Y-m-d'))
       ->orderBy('u.data', 'DESC')
       ->getQuery()
       ->getResult();
@@ -1359,8 +1362,8 @@ class RegistroUtil {
       ->leftJoin(Presenza::class, 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
       ->where('a.id IN (:id) AND a.abilitato=1 AND a.classe IS NOT NULL')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-			->setParameter('id', $alunni)
-			->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('id', $alunni)
+      ->setParameter('data', $data->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // crea l'elenco per l'appello
@@ -1375,8 +1378,8 @@ class RegistroUtil {
           ->setAlunno($elemento['cognome'].' '.$elemento['nome'].' ('.$elemento['dataNascita']->format('d/m/Y').')')
           ->setPresenza($elemento['assenza'] ? 'A' : 'P')
           ->setOra($elemento['ora'] ?: new DateTime());
-        if ($appello->getOra()->format('H:i:00') < $orario[0]['inizio'] ||
-            $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
+        if (!empty($orario) && ($appello->getOra()->format('H:i:00') < $orario[0]['inizio'] ||
+            $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine'])) {
           // ora fuori da orario
           $appello->setOra(DateTime::createFromFormat('H:i:s', $orario[0]['inizio']));
         }
@@ -1412,11 +1415,11 @@ class RegistroUtil {
       ->select('COUNT(c.id)')
       ->join('c.classe', 'cl')
       ->where("c.docente=:docente AND c.materia=:materia AND c.attiva=1 AND c.tipo!='S' AND cl.anno=:anno AND cl.sezione=:sezione AND (cl.gruppo IS NULL OR cl.gruppo='' OR cl.gruppo=:gruppo)")
-			->setParameter('docente', $docente)
-			->setParameter('materia', $materia)
-			->setParameter('anno', $classe->getAnno())
-			->setParameter('sezione', $classe->getSezione())
-			->setParameter('gruppo', $classe->getGruppo())
+      ->setParameter('docente', $docente)
+      ->setParameter('materia', $materia)
+      ->setParameter('anno', $classe->getAnno())
+      ->setParameter('sezione', $classe->getSezione())
+      ->setParameter('gruppo', $classe->getGruppo())
       ->getQuery()
       ->getSingleScalarResult();
     return ($cattedra > 0);
@@ -1493,7 +1496,7 @@ class RegistroUtil {
     $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.bes,a.religione')
       ->where('a.id IN (:lista)'.($religione ? " AND a.religione='$religione'" : ''))
-			->setParameter('lista', $listaAlunni)
+      ->setParameter('lista', $listaAlunni)
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
       ->getQuery()
       ->getArrayResult();
@@ -1508,12 +1511,12 @@ class RegistroUtil {
       ->select('(v.alunno) AS alunno_id,v.id,v.argomento,v.visibile,v.media,v.voto,v.giudizio')
       ->join('v.lezione', 'l')
       ->where('v.alunno IN (:lista) AND v.docente=:docente AND v.tipo=:tipo AND v.materia=:materia AND v.ordine=:ordine AND l.data=:data')
-			->setParameter('lista', $listaAlunni)
-			->setParameter('docente', $docente)
-			->setParameter('tipo', $tipo)
-			->setParameter('materia', $materia)
-			->setParameter('ordine', $ordine)
-			->setParameter('data', $dataObject->format('Y-m-d'))
+      ->setParameter('lista', $listaAlunni)
+      ->setParameter('docente', $docente)
+      ->setParameter('tipo', $tipo)
+      ->setParameter('materia', $materia)
+      ->setParameter('ordine', $ordine)
+      ->setParameter('data', $dataObject->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     foreach ($voti as $voto) {
@@ -1557,29 +1560,46 @@ class RegistroUtil {
   public function periodo(DateTime $data) {
     $dati = [];
     $dataStr = $data->format('Y-m-d');
-    if ($dataStr <= $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine')) {
+    $periodo1Fine = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine');
+    $periodo2Fine = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine');
+    $annoFine = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
+    $periodo3Nome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
+    $annoInizio = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio');
+    $periodo1Nome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome');
+    $periodo2Nome = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome');
+    if ($periodo1Fine === null || $periodo1Fine === '') {
+      // configurazione assente: non si può determinare il periodo
+      return null;
+    }
+    if ($dataStr <= $periodo1Fine) {
       // primo periodo
       $dati['periodo'] = 1;
-      $dati['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome');
-      $dati['inizio'] = DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00');
-      $dati['fine'] = DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine').' 00:00');
-    } elseif ($dataStr <= $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine') ||
-              ($dataStr > $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine') && $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') == '')) {
+      $dati['nome'] = $periodo1Nome;
+      $dati['inizio'] = DateTime::createFromFormat('Y-m-d H:i', $annoInizio.' 00:00');
+      $dati['fine'] = DateTime::createFromFormat('Y-m-d H:i', $periodo1Fine.' 00:00');
+    } elseif ($dataStr <= $periodo2Fine ||
+              ($annoFine !== null && $dataStr > $annoFine && $periodo3Nome === '')) {
       // secondo periodo
       $dati['periodo'] = 2;
-      $dati['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome');
-      $data = DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_fine').' 00:00');
+      $dati['nome'] = $periodo2Nome;
+      $data = DateTime::createFromFormat('Y-m-d H:i', $periodo1Fine.' 00:00');
+      if (!$data) {
+        return null;
+      }
       $data->modify('+1 day');
       $dati['inizio'] = $data;
-      $dati['fine'] = DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine').' 00:00');
-    } elseif ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
+      $dati['fine'] = DateTime::createFromFormat('Y-m-d H:i', $periodo2Fine.' 00:00');
+    } elseif ($periodo3Nome !== '' && $periodo3Nome != null) {
       // terzo periodo
       $dati['periodo'] = 3;
-      $dati['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
-      $data = DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine').' 00:00');
+      $dati['nome'] = $periodo3Nome;
+      $data = DateTime::createFromFormat('Y-m-d H:i', $periodo2Fine.' 00:00');
+      if (!$data) {
+        return null;
+      }
       $data->modify('+1 day');
       $dati['inizio'] = $data;
-      $dati['fine'] = DateTime::createFromFormat('Y-m-d H:i', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine').' 00:00');
+      $dati['fine'] = DateTime::createFromFormat('Y-m-d H:i', $annoFine.' 00:00');
     } else {
       // errore (non deve mai capitare)
       $dati = null;
@@ -1588,6 +1608,11 @@ class RegistroUtil {
     return $dati;
   }
 
+  /**
+   * Restituisce la scadenza dell'anno scolastico.
+   *
+   * @return DateTime|null Data di fine anno scolastico come parametro configurazione parsato, oppure null se non disponibile/parsabile
+   */
   /**
    * Restituisce i dati dei voti per la classe e l'intervallo di date indicato.
    *
@@ -1617,7 +1642,7 @@ class RegistroUtil {
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.sesso,a.citta,a.bes,a.noteBes,a.autorizzaEntrata,a.autorizzaUscita,a.note,a.religione,a.username,a.ultimoAccesso,(a.classe) AS classe_id')
       ->where('a.id IN (:alunni)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-			->setParameter('alunni', $tutti)
+      ->setParameter('alunni', $tutti)
       ->getQuery()
       ->getArrayResult();
     foreach ($alunni as $alu) {
@@ -1690,13 +1715,20 @@ class RegistroUtil {
     return $dati;
   }
 
-  /**
-   * Restituisce le informazioni sui periodi dell'anno scolastico
-   *
-   * @return array Informazioni sui periodi come valori di array associativo
-   */
   public function infoPeriodi() {
     $dati = [];
+    // legge e valida una data di configurazione
+    $dataConfig = function (string $chiave): ?DateTime {
+      $valore = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.$chiave);
+      if (!is_string($valore) || $valore === '') {
+        return null;
+      }
+      $data = DateTime::createFromFormat('!Y-m-d', $valore);
+      if (!$data || $data->format('Y-m-d') !== $valore) {
+        return null;
+      }
+      return $data;
+    };
     // primo periodo
     $dati[1]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome');
     $dati[1]['inizio'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio');
@@ -1704,54 +1736,29 @@ class RegistroUtil {
     $dati[1]['scrutinio'] = 'P';
     // secondo periodo
     $dati[2]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome');
-    $data = DateTime::createFromFormat('Y-m-d H:i', $dati[1]['fine'].' 00:00');
-    $data->modify('+1 day');
-    $dati[2]['inizio'] = $data->format('Y-m-d');
+    $finePrimo = $dataConfig('periodo1_fine');
+    $dati[2]['inizio'] = $finePrimo ? $finePrimo->modify('+1 day')->format('Y-m-d') : '';
     $dati[2]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine');
     $dati[2]['scrutinio'] = 'F';
     // terzo periodo
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
-      $dati[3]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
-      $data = DateTime::createFromFormat('Y-m-d H:i', $dati[2]['fine'].' 00:00');
-      $data->modify('+1 day');
-      $dati[3]['inizio'] = $data->format('Y-m-d');
+    $nomeTerzo = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
+    if ($nomeTerzo !== null && $nomeTerzo !== '') {
+      // tre periodi: il secondo periodo è uno scrutinio intermedio
       $dati[2]['scrutinio'] = 'S';
+      $dati[3]['nome'] = $nomeTerzo;
+      $fineSecondo = $dataConfig('periodo2_fine');
+      $dati[3]['inizio'] = $fineSecondo ? $fineSecondo->modify('+1 day')->format('Y-m-d') : '';
+      $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
       $dati[3]['scrutinio'] = 'F';
     } else {
+      // due periodi: il terzo periodo non è usato
       $dati[3]['nome'] = '';
       $dati[3]['inizio'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
+      $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
       $dati[3]['scrutinio'] = '';
     }
-    $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     // restituisce dati
     return $dati;
-  }
-
-  /**
-   * Restituisce vero se si tratta di un ritardo breve
-   *
-   * @param DateTime $data Data dell'entrata in ritardo
-   * @param DateTime $ora Ora dell'entrata in ritardo
-   * @param Sede $sede Sede della classe
-   *
-   * @return bool Vero se è un ritardo breve, falso altrimenti
-   */
-  public function seRitardoBreve(DateTime $data, DateTime $ora, Sede $sede) {
-    // legge prima ora
-    $prima = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('s')
-      ->select('s.inizio')
-      ->join('s.orario', 'o')
-      ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno AND s.ora=:ora')
-			->setParameter('data', $data->format('Y-m-d'))
-			->setParameter('sede', $sede)
-			->setParameter('giorno', $data->format('w'))
-			->setParameter('ora', 1)
-      ->getQuery()
-      ->getArrayResult();
-    // controlla ritardo breve
-    $inizio = $prima[0]['inizio'];
-    $inizio->modify('+' . $this->reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . ' minutes');
-    return ($ora <= $inizio);
   }
 
   /**
@@ -1769,11 +1776,11 @@ class RegistroUtil {
       ->join(ScansioneOraria::class, 's', 'WITH', 'l.ora=s.ora AND s.giorno=:giorno')
       ->join('s.orario', 'o')
       ->where("l.data=:data AND c.anno=:anno AND c.sezione=:sezione AND :data BETWEEN o.inizio AND o.fine AND o.sede=:sede")
-			->setParameter('giorno', $data->format('w'))
-			->setParameter('data', $data->format('Y-m-d'))
-			->setParameter('anno', $alunno->getClasse()->getAnno())
-			->setParameter('sezione', $alunno->getClasse()->getSezione())
-			->setParameter('sede', $alunno->getClasse()->getSede());
+      ->setParameter('giorno', $data->format('w'))
+      ->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('anno', $alunno->getClasse()->getAnno())
+      ->setParameter('sezione', $alunno->getClasse()->getSezione())
+      ->setParameter('sede', $alunno->getClasse()->getSede());
     if (empty($alunno->getClasse()->getGruppo())) {
       // nessun gruppo
       $lezioni = $lezioni
@@ -1849,10 +1856,10 @@ class RegistroUtil {
       ->select('s.inizio,s.fine,s.durata')
       ->join('s.orario', 'o')
       ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno AND s.ora=:ora')
-			->setParameter('data', $data->format('Y-m-d'))
-			->setParameter('sede', $lezione->getClasse()->getSede())
-			->setParameter('giorno', $data->format('w'))
-			->setParameter('ora', $lezione->getOra())
+      ->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('sede', $lezione->getClasse()->getSede())
+      ->setParameter('giorno', $data->format('w'))
+      ->setParameter('ora', $lezione->getOra())
       ->setMaxResults(1)
       ->getQuery()
       ->getOneOrNullResult();
@@ -1865,8 +1872,8 @@ class RegistroUtil {
       ->leftJoin(Entrata::class, 'e', 'WITH', 'a.id=e.alunno AND e.data=:data')
       ->leftJoin(Uscita::class, 'u', 'WITH', 'a.id=u.alunno AND u.data=:data')
       ->where('a.id IN (:lista)')
-			->setParameter('lista', $lista)
-			->setParameter('data', $data->format('Y-m-d'));
+      ->setParameter('lista', $lista)
+      ->setParameter('data', $data->format('Y-m-d'));
     if ($lezione->getTipoGruppo() == 'R') {
       // gruppi religione
       if ($lezione->getGruppo() == 'S' || $lezione->getGruppo() == 'A') {
@@ -1909,12 +1916,6 @@ class RegistroUtil {
             ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)')
             ->executeStatement(['lezione' => $lezione->getId(), 'alunno' => $alu['id_alunno'],
               'durata' => $oreassenza]);
-            // $stmt = $this->em->getConnection()
-            //   ->prepare('INSERT INTO gs_assenza_lezione (creato,modificato,alunno_id,lezione_id,ore) VALUES (NOW(),NOW(),:alunno,:lezione,:durata)');
-            // $stmt->bindValue('lezione', $lezione->getId(), ParameterType::INTEGER);
-            // $stmt->bindValue('alunno', $alu['id_alunno'], ParameterType::INTEGER);
-            // $stmt->bindValue('durata', $ora['durata'], ParameterType::INTEGER);
-            // $stmt->executeStatement();
         }
       }
     }
@@ -2073,10 +2074,10 @@ class RegistroUtil {
       ->where("c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo!='C' OR l.gruppo=:gruppo) AND (fs.alunno=:alunno OR fs.alunno IS NULL)")
       ->orderBy('l.data', 'DESC')
       ->addOrderBy('m.nomeBreve,l.ora', 'ASC')
-			->setParameter('anno', $cattedra->getClasse()->getAnno())
-			->setParameter('sezione', $cattedra->getClasse()->getSezione())
-			->setParameter('gruppo', $cattedra->getClasse()->getGruppo())
-			->setParameter('alunno', $cattedra->getAlunno())
+      ->setParameter('anno', $cattedra->getClasse()->getAnno())
+      ->setParameter('sezione', $cattedra->getClasse()->getSezione())
+      ->setParameter('gruppo', $cattedra->getClasse()->getGruppo())
+      ->setParameter('alunno', $cattedra->getAlunno())
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
@@ -2159,8 +2160,8 @@ class RegistroUtil {
       ->leftJoin(Presenza::class, 'p', 'WITH', 'a.id=p.alunno AND p.data=:data')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-			->setParameter('lista', $lista)
-			->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('lista', $lista)
+      ->setParameter('data', $data->format('Y-m-d'))
       ->getQuery()
       ->getArrayResult();
     // imposta vettore associativo
@@ -2214,11 +2215,11 @@ class RegistroUtil {
       ->where('l.classe=:classe AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede')
       ->andWhere('l.materia=:materia OR EXISTS ('.$queryVoti.')')
       ->orderBy('l.data,l.ora', 'ASC')
-			->setParameter('classe', $cattedra->getClasse())
-			->setParameter('materia', $cattedra->getMateria())
-			->setParameter('docente', $cattedra->getDocente())
-			->setParameter('mese', intval($data->format('m')))
-			->setParameter('sede', $cattedra->getClasse()->getSede());
+      ->setParameter('classe', $cattedra->getClasse())
+      ->setParameter('materia', $cattedra->getMateria())
+      ->setParameter('docente', $cattedra->getDocente())
+      ->setParameter('mese', intval($data->format('m')))
+      ->setParameter('sede', $cattedra->getClasse()->getSede());
     if ($cattedra->getMateria()->getTipo() == 'R') {
       // religione e mat.alt.
       $lezioni = $lezioni
@@ -2252,7 +2253,7 @@ class RegistroUtil {
       $assenze = $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
         ->select('(al.alunno) AS id,al.ore')
         ->where('al.lezione=:lezione')
-			  ->setParameter('lezione', $l['id'])
+        ->setParameter('lezione', $l['id'])
         ->getQuery()
         ->getArrayResult();
       // somma ore di assenza per alunno
@@ -2289,7 +2290,7 @@ class RegistroUtil {
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,a.bes,a.note')
       ->where('a.id IN (:lista)')
       ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
-			->setParameter('lista', $lista_alunni)
+      ->setParameter('lista', $lista_alunni)
       ->getQuery()
       ->getArrayResult();
     $dati['alunni'] = $alunni;
@@ -2318,13 +2319,13 @@ class RegistroUtil {
       ->join('so.orario', 'o')
       ->where("c.anno=:anno AND c.sezione=:sezione AND (l.tipoGruppo!='C' OR l.gruppo=:gruppo) AND MONTH(l.data)=:mese AND l.data BETWEEN o.inizio AND o.fine AND o.sede=:sede")
       ->orderBy('l.data,l.ora', 'ASC')
-			->setParameter('anno', $cattedra->getClasse()->getAnno())
-			->setParameter('sezione', $cattedra->getClasse()->getSezione())
-			->setParameter('gruppo', $cattedra->getClasse()->getGruppo())
-			->setParameter('docente', $cattedra->getDocente())
-			->setParameter('alunno', $alunno)
-			->setParameter('mese', intval($data->format('m')))
-			->setParameter('sede', $cattedra->getClasse()->getSede())
+      ->setParameter('anno', $cattedra->getClasse()->getAnno())
+      ->setParameter('sezione', $cattedra->getClasse()->getSezione())
+      ->setParameter('gruppo', $cattedra->getClasse()->getGruppo())
+      ->setParameter('docente', $cattedra->getDocente())
+      ->setParameter('alunno', $alunno)
+      ->setParameter('mese', intval($data->format('m')))
+      ->setParameter('sede', $cattedra->getClasse()->getSede())
       ->getQuery()
       ->getArrayResult();
     // legge assenze
@@ -2364,7 +2365,7 @@ class RegistroUtil {
     $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id,a.cognome,a.nome,a.dataNascita,a.religione,a.bes,a.note')
       ->where('a.id=:alunno')
-			->setParameter('alunno', $alunno)
+      ->setParameter('alunno', $alunno)
       ->getQuery()
       ->getArrayResult();
     $dati['alunni'] = $alunni;
@@ -2445,8 +2446,8 @@ class RegistroUtil {
       ->join('c.materia', 'm')
       ->where('c.docente=:docente AND c.classe=:classe')
       ->orderBy('o.data', 'DESC')
-			->setParameter('docente', $docente)
-			->setParameter('classe', $cattedra->getClasse())
+      ->setParameter('docente', $docente)
+      ->setParameter('classe', $cattedra->getClasse())
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
@@ -2518,8 +2519,8 @@ class RegistroUtil {
       ->join('c.materia', 'm')
       ->where('o.alunno=:alunno AND d.id!=:docente')
       ->orderBy('o.data', 'DESC')
-			->setParameter('alunno', $cattedra->getAlunno())
-			->setParameter('docente', $docente)
+      ->setParameter('alunno', $cattedra->getAlunno())
+      ->setParameter('docente', $docente)
       ->getQuery()
       ->getArrayResult();
     // imposta array associativo
@@ -2578,7 +2579,7 @@ class RegistroUtil {
     $osservazioni = $this->em->getRepository(OsservazioneClasse::class)->createQueryBuilder('o')
       ->where('o.cattedra=:cattedra AND (o NOT INSTANCE OF App\Entity\OsservazioneAlunno)')
       ->orderBy('o.data', 'DESC')
-			->setParameter('cattedra', $cattedra)
+      ->setParameter('cattedra', $cattedra)
       ->getQuery()
       ->getResult();
     // imposta array associativo
@@ -2636,7 +2637,7 @@ class RegistroUtil {
     $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.cognome,a.nome')
       ->where('a.id IN (:lista)')
-			->setParameter('lista', $lista)
+      ->setParameter('lista', $lista)
       ->getQuery()
       ->getArrayResult();
     // controlla i nomi
@@ -2681,7 +2682,7 @@ class RegistroUtil {
     $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // legge i voti degli degli alunni
     $parametri = [new Parameter('alunno', $alunno), new Parameter('materia', $cattedra->getMateria()),
-			new Parameter('anno', $cattedra->getClasse()->getAnno()),
+      new Parameter('anno', $cattedra->getClasse()->getAnno()),
       new Parameter('sezione', $cattedra->getClasse()->getSezione())];
     $sql = '';
     if ($cattedra->getClasse()->getGruppo()) {
@@ -2903,8 +2904,8 @@ class RegistroUtil {
       ->select('l.id,l.data,l.ora,l.argomento')
       ->where('l.classe=:classe AND l.materia=:materia')
       ->orderBy('l.data,l.ora', 'ASC')
-			->setParameter('classe', $cattedra->getClasse())
-			->setParameter('materia', $cattedra->getMateria());
+      ->setParameter('classe', $cattedra->getClasse())
+      ->setParameter('materia', $cattedra->getMateria());
     if ($cattedra->getMateria()->getTipo() == 'R') {
       // religione e mat.alt.
       $lezioni = $lezioni
@@ -2922,6 +2923,7 @@ class RegistroUtil {
         // riga vuota
         continue;
       }
+      // Non usato in contesto sensibile – md5/sha1 accettabile
       $key = sha1((string) preg_replace('/[\W_]+/', '', mb_strtolower($argomento)));
       if (!isset($dati['argomenti'][$key])) {
         // memorizza argomento
@@ -2943,10 +2945,10 @@ class RegistroUtil {
       ->join('c.docente', 'd')
       ->where('c.classe=:classe AND c.materia=:materia AND c.attiva=:attiva AND c.tipo!=:potenziamento')
       ->orderBy('d.cognome,d.nome', 'ASC')
-			->setParameter('classe', $cattedra->getClasse())
-			->setParameter('materia', $cattedra->getMateria())
-			->setParameter('attiva', 1)
-			->setParameter('potenziamento', 'P')
+      ->setParameter('classe', $cattedra->getClasse())
+      ->setParameter('materia', $cattedra->getMateria())
+      ->setParameter('attiva', 1)
+      ->setParameter('potenziamento', 'P')
       ->getQuery()
       ->getArrayResult();
     $dati['docenti'] = $docenti;
@@ -2988,9 +2990,9 @@ class RegistroUtil {
     $alunni = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
       ->select('a.id')
       ->where('a.classe=:classe AND a.abilitato=1 AND a.frequenzaEstero=0 AND NOT EXISTS ('.$cambio->getDQL().')')
-			->setParameter('inizio', $inizio->format('Y-m-d'))
-			->setParameter('fine', $fine->format('Y-m-d'))
-			->setParameter('classe', $classe)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
+      ->setParameter('classe', $classe)
       ->getQuery()
       ->getSingleColumnResult();
     // aggiunge altri alunni con cambiamento nella classe nel periodo
@@ -2998,212 +3000,13 @@ class RegistroUtil {
       ->select('a.id')
       ->join(CambioClasse::class, 'cc', 'WITH', 'a.id=cc.alunno')
       ->where('a.frequenzaEstero=0 AND cc.inizio<=:fine AND cc.fine>=:inizio AND cc.classe=:classe AND (a.classe IS NULL OR a.classe!=:classe)')
-			->setParameter('inizio', $inizio->format('Y-m-d'))
-			->setParameter('fine', $fine->format('Y-m-d'))
-			->setParameter('classe', $classe)
+      ->setParameter('inizio', $inizio->format('Y-m-d'))
+      ->setParameter('fine', $fine->format('Y-m-d'))
+      ->setParameter('classe', $classe)
       ->getQuery()
       ->getSingleColumnResult();
     // restituisce lista di ID della classe corrente e dei cambi
     return [$alunni, $alunni2];
-  }
-
-  /**
-   * Inserisce gli assenti all'ora di lezione indicata
-   *
-   * @param Docente $docente Docente che inserisce le assenze
-   * @param Lezione $lezione Lezione da considerare
-   * @param array $assenti Lista di alunni assenti alla lezione
-   */
-  public function inserisceAssentiLezione(Docente $docente, Lezione $lezione, $assenti) {
-    $scansione_oraria = $this->em->getRepository(ScansioneOraria::class)->oraLezione($lezione);
-    $ore = $scansione_oraria->getDurata();
-    // inserisce assenti
-    foreach ($assenti as $alu) {
-      $assente = (new AssenzaLezione())
-        ->setLezione($lezione)
-        ->setAlunno($alu)
-        ->setOre($ore);
-      $this->em->persist($assente);
-      // controlla assenza giorno
-      $assenza_giorno = $this->em->getRepository(Assenza::class)
-        ->findOneBy(['alunno' => $alu, 'data' => $lezione->getData()]);
-      if ($assenza_giorno) {
-        // resetta situazione a non giustificato
-        $assenza_giorno
-          ->setGiustificato(null)
-          ->setDocenteGiustifica(null);
-      } else {
-        // aggiunge assenza giornaliera
-        $assenza_giorno = (new Assenza())
-          ->setAlunno($alu)
-          ->setDocente($docente)
-          ->setData($lezione->getData());
-        $this->em->persist($assenza_giorno);
-      }
-    }
-  }
-
-  /**
-   * Cancella gli assenti dall'ora di lezione indicata
-   *
-   * @param Lezione $lezione Lezione da considerare
-   * @param array $assenti Lista di alunni assenti da cancellare
-   */
-  public function cancellaAssentiLezione(Lezione $lezione, $assenti) {
-    $assenti_lezione = $this->em->getRepository(AssenzaLezione::class)->assentiSoloLezione($lezione);
-    $assenti_giorno = array_intersect($assenti, $assenti_lezione);
-    if (count($assenti_giorno) > 0) {
-      // cancella assenze del giorno
-      $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
-        ->delete()
-        ->where('a.data=:data AND a.alunno IN (:lista)')
-        ->setParameter('data', $lezione->getData()->format('Y-m-d'))
-        ->setParameter('lista', $assenti_giorno)
-        ->getQuery()
-        ->execute();
-    }
-    // cancella assenze alla lezione
-    $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
-      ->delete()
-      ->where('al.lezione=:lezione AND al.alunno IN (:lista)')
-			->setParameter('lezione', $lezione)
-			->setParameter('lista', $assenti)
-      ->getQuery()
-      ->execute();
-  }
-
-  /**
-   * Modifica gli assenti all'ora di lezione indicata
-   *
-   * @param Docente $docente Docente che inserisce le assenze
-   * @param Lezione $lezione Lezione da considerare
-   * @param array $assenti_precedenti Precedente lista di alunni assenti alla lezione
-   * @param array $assenti Nuova lista di alunni assenti alla lezione
-   */
-  public function modificaAssentiLezione(Docente $docente, Lezione $lezione, $assenti_precedenti, $assenti) {
-    // assenti da cancellare
-    $cancellare = array_diff($assenti_precedenti, $assenti);
-    $this->cancellaAssentiLezione($lezione, $cancellare);
-    // assenti da inserire
-    $inserire = array_diff($assenti, $assenti_precedenti);
-    $this->inserisceAssentiLezione($docente, $lezione, $inserire);
-  }
-
-  /**
-   * Restituisce la lista delle assenze e dei ritardi da giustificare, considerando assenze orarie
-   *
-   * @param DateTime $data Data del giorno in cui si giustifica
-   * @param Alunno $alunno Alunno da giustificare
-   * @param Classe $classe Classe della lezione
-   *
-   * @return array Dati restituiti come array associativo
-   */
-  public function assenzeOreDaGiustificare(DateTime $data, Alunno $alunno, Classe $classe) {
-    $dati['convalida_assenze'] = [];
-    $dati['assenze'] = [];
-    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    $periodi = $this->infoPeriodi();
-    // legge assenze
-    $assenze = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
-      ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
-      ->join(Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe AND ass.data<=:data')
-      ->orderBy('ass.data', 'DESC')
-			->setParameter('alunno', $alunno)
-			->setParameter('classe', $alunno->getClasse())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->getQuery()
-      ->getArrayResult();
-    // imposta array associativo per assenze
-    foreach ($assenze as $a) {
-      $data_assenza = $a['data']->format('Y-m-d');
-      $numperiodo = ($data_assenza <= $periodi[1]['fine'] ? 1 : ($data_assenza <= $periodi[2]['fine'] ? 2 : 3));
-      $dataStr = intval(substr((string) $data_assenza, 8)).' '.$mesi[intval(substr((string) $data_assenza, 5, 2))].' '.substr((string) $data_assenza, 0, 4);
-      $dati_periodo[$numperiodo][$data_assenza]['data_obj'] = $a['data'];
-      $dati_periodo[$numperiodo][$data_assenza]['data'] = $dataStr;
-      $dati_periodo[$numperiodo][$data_assenza]['fine'] = $dataStr;
-      $dati_periodo[$numperiodo][$data_assenza]['giorni'] = 1;
-      $dati_periodo[$numperiodo][$data_assenza]['giustificato'] =
-        ($a['giustificato'] ? ($a['docenteGiustifica'] ? 'D' : 'G') : null);
-      $dati_periodo[$numperiodo][$data_assenza]['motivazione'] = $a['motivazione'];
-      $dati_periodo[$numperiodo][$data_assenza]['dichiarazione'] =
-        empty($a['dichiarazione']) ? [] : $a['dichiarazione'];
-      $dati_periodo[$numperiodo][$data_assenza]['certificati'] =
-        empty($a['certificati']) ? [] : $a['certificati'];
-      $dati_periodo[$numperiodo][$data_assenza]['id'] = $a['id'];
-      $dati_periodo[$numperiodo][$data_assenza]['ids'] = $a['id'];
-      if ($dati_periodo[$numperiodo][$data_assenza]['giustificato'] == 'G') {
-        // giustificazioni da convalidare
-        $dati['convalida_assenze'][$data_assenza] = (object) $dati_periodo[$numperiodo][$data_assenza];
-      } elseif (!$dati_periodo[$numperiodo][$data_assenza]['giustificato']) {
-        // assenze non giustificate
-        $dati['assenze'][$data_assenza] = (object) $dati_periodo[$numperiodo][$data_assenza];
-      }
-    }
-    // ritardi da giustificare
-    $ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
-      ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('e.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['ritardi'] = $ritardi;
-    // ritardi da convalidare
-    $convalida_ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
-      ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NOT NULL AND e.docenteGiustifica IS NULL AND e.ritardoBreve!=:breve')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-			->setParameter('breve', 1)
-      ->orderBy('e.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['convalida_ritardi'] = $convalida_ritardi;
-    // uscite da giustificare
-    $uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('u.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['uscite'] = $uscite;
-    // uscite da convalidare
-    $convalida_uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('u.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['convalida_uscite'] = $convalida_uscite;
-    // numero totale di giustificazioni
-    $dati['tot_giustificazioni'] = count($assenze) + count($ritardi) + count($uscite);
-    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']) +
-      count($dati['convalida_uscite']);    // uscite da giustificare
-    $uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('u.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['uscite'] = $uscite;
-    // uscite da convalidare
-    $convalida_uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('u.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['convalida_uscite'] = $convalida_uscite;
-    // numero totale di giustificazioni
-    $dati['tot_giustificazioni'] = count($dati['assenze']) + count($dati['ritardi']) + count($dati['uscite']);
-    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']) +
-      count($dati['convalida_uscite']);
-    // restituisce dati
-    return $dati;
   }
 
   /**
@@ -3290,13 +3093,17 @@ class RegistroUtil {
     $controllo['U:R:S']['S:N'] = 'sostegnoNA';
     $controllo['U:R:A']['S:N'] = 'sostegnoNA';
     $controllo['U:R:N']['S:N'] = 'sostegnoNA';
+    // religione cattolica su classe con gruppo (rappresentato dal suffisso 'C')
+    $controllo['R:C']['-:-'] = 'ok';
+    $controllo['R:C']['E:C'] = $controllo['R:C']['N:C'] = $controllo['R:C']['U:C'] = 'gruppo';
+    $controllo['R:C']['R:C'] = 'gruppo';
     // lezione firmata in altra classe
     $altre = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
       ->join(Firma::class, 'f', 'WITH', 'l.id=f.lezione')
       ->where('l.data=:data AND l.ora=:ora AND f.docente=:docente')
-			->setParameter('data', $data->format('Y-m-d'))
-			->setParameter('ora', $ora)
-			->setParameter('docente', $docente)
+      ->setParameter('data', $data->format('Y-m-d'))
+      ->setParameter('ora', $ora)
+      ->setParameter('docente', $docente)
       ->getQuery()
       ->getResult();
     // controlla sovrapposizione
@@ -3339,7 +3146,7 @@ class RegistroUtil {
         //   ->select('DISTINCT c.tipo')
         //   ->join('c.materia', 'm')
         //   ->where("c.attiva=1 AND m.tipo='R' AND c.classe=:classe")
-			  //   ->setParameter('classe', $classe)
+        //   ->setParameter('classe', $classe)
         //   ->getQuery()
         //   ->getSingleColumnResult();
         // // sostituzione gruppo religione inesistente
@@ -3374,7 +3181,7 @@ class RegistroUtil {
     foreach ($tipoCattedre as $tipoCattedra) {
       $compatibili = [];
       foreach ($tipiLezioni as $tipoLezione) {
-        if (in_array($tipoLezione, array_keys($controllo[$tipoCattedra]), true)) {
+        if (in_array($tipoLezione, array_keys($controllo[$tipoCattedra] ?? []), true)) {
           $compatibili[] = $tipoLezione;
         }
       }
@@ -3538,7 +3345,11 @@ class RegistroUtil {
     } else {
       $tipoCattedra = (!$cattedra ? 'U' : $materia->getTipo()).':'.($tipoGruppo == 'R' ? 'R:'.$gruppo : $tipoGruppo);
     }
-    $procedura = $controllo['trasforma'][$tipoCattedra];
+    // nessuna trasformazione prevista per la combinazione richiesta
+    $procedura = $controllo['trasforma'][$tipoCattedra] ?? null;
+    if ($procedura === null) {
+      return $stato;
+    }
     if (count($lezioni) > 0) {
       // trasformazione
       switch ($procedura) {
@@ -3608,7 +3419,7 @@ class RegistroUtil {
             $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
               ->delete()
               ->where('al.lezione=:lezione')
-			        ->setParameter('lezione', $lezioni[0]->getId())
+              ->setParameter('lezione', $lezioni[0]->getId())
               ->getQuery()
               ->execute();
             // modifica sostegno presente su altri gruppi
@@ -3653,7 +3464,7 @@ class RegistroUtil {
           $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
             ->delete()
             ->where('al.lezione=:lezione')
-			      ->setParameter('lezione', $lezioni[0]->getId())
+            ->setParameter('lezione', $lezioni[0]->getId())
             ->getQuery()
             ->execute();
           // modifica sostegno presente su altri gruppi

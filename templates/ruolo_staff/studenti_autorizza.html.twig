@@ -1,61 +1,71 @@
 {% extends 'ruolo_staff/index.html.twig' %}
 
 {% block pagina_contenuto %}
-<div class="container-fluid">
+<div class="container-fluid gs-studenti-autorizza">
   <h1 class="text-center gs-h2 gs-mt-2">{{ 'title.autorizza'|trans }}</h1>
   {% if errore %}
   <div class="row gs-mb-5">
     <div class="col-sm-12">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
-      <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+      {% if data_prec %}<a class="btn btn-default btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-default btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
   </div>
   <div class="alert alert-warning" role="alert">
     <strong class="gs-big">{{ errore }}</strong>
   </div>
   {% else %}
-    {% include('include/form-inline.html.twig') %}
+  <form name="{{ form.vars.name }}" method="{{ form.vars.method }}" action="{{ form.vars.action }}" class="gs-filters gs-mb-3">
+    <div id="{{ form.vars.id }}">
+      <div class="gs-filters-row">
+        <div class="gs-filter-col">
+          {{ form_label(form.classe, null, {label_attr: {class: 'control-label'}}) }}
+          {{ form_widget(form.classe) }}
+        </div>
+      </div>
+      <div class="gs-filters-buttons">
+        {{ form_widget(form.submit) }}
+      </div>
+      {{ form_widget(form._token) }}
+    </div>
+  </form>
   <div class="row gs-mb-1">
     <div class="col-sm-6">
-      {% if data_prec %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {'data': data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente"><span class="glyphicon glyphicon-chevron-left"></span></a>{% endif %}
-      <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno"><span class="glyphicon glyphicon-calendar gs-mr-3"></span><strong>{{ info.data_label }}</strong></button>
-      {% if data_succ %}<a class="btn btn-success btn-sm" href="{{ path('staff_studenti_autorizza', {'data': data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo"><span class="glyphicon glyphicon-chevron-right"></span></a>{% endif %}
+      {% if data_prec %}<a class="btn btn-default btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_prec|date('Y-m-d')}) }}" role="button" title="Giorno precedente">{{ include('admin/include/icona.html.twig', {nome: 'chevron-left', stile: 'outline'}) }}</a>{% endif %}
+      <button class="btn btn-primary" id="gs-button-date" title="Cambia giorno">{{ include('admin/include/icona.html.twig', {nome: 'calendar', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ info.data_label }}</strong></button>
+      {% if data_succ %}<a class="btn btn-default btn-sm" href="{{ path('staff_studenti_autorizza', {data: data_succ|date('Y-m-d')}) }}" role="button" title="Giorno successivo">{{ include('admin/include/icona.html.twig', {nome: 'chevron-right', stile: 'outline'}) }}</a>{% endif %}
     </div>
     <div class="col-sm-6 text-right">
       <strong class="gs-big">{{ info.periodo.nome }}</strong>
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped gs-mb-0">
-    <thead class="bg-success">
-      <tr>
-        <th>{{ 'label.alunno'|trans }}</th>
-        <th>{{ 'label.classe'|trans }}</th>
-        <th>{{ 'label.ritardi'|trans }}</th>
-        <th>{{ 'label.uscite'|trans }}</th>
-        <th>{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  {% set intestazione = [
+      {contenuto: 'label.alunno'|trans, scope: 'col'},
+      {contenuto: 'label.classe'|trans, scope: 'col'},
+      {contenuto: 'label.ritardi'|trans, scope: 'col'},
+      {contenuto: 'label.uscite'|trans, scope: 'col'},
+      {contenuto: 'label.action'|trans, scope: 'col'},
+    ] %}
+    {% set corpo_grezzo_0 %}
       {% for a in dati.lista %}
       <tr>
         <td>
-          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.alunno.cognome }} {{ a.alunno.nome }} ({{ a.alunno.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.alunno.cognome }} {{ a.alunno.nome }} ({{ a.alunno.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline'}) }}</button>
           <span>{{ a.alunno.cognome }} {{ a.alunno.nome }} ({{ a.alunno.dataNascita|date('d/m/Y') }})</span>
         {% if a.alunno.autorizzaEntrata is not empty %}
-          <button type="button" class="btn btn-xs btn-info gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.alunno.autorizzaEntrata }}"><span class="glyphicon glyphicon-time"></span></button>
+          <button type="button" class="btn btn-xs btn-info gs-ml-1" title="Autorizzazione all'entrata in ritardo" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.alunno.autorizzaEntrata }}">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline'}) }}</button>
         {% endif %}
         {% if a.alunno.autorizzaUscita is not empty %}
-          <button type="button" class="btn btn-xs btn-warning gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.alunno.autorizzaUscita }}"><span class="glyphicon glyphicon-time"></span></button>
+          <button type="button" class="btn btn-xs btn-warning gs-ml-1" title="Autorizzazione all'uscita anticipata" data-placement="auto left" data-toggle="popover" data-trigger="hover" data-content="{{ a.alunno.autorizzaUscita }}">{{ include('admin/include/icona.html.twig', {nome: 'clock', stile: 'outline'}) }}</button>
         {% endif %}
-        {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a.alunno, g: dati.genitori[a.alunno.id]} %}
+        {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a.alunno, g: dati.genitori[a.alunno.id]}) }}
         </td>
         <td>{{ a.alunno.classe }}</td>
         <td>
         {% if a.entrate is not empty %}
           <button type="button" class="btn btn-xs btn-warning" title="Clicca per visualizzare le informazioni sui ritardi" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sui ritardi" data-body="entrate-{{ a.alunno.id }}">{{ a.entrate|length }}</button>
           <div id="entrate-{{ a.alunno.id }}" style="display:none">
-          {% for k,v in a.entrate %}
+          {% for k, v in a.entrate %}
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <strong>Data: {{ v.data|date('d/m/Y') }}<br>Ora: {{ v.ora|date('H:i') }}</strong><br>
@@ -72,7 +82,7 @@
         {% if a.uscite is not empty %}
           <button type="button" class="btn btn-xs btn-warning" title="Clicca per visualizzare le informazioni sulle uscite anticipate" data-toggle="modal" data-target="#gs-modal-info" data-title="Informazioni sulle uscite anticipate" data-body="uscite-{{ a.alunno.id }}">{{ a.uscite|length }}</button>
           <div id="uscite-{{ a.alunno.id }}" style="display:none">
-          {% for k,v in a.uscite %}
+          {% for k, v in a.uscite %}
             <div class="list-group-item">
               <div class="list-group-item-text">
                 <strong>Data: {{ v.data|date('d/m/Y') }}<br>Ora: {{ v.ora|date('H:i') }}</strong><br>
@@ -87,28 +97,28 @@
         </td>
         <td>
         {% if dati.azioni %}
-          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_autorizza_entrata', {'data': data, 'classe': a.alunno.classe.id, 'alunno': a.alunno.id}) }}" role="button" title="Segna il ritardo dell'alunno">R</a>
-          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_autorizza_uscita', {'data': data, 'classe': a.alunno.classe.id, 'alunno': a.alunno.id}) }}" role="button" title="Segna l'uscita anticipata dell'alunno">U</a>
+          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_autorizza_entrata', {data: data, classe: a.alunno.classe.id, alunno: a.alunno.id}) }}" role="button" title="Segna il ritardo dell'alunno">R</a>
+          <a class="btn btn-primary btn-xs" href="{{ path('staff_studenti_autorizza_uscita', {data: data, classe: a.alunno.classe.id, alunno: a.alunno.id}) }}" role="button" title="Segna l'uscita anticipata dell'alunno">U</a>
         {% endif %}
         </td>
       </tr>
       {% endfor %}
-    </tbody>
-  </table>
-    {% include 'include/modal-info.html.twig' %}
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
+    {{ include('include/modal-info.html.twig') }}
     {% if maxPages > 1 %}
   <nav aria-label="Navigazione tra le pagine" class="text-center">
     <ul class="pagination pagination-sm gs-mt-2">
       {% if page > 1 %}
-      <li><a href="{{ path('staff_studenti_autorizza', {'data': data, 'pagina': page-1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
+      <li><a href="{{ path('staff_studenti_autorizza', {data: data, pagina: page - 1}) }}" title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></a></li>
       {% else %}
       <li class="disabled"><span title="{{ 'label.precedente'|trans }}"><span aria-hidden="true">&laquo;</span></span></li>
       {% endif %}
       {% for i in 1..maxPages %}
-      <li {{ page == i ? 'class="active"' }}><a href="{{ path('staff_studenti_autorizza', {'data': data, 'pagina': i}) }}">{{ i }}</a></li>
+      <li {{ page == i ? 'class="active"' }}><a href="{{ path('staff_studenti_autorizza', {data: data, pagina: i}) }}">{{ i }}</a></li>
       {% endfor %}
       {% if page < maxPages %}
-      <li><a href="{{ path('staff_studenti_autorizza', {'data': data, 'pagina': page+1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
+      <li><a href="{{ path('staff_studenti_autorizza', {data: data, pagina: page + 1}) }}" title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></a></li>
       {% else %}
       <li class="disabled"><span title="{{ 'label.successiva'|trans }}"><span aria-hidden="true">&raquo;</span></span></li>
       {% endif %}
@@ -130,6 +140,10 @@
 <script src="{{ asset('vendor/bootstrap-datepicker/locales/bootstrap-datepicker.it.min.js') }}"></script>
 <script>
 $(document).ready(function() {
+  // Aggiungi opzione vuota alle select se sono vuote
+  if ($('#staff_studenti_autorizza_classe option').length === 0) {
+    $('#staff_studenti_autorizza_classe').prepend('<option value="">Tutte le classi</option>');
+  }
   $('#gs-button-date').datepicker({
     format: "yyyy-mm-dd",
     weekStart: 1,
@@ -138,7 +152,7 @@ $(document).ready(function() {
     defaultViewDate: "{{ data }}",
     startDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_inizio') }}",
     endDate: "{{ app.session.get('/CONFIG/SCUOLA/anno_fine') }}",
-    datesDisabled: {{ lista_festivi|raw }},
+    {% if lista_festivi %}datesDisabled: {{ lista_festivi|raw }},{% endif %}
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,
@@ -152,7 +166,7 @@ $(document).ready(function() {
   $('#gs-button-date').datepicker()
     .on('changeDate', function(ev){
       $('#gs-button-date').datepicker('hide');
-      url = "{{ path('staff_studenti_autorizza', {'data': '9999-99-99', 'pagina': page}) }}";
+      url = "{{ path('staff_studenti_autorizza', {data: '9999-99-99', pagina: page}) }}";
       url = url.replace("9999-99-99", ev.format());
       window.location.href = url;
   });
@@ -171,13 +185,24 @@ $(document).ready(function() {
       if (el.is(':visible')) {
         el.fadeOut();
         $(this).attr('title', 'Apre la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-full gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize');
       } else {
         el.fadeIn();
         $(this).attr('title', 'Chiude la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize');
       }
     });
+  });
+  $('form[name="staff_studenti_autorizza"]').on('submit', function(ev){
+    var url = "{{ path('staff_studenti_autorizza', {data: data, pagina: '9999'}) }}";
+    var v = $('#staff_studenti_autorizza_classe').val();
+    url = url.replace("9999", (v ? v : 0));
+    window.location.href = url;
+    return false;
   });
 });
 </script>

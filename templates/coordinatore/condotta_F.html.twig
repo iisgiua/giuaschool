@@ -12,7 +12,7 @@
             <strong>{{ dati.alunni[voto.alunno.vars.value][0] }} {{ dati.alunni[voto.alunno.vars.value][1] }} ({{ dati.alunni[voto.alunno.vars.value][2]|date('d/m/Y') }})</strong>
           </div>
           <div class="col-sm-6 text-right">
-            <strong>Percentuale di assenze: <span class="label label-info gs-big">{{ dati.assenze[voto.alunno.vars.value].percentuale|number_format(2,   ',') }}%</span></strong>
+            <strong>Percentuale di assenze: <span class="label label-info gs-big">{{ dati.assenze[voto.alunno.vars.value].percentuale|number_format(2, ',') }}%</span></strong>
           </div>
         </div>
         <div class="form-group gs-mb-2">
@@ -20,11 +20,11 @@
           <div class="col-sm-10">
     {% if voto.unico.vars.value is not empty %}
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-{{ voto.unico.vars.value < dati.valutazioni.med ? 'danger' : (voto.unico.vars.value < dati.valutazioni.suff ? 'warning' : 'success') }} gs-mr-4 gs-big">{{ dati.valutazioni.lista[voto.unico.vars.value] }}</span>
-            <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi la valutazione per la condotta"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
-            <div style="display:inline-block">{{ form_widget(voto.unico, {'attr': {'class': 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
+            <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi la valutazione per la condotta">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
+            <div style="display:inline-block">{{ form_widget(voto.unico, {attr: {class: 'slider', 'data-slider-value': voto.unico.vars.value}}) }}</div>
     {% else %}
             <span style="display:inline-block;width:7em;padding:0.6em 0.2em;" class="label label-default gs-mr-4 gs-big">--</span>
-            <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi la valutazione per la condotta"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
+            <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi la valutazione per la condotta">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
             <div style="display:none">{{ form_widget(voto.unico) }}</div>
     {% endif %}
           </div>
@@ -32,7 +32,7 @@
         <div id="row_{{ voto.motivazione.vars.id }}" class="form-group gs-mb-2">
           <label class="control-label col-sm-2" for="{{ voto.motivazione.vars.id }}">Descrittori</label>
           <div class="col-sm-10">
-            {{ form_widget(voto.motivazione, {'attr': {'rows': 4, 'readonly': 'readonly'}}) }}
+            {{ form_widget(voto.motivazione, {attr: {rows: 4}}) }}
           </div>
         </div>
         <div class="form-group gs-mb-2">
@@ -52,15 +52,20 @@
   {% endfor %}
     </ul>
   </div>
-  <div class="modal-footer">
+  <div class="modal-footer gs-modal-actions">
     {{ form_widget(form.submit, {attr: {class: 'btn-primary'}}) }}
     <button type="button" class="btn-default btn" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
   </div>
   {{ form_widget(form._token) }}
-{{ form_end(form, {'render_rest': false}) }}
+{{ form_end(form, {render_rest: false}) }}
 
 <script>
 var voti = [{{ dati.valutazioni.voti|raw }}];
+var descrittori = [null, null, null, null, "{{ 'message.giudizio_condotta_NC'|trans }}", "{{ 'message.giudizio_condotta_5'|trans }}", "{{ 'message.giudizio_condotta_6'|trans }}", "{{ 'message.giudizio_condotta_7'|trans }}", "{{ 'message.giudizio_condotta_8'|trans }}", "{{ 'message.giudizio_condotta_9'|trans }}", "{{ 'message.giudizio_condotta_10'|trans }}"];
+// Restituisce il descrittore standard associato al voto
+function gsDescrittoreCondotta(valore) {
+  return descrittori[valore] || '';
+}
 $(document).ready(function() {
   $("#gs-form-collection input.slider").slider({
     min: {{ dati.valutazioni.min }},
@@ -72,6 +77,16 @@ $(document).ready(function() {
     focus: true,
     formatter: function(val) { return voti[val - {{ dati.valutazioni.min }}]; },
     natural_arrow_keys: true
+  });
+  // I voti gia' registrati possono avere il campo dei descrittori vuoto: lo
+  // si riempie subito con il descrittore del voto corrente, cosi' il
+  // coordinatore trova il testo standard da cui partire e puo' modificarlo.
+  $("#gs-form-collection input.slider").each(function() {
+    var id = this.id.slice(15,-6);
+    var campo = $('#row_condotta_lista_'+id+'_motivazione').find('textarea');
+    if (!$.trim(campo.val())) {
+      campo.val(gsDescrittoreCondotta($(this).val()));
+    }
   });
   $('#gs-form-collection button.gs-button-add').on('click', function(e) {
     $(this).parent().find('div').attr('style', 'display:inline-block').find('input').addClass('slider')
@@ -92,12 +107,11 @@ $(document).ready(function() {
     e.preventDefault();
   });
   $("#gs-form-collection").on("change", "input.slider", function(e) {
-    var g = [null, null, null, null, "{{ 'message.giudizio_condotta_NC'|trans }}", "{{ 'message.giudizio_condotta_5'|trans }}", "{{ 'message.giudizio_condotta_6'|trans }}", "{{ 'message.giudizio_condotta_7'|trans }}", "{{ 'message.giudizio_condotta_8'|trans }}", "{{ 'message.giudizio_condotta_9'|trans }}", "{{ 'message.giudizio_condotta_10'|trans }}"];
     var d = [{{ dati.valutazioni.votiAbbr|raw }}];
     var c = (e.value.newValue < {{ dati.valutazioni.med }} ? 'label-danger' : (e.value.newValue < {{ dati.valutazioni.suff }} ? 'label-warning' : 'label-success'));
     $(this).parent().siblings('span').removeClass('label-default label-success label-danger label-warning').addClass(c).text(d[e.value.newValue - {{ dati.valutazioni.min }}]);
     var id = this.id.slice(15,-6);
-    $('#row_condotta_lista_'+id+'_motivazione').find('textarea').val(g[e.value.newValue]);
+    $('#row_condotta_lista_'+id+'_motivazione').find('textarea').val(gsDescrittoreCondotta(e.value.newValue));
   });
   $('.gs-scrutinio-unanimita label.radio-inline input[type="radio"]').change(function() {
     var id = parseInt($(this).attr('id').substring(15));
