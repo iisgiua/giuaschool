@@ -23,7 +23,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -151,11 +150,14 @@ class DocumentiController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/documenti/delete/{documento}', name: 'documenti_delete', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/documenti/delete/{documento}', name: 'documenti_delete', requirements: ['documento' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(LogHandler $dblogger, ComunicazioniUtil $com,
-                         #[MapEntity] Documento $documento
-                         ): Response {
+  public function delete(Request $request, LogHandler $dblogger, ComunicazioniUtil $com,
+                         #[MapEntity] Documento $documento): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo permessi
     if (!$com->azioneDocumento('delete', $this->getUser(), $documento)) {
       // errore
@@ -529,21 +531,30 @@ class DocumentiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db
-    $com->leggeUtente($this->getUser(), $documento);
-    $this->em->flush();
     // invia il file
     $file = $documento->getAllegati()[$allegato];
     $nomefile = $com->dirDocumento($documento).'/'.$file->getFile().'.'.$file->getEstensione();
     if (!file_exists($nomefile)) {
-      // compatibilità con vecchi documenti
-      $nomefile = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
-        $documento->getAlunno()->getClasse()->getAnno().$documento->getAlunno()->getClasse()->getSezione().
-        $documento->getAlunno()->getClasse()->getGruppo().'/riservato/'.
-        $file->getFile().'.'.$file->getEstensione();
+      // compatibilità solo se il documento ha un alunno ed è uno dei casi storici
+      $alunno = $documento->getAlunno();
+      if ($alunno && $alunno->getClasse()) {
+        $nomefile = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
+          $alunno->getClasse()->getAnno().$alunno->getClasse()->getSezione().
+          $alunno->getClasse()->getGruppo().'/riservato/'.
+          $file->getFile().'.'.$file->getEstensione();
+      } else {
+        // errore: non posso ricavare il percorso senza un alunno e una classe
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
     }
-    return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
-      ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
+    if (!file_exists($nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // segna lettura e memorizza su db solo dopo aver verificato il file
+    $com->leggeUtente($this->getUser(), $documento);
+    $this->em->flush();
+    return $this->rispostaAllegato($nomefile, $file->getNome().'.'.$file->getEstensione(), $tipo == 'V');
   }
 
   /**
@@ -563,6 +574,8 @@ class DocumentiController extends BaseController {
     $criteri = [];
     $criteri['filtro'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/tipo', 'L');
+    // sanifica il tipo: un valore non previsto non consente di completare la query
+    $criteri['tipo'] = in_array($criteri['tipo'], ['L', 'P', 'R', 'M'], true) ? $criteri['tipo'] : 'L';
     $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/classe', 0));
     if ($pagina == 0) {
@@ -1052,11 +1065,16 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/documenti/bes/restore/{documento}', name: 'documenti_bes_restore', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/documenti/bes/restore/{documento}', name: 'documenti_bes_restore', requirements: ['documento' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function besRestore(TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
+  public function besRestore(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
+                             LogHandler $dblogger,
                              #[MapEntity] Documento $documento
                              ): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore
@@ -1126,11 +1144,16 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/documenti/bes/archive/{documento}', name: 'documenti_bes_archive', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/documenti/bes/archive/{documento}', name: 'documenti_bes_archive', requirements: ['documento' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function besArchive(TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
+  public function besArchive(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
+                             LogHandler $dblogger,
                              #[MapEntity] Documento $documento
                              ): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore

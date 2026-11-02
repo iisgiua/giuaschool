@@ -39,6 +39,7 @@ use App\Util\TelegramManager;
 use DateTime;
 use Doctrine\DBAL\ArrayParameterType;
 use Exception;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -308,11 +309,13 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    */
   #[Route(path: '/sistema/alias/exit', name: 'sistema_alias_exit', methods: ['GET'])]
+  #[IsGranted('ROLE_UTENTE')]
   public function aliasExit(LogHandler $dblogger): Response  {
     // log azione
+    $utente = $this->getUser();
     $dblogger->logAzione('ACCESSO', 'Alias Exit', [
-      'Username' => $this->getUser()->getUserIdentifier(),
-      'Ruolo' => $this->getUser()->getRoles()[0],
+      'Username' => $utente ? $utente->getUserIdentifier() : '---',
+      'Ruolo' => $utente ? ($utente->getRoles()[0] ?? '---') : '---',
       'Username reale' => $this->reqstack->getSession()->get('/APP/UTENTE/username_reale'),
       'Ruolo reale' => $this->reqstack->getSession()->get('/APP/UTENTE/ruolo_reale'),
       'ID reale' => $this->reqstack->getSession()->get('/APP/UTENTE/id_reale')]);
@@ -1312,9 +1315,14 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/manutenzione/cache/', name: 'sistema_manutenzione_cache', methods: ['GET'])]
+  #[Route(path: '/sistema/manutenzione/cache/', name: 'sistema_manutenzione_cache', methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function manutenzioneCache(TranslatorInterface $trans, KernelInterface $kernel): Response {
+  public function manutenzioneCache(Request $request, TranslatorInterface $trans,
+                                    KernelInterface $kernel): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // comandi per la pulizia della cache del database
@@ -1349,9 +1357,13 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/manutenzione/logout/', name: 'sistema_manutenzione_logout', methods: ['GET'])]
+  #[Route(path: '/sistema/manutenzione/logout/', name: 'sistema_manutenzione_logout', methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneLogout(Request $request): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // nome del file di sessione in uso
@@ -1439,10 +1451,14 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/manutenzione/debug/', name: 'sistema_manutenzione_debug', methods: ['GET'])]
+  #[Route(path: '/sistema/manutenzione/debug/', name: 'sistema_manutenzione_debug', methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneDebug(Request $request, TranslatorInterface $trans,
                                     KernelInterface $kernel): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // imposta nuovo livello di log
@@ -1488,9 +1504,18 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET'])]
+  #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function aggiorna(int $step): Response {
+  public function aggiorna(Request $request, CacheItemPoolInterface $cache, int $step): Response {
+    // controllo dei parametri (i passi validi sono 0, 1 e 2)
+    if ($step < 0 || $step > 2) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    // controllo CSRF (il passo 0 effettua solo controlli, gli altri modificano il sistema)
+    if ($step > 0 && (!$request->isMethod('POST') ||
+        !$this->isCsrfTokenValid('sistema_aggiorna', $request->request->get('_csrf_token')))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // inizializza
     $dati = [];
     $info = [];
@@ -1501,10 +1526,11 @@ class SistemaController extends BaseController {
     $info['prossimo'] = 0;
     switch($step) {
       case 0:   // controlli iniziali
-        // legge ultima versione
+        // legge ultima versione (il risultato resta in cache per pochi minuti,
+        // per non ripetere il download ad ogni apertura della pagina)
         $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/version.yml';
-        $pagina = file_get_contents($url);
-        preg_match('/^tag:\s*([0-9\.]+)$/m', $pagina, $trovati);
+        $pagina = $this->scaricaUrlCache($cache, 'sistema_aggiorna_version', $url);
+        preg_match('/^tag:\s*([0-9\.]+)$/m', (string) $pagina, $trovati);
         if (count($trovati) != 2) {
           // errore recupero versione
           $info['tipo'] = 'danger';
@@ -1514,8 +1540,8 @@ class SistemaController extends BaseController {
         $nuovaVersione = $trovati[1];
         // legge ultima build
         $url = 'https://github.com/iisgiua/giuaschool-docs/raw/master/_data/build.yml';
-        $pagina = file_get_contents($url);
-        preg_match('/^tag:\s*(.*)$/m', $pagina, $trovati);
+        $pagina = $this->scaricaUrlCache($cache, 'sistema_aggiorna_build', $url);
+        preg_match('/^tag:\s*(.*)$/m', (string) $pagina, $trovati);
         $nuovaBuild = $trovati[1] ?? '0';
         // controlla versione
         $versione = $this->em->getRepository(Configurazione::class)->getParametro('versione', '0');
@@ -1593,8 +1619,9 @@ class SistemaController extends BaseController {
           $nuovaVersione .= '-build';
         }
         $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.'.zip';
-        // scarica file
-        $bytes = file_put_contents($file, file_get_contents($url));
+        // scarica file (timeout più lungo: il pacchetto può essere di diversi MB)
+        $contenuto = $this->scaricaUrl($url, 120);
+        $bytes = ($contenuto === null) ? 0 : file_put_contents($file, $contenuto);
         if ($bytes == 0) {
           $info['tipo'] = 'danger';
           $info['messaggio'] = 'exception.aggiornamento_errore_file';
@@ -1615,13 +1642,69 @@ class SistemaController extends BaseController {
           'build="'.$nuovaBuild.'"'."\n";
         file_put_contents(dirname(__DIR__, 2).'/.gs-updating', $contenuto);
         // reindirizza a pagina di installazione
-        $urlPath = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
-          '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-        $urlPath = substr($urlPath, 0, - strlen('/sistema/aggiorna/2'));
-        return $this->redirect($urlPath."/install/update.php?token=$token&step=1");
+        $urlPath = $request->getSchemeAndHttpHost().$request->getBaseUrl().'/install/update.php';
+        return $this->redirect($urlPath.'?token='.$token.'&step=1');
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'aggiorna', $dati, $info);
+  }
+
+  /**
+   * Scarica il contenuto di una URL esterna
+   *
+   * Il download usa un timeout esplicito e non emette warning: in caso di errore
+   * restituisce null, così il chiamante mostra un messaggio controllato invece di
+   * lasciare che il warning diventi un errore fatale.
+   *
+   * @param string $url URL da scaricare
+   * @param int $timeout Secondi di attesa per ogni lettura
+   *
+   * @return string|null Contenuto scaricato, oppure null in caso di errore
+   *
+   */
+  private function scaricaUrl(string $url, int $timeout = 5): ?string {
+    $contesto = stream_context_create([
+      'http' => ['timeout' => $timeout, 'ignore_errors' => false],
+      'ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
+    $contenuto = @file_get_contents($url, false, $contesto);
+    // restituisce il contenuto, o null in caso di errore
+    return ($contenuto === false) ? null : $contenuto;
+  }
+
+  /**
+   * Scarica il contenuto di una URL esterna, memorizzandolo per pochi minuti in cache.
+   *
+   * Usato per il controllo della versione: il download non deve rallentare ogni
+   * apertura della pagina, ma un errore di rete non viene memorizzato in cache.
+   *
+   * @param CacheItemPoolInterface $cache Gestore della cache dell'applicazione
+   * @param string $chiave Chiave di memorizzazione in cache
+   * @param string $url URL da scaricare
+   *
+   * @return string|null Contenuto scaricato, oppure null in caso di errore
+   *
+   */
+  private function scaricaUrlCache(CacheItemPoolInterface $cache, string $chiave, string $url): ?string {
+    try {
+      $item = $cache->getItem($chiave);
+      if (!$item->isHit()) {
+        // scarica il contenuto
+        $contenuto = $this->scaricaUrl($url);
+        if ($contenuto === null) {
+          // errore di rete: non memorizza il fallimento
+          return null;
+        }
+        // memorizza per pochi minuti
+        $item->set($contenuto);
+        $item->expiresAfter(300);
+        $cache->save($item);
+      }
+      // restituisce il contenuto
+      return $item->get();
+    } catch (\Throwable) {
+      // errore della cache: scarica direttamente
+      return $this->scaricaUrl($url);
+    }
   }
 
   /**

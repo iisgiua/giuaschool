@@ -47,8 +47,8 @@ class AjaxController extends BaseController {
     // inizializza
     $search = ['cognome' => substr($cognome, 1), 'nome' => substr($nome, 1), 'sede' => []];
     $dati = [];
-    // controlla sede
-    if ($this->getUser()->getSede()) {
+    // controlla sede (lo Staff può essere limitato a una singola sede)
+    if ($this->getUser() instanceof Staff && $this->getUser()->getSede()) {
       $search['sede'] = [$this->getUser()->getSede()->getId()];
     } elseif ($sede != '-') {
       // restrizione sulle sedi indicate

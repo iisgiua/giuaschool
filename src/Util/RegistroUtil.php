@@ -1375,8 +1375,8 @@ class RegistroUtil {
           ->setAlunno($elemento['cognome'].' '.$elemento['nome'].' ('.$elemento['dataNascita']->format('d/m/Y').')')
           ->setPresenza($elemento['assenza'] ? 'A' : 'P')
           ->setOra($elemento['ora'] ?: new DateTime());
-        if ($appello->getOra()->format('H:i:00') < $orario[0]['inizio'] ||
-            $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine']) {
+        if (!empty($orario) && ($appello->getOra()->format('H:i:00') < $orario[0]['inizio'] ||
+            $appello->getOra()->format('H:i:00') > $orario[count($orario) - 1]['fine'])) {
           // ora fuori da orario
           $appello->setOra(DateTime::createFromFormat('H:i:s', $orario[0]['inizio']));
         }
@@ -1690,13 +1690,20 @@ class RegistroUtil {
     return $dati;
   }
 
-  /**
-   * Restituisce le informazioni sui periodi dell'anno scolastico
-   *
-   * @return array Informazioni sui periodi come valori di array associativo
-   */
   public function infoPeriodi() {
     $dati = [];
+    // legge e valida una data di configurazione
+    $dataConfig = function (string $chiave): ?DateTime {
+      $valore = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/'.$chiave);
+      if (!is_string($valore) || $valore === '') {
+        return null;
+      }
+      $data = DateTime::createFromFormat('!Y-m-d', $valore);
+      if (!$data || $data->format('Y-m-d') !== $valore) {
+        return null;
+      }
+      return $data;
+    };
     // primo periodo
     $dati[1]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo1_nome');
     $dati[1]['inizio'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio');
@@ -1704,54 +1711,29 @@ class RegistroUtil {
     $dati[1]['scrutinio'] = 'P';
     // secondo periodo
     $dati[2]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_nome');
-    $data = DateTime::createFromFormat('Y-m-d H:i', $dati[1]['fine'].' 00:00');
-    $data->modify('+1 day');
-    $dati[2]['inizio'] = $data->format('Y-m-d');
+    $finePrimo = $dataConfig('periodo1_fine');
+    $dati[2]['inizio'] = $finePrimo ? $finePrimo->modify('+1 day')->format('Y-m-d') : '';
     $dati[2]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo2_fine');
     $dati[2]['scrutinio'] = 'F';
     // terzo periodo
-    if ($this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome') != '') {
-      $dati[3]['nome'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
-      $data = DateTime::createFromFormat('Y-m-d H:i', $dati[2]['fine'].' 00:00');
-      $data->modify('+1 day');
-      $dati[3]['inizio'] = $data->format('Y-m-d');
+    $nomeTerzo = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/periodo3_nome');
+    if ($nomeTerzo !== null && $nomeTerzo !== '') {
+      // tre periodi: il secondo periodo è uno scrutinio intermedio
       $dati[2]['scrutinio'] = 'S';
+      $dati[3]['nome'] = $nomeTerzo;
+      $fineSecondo = $dataConfig('periodo2_fine');
+      $dati[3]['inizio'] = $fineSecondo ? $fineSecondo->modify('+1 day')->format('Y-m-d') : '';
+      $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
       $dati[3]['scrutinio'] = 'F';
     } else {
+      // due periodi: il terzo periodo non è usato
       $dati[3]['nome'] = '';
       $dati[3]['inizio'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
+      $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
       $dati[3]['scrutinio'] = '';
     }
-    $dati[3]['fine'] = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
     // restituisce dati
     return $dati;
-  }
-
-  /**
-   * Restituisce vero se si tratta di un ritardo breve
-   *
-   * @param DateTime $data Data dell'entrata in ritardo
-   * @param DateTime $ora Ora dell'entrata in ritardo
-   * @param Sede $sede Sede della classe
-   *
-   * @return bool Vero se è un ritardo breve, falso altrimenti
-   */
-  public function seRitardoBreve(DateTime $data, DateTime $ora, Sede $sede) {
-    // legge prima ora
-    $prima = $this->em->getRepository(ScansioneOraria::class)->createQueryBuilder('s')
-      ->select('s.inizio')
-      ->join('s.orario', 'o')
-      ->where(':data BETWEEN o.inizio AND o.fine AND o.sede=:sede AND s.giorno=:giorno AND s.ora=:ora')
-			->setParameter('data', $data->format('Y-m-d'))
-			->setParameter('sede', $sede)
-			->setParameter('giorno', $data->format('w'))
-			->setParameter('ora', 1)
-      ->getQuery()
-      ->getArrayResult();
-    // controlla ritardo breve
-    $inizio = $prima[0]['inizio'];
-    $inizio->modify('+' . $this->reqstack->getSession()->get('/CONFIG/SCUOLA/ritardo_breve', 0) . ' minutes');
-    return ($ora <= $inizio);
   }
 
   /**
@@ -2922,6 +2904,7 @@ class RegistroUtil {
         // riga vuota
         continue;
       }
+      // Non usato in contesto sensibile – md5/sha1 accettabile
       $key = sha1((string) preg_replace('/[\W_]+/', '', mb_strtolower($argomento)));
       if (!isset($dati['argomenti'][$key])) {
         // memorizza argomento
@@ -3008,205 +2991,6 @@ class RegistroUtil {
   }
 
   /**
-   * Inserisce gli assenti all'ora di lezione indicata
-   *
-   * @param Docente $docente Docente che inserisce le assenze
-   * @param Lezione $lezione Lezione da considerare
-   * @param array $assenti Lista di alunni assenti alla lezione
-   */
-  public function inserisceAssentiLezione(Docente $docente, Lezione $lezione, $assenti) {
-    $scansione_oraria = $this->em->getRepository(ScansioneOraria::class)->oraLezione($lezione);
-    $ore = $scansione_oraria->getDurata();
-    // inserisce assenti
-    foreach ($assenti as $alu) {
-      $assente = (new AssenzaLezione())
-        ->setLezione($lezione)
-        ->setAlunno($alu)
-        ->setOre($ore);
-      $this->em->persist($assente);
-      // controlla assenza giorno
-      $assenza_giorno = $this->em->getRepository(Assenza::class)
-        ->findOneBy(['alunno' => $alu, 'data' => $lezione->getData()]);
-      if ($assenza_giorno) {
-        // resetta situazione a non giustificato
-        $assenza_giorno
-          ->setGiustificato(null)
-          ->setDocenteGiustifica(null);
-      } else {
-        // aggiunge assenza giornaliera
-        $assenza_giorno = (new Assenza())
-          ->setAlunno($alu)
-          ->setDocente($docente)
-          ->setData($lezione->getData());
-        $this->em->persist($assenza_giorno);
-      }
-    }
-  }
-
-  /**
-   * Cancella gli assenti dall'ora di lezione indicata
-   *
-   * @param Lezione $lezione Lezione da considerare
-   * @param array $assenti Lista di alunni assenti da cancellare
-   */
-  public function cancellaAssentiLezione(Lezione $lezione, $assenti) {
-    $assenti_lezione = $this->em->getRepository(AssenzaLezione::class)->assentiSoloLezione($lezione);
-    $assenti_giorno = array_intersect($assenti, $assenti_lezione);
-    if (count($assenti_giorno) > 0) {
-      // cancella assenze del giorno
-      $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
-        ->delete()
-        ->where('a.data=:data AND a.alunno IN (:lista)')
-        ->setParameter('data', $lezione->getData()->format('Y-m-d'))
-        ->setParameter('lista', $assenti_giorno)
-        ->getQuery()
-        ->execute();
-    }
-    // cancella assenze alla lezione
-    $this->em->getRepository(AssenzaLezione::class)->createQueryBuilder('al')
-      ->delete()
-      ->where('al.lezione=:lezione AND al.alunno IN (:lista)')
-			->setParameter('lezione', $lezione)
-			->setParameter('lista', $assenti)
-      ->getQuery()
-      ->execute();
-  }
-
-  /**
-   * Modifica gli assenti all'ora di lezione indicata
-   *
-   * @param Docente $docente Docente che inserisce le assenze
-   * @param Lezione $lezione Lezione da considerare
-   * @param array $assenti_precedenti Precedente lista di alunni assenti alla lezione
-   * @param array $assenti Nuova lista di alunni assenti alla lezione
-   */
-  public function modificaAssentiLezione(Docente $docente, Lezione $lezione, $assenti_precedenti, $assenti) {
-    // assenti da cancellare
-    $cancellare = array_diff($assenti_precedenti, $assenti);
-    $this->cancellaAssentiLezione($lezione, $cancellare);
-    // assenti da inserire
-    $inserire = array_diff($assenti, $assenti_precedenti);
-    $this->inserisceAssentiLezione($docente, $lezione, $inserire);
-  }
-
-  /**
-   * Restituisce la lista delle assenze e dei ritardi da giustificare, considerando assenze orarie
-   *
-   * @param DateTime $data Data del giorno in cui si giustifica
-   * @param Alunno $alunno Alunno da giustificare
-   * @param Classe $classe Classe della lezione
-   *
-   * @return array Dati restituiti come array associativo
-   */
-  public function assenzeOreDaGiustificare(DateTime $data, Alunno $alunno, Classe $classe) {
-    $dati['convalida_assenze'] = [];
-    $dati['assenze'] = [];
-    $mesi = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-    $periodi = $this->infoPeriodi();
-    // legge assenze
-    $assenze = $this->em->getRepository(Alunno::class)->createQueryBuilder('a')
-      ->select('ass.data,ass.giustificato,ass.motivazione,(ass.docenteGiustifica) AS docenteGiustifica,ass.id,ass.dichiarazione,ass.certificati')
-      ->join(Assenza::class, 'ass', 'WITH', 'a.id=ass.alunno')
-      ->where('a.id=:alunno AND a.classe=:classe AND ass.data<=:data')
-      ->orderBy('ass.data', 'DESC')
-			->setParameter('alunno', $alunno)
-			->setParameter('classe', $alunno->getClasse())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->getQuery()
-      ->getArrayResult();
-    // imposta array associativo per assenze
-    foreach ($assenze as $a) {
-      $data_assenza = $a['data']->format('Y-m-d');
-      $numperiodo = ($data_assenza <= $periodi[1]['fine'] ? 1 : ($data_assenza <= $periodi[2]['fine'] ? 2 : 3));
-      $dataStr = intval(substr((string) $data_assenza, 8)).' '.$mesi[intval(substr((string) $data_assenza, 5, 2))].' '.substr((string) $data_assenza, 0, 4);
-      $dati_periodo[$numperiodo][$data_assenza]['data_obj'] = $a['data'];
-      $dati_periodo[$numperiodo][$data_assenza]['data'] = $dataStr;
-      $dati_periodo[$numperiodo][$data_assenza]['fine'] = $dataStr;
-      $dati_periodo[$numperiodo][$data_assenza]['giorni'] = 1;
-      $dati_periodo[$numperiodo][$data_assenza]['giustificato'] =
-        ($a['giustificato'] ? ($a['docenteGiustifica'] ? 'D' : 'G') : null);
-      $dati_periodo[$numperiodo][$data_assenza]['motivazione'] = $a['motivazione'];
-      $dati_periodo[$numperiodo][$data_assenza]['dichiarazione'] =
-        empty($a['dichiarazione']) ? [] : $a['dichiarazione'];
-      $dati_periodo[$numperiodo][$data_assenza]['certificati'] =
-        empty($a['certificati']) ? [] : $a['certificati'];
-      $dati_periodo[$numperiodo][$data_assenza]['id'] = $a['id'];
-      $dati_periodo[$numperiodo][$data_assenza]['ids'] = $a['id'];
-      if ($dati_periodo[$numperiodo][$data_assenza]['giustificato'] == 'G') {
-        // giustificazioni da convalidare
-        $dati['convalida_assenze'][$data_assenza] = (object) $dati_periodo[$numperiodo][$data_assenza];
-      } elseif (!$dati_periodo[$numperiodo][$data_assenza]['giustificato']) {
-        // assenze non giustificate
-        $dati['assenze'][$data_assenza] = (object) $dati_periodo[$numperiodo][$data_assenza];
-      }
-    }
-    // ritardi da giustificare
-    $ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
-      ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('e.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['ritardi'] = $ritardi;
-    // ritardi da convalidare
-    $convalida_ritardi = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
-      ->where('e.alunno=:alunno AND e.data<=:data AND e.giustificato IS NOT NULL AND e.docenteGiustifica IS NULL AND e.ritardoBreve!=:breve')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-			->setParameter('breve', 1)
-      ->orderBy('e.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['convalida_ritardi'] = $convalida_ritardi;
-    // uscite da giustificare
-    $uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('u.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['uscite'] = $uscite;
-    // uscite da convalidare
-    $convalida_uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('u.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['convalida_uscite'] = $convalida_uscite;
-    // numero totale di giustificazioni
-    $dati['tot_giustificazioni'] = count($assenze) + count($ritardi) + count($uscite);
-    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']) +
-      count($dati['convalida_uscite']);    // uscite da giustificare
-    $uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('u.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['uscite'] = $uscite;
-    // uscite da convalidare
-    $convalida_uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-      ->where('u.alunno=:alunno AND u.data<=:data AND u.giustificato IS NOT NULL AND u.docenteGiustifica IS NULL')
-			->setParameter('alunno', $alunno->getId())
-			->setParameter('data', $data->format('Y-m-d'))
-      ->orderBy('u.data', 'DESC')
-      ->getQuery()
-      ->getResult();
-    $dati['convalida_uscite'] = $convalida_uscite;
-    // numero totale di giustificazioni
-    $dati['tot_giustificazioni'] = count($dati['assenze']) + count($dati['ritardi']) + count($dati['uscite']);
-    $dati['tot_convalide'] = count($dati['convalida_assenze']) + count($dati['convalida_ritardi']) +
-      count($dati['convalida_uscite']);
-    // restituisce dati
-    return $dati;
-  }
-
-  /**
    * Controlla se è possibile eseguire l'azione specificata relativamente alla gestione delle presenze fuori classe.
    *
    * @param DateTime $data Data della lezione
@@ -3290,6 +3074,10 @@ class RegistroUtil {
     $controllo['U:R:S']['S:N'] = 'sostegnoNA';
     $controllo['U:R:A']['S:N'] = 'sostegnoNA';
     $controllo['U:R:N']['S:N'] = 'sostegnoNA';
+    // religione cattolica su classe con gruppo (rappresentato dal suffisso 'C')
+    $controllo['R:C']['-:-'] = 'ok';
+    $controllo['R:C']['E:C'] = $controllo['R:C']['N:C'] = $controllo['R:C']['U:C'] = 'gruppo';
+    $controllo['R:C']['R:C'] = 'gruppo';
     // lezione firmata in altra classe
     $altre = $this->em->getRepository(Lezione::class)->createQueryBuilder('l')
       ->join(Firma::class, 'f', 'WITH', 'l.id=f.lezione')
@@ -3374,7 +3162,7 @@ class RegistroUtil {
     foreach ($tipoCattedre as $tipoCattedra) {
       $compatibili = [];
       foreach ($tipiLezioni as $tipoLezione) {
-        if (in_array($tipoLezione, array_keys($controllo[$tipoCattedra]), true)) {
+        if (in_array($tipoLezione, array_keys($controllo[$tipoCattedra] ?? []), true)) {
           $compatibili[] = $tipoLezione;
         }
       }

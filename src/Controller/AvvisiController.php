@@ -20,6 +20,7 @@ use App\Entity\Docente;
 use App\Entity\Festivita;
 use App\Entity\Materia;
 use App\Entity\Orario;
+use App\Entity\Preside;
 use App\Entity\ScansioneOraria;
 use App\Entity\Sede;
 use App\Entity\Staff;
@@ -289,11 +290,14 @@ class AvvisiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/avvisi/delete/{avviso}', name: 'avvisi_delete', requirements: ['avviso' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/avvisi/delete/{avviso}', name: 'avvisi_delete', requirements: ['avviso' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(ComunicazioniUtil $com, RegistroUtil $reg, LogHandler $dblogger,
-                         #[MapEntity] Avviso $avviso
-                         ): Response {
+  public function delete(Request $request, ComunicazioniUtil $com, RegistroUtil $reg, LogHandler $dblogger,
+                         #[MapEntity] Avviso $avviso): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo permessi
     if (!$com->azioneAvviso('delete', $avviso->getData(), $this->getUser(), $avviso)) {
       // errore
@@ -362,19 +366,23 @@ class AvvisiController extends BaseController {
       // azione edit
       $edit = true;
       $tipo = $avviso->getTipo();
+      if (!in_array($tipo, ['E', 'U', 'A'], true)) {
+        // errore: tipo di avviso non gestibile da questa pagina
+        throw $this->createNotFoundException('exception.invalid_params');
+      }
       switch ($tipo) {
         case 'E':
-          $valori['ora'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{ora}']);
-          $valori['note'] = $avviso->getSostituzioni()['{note}'];
-          break;
         case 'U':
-          $valori['ora'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{ora}']);
-          $valori['note'] = $avviso->getSostituzioni()['{note}'];
+          $valori['ora'] = !empty($avviso->getSostituzioni()['{ora}']) ?
+            DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{ora}']) : null;
+          $valori['note'] = $avviso->getSostituzioni()['{note}'] ?? '';
           break;
         case 'A':
-          $valori['inizio'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{inizio}']);
-          $valori['fine'] = DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{fine}']);
-          $valori['attivita'] = $avviso->getSostituzioni()['{attivita}'];
+          $valori['inizio'] = !empty($avviso->getSostituzioni()['{inizio}']) ?
+            DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{inizio}']) : null;
+          $valori['fine'] = !empty($avviso->getSostituzioni()['{fine}']) ?
+            DateTime::CreateFromFormat('H:i', $avviso->getSostituzioni()['{fine}']) : null;
+          $valori['attivita'] = $avviso->getSostituzioni()['{attivita}'] ?? '';
           break;
       }
     } else {
@@ -419,13 +427,17 @@ class AvvisiController extends BaseController {
       if ($this->getUser()->getSede()) {
         $avviso->addSede($this->getUser()->getSede());
       }
-      $this->em->persist($avviso);
     }
-    // controllo permessi
-    if (!$com->azioneAvviso(($edit ? 'edit' : 'add'), $avviso->getData(), $this->getUser(),
-        $edit ? $avviso : null)) {
+    // controllo permessi PRIMA di persistere
+    $permesso = $com->azioneAvviso(($edit ? 'edit' : 'add'), $avviso->getData(), $this->getUser(),
+        $edit ? $avviso : null);
+    if (!$permesso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // persisti solo dopo il controllo dei permessi
+    if (!$edit) {
+      $this->em->persist($avviso);
     }
     // imposta autore dell'avviso
     $avviso->setAutore($this->getUser());
@@ -775,17 +787,28 @@ class AvvisiController extends BaseController {
   /**
    * Conferma la lettura dell'avviso destinato alla classe
    *
+   * @param Request $request Pagina richiesta
    * @param Classe $classe Classe di riferimento
    * @param Avviso|null $avviso Avviso per lettura di un singolo avviso o valore nullo per tutti gli avvisi della classe
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/avvisi/classe/firma/{classe}/{avviso}', name: 'avvisi_classe_firma', requirements: ['classe' => '\d+', 'avviso' => '\d+'], defaults: ['avviso' => 0], methods: ['GET'])]
+  #[Route(path: '/avvisi/classe/firma/{classe}/{avviso}', name: 'avvisi_classe_firma', requirements: ['classe' => '\d+', 'avviso' => '\d+'], defaults: ['avviso' => 0], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classeFirma(
+  public function classeFirma(Request $request,
                               #[MapEntity] Classe $classe,
                               #[MapEntity] ?Avviso $avviso=null
                               ): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('avvisi_classe_firma', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // inizializza
     $lista = [];
     // controlla avvisi da firmare
@@ -829,13 +852,17 @@ class AvvisiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db
-    $com->leggeUtente($this->getUser(), $avviso);
-    $this->em->flush();
     // invia il file
     $file = $avviso->getAllegati()[$allegato];
     $dir = $this->getParameter('dir_avvisi').($avviso->getStato() == 'A' ? '/'.$avviso->getAnno() : '');
     $nomefile = $dir.'/'.$file->getFile().'.'.$file->getEstensione();
+    if (!file_exists($nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // segna lettura e memorizza su db solo dopo aver verificato il file
+    $com->leggeUtente($this->getUser(), $avviso);
+    $this->em->flush();
     return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
       ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
   }
@@ -843,15 +870,26 @@ class AvvisiController extends BaseController {
   /**
    * Conferma la lettura dell'avviso da parte dell'utente
    *
+   * @param Request $request Pagina richiesta
    * @param Avviso $avviso Avviso in lettura
    *
    * @return JsonResponse Informazioni di risposta
    */
-  #[Route(path: '/avvisi/legge/{avviso}', name: 'avvisi_legge', requirements: ['avviso' => '\d+'], defaults: ['avviso' => '0'], methods: ['GET'])]
+  #[Route(path: '/avvisi/legge/{avviso}', name: 'avvisi_legge', requirements: ['avviso' => '\d+'], defaults: ['avviso' => '0'], methods: ['POST'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function legge(
+  public function legge(Request $request,
                         #[MapEntity] ?Avviso $avviso=null
                         ): JsonResponse {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('avvisi_legge', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla avviso
+    if (!$avviso) {
+      // errore: avviso non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // firma
     $this->em->getRepository(ComunicazioneUtente::class)->legge($avviso, $this->getUser());
     // restituisce dati
@@ -934,7 +972,7 @@ class AvvisiController extends BaseController {
     // parametro classe
     $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
     // controllo classe
-    $classe = $this->em->getRepository(Classe::class)->find($classe);
+    $classe = ($classe > 0) ? $this->em->getRepository(Classe::class)->find($classe) : null;
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

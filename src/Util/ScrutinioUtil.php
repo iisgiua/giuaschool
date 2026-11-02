@@ -772,10 +772,10 @@ class ScrutinioUtil {
     $proposte = $this->em->getRepository(PropostaVoto::class)->proposte($classe, $periodo,
       array_keys($dati['alunni']), array_keys($dati['materie']));
     // legge lista valutazioni
-    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
-    $valutazioni['C'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_C'));
-    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
+    $valutazioni['R'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_R');
+    $valutazioni['E'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_E');
+    $valutazioni['C'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_C');
+    $valutazioni['N'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_N');
     // crea lista voti
     $listaValori = explode(',', (string) $valutazioni['R']['valori']);
     $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
@@ -1879,41 +1879,6 @@ class ScrutinioUtil {
   }
 
   /**
-   * Gestione del form per il riepilogo finale
-   *
-   * @param Classe $classe Classe relativa alle proposte di voto
-   * @param string $periodo Periodo relativo allo scrutinio
-   * @param FormBuilder $form Form per lo scrutinio
-   * @param array $dati Dati passati al form
-   *
-   * @return FormBuilder|null Form usato nella pagina corrente dello scrutinio
-   */
-  public function riepilogoForm(Classe $classe, $periodo, FormBuilder $form, $dati) {
-    // crea form
-    $form
-      ->setAction($this->router->generate('coordinatore_scrutinio',
-        ['classe' => $classe->getId(), 'stato' => 'C']));
-    if ($periodo != '1') {
-      $form->add('fine', TimeType::class, ['label' => false,
-        'data'=> $dati['scrutinio']['fine'],
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'required' => true]);
-    } else {
-      $form->add('data', DateType::class, ['label' => false,
-        'data'=> $dati['scrutinio']['data'],
-        'widget' => 'single_text',
-        'html5' => false,
-        'attr' => ['widget' => 'gs-picker'],
-        'format' => 'dd/MM/yyyy',
-        'required' => true]);
-    }
-    // restituisce form
-    return $form;
-  }
-
-  /**
    * Esegue il passaggio di stato 6->C per lo scrutinio del periodo P
    *
    * @param Docente $docente Docente che inserisce i dati dello scrutinio
@@ -2658,121 +2623,6 @@ class ScrutinioUtil {
     }
     // restituisce form
     return $form;
-  }
-
-  /**
-   * Restituisce la lista dei giorni di lezione dal 15 Marzo a fine anno
-   *
-   * @param Classe $classe Classe per cui calcolare i giorni di lezione
-   *
-   * @return array Lista di date
-   */
-  public function lezioniDal15Marzo(Classe $classe) {
-    // inizio e fine del periodo
-    $inizio = DateTime::createFromFormat('!Y-m-d',
-      substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'), 0, 4).'-03-15');
-    $fine = DateTime::createFromFormat('!Y-m-d', $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'));
-    // festivi
-    $festivi = $this->em->getRepository(Festivita::class)->createQueryBuilder('f')
-      ->select('f.data')
-      ->where('f.tipo=:festivo AND f.data BETWEEN :inizio AND :fine AND (f.sede IS NULL OR f.sede=:sede)')
-      ->orderBy('f.data', 'ASC')
-			->setParameter('festivo', 'F')
-			->setParameter('inizio', $inizio->format('Y-m-d'))
-			->setParameter('fine', $fine->format('Y-m-d'))
-			->setParameter('sede', $classe->getSede())
-      ->getQuery()
-      ->getScalarResult();
-    $giorni_festivi = array_column($festivi, 'data');
-    $giorni_settimana = [$this->reqstack->getSession()->get('/CONFIG/SCUOLA/giorni_festivi_istituto')];
-    $altri_festivi = explode(',', (string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/giorni_festivi_classi'));
-    foreach($altri_festivi  as $f) {
-      // formato <settimana>:<classe_anno><classe_sezione>
-      if (strlen($f) > 0 && $classe->getAnno() == $f[2] && $classe->getSezione() == $f[3]) {
-        $giorni_settimana[] = $f[0];
-      }
-    }
-    // lezioni
-    $data = clone $inizio;
-    $giorni_lezione = [];
-    while ($data <= $fine) {
-      if (!in_array($data->format('Y-m-d'), $giorni_festivi) && !in_array($data->format('w'), $giorni_settimana)) {
-        // giorno di lezione
-        $giorni_lezione[] = $data->format('Y-m-d');
-      }
-      $data->modify('+1 day');
-    }
-    // restituisce lista
-    return $giorni_lezione;
-  }
-
-  /**
-   * Restituisce la lista dei giorni di presenza dell'alunno dal 15 Marzo a fine anno
-   *
-   * @param int $alunno_id ID alunno di cui calcolare le presenze
-   * @param array $lezioni Lista delle date dei giorni di lezione
-   *
-   * @return array Dati formattati come un array associativo
-   */
-  public function presenzeDal15Marzo($alunno_id, $lezioni) {
-    $dati = [];
-    // inizio e fine del periodo
-    $inizio = substr((string) $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine'), 0, 4).'-03-15';
-    $fine = $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_fine');
-    // assenze
-    $giorni_assenza = $this->em->getRepository(Assenza::class)->createQueryBuilder('a')
-      ->select('a.data')
-      ->where('a.alunno=:alunno AND a.data BETWEEN :inizio AND :fine')
-			->setParameter('alunno', $alunno_id)
-			->setParameter('inizio', $inizio)
-			->setParameter('fine', $fine)
-      ->getQuery()
-      ->getScalarResult();
-    $giorni_assenza = array_column($giorni_assenza, 'data');
-    // presenze
-    $giorni_presenza_str = array_diff($lezioni, $giorni_assenza);
-    $giorni_presenza_obj = array_map(fn($d) => DateTime::createFromFormat('!Y-m-d', $d), $giorni_presenza_str);
-    if (count($giorni_presenza_str) == 0) {
-      // cessata frequenza
-      $dati['stato'] = 0;
-      $dati['giorni'] = [];
-    } else {
-      // controllo presenze cancellabili
-      $giorni_note = $this->em->getRepository(Nota::class)->createQueryBuilder('n')
-        ->select('n.data')
-        ->join('n.alunni', 'a')
-        ->where('a.id=:alunno AND n.tipo=:nota AND n.data IN (:date)')
-        ->setParameter('alunno', $alunno_id)
-        ->setParameter('nota', 'I')
-        ->setParameter('date', $giorni_presenza_str)
-        ->getQuery()
-        ->getScalarResult();
-      $giorni_entrate = $this->em->getRepository(Entrata::class)->createQueryBuilder('e')
-        ->select('e.data')
-        ->where('e.alunno=:alunno AND e.data IN (:date)')
-        ->setParameter('alunno', $alunno_id)
-        ->setParameter('date', $giorni_presenza_str)
-        ->getQuery()
-        ->getScalarResult();
-      $giorni_uscite = $this->em->getRepository(Uscita::class)->createQueryBuilder('u')
-        ->select('u.data')
-        ->where('u.alunno=:alunno AND u.data IN (:date)')
-        ->setParameter('alunno', $alunno_id)
-        ->setParameter('date', $giorni_presenza_str)
-        ->getQuery()
-        ->getScalarResult();
-      if (count($giorni_note)+count($giorni_entrate)+count($giorni_uscite) > 0) {
-        // non si possono cancellare giorni di presenza
-        $dati['stato'] = -1;
-        $dati['giorni'] = [];
-      } else {
-        // è possibile cancellare giorni di presenza
-        $dati['stato'] = 1;
-        $dati['giorni'] = $giorni_presenza_obj;
-      }
-    }
-    // restituisce dati
-    return $dati;
   }
 
   /**
@@ -4195,10 +4045,10 @@ class ScrutinioUtil {
       }
     }
     // legge lista valutazioni
-    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
-    $valutazioni['C'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_C'));
-    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
+    $valutazioni['R'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_R');
+    $valutazioni['E'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_E');
+    $valutazioni['C'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_C');
+    $valutazioni['N'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_N');
     // crea lista voti
     $listaValori = explode(',', (string) $valutazioni['R']['valori']);
     $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);

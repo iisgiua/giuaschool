@@ -10,6 +10,7 @@ namespace App\Tests\UnitTest\Security;
 
 use App\Security\Encryptor;
 use App\Tests\DatabaseTestCase;
+use App\Util\EnvFile;
 use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Log\LoggerInterface;
@@ -149,6 +150,46 @@ class EncryptorTest extends DatabaseTestCase {
     $this->assertCount(1, $this->logs);
     $this->assertSame('Impossibile decifrare dato', $this->logs['error'][0][0]);
     $this->assertSame(['dato' => $cifrato], $this->logs['error'][0][1]);
+  }
+
+  /**
+   * Test della decodifica dei dati cifrati dalle versioni precedenti (compatibilità)
+   *
+   */
+  public function testDecryptCompatibilita(): void {
+    // init
+    $encryptorStorico = new Encryptor($this->mockedLogger, EnvFile::APP_SECRET_PLACEHOLDER);
+    $encryptor = new Encryptor($this->mockedLogger, random_bytes(32));
+    $this->logs = [];
+    // i dati cifrati con la chiave distribuita con le versioni precedenti restano leggibili
+    $dato = 'nota scritta prima dell\'aggiornamento';
+    $cifrato = $encryptorStorico->encrypt($dato);
+    $this->assertSame($dato, $encryptor->decrypt($cifrato));
+    $this->assertSame($dato, $encryptor->tryDecrypt($cifrato));
+    $this->assertCount(0, $this->logs);
+  }
+
+  /**
+   * Test della decodifica non bloccante dei dati (tryDecrypt)
+   *
+   */
+  public function testTryDecrypt(): void {
+    // init
+    $encryptor = new Encryptor($this->mockedLogger, random_bytes(32));
+    $this->logs = [];
+    // un dato non cifrato viene restituito invariato
+    $this->assertSame('dato qualsiasi', $encryptor->tryDecrypt('dato qualsiasi'));
+    // un dato cifrato e leggibile viene decifrato
+    $cifrato = $encryptor->encrypt('dato originale');
+    $this->assertSame('dato originale', $encryptor->tryDecrypt($cifrato));
+    // un dato cifrato con una chiave ignota non blocca l'esecuzione ma restituisce null
+    $encryptorIgnoto = new Encryptor($this->mockedLogger, random_bytes(32));
+    $cifratoIgnoto = $encryptorIgnoto->encrypt('dato originale');
+    $this->assertNull($encryptor->tryDecrypt($cifratoIgnoto));
+    // l'errore viene comunque segnalato nel log
+    $this->assertCount(1, $this->logs);
+    $this->assertSame('Impossibile decifrare dato', $this->logs['error'][0][0]);
+    $this->assertSame(['dato' => $cifratoIgnoto], $this->logs['error'][0][1]);
   }
 
   /**

@@ -17,10 +17,10 @@
     <td width="20%" align="center"><strong>DOCENTI</strong></td>
     <td width="45%" align="center"><strong>FIRME</strong></td>
   </tr>
-{% for idmat,mat in dati.materie %}
+{% for idmat, mat in dati.materie %}
   <tr>
     <td align="left"><strong>{{ mat.nome }}</strong></td>
-    <td align="left" style="font-size:9pt">{% for iddoc,doc in mat.docenti %}{{ doc }}{{ not loop.last ? ', '}}{% endfor %}</td>
+    <td align="left" style="font-size:9pt">{% for iddoc, doc in mat.docenti %}{{ doc }}{{ not loop.last ? ', ' }}{% endfor %}</td>
     <td>&nbsp;<br>&nbsp;</td>
   </tr>
 {% endfor %}

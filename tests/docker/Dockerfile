@@ -36,6 +36,9 @@ RUN apt-get -qq update && \
     sed -ri 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/8.2/apache2/php.ini && \
     sed -ri 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/8.2/cli/php.ini && \
     sed -ri 's/;opcache.enable=1.*$/opcache.enable=1/' /etc/php/8.2/apache2/php.ini && \
+    # non divulga la versione di PHP negli header delle risposte
+    sed -ri 's/^;?expose_php\s*=.*$/expose_php = Off/' /etc/php/8.2/apache2/php.ini && \
+    sed -ri 's/^;?expose_php\s*=.*$/expose_php = Off/' /etc/php/8.2/cli/php.ini && \
     # configura Apache
     a2enmod rewrite ssl && \
     rm -f /etc/apache2/sites-available/default-ssl.conf

@@ -69,6 +69,12 @@ DirectoryIndex index.php
 
 ########## MODIFICHE-INIZIO
 Options +FollowSymlinks
+
+# Evita che l'header X-Powered-By riveli la versione di PHP.
+# In produzione expose_php deve comunque essere impostato a Off.
+<IfModule mod_headers.c>
+    Header always unset X-Powered-By
+</IfModule>
 <IfModule !mod_authz_core.c>
   Order allow,deny
   Allow from all

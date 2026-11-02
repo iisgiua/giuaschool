@@ -85,16 +85,17 @@ class DocenteRepository extends BaseRepository {
   public function listaDocenti($lista, $attr): string {
     // legge docenti validi
     $docenti = $this->createQueryBuilder('d')
-      ->select("CONCAT('<span id=',:quote,:attr,d.id,:quote,'>',d.cognome,' ',d.nome,'</span>') AS nome")
+      ->select('d.id AS id, d.cognome AS cognome, d.nome AS nome')
       ->where('d.id IN (:lista) AND d.abilitato=:abilitato')
-			->setParameter('lista', $lista)
-			->setParameter('abilitato', 1)
-			->setParameter('attr', $attr)
-			->setParameter('quote', '\\"')
+      ->setParameter('lista', $lista)
+      ->setParameter('abilitato', 1)
       ->orderBy('d.cognome,d.nome', 'ASC')
       ->getQuery()
       ->getArrayResult();
-    $lista_docenti = array_column($docenti, 'nome');
+    // costruisce la lista codificando i valori (evita iniezione di markup nei nomi)
+    $lista_docenti = array_map(
+      fn($d) => '<span id=\"'.htmlspecialchars($attr.$d['id'], ENT_QUOTES).'\">'.
+        htmlspecialchars($d['cognome'].' '.$d['nome'], ENT_QUOTES).'</span>', $docenti);
     // restituisce lista
     return implode(', ', $lista_docenti);
   }

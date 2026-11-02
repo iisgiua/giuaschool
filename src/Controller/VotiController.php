@@ -208,7 +208,8 @@ class VotiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_classe/conferma', 0);
     }
     // controllo cattedra
-    $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+      'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -416,7 +417,8 @@ class VotiController extends BaseController {
       $this->reqstack->getSession()->set('/APP/ROUTE/lezioni_voti_alunno/conferma', 0);
     }
     // controllo cattedra
-    $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+    $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+      'docente' => $this->getUser(), 'attiva' => 1]);
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
@@ -615,6 +617,7 @@ class VotiController extends BaseController {
     // inizializza variabili
     $info = null;
     $dati = null;
+    $alunni = [];
     // parametri cattedra/classe
     if ($cattedra == 0 && $classe == 0) {
       // recupera parametri da sessione
@@ -943,10 +946,14 @@ class VotiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/lezioni/voti/cancella/{id}', name: 'lezioni_voti_cancella', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/lezioni/voti/cancella/{id}', name: 'lezioni_voti_cancella', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function votiCancella(RegistroUtil $reg, LogHandler $dblogger,
+  public function votiCancella(Request $request, RegistroUtil $reg, LogHandler $dblogger,
                                int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo voto
     $valutazione = $this->em->getRepository(Valutazione::class)->findOneBy(['id' => $id,
       'docente' => $this->getUser()]);
@@ -991,7 +998,8 @@ class VotiController extends BaseController {
       // recupera parametri da sessione
       $cattedra = $this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione');
     }
-    $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+    // controllo cattedra
+    $cattedra = ($cattedra > 0) ? $this->em->getRepository(Cattedra::class)->find($cattedra) : null;
     if (!$cattedra) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');

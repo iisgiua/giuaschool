@@ -80,9 +80,9 @@ class ScrutinioController extends BaseController {
     $title['N'] = in_array($periodo, ['P', 'S', 'F']) ? 'message.proposte' : 'message.proposte_sospesi';
     $title['E'] = $title['N'];
     $title['R'] = 'message.proposte_religione';
-    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
-    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
+    $valutazioni['R'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_R');
+    $valutazioni['E'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_E');
+    $valutazioni['N'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_N');
     // crea lista voti
     $listaValori = explode(',', (string) $valutazioni['R']['valori']);
     $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
@@ -419,9 +419,9 @@ class ScrutinioController extends BaseController {
     $info = [];
     $elenco = [];
     $elenco['alunni'] = [];
-    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
-    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
+    $valutazioni['R'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_R');
+    $valutazioni['E'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_E');
+    $valutazioni['N'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_N');
     // crea lista voti
     $listaValori = explode(',', (string) $valutazioni['R']['valori']);
     $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
@@ -599,7 +599,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo periodo
     $scrutinio_attivo = $scr->scrutinioAttivo($classe);
-    if ($periodo != $scrutinio_attivo['periodo']) {
+    if (!$scrutinio_attivo || $periodo != $scrutinio_attivo['periodo']) {
       // errore
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -745,7 +745,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo periodo
     $scrutinio = $scr->scrutinioAttivo($classe);
-    if ($periodo != $scrutinio['periodo']) {
+    if (!$scrutinio || $periodo != $scrutinio['periodo']) {
       // errore
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -982,7 +982,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo periodo
     $lista_scrutinio = $scr->scrutinioAttivo($classe, true);
-    if ($periodo != $lista_scrutinio['periodo']) {
+    if (!$lista_scrutinio || $periodo != $lista_scrutinio['periodo']) {
       // errore
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -1259,7 +1259,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo periodo
     $lista_scrutinio = $scr->scrutinioAttivo($classe);
-    if ($periodo != $lista_scrutinio['periodo']) {
+    if (!$lista_scrutinio || $periodo != $lista_scrutinio['periodo']) {
       // errore
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -1281,7 +1281,7 @@ class ScrutinioController extends BaseController {
       // classe terza e quarta
       $m = ceil($media);
     }
-    $dati['credito'] = $credito[$classe->getAnno()][$m];
+    $dati['credito'] = $credito[$classe->getAnno()][(int) $m] ?? 0;
     // credito per condotta
     $condotta = $this->em->getRepository(Materia::class)->findOneByTipo('C');
     $creditoCondotta = ($dati['voti'][$condotta->getId()]->getUnico() >= 9);
@@ -1370,7 +1370,7 @@ class ScrutinioController extends BaseController {
    *
    * @param Request $request Pagina richiesta
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
-   * @param int $alunnno Identificativo dell'alunno
+   * @param int $alunno Identificativo dell'alunno
    * @param string $periodo Periodo relativo allo scrutinio
    * @param int $classe Identificativo della classe
    * @param int $posizione Posizione per lo scrolling verticale della finestra
@@ -1407,7 +1407,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo periodo
     $lista_scrutinio = $scr->scrutinioAttivo($classe);
-    if ($periodo != $lista_scrutinio['periodo']) {
+    if (!$lista_scrutinio || $periodo != $lista_scrutinio['periodo']) {
       // errore
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -1614,7 +1614,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo periodo
     $lista_scrutinio = $scr->scrutinioAttivo($alunno->getClasse());
-    if ($periodo != $lista_scrutinio['periodo']) {
+    if (!$lista_scrutinio || $periodo != $lista_scrutinio['periodo']) {
       // errore
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -1721,7 +1721,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo periodo
     $lista_scrutinio = $scr->scrutinioAttivo($alunno->getClasse());
-    if ($periodo != $lista_scrutinio['periodo']) {
+    if (!$lista_scrutinio || $periodo != $lista_scrutinio['periodo']) {
       // errore
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -1825,6 +1825,13 @@ class ScrutinioController extends BaseController {
         throw $this->createNotFoundException('exception.invalid_params');
       }
     }
+    // controllo definizione dello step del verbale
+    if (!is_array($passo_verbale) || !method_exists($scr, 'verbaleDati'.$passo_verbale[0]) ||
+        !method_exists($scr, 'verbaleForm'.$passo_verbale[0]) ||
+        !method_exists($scr, 'verbaleValida'.$passo_verbale[0])) {
+      // errore: definizione del verbale non valida
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // esegue funzioni
     $func_dati = 'verbaleDati'.$passo_verbale[0];
     $func_form = 'verbaleForm'.$passo_verbale[0];
@@ -1897,7 +1904,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo periodo
     $scrutinio = $scr->scrutinioAttivo($classe);
-    if ($periodo != $scrutinio['periodo']) {
+    if (!$scrutinio || $periodo != $scrutinio['periodo']) {
       // errore
       throw $this->createNotFoundException('exception.not_allowed');
     }
@@ -2046,12 +2053,9 @@ class ScrutinioController extends BaseController {
   /**
    * Gestione delle proposte di voto
    *
-   * @param Request $request Pagina richiesta
-   * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ScrutinioUtil $scr Funzioni di utilità per lo scrutinio
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $cattedra Identificativo della cattedra (nullo se sostituzione)
-   * @param int $classe Identificativo della classe
    * @param string $periodo Periodo relativo allo scrutinio
    *
    * @return Response Pagina di risposta
@@ -2062,9 +2066,9 @@ class ScrutinioController extends BaseController {
   public function medie(RegistroUtil $reg, ScrutinioUtil $scr,
                         LogHandler $dblogger, int $cattedra, string $periodo): Response {
     // inizializza variabili
-    $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
-    $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
-    $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
+    $valutazioni['R'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_R');
+    $valutazioni['E'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_E');
+    $valutazioni['N'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_N');
     // controllo cattedra
     $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
       'docente' => $this->getUser(), 'attiva' => 1]);
@@ -2087,15 +2091,30 @@ class ScrutinioController extends BaseController {
     $listaAlunni = $reg->alunniInData(new DateTime(), $cattedra->getClasse());
     // calcola voto medio per il periodo
     $infoPeriodi = $reg->infoPeriodi();
-    $inizio = '0000-00-00';
-    $fine = '0000-00-00';
+    $inizio = null;
+    $fine = null;
     foreach ($infoPeriodi as $info) {
-      if ($info['scrutinio'] == $periodo) {
-        $inizio = $info['inizio'];
-        $fine = $info['fine'];
+      if (($info['scrutinio'] ?? null) === $periodo) {
+        $inizio = $info['inizio'] ?? null;
+        $fine = $info['fine'] ?? null;
         break;
       }
     }
+    if (!is_string($inizio) || !is_string($fine) || $inizio === '' || $fine === '') {
+      // periodo non configurato per l'anno scolastico corrente
+      throw $this->createNotFoundException('exception.not_allowed');
+    }
+    $inizioObj = DateTime::createFromFormat('!Y-m-d', $inizio);
+    $fineObj = DateTime::createFromFormat('!Y-m-d', $fine);
+    if (!$inizioObj || !$fineObj ||
+        $inizioObj->format('Y-m-d') !== $inizio ||
+        $fineObj->format('Y-m-d') !== $fine ||
+        $inizioObj > $fineObj) {
+      // date del periodo non valide: evita query con valori sentinella
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
+    $inizio = $inizioObj->format('Y-m-d');
+    $fine = $fineObj->format('Y-m-d');
     $precisione = $this->reqstack->getSession()->get('/CONFIG/SISTEMA/precisione_media');
     $medie = $this->em->getRepository(Valutazione::class)->medie($cattedra->getMateria(), $listaAlunni, $inizio,
       $fine, $cattedra->getMateria()->getTipo() == 'E' ? $this->getUser() : null, $precisione);
@@ -2195,7 +2214,7 @@ class ScrutinioController extends BaseController {
     }
     // controllo periodo
     $lista_scrutinio = $scr->scrutinioAttivo($alunno->getClasse());
-    if ($periodo != $lista_scrutinio['periodo']) {
+    if (!$lista_scrutinio || $periodo != $lista_scrutinio['periodo']) {
       // errore
       throw $this->createNotFoundException('exception.not_allowed');
     }

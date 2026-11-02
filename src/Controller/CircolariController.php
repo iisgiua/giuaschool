@@ -210,11 +210,14 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/circolari/delete/{circolare}', name: 'circolari_delete', requirements: ['circolare' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/circolari/delete/{circolare}', name: 'circolari_delete', requirements: ['circolare' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_STAFF')]
-  public function delete(LogHandler $dblogger, ComunicazioniUtil $com,
-                         #[MapEntity] Circolare $circolare
-                         ): Response {
+  public function delete(Request $request, LogHandler $dblogger, ComunicazioniUtil $com,
+                         #[MapEntity] Circolare $circolare): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo permessi
     if (!$com->azioneCircolare('delete', $circolare->getData(), $this->getUser(), $circolare)) {
       // errore
@@ -307,6 +310,7 @@ class CircolariController extends BaseController {
   /**
    * Pubblica la circolare o ne rimuove la pubblicazione (la mette in bozza)
    *
+   * @param Request $request Pagina richiesta
    * @param MessageBusInterface $msg Gestione delle notifiche
    * @param LogHandler $dblogger Gestore dei log su database
    * @param ComunicazioniUtil $com Funzioni di utilità per le circolari
@@ -315,11 +319,16 @@ class CircolariController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/circolari/publish/{circolare}/{pubblica}', name: 'circolari_publish', requirements: ['circolare' => '\d+', 'pubblica' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/circolari/publish/{circolare}/{pubblica}', name: 'circolari_publish', requirements: ['circolare' => '\d+', 'pubblica' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_STAFF')]
-  public function publish(MessageBusInterface $msg, LogHandler $dblogger, ComunicazioniUtil $com,
+  public function publish(Request $request, MessageBusInterface $msg, LogHandler $dblogger, ComunicazioniUtil $com,
                           #[MapEntity] Circolare $circolare,
                           int $pubblica): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('circolari_publish', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // controllo permessi
     if (!$com->azioneCircolare(($pubblica ? 'publish' : 'unpublish'), $circolare->getData(), $this->getUser(), $circolare)) {
       // errore
@@ -406,13 +415,17 @@ class CircolariController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db
-    $com->leggeUtente($this->getUser(), $circolare);
-    $this->em->flush();
     // invia il file
     $file = $circolare->getAllegati()[$allegato];
     $dir = $this->getParameter('dir_circolari').($circolare->getStato() == 'A' ? '/'.$circolare->getAnno() : '');
     $nomefile = $dir.'/'.$file->getFile().'.'.$file->getEstensione();
+    if (!file_exists($nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // segna lettura e memorizza su db solo dopo aver verificato il file
+    $com->leggeUtente($this->getUser(), $circolare);
+    $this->em->flush();
     return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
       ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
   }
@@ -420,15 +433,21 @@ class CircolariController extends BaseController {
   /**
    * Conferma la lettura della circolare da parte dell'utente
    *
+   * @param Request $request Pagina richiesta
    * @param Circolare $circolare Circolare da firmare
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/circolari/firma/{circolare}', name: 'circolari_firma', requirements: ['circolare' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/circolari/firma/{circolare}', name: 'circolari_firma', requirements: ['circolare' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_UTENTE')]
-  public function firma(
+  public function firma(Request $request,
                         #[MapEntity] Circolare $circolare
                         ): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('circolari_firma', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // firma
     $this->em->getRepository(ComunicazioneUtente::class)->firma($circolare, $this->getUser());
     // redirect
@@ -500,18 +519,29 @@ class CircolariController extends BaseController {
   /**
    * Conferma la lettura della circolare alla classe
    *
+   * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param Classe $classe Classe a cui è destinata la circolare
    * @param Circolare $circolare Circolare da firmare
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/circolari/firma/classe/{classe}/{circolare}', name: 'circolari_firma_classe', requirements: ['classe' => '\d+', 'circolare' => '\d+'], defaults: ['circolare' => 0], methods: ['GET'])]
+  #[Route(path: '/circolari/firma/classe/{classe}/{circolare}', name: 'circolari_firma_classe', requirements: ['classe' => '\d+', 'circolare' => '\d+'], defaults: ['circolare' => 0], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function firmaClasse(TranslatorInterface $trans,
+  public function firmaClasse(Request $request, TranslatorInterface $trans,
                               #[MapEntity] Classe $classe,
                               #[MapEntity] ?Circolare $circolare=null
                               ): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('circolari_firma', $request->request->get('_csrf_token'))) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controllo accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     $numeri = [];
     // lista circolari da firmare
     $circolari = $circolare ? [$circolare] :

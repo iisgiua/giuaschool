@@ -11,15 +11,15 @@
     </div>
     <div class="panel-body gs-pt-0">
       <div class="row bg-success">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Data:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Data:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.data|date('d/m/Y') }}</span></div>
-        <div class="col-sm-2 text-right"><strong class="gs-big">Tipo:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Tipo:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.tipo == 'D' ? 'A DISTANZA' : 'IN PRESENZA' }}</span></div>
       </div>
       <div class="row bg-success gs-mb-3">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Classe:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.classe }}</span></div>
-        <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Alunno:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.alunno }}</span></div>
       </div>
       {{ form_row(form[0].messaggio) }}

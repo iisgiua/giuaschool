@@ -1,0 +1,19 @@
+{## # Riga utente in cima al menu laterale (apre il profilo).
+  #
+  # Condivisa da base.html.twig e admin/layout-sidebar.html.twig: prima era
+  # duplicata nei due layout (icona a tratti in uno, piena nell'altro).
+  #
+  # Quando la pagina corrente e' una di quelle del profilo la riga e'
+  # "selezionata", con gli stessi colori di una voce attiva del menu. # ##}
+{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+{% set route_profilo = app.request.attributes.get('_route') starts with 'utenti_' %}
+<div class="gs-hdr-account{{ route_profilo ? ' is-active' }}">
+  <a class="gs-hdr-profile" href="{{ path('utenti_profilo') }}" title="{{ 'title.modifica_profilo'|trans }}">
+    {{ include('admin/include/icona.html.twig', {nome: 'user'}, false) }}
+    <span class="gs-hdr-user">
+      <span class="gs-hdr-user-name">{% if is_granted('ROLE_GENITORE') %}{{ app.user.alunno.nome }} {{ app.user.alunno.cognome }}{% else %}{{ app.user.nome }} {{ app.user.cognome }}{% endif %}</span>
+      <small class="gs-hdr-user-role">{{ ('label.' ~ app.user.roles[0])|trans }}</small>
+    </span>
+  </a>
+</div>
+{% endif %}

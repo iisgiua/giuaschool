@@ -1,0 +1,37 @@
+{## # flash: messaggi temporanei impostati tramite la sessione # ##}
+{## #    resi come notifiche ancorate al bordo inferiore (contenitore posizionato # ##}
+{## #    in main.css): restano fuori dal flusso del contenuto, quindi non spostano # ##}
+{## #    nulla e la pagina non torna in alto. Comportamento in js/notifiche.js # ##}
+{## #    parametri: - # ##}
+{## #             tipo, messaggio (opzionali: messaggio da mostrare anche se non # ##}
+{## #             arriva dal flashbag, es. conferma di un form reinviato) # ##}
+{## #             salta_errore (opzionale: non mostrare i messaggi di errore, # ##}
+{## #             lasciandoli al gestore della pagina, es. una modale) # ##}
+
+{% set ha_extra = tipo is defined and messaggio is defined %}
+{% set classi = {errore: 'danger', avviso: 'warning'} %}
+{% set salta_errore = salta_errore|default(false) %}
+{% set tipi = [] %}
+{% for flash_tipo in app.session.flashbag.peekAll()|keys %}
+  {% if not (salta_errore and flash_tipo == 'errore') %}
+    {% set tipi = tipi|merge([flash_tipo]) %}
+  {% endif %}
+{% endfor %}
+{% if ha_extra or tipi is not empty %}
+<div class="gs-flash-region" role="region" aria-label="Messaggi">
+  {% if ha_extra %}
+  <div class="alert alert-{{ classi[tipo]|default(tipo) }} gs-flash" role="alert" data-gs-flash-autochiusura="{{ tipo == 'success' ? '1' : '0' }}">
+    <span class="gs-flash-testo">{{ messaggio|trans|raw }}</span>
+    <button type="button" class="gs-flash-chiudi" data-gs-flash-chiudi title="Chiudi" aria-label="Chiudi il messaggio">&times;</button>
+  </div>
+  {% endif %}
+  {% for flash_tipo in tipi %}
+    {% for flash_messaggio in app.flashes(flash_tipo) %}
+  <div class="alert alert-{{ classi[flash_tipo]|default(flash_tipo) }} gs-flash" role="alert" data-gs-flash-autochiusura="{{ flash_tipo == 'success' ? '1' : '0' }}">
+    <span class="gs-flash-testo">{{ flash_messaggio|trans|raw }}</span>
+    <button type="button" class="gs-flash-chiudi" data-gs-flash-chiudi title="Chiudi" aria-label="Chiudi il messaggio">&times;</button>
+  </div>
+    {% endfor %}
+  {% endfor %}
+</div>
+{% endif %}

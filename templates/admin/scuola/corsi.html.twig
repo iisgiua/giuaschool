@@ -1,0 +1,36 @@
+{% extends 'admin/layout-sidebar.html.twig' %}
+
+{% import 'admin/include/tabella.html.twig' as t %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid">
+  {# pulsanti di pagina sotto il titolo, non in fondo alla tabella #}
+  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [{url: path('scuola_corsi_edit'), etichetta: 'label.add'|trans, titolo: 'Nuovo corso'}]}) }}
+  {{ include('admin/include/flash.html.twig') }}
+  {% set colonne = [
+    {titolo: 'label.nome_corso'|trans, chiave: 'nome'}
+  ] %}
+  {% set azioni = [] %}
+  {% for c in dati %}
+    {% set azioni = azioni|merge([{voci: [
+      {tipo: 'info', etichetta: 'label.show'|trans, titolo: 'Mostra i dettagli del corso', titolo_modale: c.nome,
+        contenuto: t.info([
+          {etichetta: 'label.nome_corso'|trans, valore: c.nome},
+          {etichetta: 'label.nome_breve_corso'|trans, valore: c.nomeBreve}
+        ], 'row', 'col-sm-3 text-right', 'col-sm-9')},
+      {tipo: 'link', etichetta: 'label.edit'|trans, titolo: 'Modifica i dati del corso',
+        url: path('scuola_corsi_edit', {id: c.id})},
+      {tipo: 'conferma', stile: 'danger', etichetta: 'label.delete'|trans, titolo: 'Cancella il corso', titolo_modale: c.nome,
+        contenuto: 'message.cancella_corso'|trans, url: path('scuola_corsi_delete', {id: c.id})}
+    ]}]) %}
+  {% endfor %}
+  {{ t.tabella(colonne, dati, {
+    vuoto: 'Nessun corso trovato',
+    azioni: azioni
+      }) }}
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('admin/include/tabella-js.html.twig') }}
+{% endblock %}

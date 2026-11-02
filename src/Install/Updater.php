@@ -9,7 +9,11 @@
 namespace App\Install;
 
 require_once __DIR__.'/DataMigrator.php';
+require_once __DIR__.'/../Exception/InstallException.php';
+require_once __DIR__.'/../Exception/InstallAuthException.php';
 
+use App\Exception\InstallException;
+use App\Exception\InstallAuthException;
 use Exception;
 use PDO;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
@@ -39,6 +43,13 @@ class Updater {
    * @var array $sys Lista delle variabili di sistema
    */
   private array $sys;
+
+  /**
+   * Indica se il token di sicurezza e' stato verificato con successo
+   *
+   * @var bool $authenticated Esito dell'autenticazione della procedura
+   */
+  private bool $authenticated = false;
 
   /**
    * Conserva la connessione al database come istanza PDO
@@ -98,7 +109,6 @@ class Updater {
     $this->env = [];
     $this->sys = [];
     $this->pdo = null;
-    $this->migrator = null;
     $this->projectPath = dirname($this->publicPath);
     $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').
       '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
@@ -125,16 +135,27 @@ class Updater {
       $maxStep = count($this->steps['update']);
       $step = ($step < 1) ? 1 : (($step > $maxStep) ? $maxStep : $step);
       $this->{$this->steps['update'][$step]}($step);
+    } catch (InstallAuthException) {
+      // errore di autenticazione: risponde 403 senza generare collegamenti contenenti il token
+      http_response_code(403);
+      $page['version'] = $this->sys['version'] ?? 'INSTALL';
+      $page['step'] = $step.' - Errore';
+      $page['title'] = 'Accesso non autorizzato';
+      $page['danger'] = "Errore di sicurezza nell'invio dei dati.";
+      $page['text'] = 'Verifica di disporre del codice di sicurezza corretto e riprova.';
+      include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
     } catch (Exception $e) {
       // visualizza pagina di errore
-      $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
+      $page['version'] = ($this->sys['version'] ?? 'INSTALL').
+        (($this->sys['build'] ?? '0') == '0' ? '' : '#build');
       $page['step'] = $step.' - Errore';
       $page['title'] = 'Si è verificato un errore';
       $page['danger'] = $e->getMessage();
       $page['text'] = "Correggi l'errore e riprova.";
-      $page['error'] = 'update.php?token='.$this->sys['token'].'&step='.
-        ($e->getCode() > 0 ? $e->getCode() : 1);
-      include($this->publicPath.'/install/update_page.php');
+      // il collegamento di ripetizione viene generato solo dopo l'autenticazione riuscita
+      $page['error'] = $this->authenticated ? ('update.php?token='.$this->sys['token'].'&step='.
+        ($e->getCode() > 0 ? $e->getCode() : 1)) : null;
+      include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
     }
   }
 
@@ -152,6 +173,15 @@ class Updater {
       $maxStep = count($this->steps['install']);
       $step = ($step < 1) ? 1 : (($step > $maxStep) ? $maxStep : $step);
       $this->{$this->steps['install'][$step]}($step);
+    } catch (InstallAuthException) {
+      // errore di autenticazione: risponde 403 senza generare collegamenti contenenti il token
+      http_response_code(403);
+      $page['version'] = 'INSTALL';
+      $page['step'] = $step.' - Errore';
+      $page['title'] = 'Accesso non autorizzato';
+      $page['danger'] = "Errore di sicurezza nell'invio dei dati.";
+      $page['text'] = 'Verifica di disporre del codice di sicurezza corretto e riprova.';
+      include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
     } catch (Exception $e) {
       // visualizza pagina di errore
       $page['version'] = 'INSTALL';
@@ -159,9 +189,10 @@ class Updater {
       $page['title'] = 'Si è verificato un errore';
       $page['danger'] = $e->getMessage();
       $page['text'] = "Correggi l'errore e riprova.";
-      $page['error'] = 'app.php?token='.$this->sys['token'].'&step='.
-        ($e->getCode() > 0 ? $e->getCode() : 1);
-      include($this->publicPath.'/install/update_page.php');
+      // il collegamento di ripetizione viene generato solo dopo l'autenticazione riuscita
+      $page['error'] = $this->authenticated ? ('app.php?token='.$this->sys['token'].'&step='.
+        ($e->getCode() > 0 ? $e->getCode() : 1)) : null;
+      include $this->publicPath.'/install/update_page.php'; //NOSONAR php:S2003 - la pagina va inclusa a ogni passo/errore
     }
   }
 
@@ -174,8 +205,9 @@ class Updater {
    */
   private function readEnv(): void {
     $path = $this->projectPath.'/.env';
-    // legge .env e carica variabili di ambiente
-    $this->env = parse_ini_file($path);
+    // legge .env e carica variabili di ambiente (array vuoto se il file non è leggibile)
+    $dati = parse_ini_file($path);
+    $this->env = is_array($dati) ? $dati : [];
   }
 
   /**
@@ -187,7 +219,7 @@ class Updater {
     $vars = [
       'APP_ENV' => ['prod', 'definisce l\'ambiente correntemente utilizzato'],
       'APP_SECRET' => [bin2hex(random_bytes(20)), 'codice segreto univoco usato nella gestione della sicurezza'],
-      'DATABASE_URL' => ['mysql://root:root@localhost:3306/giuaschool', 'parametri di connessione al database'],
+      'DATABASE_URL' => ['', 'parametri di connessione al database'],
       'MAILER_DSN' => ['null://null', 'parametri di connessione al server email'],
       'MESSENGER_TRANSPORT_DSN' => ['doctrine://default','parametri di configurazione per l\'invio dei messaggi' ],
       'GOOGLE_API_KEY' => ['', 'autenticazione tramite Google Workspace'],
@@ -207,7 +239,9 @@ class Updater {
         if (!empty($var[1])) {
           $newEnv .= "\n".'### '.$var[1]."\n";
         }
-        $newEnv .= $key."='".($this->env[$key] ?? $var[0])."'\n";
+        $value = (string) ($this->env[$key] ?? $var[0]);
+        $value = str_replace(["\\", "'", "\n", "\r"], ["\\\\", "\\'", '', ''], $value);
+        $newEnv .= $key."='".$value."'\n";
       }
     }
     // aggiunge variabili
@@ -215,6 +249,7 @@ class Updater {
     $otherVars = '';
     foreach ($newVars as $key => $value) {
       if (!in_array($key, $toDelete, true)) {
+        $value = str_replace(["\\", "'", "\n", "\r"], ["\\\\", "\\'", '', ''], (string) $value);
         $otherVars .= $key."='".$value."'\n";
       }
     }
@@ -234,8 +269,14 @@ class Updater {
    */
   private function readSys(): void {
     $path = $this->projectPath.'/.gs-updating';
+    if (!file_exists($path)) {
+      // procedura di installazione/aggiornamento non inizializzata
+      $this->sys = [];
+      return;
+    }
     // legge file e carica variabili di ambiente
-    $this->sys = parse_ini_file($path);
+    $dati = parse_ini_file($path);
+    $this->sys = is_array($dati) ? $dati : [];
   }
 
   /**
@@ -246,6 +287,8 @@ class Updater {
     // inserisce variabili di sistema
     $newSys = '';
     foreach ($this->sys as $key => $value) {
+      // protezione dei caratteri significativi per il formato del file
+      $value = str_replace(["\\", "'", "\n", "\r"], ["\\\\", "\\'", '', ''], (string) $value);
       $newSys .= $key."='".$value."'\n";
     }
     // scrive la nuova configurazione
@@ -267,10 +310,13 @@ class Updater {
       $this->sys['build'] = '0';
     }
     // controlla token
-    if (empty($token) || empty($this->sys['token']) || $token != $this->sys['token']) {
-      // errore di sicurezza
-      throw new Exception('Errore di sicurezza nell\'invio dei dati', 0);
+    if (empty($token) || empty($this->sys['token']) ||
+      !hash_equals((string) $this->sys['token'], (string) $token)) {
+      // errore di autenticazione: distinto dagli errori operativi, non deve divulgare il token
+      throw new InstallAuthException('Errore di sicurezza nell\'invio dei dati');
     }
+    // autenticazione riuscita
+    $this->authenticated = true;
     // controlla versione
     $version = $this->getParameter('versione', '0');
     $build = $this->getParameter('versione_build', '0');
@@ -287,7 +333,10 @@ class Updater {
     }
     // converte nomi file per compatibilità
     foreach (glob($this->projectPath.'/src/Install/giuaschool-*-v*.zip') as $file) {
-      preg_match('!/giuaschool-(release|update)-v(.+)\.zip$!', $file, $matches);
+      if (preg_match('!/giuaschool-(release|update)-v(.+)\.zip$!', $file, $matches) !== 1) {
+        // nome file non riconosciuto: non viene rinominato
+        continue;
+      }
       $newFile = $this->projectPath.'/src/Install/v'.$matches[2].
         ($matches[1] == 'update' ? '-build' : '').'.zip';
       rename($file, $newFile);
@@ -310,10 +359,13 @@ class Updater {
     // carica variabili di sistema
     $this->readSys();
     // controlla token
-    if (empty($token) || empty($this->sys['token']) || $token != $this->sys['token']) {
-      // errore di sicurezza
-      throw new Exception('Errore di sicurezza nell\'invio dei dati', 0);
+    if (empty($token) || empty($this->sys['token']) ||
+      !hash_equals((string) $this->sys['token'], (string) $token)) {
+      // errore di autenticazione: distinto dagli errori operativi, non deve divulgare il token
+      throw new InstallAuthException('Errore di sicurezza nell\'invio dei dati');
     }
+    // autenticazione riuscita
+    $this->authenticated = true;
   }
 
   /**
@@ -321,12 +373,32 @@ class Updater {
    *
    * @param boolean $noSchema Se vero non usa lo schema per la connessione
    */
-  private function connectDb(bool $noSchema=false): void {
-    // connessione al database
-    $db = parse_url((string) $this->env['DATABASE_URL']);
-    $dsn = $db['scheme'].':host='.$db['host'].';port='.$db['port'].
-      ($noSchema ? '' : (';dbname='.substr($db['path'], 1)));
-    $this->pdo = new PDO($dsn, $db['user'], $db['pass']);
+  private function connectDb(bool $noSchema = false): void {
+    // recupera URL
+    $url = trim((string) ($this->env['DATABASE_URL'] ?? ''));
+
+    // errore se non impostata
+    if ($url === '') {
+      throw new Exception('Parametro DATABASE_URL non configurato. Impostare la connessione al database.');
+    }
+
+    // parsing URL
+    $db = parse_url($url);
+    if ($db === false || empty($db['scheme']) || empty($db['host'])) {
+      throw new Exception('Parametro DATABASE_URL non valido.');
+    }
+
+    // credenziali
+    $user = urldecode($db['user'] ?? '');
+    $pass = urldecode($db['pass'] ?? '');
+    $port = $db['port'] ?? 3306;
+
+    // DSN
+    $dsn = $db['scheme'].':host='.$db['host'].';port='.$port.
+      ($noSchema ? '' : (';dbname='.substr($db['path'] ?? '', 1)));
+
+    // connessione
+    $this->pdo = new PDO($dsn, $user, $pass);
     $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
   }
 
@@ -517,8 +589,8 @@ class Updater {
           // elimina link
           unlink($this->projectPath.'/'.$zip->getNameIndex($i));
         }
-        // estrae file
-        $success = $zip->extractTo('../..', [$zip->getNameIndex($i)]);
+        // estrae file (percorso assoluto: non dipende dalla directory di lavoro del processo)
+        $success = $zip->extractTo($this->projectPath, [$zip->getNameIndex($i)]);
         if (!$success) {
           // errore
           throw new Exception('Errore nell\'estrazione del file "'.$zip->getNameIndex($i).'"', $step);
@@ -558,11 +630,12 @@ class Updater {
             $dest .= basename($file);
           }
           // crea dir se necessario
-          if (!is_dir(dirname($dest))) {
-            mkdir(dirname($dest), 0777, true);
+          if (!is_dir(dirname($dest)) && !mkdir(dirname($dest), 0777, true) && !is_dir(dirname($dest))) {
+            // errore
+            throw new InstallException('Errore nel creare la directory "'.dirname($dest).'"', $step);
           }
-          // copia file
-          copy($file, $dest);
+          // copia file (l'esito viene controllato subito dopo)
+          $success = copy($file, $dest);
         }
         if (!$success) {
           // errore
@@ -970,24 +1043,58 @@ class Updater {
    */
   private function database(int $step): void {
     if (isset($_POST['install']['submit'])) {
+      $dbUser = (string) ($_POST['install']['db_user'] ?? '');
+      $dbPassword = (string) ($_POST['install']['db_password'] ?? '');
+      $dbServer = (string) ($_POST['install']['db_server'] ?? '');
+      $dbPort = (string) ($_POST['install']['db_port'] ?? '3306');
+      $dbName = (string) ($_POST['install']['db_name'] ?? '');
+
+      if (!preg_match('/^[a-zA-Z0-9_\-]+$/', $dbName)) {
+        throw new Exception('Nome del database non valido. Sono consentiti solo caratteri alfanumerici, trattini e trattini bassi.', $step);
+      }
+      if (!preg_match('/^[a-zA-Z0-9_\.\-]+$/', $dbServer)) {
+        throw new Exception('Nome server database non valido.', $step);
+      }
+      if ($dbPort !== '' && (!ctype_digit($dbPort) || (int) $dbPort < 1 || (int) $dbPort > 65535)) {
+        throw new Exception('Porta database non valida.', $step);
+      }
+      if (!preg_match('/^[a-zA-Z0-9_\.\-]+$/', $dbUser)) {
+        throw new Exception('Nome utente database non valido.', $step);
+      }
+
       // salva configurazione
-      $this->env['DATABASE_URL'] = 'mysql://'.$_POST['install']['db_user'].':'.
-        $_POST['install']['db_password'].'@'.$_POST['install']['db_server'].':'.
-        $_POST['install']['db_port'].'/'.$_POST['install']['db_name'];
+      // nosemgrep: php.lang.security.injection.tainted-url-host.tainted-url-host -- server validato dall'allowlist, nessun carattere di URL; procedura protetta da token
+      $this->env['DATABASE_URL'] = 'mysql://'.urlencode($dbUser).':'.
+        urlencode($dbPassword).'@'.$dbServer.':'.
+        $dbPort.'/'.$dbName;
       $_SESSION['GS_INSTALL_ENV'] = $this->env;
       $this->writeEnv([]);
       // connessione di test al db (solo server, senza schema)
       $this->connectDb(true);
       // crea schema
-      $sql = "CREATE DATABASE IF NOT EXISTS ".$_POST['install']['db_name']." CHARACTER SET utf8;";
+      // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string -- nome database validato dall'allowlist: nessun metacarattere SQL
+      $sql = "CREATE DATABASE IF NOT EXISTS `".$dbName."` CHARACTER SET utf8;";
       $this->pdo->exec($sql);
       // imposta dati della pagina
       $page['success'] = 'Connessione al database riuscita.';
       $page['url'] = 'app.php?token='.$this->sys['token'].'&step='.($step + 1);
     } else {
-      // legge configurazione
-      $db = parse_url((string) $this->env['DATABASE_URL']);
-      // imposta dati della pagina
+      $url = (string) ($this->env['DATABASE_URL'] ?? '');
+      $db = $url !== '' ? parse_url($url) : [];
+      if (!is_array($db)) {
+          $db = [];
+      }
+
+      // valori di default per il form
+      $db += [
+          'scheme' => 'mysql',
+          'host'   => 'localhost',
+          'port'   => '3306',
+          'user'   => '',
+          'pass'   => '',
+          'path'   => '/',
+      ];
+
       $page['postUrl'] = 'app.php?token='.$this->sys['token'].'&step='.$step;
       $page['database'] = $db;
     }
@@ -1008,17 +1115,31 @@ class Updater {
     if (!$this->pdo) {
       $this->connectDb();
     }
+    // controlla la presenza dei file SQL (generati con doctrine:schema:create/drop --dump-sql)
+    $fileDrop = $this->projectPath.'/src/Install/drop-db.sql';
+    $fileCreate = $this->projectPath.'/src/Install/create-db.sql';
+    $fileInit = $this->projectPath.'/src/Install/init-db.sql';
+    foreach ([$fileDrop, $fileCreate, $fileInit] as $file) {
+      if (!file_exists($file)) {
+        // errore
+        throw new InstallException('File SQL di installazione non trovato: "'.basename($file).'". '.
+          'Rigenerare i file con doctrine:schema:create --dump-sql e doctrine:schema:drop --dump-sql.', $step);
+      }
+    }
     // ripulisce db
     $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 0;');
-    $sqlCommands = file($this->projectPath.'/src/Install/drop-db.sql', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $sqlCommands = file($fileDrop, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
     foreach ($sqlCommands as $sql) {
       if (str_starts_with($sql, 'DROP TABLE')) {
-        // cancella tabella
-        $this->pdo->exec('DROP TABLE IF EXISTS '.substr($sql, 11));
+        // cancella tabella (riconosce sia "DROP TABLE x" sia "DROP TABLE IF EXISTS x")
+        $tavola = trim((string) preg_replace('/^IF\s+EXISTS\s+/i', '', trim(substr($sql, 11))), "; \t");
+        if (preg_match('/^`?[a-zA-Z0-9_]+`?$/', $tavola)) {
+          $this->pdo->exec('DROP TABLE IF EXISTS '.$tavola);
+        }
       }
     }
     // crea nuovo db
-    $sqlCommands = file($this->projectPath.'/src/Install/create-db.sql', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $sqlCommands = file($fileCreate, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
     foreach ($sqlCommands as $sql) {
       if (!empty($sql)) {
         // crea tabella
@@ -1026,7 +1147,7 @@ class Updater {
       }
     }
     // inizializza db
-    $sql = file_get_contents($this->projectPath.'/src/Install/init-db.sql');
+    $sql = file_get_contents($fileInit);
     $this->pdo->exec($sql);
     $this->pdo->exec('SET FOREIGN_KEY_CHECKS = 1;');
     // imposta dati della pagina
@@ -1151,9 +1272,13 @@ class Updater {
     // legge aggiornamenti
     $updates = $this->readUpdates();
     // carica substep
-    $subStep = $_GET['sub'] ?? 0;
-    // esegue procedura di aggiornamento
-    eval($updates['procedure'][$subStep]);
+    $subStep = isset($_GET['sub']) ? (int) $_GET['sub'] : 0;
+    // controlla che il substep esista e sia una procedura valida
+    if (!isset($updates['procedure'][$subStep]) || !($updates['procedure'][$subStep] instanceof \Closure)) {
+      throw new InstallException('Procedura di aggiornamento non valida', $step);
+    }
+    // esegue procedura di aggiornamento (le procedure sono Closure e non codice da valutare)
+    $updates['procedure'][$subStep]($this->pdo, $migrator);
     // visualizza pagina
     $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
     $page['step'] = $step.' - Migrazione dei dati';
@@ -1164,6 +1289,7 @@ class Updater {
       $step++;
       unset($subStep);
     }
+    // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string -- falso positivo: "update" è parte della URL, il valore è convertito in intero
     $page['url'] = 'update.php?token='.$this->sys['token'].'&step='.$step.(isset($subStep) ? '&sub='.$subStep : '');
     include($this->publicPath.'/install/update_page.php');
   }

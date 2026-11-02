@@ -150,6 +150,7 @@ label.descrizione_verifica: Descrizione o argomenti
 label.destinatari: Destinatari
 label.disabilitato: Disabilitato
 label.disable: Disabilita
+label.domenica: Domenica
 label.maggio: Documenti del 15 maggio
 label.docente: Docente
 label.docenti_classe: Docenti della classe
@@ -207,7 +208,7 @@ label.inserisci_motivazione: Inserisci la motivazione predefinita
 label.invia: Invia
 label.invio_notifiche: Invio delle notifiche
 label.leggere_in_classe: Leggere agli alunni
-label.login_otp: Codice OTP<br>(solo per gli utenti abilitati)
+label.login_otp: Codice OTP (solo per gli utenti abilitati)
 label.login: Accedi
 label.logout: Esci
 label.lunedi: Lunedì
@@ -369,6 +370,7 @@ label.next: Continua
 label.successiva: Successiva
 label.successivo: Successivo
 label.testo: Testo
+label.torna_indietro: Torna indietro
 label.tipo_documento: Tipo di documenti
 label.tipo_I: ITP
 label.tipo_N: Normale
@@ -769,6 +771,8 @@ page.info.cookie: Informativa sui cookie
 title.info.cookie: Informativa sui cookie
 page.info.credits: Credits
 title.info.credits: Credits
+page.error.404: Pagina non trovata
+title.error.404: Pagina non trovata
 page.ata.importa: Importa ATA
 title.ata.importa: Importa i dati del personale ATA
 page.ata.modifica: Modifica ATA
@@ -1245,6 +1249,7 @@ title.lezioni_voti_configura: Configura la visualizzazione della pagina con i vo
 
 ##### MESSAGGI #####
 message.required_fields: I campi contrassegnati con l'asterisco (*) sono obbligatori.
+message.error_404_descrizione: La pagina richiesta non esiste, oppure non è più disponibile.
 message.update_ok: La modifica è stata memorizzata correttamente.
 message.delete_ok: La cancellazione è stata effettuata correttamente.
 message.importa_cattedre: "Il file CSV deve avere la struttura seguente (la prima riga è il nome dei campi):
@@ -1342,6 +1347,7 @@ message.avviso_attivita_testo: "Si comunica che il giorno {data}, dalle ore {ini
 message.attivita_edit: Il testo dell'avviso utilizza i campi <strong>{DATA}</strong>, <strong>{INIZIO}</strong> e <strong>{FINE}</strong> che verranno sostituiti automaticamente con la data e l'ora di inizio e fine dell'attività indicata.
 message.presenti_avvisi: "{num, plural, one {È presente un avviso da leggere alla classe} other {Sono presenti # avvisi da leggere alla classe}}"
 message.presenti_nuovi_avvisi: "{num, plural, one {È presente un nuovo avviso da leggere} other {Sono presenti # nuovi avvisi da leggere}}"
+message.nessuna_notifica_home: Non ci sono notifiche, avvisi o richieste da mostrare al momento.
 message.avviso_coordinatore_oggetto: Messaggio dal coordinatore della classe {classe}
 message.avviso_predefinito_info: Il testo dell'avviso è predeterminato e utilizza i dati inseriti al suo interno. Usare il pulsante di ANTEPRIMA per visualizzare il testo finale.
 message.avviso_individuale_oggetto: "Comunicazione del{docente}"
@@ -1522,6 +1528,10 @@ message.documenti_archivio_bes: "Scarica, elimina o ripristina i documenti degli
 message.documento_bes_ripristinato: Il documento dell'alunn{sex} {alunno} è stato ripristinato.
 message.documento_bes_archiviato: Il documento dell'alunn{sex} {alunno} è stato archiviato.
 message.cancella_documenti_bes: Verrà cancellato il documento relativo all'alunno BES. Vuoi continuare?
+message.archivia_documento_bes: Verrà archiviato il documento relativo all'alunno BES. Vuoi continuare?
+message.ripristina_documento_bes: Verrà ripristinato il documento relativo all'alunno BES. Vuoi continuare?
+message.abilita_ricevimento: Verrà riabilitato il ricevimento indicato. Vuoi continuare?
+message.disabilita_ricevimento: Verrà disabilitato il ricevimento indicato. Vuoi continuare?
 message.alunno_assente_in_data: "ATTENZIONE: L'alunno risulta assente alla lezione della data indicata."
 message.modifica_data_o_conferma: "Puoi modificare la data o confermare i dati inseriti."
 message.alunni_assenti_in_data: "ATTENZIONE: Gli alunni seguenti risultano assenti alla lezione della data indicata:"
@@ -1532,6 +1542,16 @@ message.cancella_materia: Verrà cancellata la materia scolastica indicata. Vuoi
 message.cancella_classe: Verrà cancellata la classe indicata. Vuoi continuare?
 message.cancella_festivita: Verrà cancellata la festività indicata. Vuoi continuare?
 message.cancella_orario: Verrà cancellato l'orario indicato. Vuoi continuare?
+message.cancella_staff: Verrà tolto il ruolo di staff al docente indicato. Vuoi continuare?
+message.cancella_responsabileBes: Verrà tolto l'incarico di responsabile BES al docente indicato. Vuoi continuare?
+message.cancella_coordinatore: Verrà tolto l'incarico di coordinatore di classe al docente indicato. Vuoi continuare?
+message.cancella_segretario: Verrà tolto l'incarico di segretario di classe al docente indicato. Vuoi continuare?
+message.cancella_rappresentante_docenti: Verrà tolto l'incarico di rappresentante dei docenti al docente indicato. Vuoi continuare?
+message.cancella_rappresentante_alunni: Verrà tolto l'incarico di rappresentante di classe all'alunno indicato. Vuoi continuare?
+message.cancella_rappresentante_genitori: Verrà tolto l'incarico di rappresentante dei genitori all'utente indicato. Vuoi continuare?
+message.cancella_rappresentante_ata: Verrà tolto l'incarico di rappresentante del personale ATA al dipendente indicato. Vuoi continuare?
+message.cancella_cambio_classe: Verranno cancellati i dati del cambio di classe indicato. Vuoi continuare?
+message.cancella_presenza: Verrà rimossa la presenza fuori classe indicata. Vuoi continuare?
 message.scansione_oraria: "Inserisci la scansione oraria per ogni giorno della settimana. Usa i pulsanti per aggiungere o rimuovere un elemento.<br>La durata è indicata come frazioni dell'unità oraria."
 message.svuota_cache_ok: La cache di sistema è stata cancellata.
 message.avviso_svuota_cache: "Attenzione: l'operazione può comportare dei malfunzionamenti per gli utenti attualmente collegati."
@@ -1543,6 +1563,22 @@ message.avviso_disattiva_log_level: "Attenzione: l'operazione disattiverà la mo
 message.modifica_log_level_ok: La modalità di debug è stata modificata.
 message.tutte_operazioni_ok: Tutte le operazioni sono state eseguite senza errori.
 message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
+message.cancella_voto: Verrà cancellata la valutazione indicata. Vuoi continuare?
+message.reset_otp: Verrà azzerato il codice OTP del docente indicato, che dovrà riattivarlo al prossimo accesso. Vuoi continuare?
+message.abilita_docente: Verrà riabilitato l'account del docente indicato. Vuoi continuare?
+message.disabilita_docente: Verrà disabilitato l'account del docente indicato, che non potrà più accedere al registro. Vuoi continuare?
+message.abilita_alunno: Verrà riabilitato l'account dell'alunno indicato e quelli dei suoi genitori. Vuoi continuare?
+message.disabilita_alunno: Verrà disabilitato l'account dell'alunno indicato e quelli dei suoi genitori. Vuoi continuare?
+message.abilita_ata: Verrà riabilitato l'account del dipendente indicato. Vuoi continuare?
+message.disabilita_ata: Verrà disabilitato l'account del dipendente indicato, che non potrà più accedere al registro. Vuoi continuare?
+message.abilita_cattedra: Verrà riabilitata la cattedra indicata. Vuoi continuare?
+message.disabilita_cattedra: Verrà disabilitata la cattedra indicata, che verrà rimossa dal registro. Vuoi continuare?
+message.abilita_modulo: Verrà riabilitato il modulo indicato. Vuoi continuare?
+message.disabilita_modulo: Verrà disabilitato il modulo indicato, che non potrà più essere richiesto. Vuoi continuare?
+message.abilita_autorizzazione: Verrà riabilitato il modulo di autorizzazione indicato. Vuoi continuare?
+message.disabilita_autorizzazione: Verrà disabilitato il modulo di autorizzazione indicato, che non potrà più essere richiesto. Vuoi continuare?
+message.abilita_consultazione: Verrà riabilitata la consultazione indicata. Vuoi continuare?
+message.disabilita_consultazione: Verrà disabilitata la consultazione indicata, che non potrà più essere richiesta. Vuoi continuare?
 message.cancella_consultazione: Verrà cancellata la consultazione indicata. Vuoi continuare?
 message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
 message.no_moduli_classe: Non sono presenti moduli per la classe.
@@ -1624,6 +1660,7 @@ exception.cattedra_sostegno: Non puoi inserire una verifica per una cattedra di 
 exception.classe_errata: La classe non è corretta.
 exception.colloqui_errore: È presente un errore nell'impostazione dell'orario del colloquio del docente.
 exception.colloqui_esiste: Esiste già una richiesta per il colloquio con il docente.
+exception.colloqui_esauriti: Non ci sono più posti disponibili per il ricevimento indicato.
 exception.colloqui_sospesi: Il ricevimento dei genitori è sospeso sino al termine delle lezioni.
 exception.conferma_invalida: "Procedura terminata con errore:<br>&nbsp;&nbsp;Utente sconosciuto"
 exception.conferma_scaduta: "Procedura terminata con errore:<br>&nbsp;&nbsp;La richiesta di attivazione è stata inviata più di 48 ore fa.<br><br>Effettua una nuova richiesta di attivazione e confermala entro 48 ore."
@@ -1869,6 +1906,7 @@ exception.modulo_campo_senza_nome: Non possono esistere campi del modulo senza n
 exception.modulo_campo_senza_tipo: Non possono esistere campi del modulo senza tipo.
 exception.campo_obbligatorio_vuoto: Non hai inserito un valore accettabile in un campo obbligatorio.
 exception.modulo_allegati_mancanti: Non hai caricato gli allegati richiesti.
+exception.modulo_template_mancante: "Il template del modulo non è disponibile: contatta l'amministratore."
 exception.modulo_campo_nome_riservato: Non puoi inserire un campo con il nome "data".
 exception.campo_data_vuoto: Non hai inserito un valore per la data.
 exception.campo_data_successivo_oggi: Non puoi inserire una data successiva a quella di oggi.
@@ -1917,7 +1955,9 @@ exception.documento_bes_non_autorizzato: Non hai i permessi per caricare documen
 exception.tipo_filtro_invalido: Il tipo di filtro non è valido
 exception.consultazione_intervallo_date_invalido: La data e ora iniziale deve precedere quella finale
 exception.consultazione_nessuna_classe: Devi indicare almeno una classe di destinazione
+exception.consultazione_template_mancante: "Il template della consultazione non è disponibile: contatta l'amministratore."
 exception.impossibile_creare_zip: Impossibile creare il file compresso
+exception.nessun_allegato_archivio: "Nessun documento presente: non c'è nulla da archiviare."
 exception.autorizzazione_intervallo_date_invalido: L'ora iniziale deve precedere quella finale
 exception.autorizzazione_nessuna_classe: Devi indicare almeno una classe di destinazione
 exception.autorizzazione_no_descrizione: Devi indicare la descrizione dell'attività

@@ -9,27 +9,27 @@
   {% else %}
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-3">{{ 'title.coordinatore_assenze'|trans }} {{ classe }}</h1>
   <div class="row gs-mb-1">
-    <div class="col-sm-12 text-right">
-      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_assenze', {'classe': classe.id, 'tipo': 'P'}) }}" role="button" title="Scarica il documento in formato PDF"><span class="glyphicon glyphicon-print gs-mr-3"></span><strong>{{ 'label.stampa'|trans }}</strong></a>
+    <div class="col-sm-6 text-info">
+      <strong class="gs-big">Alunni della classe</strong>
+    </div>
+    <div class="col-sm-6 text-right">
+      <a class="btn btn-success btn-sm" href="{{ path('coordinatore_assenze', {classe: classe.id, tipo: 'P'}) }}" role="button" title="Scarica il documento in formato PDF">{{ include('admin/include/icona.html.twig', {nome: 'printer', stile: 'outline', classe: 'gs-mr-3'}) }}<strong>{{ 'label.stampa'|trans }}</strong></a>
     </div>
   </div>
-  <table class="table table-bordered table-hover table-striped">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-5">Alunno</th>
-        <th class="col-sm-1">Assenze</th>
-        <th class="col-sm-1">Ritardi<br>(brevi)</th>
-        <th class="col-sm-1">Conteggio<br>Ritardi</th>
-        <th class="col-sm-1">Uscite</th>
-        <th class="col-sm-1">Conteggio<br>Uscite</th>
-        <th class="col-sm-2">Ore totali<br>e % su {{ dati.monte }}</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for alunno,a in dati.alunni %}
+  {% set intestazione = [
+      {contenuto: 'Alunno', classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'Assenze', classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'Ritardi<br>(brevi)', classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'Conteggio<br>Ritardi', classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'Uscite', classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'Conteggio<br>Uscite', classi: 'col-sm-1', scope: 'col'},
+      {contenuto: 'Ore totali<br>e % su {{ dati.monte }}', classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
+    {% for alunno, a in dati.alunni %}
       <tr>
         <td>
-          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
+          <button type="button" class="btn btn-xs btn-default" title="Dettagli alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})" data-body="alunno-{{ loop.index }}">{{ include('admin/include/icona.html.twig', {nome: 'zoom-in', stile: 'outline'}) }}</button>
           <strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong>
       {% if a.cambio %}
           <br><em class="text-danger">{{ a.cambio }}</em>
@@ -37,7 +37,7 @@
       {% if a.frequenzaEstero %}
           <br><em class="text-danger">Frequenta all'estero</em>
       {% endif %}
-          {% include 'include/scheda-alunno.html.twig' with {id: loop.index, a: a, g: dati.genitori[a.id]} %}
+          {{ include('include/scheda-alunno.html.twig', {id: loop.index, a: a, g: dati.genitori[a.id]}) }}
         </td>
         <td>
       {% if dati.statistiche[alunno].assenze is defined %}
@@ -89,19 +89,15 @@
       {% endif %}
         </td>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped'}) }}
     {% if dati.trasferiti|length > 0 %}
-  <table class="table table-bordered table-hover table-striped">
-    <caption class="text-center text-primary gs-h2">Traferiti o ritirati</caption>
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-5">Alunno</th>
-        <th class="col-sm-7">Situazione</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for alunno,a in dati.trasferiti %}
+  {% set intestazione = [
+      {contenuto: 'Alunno', classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'Situazione', classi: 'col-sm-7', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_1 %}
+    {% for alunno, a in dati.trasferiti %}
       <tr>
         <td>
           <strong>{{ a.cognome }} {{ a.nome }} ({{ a.dataNascita|date('d/m/Y') }})</strong>
@@ -111,10 +107,10 @@
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {didascalia: '<strong>Alunni trasferiti</strong>', classi_didascalia: 'text-info text-center gs-big', corpo_grezzo: corpo_grezzo_1, classi: 'table table-bordered table-hover table-striped'}) }}
     {% endif %}
-    {% include 'include/modal-info.html.twig' %}
+    {{ include('include/modal-info.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}
@@ -138,11 +134,15 @@ $(document).ready(function() {
       if (el.is(':visible')) {
         el.fadeOut();
         $(this).attr('title', 'Apre la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-full gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-maximize');
       } else {
         el.fadeIn();
         $(this).attr('title', 'Chiude la scheda con le informazioni riservate');
-        $(this).find('strong span').attr('class', 'glyphicon glyphicon-resize-small gs-mr-2');
+        $(this).find('strong use')
+          .attr('href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize')
+          .attr('xlink:href', '{{ asset('icons/tabler-sprite.svg') }}#arrows-minimize');
       }
     });
   });

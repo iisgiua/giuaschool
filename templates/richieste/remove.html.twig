@@ -11,24 +11,24 @@
     </div>
     <div class="panel-body gs-pt-0">
       <div class="row bg-success">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Modulo:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Modulo:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.definizioneRichiesta.nome }}</span></div>
-        <div class="col-sm-2 text-right"><strong class="gs-big">Stato:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Stato:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.stato == 'A' ? 'ANNULLATA' : (info.richiesta.stato == 'I' ? 'IN ATTESA' : (info.richiesta.stato == 'G' ? 'GESTITA' : (info.richiesta.stato == 'R' ? 'RIMOSSA' : ''))) }}</span></div>
       </div>
       <div class="row bg-success">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Alunno:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.utente.cognome }} {{ info.richiesta.utente.nome }}</span></div>
-        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Classe:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.utente.classe }}</span></div>
       </div>
       <div class="row bg-success gs-mb-4">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Città:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Città:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.utente.citta }}</span></div>
-        <div class="col-sm-2 text-right"><strong class="gs-big">Indirizzo:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Indirizzo:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ info.richiesta.utente.indirizzo }}</span></div>
       </div>
-      {{ form(form[0]) }}
+      {{ form_widget(form[0]) }}
     </div>
     <div class="panel-footer text-center">
       <button type="submit" id="richiesta_submit" name="richiesta[submit]" class="btn btn-primary gs-mr-3"><strong>{{ 'label.submit'|trans }}</strong></button>

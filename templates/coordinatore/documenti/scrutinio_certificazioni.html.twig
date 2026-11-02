@@ -1,4 +1,4 @@
-{% for id,alu in dati.ammessi %}
+{% for id, alu in dati.ammessi %}
   {% for t in dati.tcpdf['header'] %}<tcpdf data="{{ t }}" />{% endfor %}
 <div style="text-align:center;font-family:times;font-size:11pt">
   <img src="@{{ image64('intestazione-documenti.jpg') }}" width="400">
@@ -29,7 +29,7 @@
   <table border="0" cellpadding="0" cellspacing="5">
     <tr>
       <td width="15%">nat{{ alu.sesso == 'M' ? 'o' : 'a' }} a</td>
-      <td width="65%" style="border-bottom-width:0.1px"><strong>{{ alu.comuneNascita|upper }} {%if alu.provinciaNascita %}({{ alu.provinciaNascita|upper }}){%endif%}</strong></td>
+      <td width="65%" style="border-bottom-width:0.1px"><strong>{{ alu.comuneNascita|upper }} {% if alu.provinciaNascita %}({{ alu.provinciaNascita|upper }}){% endif %}</strong></td>
       <td width="5%" align="right">il</td>
       <td width="15%" style="border-bottom-width:0.1px"><strong>{{ alu.dataNascita|date('d/m/Y') }}</strong></td>
     </tr>
@@ -51,7 +51,7 @@
     <td align="justify">Padroneggiare la lingua di scolarizzazione in forma sia orale sia scritta in tutti i suoi aspetti (comprensione, interpretazione, produzione) utilizzando materiali di vario genere all'interno delle diverse discipline, dei diversi contesti e scopi comunicativi.
       Comunicare e relazionarsi con gli altri in modo efficace e opportuno.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_alfabetica'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_alfabetica'])|trans }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_alfabetica'] }}<br>{{ ('label.competenza_descrizione_livello_' ~ alu.dati['competenza_alfabetica'])|trans }}</strong></td>
   </tr>
   <tr>
     <td rowspan="{{ app.session.get('/CONFIG/SCUOLA/competenze_lingua2') is empty ? 2 : (app.session.get('/CONFIG/SCUOLA/competenze_lingua3') is empty ? 3 : 4) }}"><strong>{{ 'label.competenza_linguistica'|trans }}</strong></td>
@@ -62,18 +62,18 @@
   </tr>
   <tr>
     <td><strong>Lingua {{ app.session.get('/CONFIG/SCUOLA/competenze_lingua1') }}</strong></td>
-    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_linguistica1'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_linguistica1'])|trans }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_linguistica1'] }}<br>{{ ('label.competenza_descrizione_livello_' ~ alu.dati['competenza_linguistica1'])|trans }}</strong></td>
   </tr>
   {% if app.session.get('/CONFIG/SCUOLA/competenze_lingua2') is not empty %}
   <tr>
     <td><strong>Lingua {{ app.session.get('/CONFIG/SCUOLA/competenze_lingua2') }}</strong></td>
-    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_linguistica2'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_linguistica2'])|trans }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_linguistica2'] }}<br>{{ ('label.competenza_descrizione_livello_' ~ alu.dati['competenza_linguistica2'])|trans }}</strong></td>
   </tr>
   {% endif %}
   {% if app.session.get('/CONFIG/SCUOLA/competenze_lingua3') is not empty %}
   <tr>
     <td><strong>Lingua {{ app.session.get('/CONFIG/SCUOLA/competenze_lingua3') }}</strong></td>
-    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_linguistica3'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_linguistica3'])|trans }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_linguistica3'] }}<br>{{ ('label.competenza_descrizione_livello_' ~ alu.dati['competenza_linguistica3'])|trans }}</strong></td>
   </tr>
   {% endif %}
   <tr>
@@ -86,7 +86,7 @@
       Analizzare qualitativamente e quantitativamente fenomeni legati alle trasformazioni di energia a partire dall'esperienza, anche in relazione agli impatti ambientali e sociali di tali trasformazioni.
       Individuare potenzialità e limiti delle tecnologie nel contesto culturale e sociale in cui vengono applicate anche a tutela della sostenibilità ambientale, sociale ed economica, con attenzione alle questioni etiche e della sicurezza, in particolare per quanto concerne il processo scientifico e tecnologico in relazione all'individuo, alla famiglia, alla comunità e alle questioni di dimensione globale.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_matematica'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_matematica'])|trans }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_matematica'] }}<br>{{ ('label.competenza_descrizione_livello_' ~ alu.dati['competenza_matematica'])|trans }}</strong></td>
   </tr>
   <tr>
     <td><strong>{{ 'label.competenza_digitale'|trans }}</strong></td>
@@ -96,7 +96,7 @@
       Osservare le principali regole a tutela della riservatezza applicate dai servizi digitali relativamente all'uso dei dati personali.
       Evitare, usando tecnologie digitali, rischi per la salute e minacce al proprio benessere fisico e psicologico.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_digitale'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_digitale'])|trans }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_digitale'] }}<br>{{ ('label.competenza_descrizione_livello_' ~ alu.dati['competenza_digitale'])|trans }}</strong></td>
   </tr>
   <tr>
     <td><strong>{{ 'label.competenza_personale'|trans }}</strong></td>
@@ -107,7 +107,7 @@
       Individuare collegamenti e relazioni, identificando, elaborando e rappresentando argomentazioni coerenti, relazioni tra fenomeni, eventi e concetti, anche appartenenti a diversi ambiti disciplinari e lontani nello spazio e nel tempo, cogliendone la natura sistemica e complessa, ricercando analogie e differenze, coerenze ed incoerenze; stabilendo cause ed effetti in relazione a scenari/futuri possibili, riconoscendone la loro natura probabilistica.
       Ricercare ed interpretare criticamente l'informazione proveniente dai diversi ambiti ed attraverso diversi strumenti comunicativi, valutandone l'attendibilità e l'utilità, distinguendo fatti e opinioni.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_personale'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_personale'])|trans }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_personale'] }}<br>{{ ('label.competenza_descrizione_livello_' ~ alu.dati['competenza_personale'])|trans }}</strong></td>
   </tr>
 </table>
   {% for t in dati.tcpdf[id] %}<tcpdf data="{{ t }}" />{% endfor %}
@@ -123,7 +123,7 @@
       Collocare l'esperienza personale in un sistema di regole fondato sul reciproco riconoscimento dei diritti garantiti dalla Costituzione, a tutela della persona, della collettività e dell'ambiente e delle future generazioni.
       Osservare comportamenti e atteggiamenti rispettosi dell'ambiente, dei beni comuni, della sostenibilità ambientale, economica, sociale, coerentemente con l'Agenda 2030 per lo sviluppo sostenibile.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_cittadinanza'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_cittadinanza'])|trans }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_cittadinanza'] }}<br>{{ ('label.competenza_descrizione_livello_' ~ alu.dati['competenza_cittadinanza'])|trans }}</strong></td>
   </tr>
   <tr>
     <td><strong>{{ 'label.competenza_imprenditoriale'|trans }}</strong></td>
@@ -132,7 +132,7 @@
       Collaborare con altri, valorizzando le loro risorse, le idee, i contributi al lavoro.
       Riconoscere le caratteristiche essenziali del sistema socioeconomico per orientarsi nel tessuto produttivo del territorio.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_imprenditoriale'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_imprenditoriale'])|trans }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_imprenditoriale'] }}<br>{{ ('label.competenza_descrizione_livello_' ~ alu.dati['competenza_imprenditoriale'])|trans }}</strong></td>
   </tr>
   <tr>
     <td><strong>{{ 'label.competenza_culturale'|trans }}</strong></td>
@@ -140,7 +140,7 @@
       Utilizzare gli strumenti fondamentali per una fruizione consapevole del patrimonio culturale, artistico, letterario, paesaggistico.
       Comprendere il cambiamento e la diversità dei tempi storici in una dimensione diacronica attraverso il confronto fra epoche e culture, in una dimensione sincronica attraverso il confronto fra aree geografiche e culturali.
     </td>
-    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_culturale'] }}<br>{{ ('label.competenza_descrizione_livello_'~alu.dati['competenza_culturale'])|trans }}</strong></td>
+    <td style="font-size:10pt" align="center"><strong>{{ alu.dati['competenza_culturale'] }}<br>{{ ('label.competenza_descrizione_livello_' ~ alu.dati['competenza_culturale'])|trans }}</strong></td>
   </tr>
   <tr>
     <td colspan="3" align="justify">{{ alu.sesso == 'M' ? 'Lo studente' : 'La studentessa' }}

@@ -65,11 +65,19 @@ class PdfManager {
    * Crea un documento PDF convertendolo dal codice HTML
    *
    * @param string $html Il testo in HTML da convertire
+   *
+   * @throws \RuntimeException Se la conversione HTML a PDF fallisce
    */
-  public function createFromHtml(string $html) {
+  public function createFromHtml(string $html): void {
     // trasforma in PDF
     $this->pdf->AddPage();
-    $this->pdf->writeHTML($html);
+    try {
+      $this->pdf->writeHTML($html);
+    } catch (\Throwable $e) {
+      // alcuni ambienti senza GD o Imagick segnalano errori critici
+      // sulla gestione di immagini PNG con canale alpha.
+      throw new \RuntimeException('Impossibile generare il PDF: '.$e->getMessage(), 0, $e);
+    }
   }
 
   /**

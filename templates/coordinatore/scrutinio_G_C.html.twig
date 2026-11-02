@@ -10,16 +10,13 @@
   <h1 class="text-center gs-h1 gs-mt-2 gs-mb-0">Scrutinio per gli esami degli studenti con sospensione del giudizio<br>della classe {{ classe }}</h1>
   {% if dati.periodo is defined and dati.periodo != 'G' %}<h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Sessione supplettiva</h2>{% endif %}
   <h2 class="text-center gs-h2 gs-mt-0 gs-mb-4">Scrutinio chiuso</h2>
-    {% include 'include/modal-error.html.twig' %}
-    <table class="table table-bordered table-hover table-striped gs-mt-4">
-      <thead class="bg-success">
-        <tr>
-          <th class="col-sm-2">Documento</th>
-          <th class="col-sm-7">Note</th>
-          <th class="col-sm-3">Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
+    {{ include('include/modal-error.html.twig') }}
+    {% set intestazione = [
+      {contenuto: 'Documento', classi: 'col-sm-2', scope: 'col'},
+      {contenuto: 'Note', classi: 'col-sm-7', scope: 'col'},
+      {contenuto: 'Azioni', classi: 'col-sm-3', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
         <tr>
           <td><strong>Verbale</strong></td>
           <td>
@@ -29,7 +26,7 @@
           </td>
           <td>
             <div class="gs-mb-2">
-              <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'V', 'periodo': dati.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+              {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica', titolo: 'Scarica il documento', url: path('pagelle_classe', {classe: classe.id, tipo: 'V', periodo: dati.periodo})}) }}
             </div>
           </td>
         </tr>
@@ -41,7 +38,7 @@
             <strong><em>Devono firmare tutti i docenti.</em></strong>
           </td>
           <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'R', 'periodo': dati.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica', titolo: 'Scarica il documento', url: path('pagelle_classe', {classe: classe.id, tipo: 'R', periodo: dati.periodo})}) }}
           </td>
         </tr>
         <tr>
@@ -52,7 +49,7 @@
             <strong><em>Devono firmare tutti i docenti.</em></strong>
           </td>
           <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'I', 'periodo': dati.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica', titolo: 'Scarica il documento', url: path('pagelle_classe', {classe: classe.id, tipo: 'I', periodo: dati.periodo})}) }}
           </td>
         </tr>
     {% if classe.anno == 2 %}
@@ -63,7 +60,7 @@
           </td>
           <td>
       {% if dati.ammessi > 0 %}
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'C', 'periodo': dati.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica', titolo: 'Scarica il documento', url: path('pagelle_classe', {classe: classe.id, tipo: 'C', periodo: dati.periodo})}) }}
       {% else %}
             <span class="label label-warning">NESSUN DOCUMENTO</span>
       {% endif %}
@@ -76,7 +73,7 @@
             Documento pubblicato sul Registro Elettronico (<em>non stampare</em>).
           </td>
           <td>
-            <a class="btn btn-primary btn-xs" href="{{ path('pagelle_classe', {'classe': classe.id, 'tipo': 'T', 'periodo': dati.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>Scarica</strong></a>
+            {{ include('include/bottone-azione.html.twig', {nome: 'download', etichetta: 'Scarica', titolo: 'Scarica il documento', url: path('pagelle_classe', {classe: classe.id, tipo: 'T', periodo: dati.periodo})}) }}
           </td>
         </tr>
         <tr>
@@ -86,21 +83,21 @@
           </td>
           <td>
     {% for a in dati.non_ammessi %}
-            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {'classe': classe.id, 'alunno': a.id, 'tipo': 'N', 'periodo': dati.periodo}) }}" role="button" title="Scarica il documento"><span class="glyphicon glyphicon-download-alt gs-mr-2"></span><strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
+            <div class="gs-mb-2"><a class="btn btn-primary btn-xs" href="{{ path('pagelle_alunno', {classe: classe.id, alunno: a.id, tipo: 'N', periodo: dati.periodo}) }}" role="button" title="Scarica il documento">{{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>{{ a.cognome }} {{ a.nome }}</strong></a></div>
     {% else %}
             <span class="label label-warning">NESSUNA COMUNICAZIONE</span>
     {% endfor %}
           </td>
         </tr>
-      </tbody>
-    </table>
+      {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mt-4'}) }}
     {% if dati.precedente %}
   <div class="row text-center gs-mt-5 gs-mb-5">
-    <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {'classe': classe.id, 'stato': '4'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente"><span class="glyphicon glyphicon-backward gs-mr-2"></span><strong>Riapri lo scrutinio</strong></a>
+    <a class="btn btn-danger gs-wait-page" href="{{ path('coordinatore_scrutinio', {classe: classe.id, stato: '4'}) }}" role="button" title="Annulla la chiusura dello scrutinio e torna al passo precedente">{{ include('admin/include/icona.html.twig', {nome: 'arrow-left', stile: 'outline', classe: 'gs-mr-2'}) }}<strong>Riapri lo scrutinio</strong></a>
   </div>
     {% endif %}
-    {% include 'include/modal-remote.html.twig' %}
-    {% include 'include/modal-waiting.html.twig' %}
+    {{ include('include/modal-remote.html.twig') }}
+    {{ include('include/modal-waiting.html.twig') }}
   {% endif %}
 </div>
 {% endblock %}
