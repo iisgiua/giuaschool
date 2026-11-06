@@ -326,6 +326,16 @@ class UtentiController extends BaseController {
     $info = [];
     // legge dati
     $notifica = $this->getUser()->getNotifica();
+    // assicura che l'array abbia la struttura corretta
+    if (empty($notifica) || !is_array($notifica)) {
+      $notifica = ['tipo' => 'email', 'abilitato' => ['circolare']];
+    }
+    if (!isset($notifica['tipo'])) {
+      $notifica['tipo'] = 'email';
+    }
+    if (!isset($notifica['abilitato'])) {
+      $notifica['abilitato'] = ['circolare'];
+    }
     // controlla configurazione telegram
     $bot = $this->em->getRepository(Configurazione::class)->getParametro('telegram_bot');
     if (empty($bot) && $notifica['tipo'] == 'telegram') {
