@@ -49,6 +49,11 @@ services:
       - { name: console.command }
       - { name: monolog.logger, channel: command }
 
+  # necessario per specificare il renderer predefinito degli errori del framework
+  App\Controller\ErrorController:
+    arguments:
+      $errorRenderer: '@error_renderer'
+
   # necessario per evitare warning di servizio deprecato
   App\Util\CsvImporter:
     arguments:

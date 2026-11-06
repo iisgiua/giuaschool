@@ -1,0 +1,197 @@
+<!doctype html>
+{# gs-admin: imposta in main.css una dimensione base del font più compatta per l'area admin #}
+<html dir="ltr" lang="it" class="gs-admin">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="keywords"
+    content="scuola,registro,elettronico,{{ app.session.get('/CONFIG/ISTITUTO/intestazione')|replace({' ': ','})|lower }}{% for ks in 0..(app.session.get('/CONFIG/ISTITUTO/num_sedi') - 1) %},{{ app.session.get('/CONFIG/ISTITUTO/sede_' ~ ks ~ '_citta')|lower }}{% endfor %}">
+  <meta name="description"
+    content="giua@school: il registro elettronico dell'{{ app.session.get('/CONFIG/ISTITUTO/intestazione') }}">
+  <meta name="author" content="Antonello Dessì">
+  <title>{{ pagina_titolo|trans }}</title>
+  <link href="{{ asset('vendor/bootstrap-italia/css/bootstrap-italia.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('css/main.css?v=' ~ (filedate('css/main.css')|date('U'))) }}" rel="stylesheet">
+  <link href="{{ asset('css/gs-standard.css?v=' ~ (filedate('css/gs-standard.css')|date('U'))) }}" rel="stylesheet">
+  <link href="{{ asset('css/gs-pages.css?v=' ~ (filedate('css/gs-pages.css')|date('U'))) }}" rel="stylesheet">
+  {% block pagina_css %}
+  {% endblock %}
+  {% block pagina_js_inizio %}
+  {% endblock %}
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-icon-180x180.png') }}">
+  <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('icons/apple-icon-152x152.png') }}">
+  <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('icons/apple-icon-144x144.png') }}">
+  <link rel="apple-touch-icon" sizes="120x120" href="{{ asset('icons/apple-icon-120x120.png') }}">
+  <link rel="apple-touch-icon" sizes="114x114" href="{{ asset('icons/apple-icon-114x114.png') }}">
+  <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('icons/apple-icon-76x76.png') }}">
+  <link rel="apple-touch-icon" sizes="72x72" href="{{ asset('icons/apple-icon-72x72.png') }}">
+  <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('icons/apple-icon-60x60.png') }}">
+  <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('icons/apple-icon-57x57.png') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('icons/android-icon-192x192.png') }}">
+  <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('icons/favicon-96x96.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('icons/favicon-16x16.png') }}">
+  <link rel="icon" type="image/x-icon" href="{{ asset('icons/favicon.ico') }}">
+  <link rel="manifest" href="{{ asset('manifest.json') }}">
+  <meta name="msapplication-TileColor" content="#0066CC">
+  <meta name="msapplication-TileImage" content="{{ asset('icons/ms-icon-144x144.png') }}">
+  <meta name="theme-color" content="#0066CC">
+  <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
+  <link rel="mask-icon" href="{{ asset('icons/safari-pinned-tab.svg') }}" color="#0066CC">
+</head>
+
+<body>
+  {## # scorciatoie per tastiera/screen reader # ##}
+  <div class="skiplinks">
+    <a href="#gs-main">Vai al contenuto</a>
+    <a href="#gs-footer">Vai a fine pagina</a>
+  </div>
+  {## # FINE scorciatoie per tastiera/screen reader # ##}
+  
+  {## # intestazione pagina # ##}
+  <header id="gs-header" class="gs-hdr">
+    <div class="gs-hdr-bar">
+      <button type="button" class="gs-hdr-toggle" aria-expanded="false" aria-controls="gs-navbar-collapse-1"
+        aria-label="Apri il menu di navigazione">
+        {{ include('admin/include/icona.html.twig', {nome: 'menu-2'}, false) }}
+      </button>
+      <div class="gs-hdr-brand"
+        aria-label="{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }} - anno scolastico {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}">
+        <strong class="gs-hdr-brand-name">{{ app.session.get('/CONFIG/ISTITUTO/intestazione_breve') }}</strong>
+        <span class="gs-hdr-year">A.S. {{ app.session.get('/CONFIG/SCUOLA/anno_scolastico') }}</span>
+      </div>
+      {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        {% if is_granted('ROLE_IMPERSONATOR') %}
+        <a class="gs-hdr-exit" href="{{ path('sistema_alias_exit') }}" title="Esci dall'alias" aria-label="Esci dall'alias">
+          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}, false) }}
+          <strong class="gs-hdr-exit-label">{{ 'label.alias'|trans|upper }}</strong>
+        </a>
+        {% elseif is_granted('ROLE_DOCENTE') and app.session.get('/APP/UTENTE/tipo_accesso') == 'Google' %}
+        <a class="gs-hdr-exit" href="#" onClick="logoutGoogle()" title="Esci dal Registro Elettronico" aria-label="Esci dal Registro Elettronico">
+          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}) }}
+          <strong class="gs-hdr-exit-label">{{ 'label.logout'|trans|upper }}</strong>
+        </a>
+        {% else %}
+        <a class="gs-hdr-exit" href="{{ path('logout') }}" title="Esci dal Registro Elettronico" aria-label="Esci dal Registro Elettronico">
+          {{ include('admin/include/icona.html.twig', {nome: 'logout', stile: 'outline'}, false) }}
+          <strong class="gs-hdr-exit-label">{{ 'label.logout'|trans|upper }}</strong>
+        </a>
+        {% endif %}
+      {% endif %}
+    </div>
+  </header>
+  {## # FINE intestazione pagina # ##}
+
+  <div class="gs-page-container">
+    <div class="gs-app-shell">
+    {## # barra laterale (sotto i 992px diventa un pannello a scorrimento) # ##}
+    <aside class="gs-hdr-collapse" id="gs-navbar-collapse-1" aria-label="Menu di navigazione">
+      <div class="gs-hdr-panel">
+        {{ include('include/menu-utente.html.twig') }}
+        <nav class="gs-hdr-menu" aria-label="Menu principale">
+          {{ include('admin/include/menu.html.twig') }}
+        </nav>
+      </div>
+    </aside>
+    <div class="gs-hdr-overlay" aria-hidden="true"></div>
+
+    <div class="gs-content">
+      {## # contenuto pagina # ##}
+      <div class="gs-main-container clearfix">
+        <div id="gs-main" tabindex="-1">
+          {% block pagina_contenuto %}
+          {% endblock %}
+        </div>
+
+        <!-- piè di pagina -->
+        {{ include('footer.html.twig') }}
+        <!-- fine piè di pagina -->
+      </div>
+      {## # FINE contenuto pagina # ##}
+    </div>
+  </div>
+</div>
+
+  {## # link TornaSu # ##}
+  <a class="back-to-top back-to-top-small shadow" href="#" aria-hidden="true" data-attribute="back-to-top"
+    title="Vai a inizio pagina">
+    {{ include('admin/include/icona.html.twig', {nome: 'circle-arrow-up', classe: 'icon-light'}, false) }}
+  </a>
+  {## # FINE link TornaSu # ##}
+
+  {## # caricamento javascript # ##}
+  <script>window.__PUBLIC_PATH__ = "{{ asset('vendor/bootstrap-italia/fonts') }}"</script>
+  <script src="{{ asset('vendor/bootstrap-italia/js/bootstrap-italia.bundle.min.js') }}"></script>
+  <script src="{{ asset('js/main.js?v=' ~ (filedate('js/main.js')|date('U'))) }}"></script>
+  <script src="{{ asset('js/notifiche.js?v=' ~ (filedate('js/notifiche.js')|date('U'))) }}"></script>
+  <script>
+    /* pannello di navigazione mobile: apre/chiude la barra laterale sotto i 992px */
+    (function () {
+      var html = document.documentElement;
+      var btn = document.querySelector('.gs-hdr-toggle');
+      var panel = document.getElementById('gs-navbar-collapse-1');
+      var overlay = document.querySelector('.gs-hdr-overlay');
+      if (!btn || !panel) { return; }
+      var desktop = window.matchMedia('(min-width: 992px)');
+
+      function setOpen(open) {
+        panel.classList.toggle('is-open', open);
+        if (overlay) { overlay.classList.toggle('is-visible', open); }
+        html.classList.toggle('gs-hdr-lock', open);
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.setAttribute('aria-label', open ? 'Chiudi il menu di navigazione' : 'Apri il menu di navigazione');
+      }
+
+      btn.addEventListener('click', function () {
+        setOpen(!panel.classList.contains('is-open'));
+      });
+      if (overlay) {
+        overlay.addEventListener('click', function () { setOpen(false); });
+      }
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('is-open')) {
+          setOpen(false);
+          btn.focus();
+        }
+      });
+      panel.addEventListener('click', function (e) {
+        var a = e.target.closest ? e.target.closest('a') : null;
+        if (a && !a.classList.contains('dropdown-toggle') && a.getAttribute('href') !== '#') {
+          setOpen(false);
+        }
+      });
+      function onResize() {
+        if (desktop.matches) { setOpen(false); }
+      }
+      if (desktop.addEventListener) { desktop.addEventListener('change', onResize); }
+      else if (desktop.addListener) { desktop.addListener(onResize); }
+    })();
+
+    /* Dropdown toggle per menu sidebar */
+    (function () {
+      var dropdownToggles = document.querySelectorAll('.gs-hdr-menu .dropdown-toggle');
+      dropdownToggles.forEach(function(toggle) {
+        toggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var parentLi = this.parentElement;
+          var dropdownMenu = parentLi.querySelector('.dropdown-menu');
+          if (dropdownMenu) {
+            var isOpen = parentLi.classList.contains('open');
+            parentLi.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+            this.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+          }
+        });
+      });
+    })();
+  </script>
+  {% block pagina_js_fine %}
+  {% endblock %}
+  {## # FINE caricamento javascript # ##}
+</body>
+
+</html>

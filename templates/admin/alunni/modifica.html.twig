@@ -1,0 +1,197 @@
+{% extends 'admin/layout-sidebar.html.twig' %}
+
+{% import 'admin/include/tabella.html.twig' as t %}
+
+{% block pagina_contenuto %}
+<div class="container-fluid" style="padding-top: 1rem;">
+  {# pulsanti di pagina in alto a destra del titolo, non in fondo alla tabella #}
+  {{ include('admin/include/titolo-bottoni.html.twig', {titolo: titolo|trans, bottoni: [ {url: path('alunni_modifica_edit'), etichetta: 'label.add'|trans, titolo: 'Nuovo utente'}, {url: path('alunni_passwordFiltro', {genitore: 0}), etichetta: 'label.pdf_password'|trans, titolo: 'Genera le nuove password per gli alunni selezionati e le scarica come documento PDF'}, {url: path('alunni_passwordFiltro', {genitore: 1}), etichetta: 'label.pdf_password_genitore'|trans, titolo: 'Genera le nuove password per i genitori degli alunni selezionati e le scarica come documento PDF'} ]}) }}
+  {{ include('admin/include/filtro.html.twig', {form: form[0]}) }}
+  {% set colonne = [
+    {titolo: 'label.stato'|trans, chiave: 'abilitato', tipo: 'stato',
+      titolo_vero: 'label.utente_attivo'|trans, titolo_falso: 'label.utente_disabilitato'|trans},
+    {titolo: 'label.cognome'|trans, chiave: 'cognome'},
+    {titolo: 'label.nome'|trans, chiave: 'nome'},
+    {titolo: 'label.data_nascita'|trans, chiave: 'data_nascita', classe: 'd-none d-md-table-cell', classe_cella: 'd-none d-md-table-cell'},
+    {titolo: 'label.bes'|trans, chiave: 'bes', classe: 'd-none d-lg-table-cell', classe_cella: 'd-none d-lg-table-cell'},
+    {titolo: 'label.classe'|trans, chiave: 'classe', classe: 'd-none d-xl-table-cell', classe_cella: 'd-none d-xl-table-cell'}
+  ] %}
+  {% set righe = [] %}
+  {% set azioni = [] %}
+  {% for a in dati.lista %}
+    {% set genitore1 = dati.genitori[a.id][0] %}
+    {% set genitore2 = dati.genitori[a.id][1] %}
+    {% set righe = righe|merge([{
+      id: a.id,
+      abilitato: a.abilitato,
+      cognome: a.cognome,
+      nome: a.nome,
+      data_nascita: a.dataNascita|date('d/m/Y'),
+      bes: ('label.bes_' ~ a.bes)|trans,
+      classe: a.classe
+    }]) %}
+    {% set voci = [
+      {tipo: 'info', etichetta: 'label.show'|trans, titolo_modale: a.cognome ~ ' ' ~ a.nome,
+        contenuto: t.info([
+          {etichetta: 'label.nome'|trans, valore: a.nome},
+          {etichetta: 'label.cognome'|trans, valore: a.cognome},
+          {etichetta: 'label.sesso'|trans, valore: (a.sesso == 'M' ? 'label.maschile' : 'label.femminile')|trans},
+          {etichetta: 'label.data_nascita'|trans, valore: a.dataNascita|date('d/m/Y')},
+          {etichetta: 'label.comune_nascita'|trans, valore: a.comuneNascita},
+          {etichetta: 'label.provincia_nascita'|trans, valore: a.provinciaNascita},
+          {etichetta: 'label.codice_fiscale'|trans, valore: a.codiceFiscale},
+          {etichetta: 'label.citta'|trans, valore: a.citta},
+          {etichetta: 'label.provincia'|trans, valore: a.provincia},
+          {etichetta: 'label.indirizzo'|trans, valore: a.indirizzo},
+          {etichetta: 'label.religione'|trans, valore: ('label.religione_' ~ a.religione)|trans},
+          {etichetta: 'label.bes'|trans, valore: ('label.bes_' ~ a.bes)|trans},
+          {etichetta: 'label.note_bes'|trans, valore: a.noteBes},
+          {etichetta: 'label.credito3'|trans, valore: a.credito3},
+          {etichetta: 'label.credito4'|trans, valore: a.credito4},
+          {etichetta: 'label.classe'|trans, valore: a.classe},
+          {etichetta: 'label.frequenza_estero'|trans, valore: (a.frequenzaEstero ? 'label.si' : 'label.no')|trans},
+          {etichetta: 'label.username'|trans, valore: a.username},
+          {etichetta: 'label.email'|trans, valore: a.email},
+          {etichetta: 'label.spid'|trans, valore: (a.spid ? 'label.si' : 'label.no')|trans},
+          {etichetta: 'label.ultimo_accesso'|trans, valore: a.ultimoAccesso ? a.ultimoAccesso|date('d/m/Y H:i:s') : '', vuoto: 'NESSUNO'},
+        ]) ~
+        '<h6 class="gs-mt-4">Genitore 1</h6>' ~ t.info([
+          {etichetta: 'label.nome'|trans, valore: genitore1.nome},
+          {etichetta: 'label.cognome'|trans, valore: genitore1.cognome},
+          {etichetta: 'label.codice_fiscale'|trans, valore: genitore1.codiceFiscale},
+          {etichetta: 'label.numeri_telefono'|trans, valore: genitore1.numeriTelefono|default([])|join(', ')},
+          {etichetta: 'label.username'|trans, valore: genitore1.username},
+          {etichetta: 'label.email'|trans, valore: genitore1.email},
+          {etichetta: 'label.spid'|trans, valore: (genitore1.spid ? 'label.si' : 'label.no')|trans},
+          {etichetta: 'label.ultimo_accesso'|trans, valore: genitore1.ultimoAccesso ? genitore1.ultimoAccesso|date('d/m/Y H:i:s') : '', vuoto: 'NESSUNO'},
+        ]) ~
+        '<h6 class="gs-mt-4">Genitore 2</h6>' ~ t.info([
+          {etichetta: 'label.nome'|trans, valore: genitore2.nome},
+          {etichetta: 'label.cognome'|trans, valore: genitore2.cognome},
+          {etichetta: 'label.codice_fiscale'|trans, valore: genitore2.codiceFiscale},
+          {etichetta: 'label.numeri_telefono'|trans, valore: genitore2.numeriTelefono|default([])|join(', ')},
+          {etichetta: 'label.username'|trans, valore: genitore2.username},
+          {etichetta: 'label.email'|trans, valore: genitore2.email},
+          {etichetta: 'label.spid'|trans, valore: (genitore2.spid ? 'label.si' : 'label.no')|trans},
+          {etichetta: 'label.ultimo_accesso'|trans, valore: genitore2.ultimoAccesso ? genitore2.ultimoAccesso|date('d/m/Y H:i:s') : '', vuoto: 'NESSUNO'},
+        ])},
+      {tipo: 'link', etichetta: 'label.edit'|trans, titolo: "Modifica i dati dell'utente",
+        url: path('alunni_modifica_edit', {id: a.id})},
+      {tipo: 'link', etichetta: 'label.email_password'|trans,
+        titolo: "Genera una nuova password per l'alunno e la invia tramite email",
+        url: path('alunni_password', {username: a.username, tipo: 'E'})},
+      {tipo: 'link', etichetta: 'label.pdf_password'|trans,
+        titolo: "Genera una nuova password per l'alunno e la scarica come documento PDF",
+        url: path('alunni_password', {username: a.username, tipo: 'P'})}
+    ] %}
+    {% if a.abilitato %}
+      {% set voci = voci|merge([{tipo: 'conferma', stile: 'danger', etichetta: 'label.disable'|trans,
+        titolo: "Disabilita l'utente", titolo_modale: a, contenuto: 'message.disabilita_alunno'|trans,
+        url: path('alunni_abilita', {id: a.id, abilita: 0})}]) %}
+    {% else %}
+      {% set voci = voci|merge([{tipo: 'conferma', stile: 'success', etichetta: 'label.enable'|trans,
+        titolo: "Abilita l'utente", titolo_modale: a, contenuto: 'message.abilita_alunno'|trans,
+        url: path('alunni_abilita', {id: a.id, abilita: 1})}]) %}
+    {% endif %}
+    {% set voci = voci|merge([
+      {tipo: 'personalizzato', stile: 'primary', etichetta: 'label.email_password_genitore'|trans,
+        titolo: 'Genera una nuova password per il genitore e la invia tramite email',
+        attributi: {
+          'data-toggle': 'modal', 'data-target': '#gs-scelta-genitore',
+          'data-title': 'Scegli il genitore a cui inviare la password',
+          'data-button1': (genitore1.email and genitore1.email[-6:] != '.local') ? 'Invia' : '',
+          'data-gen1': genitore1.nome ~ ' ' ~ genitore1.cognome ~ ' (' ~ genitore1.username ~ ')',
+          'data-email1': (genitore1.email and genitore1.email[-6:] != '.local') ? (': ' ~ genitore1.email) : '',
+          'data-href1': genitore1.username ? path('alunni_password', {username: genitore1.username, tipo: 'E'}) : '#',
+          'data-button2': (genitore2.email and genitore2.email[-6:] != '.local') ? 'Invia' : '',
+          'data-gen2': genitore2.nome ~ ' ' ~ genitore2.cognome ~ ' (' ~ genitore2.username ~ ')',
+          'data-email2': (genitore2.email and genitore2.email[-6:] != '.local') ? (': ' ~ genitore2.email) : '',
+          'data-href2': genitore2.username ? path('alunni_password', {username: genitore2.username, tipo: 'E'}) : '#'
+        }},
+      {tipo: 'personalizzato', stile: 'primary', etichetta: 'label.pdf_password_genitore'|trans,
+        titolo: 'Genera una nuova password per il genitore e la scarica come documento PDF',
+        attributi: {
+          'data-toggle': 'modal', 'data-target': '#gs-scelta-genitore',
+          'data-title': 'Scegli il genitore di cui scaricare la password',
+          'data-button1': 'Scarica',
+          'data-gen1': genitore1.nome ~ ' ' ~ genitore1.cognome ~ ' (' ~ genitore1.username ~ ')',
+          'data-email1': '',
+          'data-href1': genitore1.username ? path('alunni_password', {username: genitore1.username, tipo: 'P'}) : '#',
+          'data-button2': 'Scarica',
+          'data-gen2': genitore2.nome ~ ' ' ~ genitore2.cognome ~ ' (' ~ genitore2.username ~ ')',
+          'data-email2': '',
+          'data-href2': genitore2.username ? path('alunni_password', {username: genitore2.username, tipo: 'P'}) : '#'
+        }}
+    ]) %}
+    {% set azioni = azioni|merge([{voci: voci}]) %}
+  {% endfor %}
+  {{ t.tabella(colonne, righe, {
+    vuoto: 'Nessun alunno trovato',
+    mappa: {chiave: 'abilitato', valori: {1: '', 0: 'table-danger'}},
+    azioni: azioni,
+    paginazione: {maxPagine: dati.maxPagine, pagina: info.pagina, url: 'alunni_modifica'},
+  }) }}
+  {# finestra di scelta del genitore per l'invio o lo scarico della password #}
+  <div class="modal fade" id="gs-scelta-genitore" tabindex="-1" role="dialog" aria-labelledby="gs-scelta-genitore-titolo">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="gs-scelta-genitore-titolo"></h5>
+          <button type="button" class="close p-0" data-dismiss="modal" aria-label="{{ 'label.close'|trans }}">
+            {{ include('admin/include/icona.html.twig', {nome: 'x'}) }}
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-10 gs-mb-2"><strong id="gs-scelta-genitore-1"></strong><span id="gs-scelta-genitore-1-email"></span></div>
+            <div class="col-sm-2 gs-mb-2"><a id="gs-scelta-genitore-1-href" class="btn btn-primary btn-xs gs-post" href="" role="button" data-csrf="{{ csrf_token('password') }}"><strong></strong></a></div>
+            <div class="col-sm-10"><strong id="gs-scelta-genitore-2"></strong><span id="gs-scelta-genitore-2-email"></span></div>
+            <div class="col-sm-2"><a id="gs-scelta-genitore-2-href" class="btn btn-primary btn-xs gs-post" href="" role="button" data-csrf="{{ csrf_token('password') }}"><strong></strong></a></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-xs mx-auto" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block pagina_js_fine %}
+{{ include('admin/include/tabella-js.html.twig', {url_paginazione: 'alunni_modifica'}) }}
+<script>
+$(document).ready(function() {
+  $('#gs-scelta-genitore').on('show.bs.modal', function (e) {
+    var title = $(e.relatedTarget).data('title');
+    var button1 = $(e.relatedTarget).data('button1');
+    var gen1 = $(e.relatedTarget).data('gen1');
+    var email1 = $(e.relatedTarget).data('email1');
+    var href1 = $(e.relatedTarget).data('href1');
+    var button2 = $(e.relatedTarget).data('button2');
+    var gen2 = $(e.relatedTarget).data('gen2');
+    var email2 = $(e.relatedTarget).data('email2');
+    var href2 = $(e.relatedTarget).data('href2');
+    $(this).find('#gs-scelta-genitore-titolo').text(title);
+    if (button1) {
+      $('#gs-scelta-genitore-1-href').show();
+      $('#gs-scelta-genitore-1-href strong').text(button1);
+    } else {
+      $('#gs-scelta-genitore-1-href').hide();
+    }
+    if (button2) {
+      $('#gs-scelta-genitore-2-href').show();
+      $('#gs-scelta-genitore-2-href strong').text(button2);
+    } else {
+      $('#gs-scelta-genitore-2-href').hide();
+    }
+    $(this).find('#gs-scelta-genitore-1').text(gen1);
+    $(this).find('#gs-scelta-genitore-1-email').text(email1);
+    $(this).find('#gs-scelta-genitore-1-href').attr('href', href1);
+    $(this).find('#gs-scelta-genitore-2').text(gen2);
+    $(this).find('#gs-scelta-genitore-2-email').text(email2);
+    $(this).find('#gs-scelta-genitore-2-href').attr('href', href2);
+  });
+});
+</script>
+{% endblock %}

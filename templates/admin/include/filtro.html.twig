@@ -1,0 +1,12 @@
+{## # filtro: form inline per filtro sui dati di ricerca # ##}
+{## #    parametri: form # ##}
+{% form_theme form with 'admin/layout-form.html.twig' only %}
+
+{{ include('admin/include/flash.html.twig') }}
+{{ form_start(form, {attr: {class: 'mr-1'}}) }}
+<div id="{{ form.vars.id }}" class="form-row">
+  {% for child in form|filter(child => not child.rendered) %}
+    {{ form_row(child, {inline: true}) }}
+  {% endfor %}
+</div>
+{{ form_end(form) }}

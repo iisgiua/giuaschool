@@ -8,46 +8,43 @@
     <strong class="gs-big">{{ 'message.no_cattedra_piani'|trans }}</strong>
   </div>
   {% else %}
-  <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_piani'|trans|raw }}</em></div>
-  <table class="table table-bordered table-hover table-striped gs-mt-5">
-    <thead class="bg-success">
-      <tr>
-        <th class="col-sm-5">{{ 'label.cattedra'|trans }}</th>
-        <th class="col-sm-5">{{ 'label.documento'|trans }}</th>
-        <th class="col-sm-2">{{ 'label.action'|trans }}</th>
-      </tr>
-    </thead>
-    <tbody>
+  <div class="help-block gs-text-normal gs-big gs-mb-4 text-center"><em>{{ 'message.inserimento_piani'|trans|raw }}</em></div>
+  {% set intestazione = [
+      {contenuto: 'label.cattedra'|trans, classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'label.documento'|trans, classi: 'col-sm-5', scope: 'col'},
+      {contenuto: 'label.action'|trans, classi: 'col-sm-2', scope: 'col'}
+    ] %}
+    {% set corpo_grezzo_0 %}
     {% for d in dati %}
       <tr>
         <td>
-          <strong>{{ d.anno }}ª {{ d.sezione }}{{ d.gruppo ? ('-'~d.gruppo) }}</strong> - {{ d.corso }} - {{ d.sede }}<br>
+          <strong>{{ d.anno }}ª {{ d.sezione }}{{ d.gruppo ? ('-' ~ d.gruppo) }}</strong> - {{ d.corso }} - {{ d.sede }}<br>
           <strong>{{ d.materia }}</strong>
         </td>
         <td>
       {% if d.documento %}
-          <a href="{{ path('documenti_download', {'documento': d.documento.id}) }}" title="Scarica il piano di lavoro indicato">
-          <span class="glyphicon glyphicon-download gs-mr-1"></span><strong>{{ d.documento.allegati[0].titolo }}</strong>
+          <a href="{{ path('documenti_download', {documento: d.documento.id}) }}" title="Scarica il piano di lavoro indicato">
+          {{ include('admin/include/icona.html.twig', {nome: 'download', stile: 'outline', classe: 'gs-mr-1'}) }}<strong>{{ d.documento.allegati[0].titolo }}</strong>
           </a><br>
-          <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1000)|number_format(0,',','.') }} kB</small>
+          <small>Dimensione: {{ (d.documento.allegati[0].dimensione / 1000)|number_format(0, ',', '.') }} kB</small>
       {% else %}
           <strong class="gs-big text-danger">{{ 'label.documento_mancante'|trans }}</strong>
       {% endif %}
         </td>
         <td>
       {% if d.add is defined %}
-          <a class="btn btn-primary btn-xs" href="{{ path('documenti_piani_add', {'classe': d.classe_id, 'materia': d.materia_id }) }}" role="button" title="Inserisci il piano di lavoro"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
+          {{ include('include/bottone-azione.html.twig', {nome: 'plus', etichetta: 'Aggiungi', titolo: 'Inserisci il piano di lavoro', url: path('documenti_piani_add', {classe: d.classe_id, materia: d.materia_id})}) }}
       {% endif %}
       {% if d.delete is defined %}
-          <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il piano di lavoro indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'documento': d.documento.id}) }}" data-text="{{ 'message.cancella_piano'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+          {{ include('include/bottone-azione.html.twig', {nome: 'trash', etichetta: 'Cancella', titolo: 'Cancella il piano di lavoro indicato', stile: 'danger', classi: 'gs-modal-confirm-button', attributi: {'data-toggle': 'modal', 'data-target': '#gs-modal-confirm', 'data-href': path('documenti_delete', {documento: d.documento.id}), 'data-text': 'message.cancella_piano'|trans, 'data-csrf': csrf_token('delete')}}) }}
       {% endif %}
         </td>
       </tr>
     {% endfor %}
-    </tbody>
-  </table>
+    {% endset %}
+    {{ include('include/tabella.html.twig', {corpo_grezzo: corpo_grezzo_0, classi: 'table table-bordered table-hover table-striped gs-mt-5'}) }}
   {% endif %}
-  {% include 'include/modal-confirm.html.twig' with {'modal_confirm_msg': 'message.cancella_piano'} %}
+  {{ include('include/modal-confirm.html.twig', {modal_confirm_msg: 'message.cancella_piano'}) }}
 </div>
 {% endblock %}
 
@@ -57,10 +54,12 @@
 $(document).ready(function() {
   $('#gs-modal-confirm').on('show.bs.modal', function (event) {
     var href = $(event.relatedTarget).data('href');
-    $(this).find('#gs-modal-confirm-yes').attr('href', href);
+    var csrf = $(event.relatedTarget).data('csrf');
     var text = $(event.relatedTarget).data('text');
+    $(this).find('#gs-modal-confirm-form').attr('action', href);
+    $(this).find('#gs-modal-confirm-csrf').val(csrf);
     $(this).find('#gs-modal-confirm-msg').text(text);
-  });
+});
 });
 </script>
 {% endblock %}

@@ -45,8 +45,8 @@ class LezioniController extends BaseController {
   #[IsGranted('ROLE_DOCENTE')]
   public function lezioni(): Response {
     if (!$this->reqstack->getSession()->get('/APP/DOCENTE/cattedra_lezione') && !$this->reqstack->getSession()->get('/APP/DOCENTE/classe_lezione')) {
-      // scelta classe
-      return $this->redirectToRoute('lezioni_classe');
+      // nessuna scelta in sessione: vai al registro
+      return $this->redirectToRoute('lezioni_registro_firme');
     }
     if ($this->reqstack->getSession()->get('/APP/DOCENTE/menu_lezione')) {
       // vai all'ultima pagina visitata
@@ -58,45 +58,60 @@ class LezioniController extends BaseController {
   }
 
   /**
-   * Gestione della scelta delle classi
+   * Imposta la classe (cattedra) corrente e torna alla pagina precedente.
+   *
+   * Usato dal selettore sede/classe: la scelta viene memorizzata in sessione e
+   * la pagina corrente viene ricaricata, senza cambiare sezione.
+   *
+   * @param Request $request Pagina richiesta
    *
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/lezioni/classe/', name: 'lezioni_classe', methods: ['GET'])]
+  #[Route(path: '/lezioni/seleziona/', name: 'lezioni_seleziona', methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classe(): Response
+  public function seleziona(Request $request): Response
   {
-      // lista cattedre
-      $lista = $this->em->getRepository(Cattedra::class)->createQueryBuilder('c')
-        ->join('c.classe', 'cl')
-        ->join('c.materia', 'm')
-        ->where('c.docente=:docente AND c.attiva=:attiva')
-        ->orderBy('cl.sede,cl.anno,cl.sezione,cl.gruppo,m.nomeBreve', 'ASC')
-        ->setParameter('docente', $this->getUser())
-        ->setParameter('attiva', 1)
-        ->getQuery()
-        ->getResult();
-      // raggruppa per classi
-      $cattedre = [];
-      foreach ($lista as $c) {
-        $cattedre[$c->getClasse()->getId()][] = $c;
+      // legge parametri
+      $cattedra = $request->query->getInt('cattedra');
+      $classe = $request->query->getInt('classe');
+      // verifica e memorizza in sessione
+      if ($cattedra > 0) {
+        // cattedra del docente
+        $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+          'docente' => $this->getUser(), 'attiva' => 1]);
+        if (!$cattedra) {
+          // errore
+          throw $this->createNotFoundException('exception.id_notfound');
+        }
+        $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', $cattedra->getId());
+        $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', 0);
+      } elseif ($classe > 0) {
+        // classe per sostituzione
+        $classe = $this->em->getRepository(Classe::class)->find($classe);
+        if (!$classe) {
+          // errore
+          throw $this->createNotFoundException('exception.id_notfound');
+        }
+        $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', 0);
+        $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', $classe->getId());
+      } else {
+        // nessuna scelta
+        $this->reqstack->getSession()->set('/APP/DOCENTE/cattedra_lezione', 0);
+        $this->reqstack->getSession()->set('/APP/DOCENTE/classe_lezione', 0);
       }
-      // lista tutte le classi
-      $lista = $this->em->getRepository(Classe::class)->createQueryBuilder('cl')
-        ->orderBy('cl.sede,cl.sezione,cl.anno,cl.gruppo', 'ASC')
-        ->getQuery()
-        ->getResult();
-      // raggruppa per sezione
-      $classi = [];
-      foreach ($lista as $c) {
-        $classi[$c->getSezione()][] = $c;
+      // torna alla pagina corrente (ultima pagina delle lezioni visitata):
+      // rimuove cattedra/classe dai parametri così la pagina rilegge la sessione
+      $menu = $this->reqstack->getSession()->get('/APP/DOCENTE/menu_lezione');
+      if ($menu && ($menu['name'] ?? '') != '' && $menu['name'] != 'lezioni_seleziona') {
+        $param = $menu['param'] ?? [];
+        if (is_array($param)) {
+          unset($param['cattedra'], $param['classe']);
+        }
+        return $this->redirectToRoute($menu['name'], is_array($param) ? $param : []);
       }
-      // visualizza pagina
-      return $this->render('lezioni/classe.html.twig', [
-        'pagina_titolo' => 'page.lezioni_classe',
-        'cattedre' => $cattedre,
-        'classi' => $classi]);
+      // nessuna pagina precedente: vai al registro
+      return $this->redirectToRoute('lezioni_registro_firme');
   }
 
   /**

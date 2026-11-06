@@ -27,7 +27,7 @@
   </tr>
 </table>
 <br><br>
-{% for nome,v in dati.lista %}
+{% for nome, v in dati.lista %}
   {% if info.consultazione.campi[nome][0] == 'bool' %}
 <div style="text-align:center;font-size:11pt"><strong>{{ nome|upper }}</strong></div>
 <table border="1" cellpadding="3" style="font-size:11pt">
@@ -50,6 +50,6 @@
     <td><strong>SI &nbsp;{{ dati.statistica[nome][1]['utenti']|number_format(2, ',') }}% ({{ dati.lista[nome][1]['utenti'] }} su {{ dati.totale.utenti }})</strong></td>
     <td><strong>NO &nbsp;{{ dati.statistica[nome][0]['utenti']|number_format(2, ',') }}% ({{ dati.lista[nome][0]['utenti'] }} su {{ dati.totale.utenti }})</strong></td>
   </tr>
+</table>
   {% endif %}
 {% endfor %}
-</table>

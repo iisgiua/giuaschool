@@ -1,0 +1,2253 @@
+/* ==========================================================================
+   gs-pages.css — Stili pagina-specifici GS (GiuaSchool)
+   Solo sezioni legate a singole pagine/flussi: LOGIN, FILTRI, AVVISI,
+   CALENDARIO, ORARIO LEZIONI, VOTI, OSSERVAZIONI, SELETTORE CLASSE.
+   Caricato DOPO main.css e gs-standard.css in ogni pagina, quindi a pari
+   specificita' vince su entrambi senza !important.
+   Ordine: bootstrap(.min).css > bootstrap-italia.min.css >
+   main.css > gs-standard.css > gs-pages.css
+   main.css resta solo generici: token, base, shell (hdr/side/footer/flash),
+   componenti riusabili, utilities, override vendor.
+   ========================================================================== */
+
+/***** LOGIN PAGE *****/
+
+.gs-login-page {
+  padding-top: 0;
+  background-color: var(--gs-page-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gs-login-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.gs-login-header {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem 0;
+}
+
+.gs-header-spacing {
+  padding: 0 2rem;
+}
+
+.gs-back-button {
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+}
+
+.gs-login-logo img {
+  max-height: 80px;
+  margin-bottom: 0;
+}
+
+.gs-logo-title-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.gs-logo-right {
+  justify-content: flex-end;
+}
+
+.gs-logo-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-direction: row;
+}
+
+.gs-login-title {
+  color: var(--gs-navy);
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 1rem 0;
+}
+
+.gs-login-subtitle {
+  color: var(--gs-navy);
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.gs-login-main {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.gs-login-content-wrapper {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.gs-app-button {
+  min-width: 200px;
+}
+
+.gs-login-page .panel {
+  margin-bottom: 1.5rem;
+  box-shadow: var(--gs-shadow-md);
+  border: 1px solid var(--gs-border);
+  border-radius: var(--gs-radius-lg);
+  overflow: hidden;
+}
+
+.gs-login-page .panel-primary .panel-title {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.gs-login-page .panel-body {
+  padding: 3rem 2.5rem;
+  background: var(--gs-surface);
+}
+
+.gs-login-section {
+  padding: 1.5rem 0;
+}
+
+.gs-login-section-title {
+  color: var(--gs-navy);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.gs-login-divider {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid var(--gs-border);
+  background: none;
+  height: 0;
+}
+
+.gs-help-icon {
+  color: var(--gs-primary);
+  font-size: 1.2rem;
+}
+
+.gs-login-page .panel-title {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.gs-login-page .help-block {
+  color: var(--gs-text-muted);
+  margin-bottom: 1.25rem;
+  font-size: 1.1rem;
+}
+
+/* Stili contestuali .gs-login-page .form-control/.btn rimossi: altezze e
+   padding sono unificati in gs-standard.css (§2, §4). */
+
+.gs-login-page .container_fluid {
+  padding: 0;
+}
+
+.gs-login-page .form-group {
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 767.98px) {
+  .gs-login-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .gs-login-main {
+    max-width: 100%;
+  }
+
+  .gs-login-title {
+    font-size: 1.25rem;
+  }
+
+  .gs-login-logo img {
+    max-height: 50px;
+  }
+}
+
+.italia-it-button:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.gs-checkbox-inline,
+.radio-inline {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+.gs-checkbox-inline:hover,
+.radio-inline:hover {
+  background-color: var(--gs-surface-muted);
+}
+
+
+/***** FILTRI PAGINE (comune a tutte le sezioni di ricerca) *****/
+
+/* Contenitore del pannello filtri */
+.gs-filters {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border);
+  border-radius: 8px;
+  box-shadow: var(--gs-shadow-sm);
+}
+
+/* Riga dei filtri; display ha !important perché Bootstrap 3 forza block. */
+.gs-filters-row {
+  display: flex !important;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+/* Colonna singolo filtro */
+.gs-filter-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Nei pannelli filtri le etichette restano visibili anche se il form le marca sr-only */
+.gs-filters label.sr-only {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 0 0.5rem !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  border: 0 !important;
+}
+
+.gs-filters label,
+.gs-filters label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--gs-text);
+  font-size: 0.875rem;
+}
+
+/* Campi dei filtri a tutta larghezza */
+.gs-filters .form-control,
+.gs-filters select,
+.gs-filters select {
+  width: 100%;
+}
+
+/* Input-group.date a tutta larghezza dentro i filtri */
+.gs-filters .input-group.date,
+.gs-filters .input-group.date .form-control,
+.gs-filters .input-group.date .form-control {
+  width: 100%;
+}
+
+/* Regole speciali .form-group annidati */
+.gs-filters .form-group,
+.gs-filters .form-group {
+  margin-bottom: 0;
+}
+
+.gs-filters .form-group:not(.gs-filter-col),
+.gs-filters .form-group:not(.gs-filter-col) {
+  margin-bottom: 1rem;
+}
+
+/* Gruppo di pulsanti (classe "buttons") */
+.gs-filters-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.gs-filters-buttons .btn {
+  white-space: nowrap;
+}
+
+/* Azioni della pagina subito sotto il pannello dei filtri: l'azione
+   secondaria ("Archivio") a sinistra e quella principale ("Aggiungi") a
+   destra, sempre sulla stessa riga anche a 320px. */
+.gs-filtri-azioni {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.gs-filtri-azioni .btn {
+  white-space: nowrap;
+}
+
+/* Riepilogo Classe/Materia (o Classe/Alunno) nelle pagine dei documenti:
+   ogni etichetta resta attaccata al proprio valore e non si spezza; se lo
+   spazio non basta i due gruppi passano su righe diverse (al massimo due)
+   invece di dividersi nelle quattro colonne della griglia di Bootstrap.
+   I margini negativi fanno arrivare lo sfondo ai bordi del pannello, come
+   faceva la .row che c'era prima. */
+.gs-dati-riepilogo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 2rem;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.gs-dati-riepilogo .gs-dato {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.gs-dati-riepilogo .gs-dato strong {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.gs-dati-riepilogo .gs-dato-valore {
+  min-width: 0;
+}
+
+/* Gruppo azioni (classe "actions") */
+.gs-richieste-modulo-evacuazione-actions,
+.gs-richieste-modulo-lista-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.gs-richieste-modulo-evacuazione-actions .btn,
+.gs-richieste-modulo-lista-actions .btn {
+  white-space: nowrap;
+}
+
+/* Media query mobile per i filtri */
+@media (max-width: 599.98px) {
+  .gs-filters {
+    max-width: 100%;
+    padding: 1rem;
+  }
+
+  .gs-filters-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .gs-filters .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .gs-filters-buttons {
+    flex-direction: row;
+    width: auto;
+  }
+
+  .gs-filters-buttons .btn {
+    width: auto;
+  }
+
+  .gs-richieste-modulo-evacuazione-actions,
+  .gs-richieste-modulo-lista-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .gs-richieste-modulo-evacuazione-actions .btn,
+  .gs-richieste-modulo-lista-actions .btn {
+    width: 100%;
+  }
+
+}
+
+/* Ricerca dentro le modali di scelta di alunni e docenti: due colonne con
+   etichetta sopra il campo e "Cerca" in basso a destra. Le modali storiche
+   sono larghe al massimo 600px, quindi tre campi e il pulsante non stanno
+   sulla stessa riga. Sotto i 576px i campi si impilano a tutta larghezza. */
+.gs-modal-search {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: end;
+}
+
+.gs-modal-search-field {
+  min-width: 0;
+}
+
+.gs-modal-search .gs-modal-search-field label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: var(--gs-fs-sm);
+  font-style: normal;
+  font-weight: 600;
+  text-align: left;
+  color: var(--gs-text);
+}
+
+.gs-modal-search .form-control {
+  width: 100%;
+}
+
+.gs-modal-search-action {
+  grid-column: 2;
+  justify-self: end;
+}
+
+.gs-modal-search-action .btn {
+  min-width: 7rem;
+}
+
+@media (max-width: 575.98px) {
+  .gs-modal-search {
+    grid-template-columns: 1fr;
+  }
+
+  .gs-modal-search-action {
+    grid-column: auto;
+    justify-self: stretch;
+  }
+
+  .gs-modal-search-action .btn {
+    width: 100%;
+  }
+}
+
+
+/***** AVVISI - GESTIONE (parti specifiche) *****/
+
+.gs-avvisi-gestione-header {
+  margin-bottom: 1.5rem;
+}
+
+.gs-avvisi-filters-desktop {
+  display: none;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border);
+  border-radius: 8px;
+  box-shadow: var(--gs-shadow-sm);
+}
+
+.gs-avvisi-filter-expand {
+  flex: 2;
+  min-width: 0;
+}
+
+.gs-avvisi-filter-btn {
+  flex: 0 0 auto;
+}
+
+.gs-avvisi-filters-mobile {
+  display: none;
+  margin-bottom: 1rem;
+}
+
+.gs-avvisi-filters-mobile-header {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.gs-avvisi-filters-mobile-header .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.gs-avvisi-filters-mobile-header label {
+  display: none;
+}
+
+.gs-avvisi-filters-toggle {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.gs-avvisi-filters-mobile-panel {
+  display: none;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border);
+  border-radius: 8px;
+  box-shadow: var(--gs-shadow-sm);
+}
+
+.gs-avvisi-filters-mobile-panel.is-open {
+  display: block;
+}
+
+.gs-avvisi-filters-mobile-row {
+  margin-bottom: 1rem;
+}
+
+.gs-avvisi-filters-mobile-row:last-child {
+  margin-bottom: 0;
+}
+
+.gs-avvisi-filters-mobile label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--gs-text);
+  font-size: 0.875rem;
+}
+
+.gs-avvisi-filters-mobile .form-control,
+.gs-avvisi-filters-mobile select {
+  width: 100%;
+}
+
+.gs-avvisi-filters-mobile-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.gs-avvisi-filters-mobile-buttons .btn {
+  flex: 1;
+}
+
+.gs-avvisi-actions-row {
+  display: none;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--gs-surface-soft);
+  border-radius: 8px;
+}
+
+.gs-avvisi-actions-label {
+  margin-right: 0.5rem;
+  font-weight: 600;
+  color: var(--gs-text);
+}
+
+.gs-avvisi-actions-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.gs-avvisi-actions-buttons .btn {
+  white-space: nowrap;
+}
+
+.gs-avvisi-mobile-actions {
+  display: none;
+  margin-bottom: 1rem;
+  text-align: right;
+}
+
+@media (min-width: 600px) {
+  .gs-avvisi-filters-desktop {
+    display: block;
+  }
+
+  .gs-avvisi-filters-mobile {
+    display: none;
+  }
+
+  .gs-avvisi-actions-row {
+    display: flex;
+  }
+
+  .gs-avvisi-mobile-actions {
+    display: none;
+  }
+}
+
+@media (max-width: 599.98px) {
+  .gs-avvisi-filters-desktop {
+    display: none;
+  }
+
+  .gs-avvisi-filters-mobile {
+    display: block;
+  }
+
+  .gs-avvisi-actions-row {
+    display: none;
+  }
+
+  .gs-avvisi-mobile-actions {
+    display: block;
+  }
+
+  .gs-avvisi-actions {
+    display: none;
+  }
+}
+
+
+/***** CALENDARIO AGENDA *****/
+
+.gs-calendar {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--gs-shadow-sm);
+}
+
+.gs-calendar thead th {
+  width: 14.2857%;
+  height: 46px;
+  padding: 12px 10px;
+  background: var(--gs-secondary);
+  color: #ffffff;
+  border: 0;
+  border-bottom: 1px solid var(--gs-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.gs-calendar tbody td {
+  width: 14.2857%;
+  height: 125px;
+  padding: 10px;
+  vertical-align: top;
+  background: var(--gs-surface);
+  color: var(--gs-text);
+  border: 0;
+  border-right: 1px solid var(--gs-border);
+  border-bottom: 1px solid var(--gs-border);
+}
+
+.gs-calendar tbody td:last-child {
+  border-right: 0;
+}
+
+.gs-calendar tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.gs-calendar .gs-calendar-empty {
+  background: var(--gs-surface-soft);
+}
+
+.gs-calendar .gs-calendar-day-number {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--gs-text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.gs-calendar tbody td:not(.gs-calendar-empty):not(.gs-calendar-holiday):hover {
+  background: var(--gs-surface-soft);
+}
+
+.gs-calendar .gs-calendar-holiday {
+  background: var(--gs-surface-soft);
+}
+
+.gs-calendar .gs-calendar-holiday .gs-calendar-day-number {
+  color: var(--gs-text-muted);
+}
+
+.gs-calendar .gs-calendar-has-events {
+  background: var(--gs-surface);
+}
+
+.gs-calendar .gs-calendar-events {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gs-calendar .gs-calendar-event {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 28px;
+  padding: 5px 7px;
+  background: var(--gs-neutral-btn);
+  border: 1px solid var(--gs-neutral-btn);
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
+  box-shadow: none;
+  transform: none;
+}
+
+.gs-calendar .gs-calendar-event:hover,
+.gs-calendar .gs-calendar-event:focus {
+  background: var(--gs-primary);
+  border-color: var(--gs-primary);
+  color: #ffffff;
+  box-shadow: none;
+  transform: none;
+  text-decoration: none;
+}
+
+.gs-calendar .gs-calendar-event .glyphicon {
+  margin-right: 6px;
+  color: #ffffff;
+  font-size: 11px;
+}
+
+.gs-calendar .gs-calendar-event-primary {
+  background: var(--gs-navy);
+  border-color: var(--gs-navy);
+  color: #ffffff;
+}
+
+.gs-calendar .gs-calendar-event-count {
+  margin-left: auto;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.gs-calendar .gs-calendar-today {
+  background: var(--gs-primary-border);
+}
+
+.gs-calendar .gs-calendar-today .gs-calendar-day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 27px;
+  height: 27px;
+  padding: 0 7px;
+  background: var(--gs-primary);
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+@media (max-width: 767.98px) {
+  .gs-calendar thead th {
+    height: 40px;
+    padding: 8px 4px;
+    font-size: 11px;
+  }
+
+  .gs-calendar tbody td {
+    height: 100px;
+    padding: 7px 5px;
+  }
+
+  .gs-calendar .gs-calendar-day-number {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .gs-calendar .gs-calendar-event {
+    min-height: 25px;
+    padding: 4px 5px;
+    font-size: 10px;
+  }
+
+  .gs-calendar .gs-calendar-event .glyphicon {
+    display: none;
+  }
+}
+
+
+/***** ORARIO LEZIONI *****/
+
+.gs-lessons-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.gs-lessons-nav-date {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .6rem 1.25rem;
+  background: var(--gs-primary);
+  border: 1px solid var(--gs-primary);
+  border-radius: 8px;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: none;
+  transform: none;
+}
+
+.gs-lessons-nav-date:hover,
+.gs-lessons-nav-date:focus {
+  background: var(--gs-primary-hover);
+  border-color: var(--gs-primary-hover);
+  color: #ffffff;
+  box-shadow: none;
+  transform: none;
+}
+
+.gs-lessons-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--gs-shadow-sm);
+}
+
+.gs-lessons-table thead th {
+  height: 46px;
+  padding: 12px 10px;
+  background: var(--gs-secondary);
+  color: #ffffff;
+  border: 0;
+  border-bottom: 1px solid var(--gs-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.gs-lessons-table tbody td {
+  padding: 10px 12px;
+  vertical-align: top;
+  background: var(--gs-surface);
+  color: var(--gs-text);
+  border: 0;
+  border-bottom: 1px solid var(--gs-border);
+  font-size: 13.5px;
+}
+
+.gs-lessons-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.gs-lessons-table tbody tr:hover td {
+  background: var(--gs-surface-soft);
+}
+
+.gs-lessons-table .gs-lessons-ora {
+  background: var(--gs-surface-soft);
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--gs-navy);
+}
+
+.gs-lessons-table tbody tr:hover td.gs-lessons-ora {
+  background: var(--gs-primary-soft);
+}
+
+.gs-lessons-table .gs-lessons-orario {
+  color: var(--gs-primary);
+  font-weight: 500;
+}
+
+.gs-lessons-table .gs-lessons-gruppo {
+  display: inline-block;
+  margin-bottom: 2px;
+  padding: 2px 8px;
+  background: var(--gs-secondary);
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.gs-lessons-table .gs-lessons-docenti {
+  display: block;
+  margin-top: 4px;
+  color: var(--gs-text-muted);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.gs-lessons-table tbody td,
+.gs-lessons-table thead th {
+  border-right: 1px solid var(--gs-border);
+}
+
+.gs-lessons-table tbody td:last-child,
+.gs-lessons-table thead th:last-child {
+  border-right: 0;
+}
+
+@media (max-width: 767.98px) {
+  .gs-lessons-table thead th {
+    font-size: 11px;
+    padding: 8px 6px;
+  }
+
+  .gs-lessons-table tbody td {
+    padding: 8px 6px;
+    font-size: 12.5px;
+  }
+}
+
+
+
+/***** COLLOQUI *****/
+/* Il messaggio del docente sta nella cella "Stato della richiesta" come
+   citazione, non come pannello annidato dentro il pannello della pagina. */
+.gs-colloquio-messaggio {
+  margin-top: 8px;
+  padding: 4px 0 4px 10px;
+  border-left: 4px solid var(--gs-primary);
+  color: var(--gs-text);
+  font-size: var(--gs-fs-sm);
+  line-height: 1.45;
+}
+
+.gs-colloquio-messaggio-label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--gs-text-muted);
+  font-weight: 600;
+}
+
+.gs-colloquio-messaggio-testo {
+  display: block;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/***** BARRA STRUMENTI DI PAGINA (assenze, agenda) *****/
+/* Una sola barra a card: navigazione del giorno a sinistra, filtri e vista
+   a destra, Appello come unica azione primaria. Sostituisce le colonne
+   Bootstrap fisse 5/2/3/2, che lasciavano un buco quando il filtro non
+   era disponibile. */
+.gs-page-toolbar,
+.gs-assenze-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border);
+  border-radius: var(--gs-radius-lg);
+  box-shadow: var(--gs-shadow-sm);
+}
+
+.gs-date-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  /* la navigazione non si comprime: la barra va a capo quando non c'e' piu'
+     spazio, invece di schiacciare le date */
+  flex: 0 0 auto;
+}
+
+.gs-date-nav .btn {
+  min-height: 40px;
+}
+
+.gs-date-nav .gs-date-nav-btn {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+}
+
+body .gs-date-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border-strong);
+  color: var(--gs-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+body .gs-date-btn:hover,
+body .gs-date-btn:focus {
+  background: var(--gs-surface-soft);
+  border-color: var(--gs-primary);
+  color: var(--gs-text);
+}
+
+body .gs-date-btn strong {
+  font-weight: 600;
+}
+
+.gs-toolbar-spacer {
+  flex: 1 1 24px;
+  min-width: 0;
+}
+
+/* Filtro e azioni restano un blocco unico: se non entrano nella prima riga,
+   scendono insieme sotto la navigazione. */
+.gs-toolbar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+/* Barra impilata a tutta larghezza: la classe la mette script.js quando
+   navigazione e comandi non stanno piu' sulla stessa riga. Prima la
+   navigazione a tutta larghezza, sotto Vista e azioni (come sul telefono). */
+.gs-toolbar-stacked .gs-date-nav {
+  flex: 1 1 100%;
+}
+
+.gs-toolbar-stacked .gs-toolbar-spacer {
+  display: none;
+}
+
+.gs-toolbar-stacked .gs-toolbar-controls {
+  margin-left: 0;
+}
+
+.gs-toolbar-filter,
+.gs-toolbar-view,
+.gs-toolbar-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.gs-toolbar-label {
+  margin: 0;
+  color: var(--gs-text-muted);
+  font-size: var(--gs-fs-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gs-assenze-filtro {
+  width: 160px;
+  min-width: 140px;
+}
+
+.gs-view-switch {
+  display: inline-flex;
+  align-items: stretch;
+  overflow: hidden;
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border-strong);
+  border-radius: var(--gs-radius-md);
+}
+
+.gs-view-switch-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-left: 1px solid var(--gs-border);
+  color: var(--gs-text);
+  font-size: var(--gs-fs-sm);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.gs-view-switch-item:first-child {
+  border-left: 0;
+}
+
+.gs-view-switch-item:hover,
+.gs-view-switch-item:focus {
+  background: var(--gs-surface-muted);
+  color: var(--gs-text);
+  text-decoration: none;
+}
+
+body .gs-view-switch-item.active {
+  background: var(--gs-primary);
+  color: #ffffff;
+  border-left-color: var(--gs-primary);
+}
+
+body .gs-view-switch-item.active + .gs-view-switch-item {
+  border-left-color: var(--gs-primary);
+}
+
+.gs-view-switch-item .icon {
+  width: 16px;
+  height: 16px;
+}
+
+body .gs-view-switch-item:focus-visible {
+  outline-offset: -3px;
+}
+
+.gs-assenze-appello {
+  min-width: 132px;
+}
+
+/* La barra del registro firme e dell'agenda non ha piu' una soglia fissa a
+   992px: resta su una riga finche' il contenuto ci sta e va a capo solo
+   quando non c'e' piu' spazio (flex-wrap + gs-toolbar-stacked, messa da
+   script.js). La barra delle assenze non ha il blocco .gs-toolbar-controls
+   da misurare: continua a impilare a tutta larghezza sotto i 992px. */
+@media (max-width: 991.98px) {
+  .gs-assenze-toolbar .gs-date-nav {
+    flex: 1 1 100%;
+  }
+
+  .gs-assenze-toolbar .gs-toolbar-spacer {
+    display: none;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .gs-page-toolbar > *,
+  .gs-assenze-toolbar > * {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .gs-toolbar-spacer {
+    display: none;
+  }
+
+  .gs-toolbar-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .gs-toolbar-controls > * {
+    width: 100%;
+  }
+
+  .gs-date-nav {
+    justify-content: space-between;
+  }
+
+  body .gs-date-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .gs-toolbar-filter,
+  .gs-toolbar-view {
+    flex-wrap: wrap;
+  }
+
+  .gs-assenze-filtro,
+  .gs-view-switch {
+    width: 100%;
+  }
+
+  .gs-view-switch-item {
+    flex: 1 1 50%;
+  }
+
+  .gs-toolbar-action .btn {
+    width: 100%;
+  }
+}
+
+/***** ARGOMENTI SVOLTI - TESTATA PERIODO *****/
+
+/* Periodo e pulsanti di stampa sulla stessa riga. Prima erano tre colonne
+   .col-sm-4: sotto i 768px Bootstrap le impilava a tutta larghezza e
+   "Programma svolto" finiva su una riga diversa da "Riepilogo mensile".
+   Ora i due pulsanti stanno sempre affiancati (nowrap) e, quando lo spazio
+   e' poco, e' il titolo del periodo a passare sopra; a stringersi sono i
+   pulsanti, non la loro disposizione. */
+.gs-periodo-testa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.gs-periodo-titolo {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gs-periodo-azioni {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.gs-periodo-azioni .btn {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* Sotto i 576px i due pulsanti non entrano affiancati con le icone: si
+   nascondono le icone (sono decorative, aria-hidden, e il testo dice gia'
+   cosa fa il pulsante) e si stringe l'imbottitura orizzontale, cosi' le
+   etichette restano su una riga sola fino a 320px invece di spezzarsi in
+   "Programma" / "svolto" dentro un pulsante stretto. */
+@media (max-width: 575.98px) {
+  .gs-periodo-azioni .btn {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .gs-periodo-azioni .btn .icon {
+    display: none;
+  }
+}
+
+/***** VOTI *****/
+
+/* Barra strumenti: periodo e visualizzazione a sinistra, esportazione e
+   stampe a destra. Flex + wrap evita che "Dettagli" finisca a capo da solo
+   nella colonna stretta. Tutti i comandi restano pieni e scuri. */
+.gs-voti-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.gs-voti-toolbar-main,
+.gs-voti-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.gs-voti-toolbar-label {
+  font-weight: 700;
+  color: var(--gs-text);
+}
+
+.gs-voti-toolbar .dropdown {
+  display: inline-flex;
+}
+
+.gs-voti-toolbar .btn {
+  white-space: nowrap;
+}
+
+/* Legenda del quadro voti: spiega insieme le lettere S/O/P e i colori
+   dei voti, senza lasciare che l'utente li interpreti da solo. */
+.gs-voti-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border);
+  border-radius: var(--gs-radius-md);
+  color: var(--gs-text);
+  font-size: 0.875rem;
+}
+
+.gs-voti-legenda-titolo {
+  font-weight: 700;
+}
+
+.gs-voti-legenda-voce {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.gs-voti-legenda-sep {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--gs-border-strong);
+}
+
+.gs-voti-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 5px;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.gs-voti-swatch-s { background: var(--gs-navy); }
+.gs-voti-swatch-o { background: var(--gs-info); }
+.gs-voti-swatch-p { background: var(--gs-secondary); }
+.gs-voti-swatch-success { background: var(--gs-success); }
+.gs-voti-swatch-warning { background: var(--gs-warning); }
+.gs-voti-swatch-danger { background: var(--gs-danger); }
+.gs-voti-swatch-default { background: var(--gs-neutral-btn); }
+.gs-voti-swatch-info { background: var(--gs-info); }
+
+@media (max-width: 767.98px) {
+  .gs-voti-toolbar-main,
+  .gs-voti-toolbar-actions {
+    width: 100%;
+  }
+
+  .gs-voti-toolbar-actions .btn,
+  .gs-voti-toolbar-main .btn {
+    flex: 1 1 auto;
+  }
+
+  .gs-voti-legenda-sep {
+    display: none;
+  }
+}
+
+.gs-grades-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--gs-shadow-sm);
+}
+
+.gs-grades-caption {
+  caption-side: top;
+  padding: 12px 10px;
+  background: var(--gs-surface-soft);
+  border-bottom: 1px solid var(--gs-border);
+  color: var(--gs-navy);
+  font-size: 15px;
+}
+
+.gs-grades-table thead th {
+  height: 46px;
+  padding: 12px 10px;
+  background: var(--gs-secondary);
+  color: #ffffff;
+  border: 0;
+  border-bottom: 1px solid var(--gs-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.gs-grades-table thead th,
+.gs-grades-table tbody td {
+  border-right: 1px solid var(--gs-border);
+}
+
+.gs-grades-table thead th:last-child,
+.gs-grades-table tbody td:last-child {
+  border-right: 0;
+}
+
+.gs-grades-table tbody td {
+  padding: 10px 12px;
+  vertical-align: top;
+  background: var(--gs-surface);
+  color: var(--gs-text);
+  border-bottom: 1px solid var(--gs-border);
+  font-size: 13.5px;
+}
+
+.gs-grades-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.gs-grades-table tbody tr:hover td {
+  background: var(--gs-surface-soft);
+}
+
+.gs-grades-table .gs-grades-materia {
+  font-weight: 600;
+  color: var(--gs-navy);
+  white-space: nowrap;
+}
+
+.gs-grade-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 26px;
+  margin: 2px 3px 2px 0;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: none;
+  transform: none;
+}
+
+.gs-grade-badge:hover,
+.gs-grade-badge:focus {
+  box-shadow: none;
+  transform: none;
+  filter: brightness(0.95);
+}
+
+.gs-grade-badge-danger {
+  background: var(--gs-danger);
+  color: #ffffff;
+  border-color: var(--gs-danger);
+}
+
+.gs-grade-badge-warning {
+  background: var(--gs-warning);
+  color: #ffffff;
+  border-color: var(--gs-warning);
+}
+
+.gs-grade-badge-success {
+  background: var(--gs-success);
+  color: #ffffff;
+  border-color: var(--gs-success);
+}
+
+.gs-grade-badge-default,
+.gs-grade-badge-secondary {
+  background: var(--gs-secondary);
+  color: #ffffff;
+  border-color: var(--gs-secondary);
+}
+
+@media (max-width: 767.98px) {
+  .gs-grades-table thead th {
+    font-size: 11px;
+    padding: 8px 6px;
+  }
+
+  .gs-grades-table tbody td {
+    padding: 8px 6px;
+    font-size: 12.5px;
+  }
+
+  .gs-grade-badge {
+    min-width: 26px;
+    height: 24px;
+    font-size: 11.5px;
+  }
+}
+
+
+/***** OSSERVAZIONI *****/
+
+.gs-pobs-wrapper {
+  background: var(--gs-surface);
+  border: 1px solid var(--gs-border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--gs-shadow-sm);
+  margin-bottom: 1.5rem;
+}
+
+.gs-pobs-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--gs-surface);
+}
+
+.gs-pobs-caption {
+  caption-side: top;
+  padding: 12px 10px;
+  background: var(--gs-surface-soft);
+  border-bottom: 1px solid var(--gs-border);
+  color: var(--gs-navy);
+  font-size: 15px;
+  text-align: left;
+}
+
+.gs-pobs-table thead th {
+  height: 46px;
+  padding: 12px 10px;
+  background: var(--gs-secondary);
+  color: #ffffff;
+  border: 0;
+  border-bottom: 1px solid var(--gs-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.gs-pobs-table thead th,
+.gs-pobs-table tbody td {
+  border-right: 1px solid var(--gs-border);
+}
+
+.gs-pobs-table thead th:last-child,
+.gs-pobs-table tbody td:last-child {
+  border-right: 0;
+}
+
+.gs-pobs-table tbody td {
+  padding: 10px 12px;
+  vertical-align: top;
+  background: var(--gs-surface);
+  color: var(--gs-text);
+  border-bottom: 1px solid var(--gs-border);
+  font-size: 13.5px;
+}
+
+.gs-pobs-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.gs-pobs-table tbody tr:hover td {
+  background: var(--gs-surface-soft);
+}
+
+.gs-pobs-table .gs-pobs-data {
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--gs-navy);
+}
+
+.gs-pobs-table .gs-pobs-materia {
+  font-weight: 600;
+  color: var(--gs-navy);
+}
+
+.gs-pobs-table .gs-pobs-docente {
+  display: block;
+  margin-top: 2px;
+  color: var(--gs-text-muted);
+  font-size: 12px;
+  font-style: italic;
+}
+
+@media (max-width: 767.98px) {
+  .gs-pobs-table thead th {
+    font-size: 11px;
+    padding: 8px 6px;
+  }
+
+  .gs-pobs-table tbody td {
+    padding: 8px 6px;
+    font-size: 12.5px;
+  }
+}
+
+
+/* Fix: il select di Bootstrap-select non deve tracciare il bordo inferiore
+   con un ::after che sborda dal campo */
+.bootstrap-select .filter-option::after {
+  content: none;
+  display: none;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+
+/***** AVVISI - GESTIONE: responsive per Bootstrap 3 *****/
+
+.gs-avvisi-page {
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.gs-avvisi-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.gs-avvisi-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.gs-avvisi-page .table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  min-width: 0;
+  contain: inline-size;
+}
+
+.gs-avvisi-page .table-responsive > .gs-table {
+  width: 100%;
+  min-width: 100%;
+  table-layout: fixed;
+  margin-bottom: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.gs-avvisi-page .gs-table th:nth-child(1),
+.gs-avvisi-page .gs-table td:nth-child(1) { width: 12%; }
+.gs-avvisi-page .gs-table th:nth-child(2),
+.gs-avvisi-page .gs-table td:nth-child(2) { width: 8%; }
+.gs-avvisi-page .gs-table th:nth-child(3),
+.gs-avvisi-page .gs-table td:nth-child(3) { width: 9%; }
+.gs-avvisi-page .gs-table th:nth-child(4),
+.gs-avvisi-page .gs-table td:nth-child(4) { width: 28%; }
+.gs-avvisi-page .gs-table th:nth-child(5),
+.gs-avvisi-page .gs-table td:nth-child(5) { width: 10%; }
+.gs-avvisi-page .gs-table th:nth-child(6),
+.gs-avvisi-page .gs-table td:nth-child(6) { width: 24%; }
+.gs-avvisi-page .gs-table th:nth-child(7),
+.gs-avvisi-page .gs-table td:nth-child(7) { width: 9%; }
+
+.gs-avvisi-page .gs-table th,
+.gs-avvisi-page .gs-table td {
+  word-break: break-word;
+  white-space: normal;
+  vertical-align: top;
+}
+
+.gs-avvisi-page .gs-table td:nth-child(7) {
+  white-space: normal;
+  text-align: center;
+}
+
+.gs-avvisi-page .gs-table td:nth-child(7) .btn {
+  margin: 2px 1px;
+}
+
+.gs-avvisi-page .form-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.gs-avvisi-page .form-inline .form-group {
+  margin-bottom: 0;
+}
+
+@media (max-width: 991.98px) {
+  .gs-avvisi-page {
+    padding: 0.75rem;
+  }
+
+  .gs-avvisi-page .gs-table th:nth-child(1),
+  .gs-avvisi-page .gs-table td:nth-child(1) { width: 14%; }
+  .gs-avvisi-page .gs-table th:nth-child(4),
+  .gs-avvisi-page .gs-table td:nth-child(4) { width: 30%; }
+  .gs-avvisi-page .gs-table th:nth-child(6),
+  .gs-avvisi-page .gs-table td:nth-child(6) { width: 22%; }
+}
+
+@media (max-width: 767.98px) {
+  .gs-avvisi-page {
+    padding: 0.5rem;
+  }
+
+  .gs-avvisi-page .form-inline {
+    display: block;
+  }
+
+  .gs-avvisi-page .form-inline .form-group {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .gs-avvisi-page .form-inline .form-control,
+  .gs-avvisi-page .form-inline select,
+  .gs-avvisi-page .form-inline input,
+  .gs-avvisi-page .form-inline .btn {
+    width: 100%;
+    display: block;
+  }
+
+  .gs-avvisi-actions {
+    gap: 0.4rem;
+  }
+
+  .gs-avvisi-actions .btn {
+    flex: 1 1 calc(50% - 0.2rem);
+    justify-content: center;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.5rem;
+  }
+
+  .gs-avvisi-page .table-responsive {
+    max-width: 100%;
+    min-width: 0;
+    contain: inline-size;
+  }
+
+  .gs-avvisi-page .table-responsive > .gs-table {
+    min-width: 640px;
+    table-layout: auto;
+  }
+
+  .gs-avvisi-page .gs-table th,
+  .gs-avvisi-page .gs-table td {
+    padding: 6px 6px;
+    font-size: 0.82rem;
+  }
+
+  .gs-avvisi-page .gs-table th:nth-child(1),
+  .gs-avvisi-page .gs-table td:nth-child(1),
+  .gs-avvisi-page .gs-table th:nth-child(2),
+  .gs-avvisi-page .gs-table td:nth-child(2),
+  .gs-avvisi-page .gs-table th:nth-child(5),
+  .gs-avvisi-page .gs-table td:nth-child(5) {
+    display: none;
+  }
+}
+
+@media (max-width: 479.98px) {
+  .gs-avvisi-actions .btn {
+    flex: 1 1 100%;
+  }
+
+  .gs-avvisi-page .gs-table th:nth-child(6),
+  .gs-avvisi-page .gs-table td:nth-child(6) {
+    display: none;
+  }
+}
+
+/***** SELETTORE CLASSE (docente) *****/
+
+/* Barra condivisa per la scelta sede/classe delle sostituzioni */
+.gs-selettore-classe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin: 0 0 1rem 0;
+  background: var(--gs-surface-soft);
+  border: 1px solid var(--gs-border);
+  border-radius: 8px;
+}
+
+.gs-selettore-classe-campo {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.gs-selettore-classe-gruppo {
+  flex: 1 1 12rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.gs-selettore-classe-label {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--gs-text-muted);
+  white-space: nowrap;
+}
+
+/* I select sono .form-control: portati a tutta la larghezza del gruppo */
+.gs-selettore-classe-gruppo select.form-control {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* elenco di fallback visualizzato senza JavaScript */
+.gs-selettore-classe-elenco {
+  margin: 0.25rem 0 0 0;
+  padding-left: 1.25rem;
+}
+
+@media (max-width: 767.98px) {
+  .gs-selettore-classe {
+    padding: 0.75rem;
+  }
+
+  .gs-selettore-classe-gruppo,
+  .gs-selettore-classe-label {
+    flex: 1 1 100%;
+    width: 100%;
+    white-space: normal;
+  }
+}
+
+
+/***** TABELLE STICKY (voti quadro, sostegno) *****/
+/* Usate solo in lezioni/voti_quadro.html.twig e voti_quadro_sostegno.html.twig.
+   La tabella e' una scheda: cornice tonda sul contenitore scrollabile, righe
+   separate da linee leggere invece del reticolo pieno, prima colonna (alunno)
+   fissa e bianca, intestazioni su due righe con la seconda piu' scura. I
+   colori .gs-color-* restano generici in main.css. */
+
+.gs-table-sticky-wrapper {
+  max-height: min(72vh, 620px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--gs-border);
+  border-radius: var(--gs-radius-lg);
+  background: var(--gs-surface);
+  box-shadow: var(--gs-shadow-sm);
+}
+
+/* il contenitore interno serve solo allo scroll orizzontale: la cornice e' già
+   sul wrapper, qui non si disegna un secondo bordo */
+.gs-table-sticky-wrapper > .table-responsive {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.gs-table-sticky {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+  /* altezza riga dei gruppi: la seconda riga di testata si ferma sotto */
+  --gs-voti-head-h: 44px;
+  --gs-voti-head-2h: 40px;
+}
+
+.gs-table-sticky th,
+.gs-table-sticky td {
+  padding: 0.5rem 0.7rem;
+  text-align: center;
+  white-space: nowrap;
+  border: 0;
+  border-bottom: 1px solid var(--gs-border);
+  border-left: 1px solid var(--gs-border);
+}
+
+.gs-table-sticky th:first-child,
+.gs-table-sticky td:first-child {
+  border-left: 0;
+}
+
+/* ---------- testata ---------- */
+.gs-table-sticky thead th {
+  position: sticky;
+  z-index: 3;
+  padding: 0 0.7rem;
+  font-size: var(--gs-fs-sm);
+  font-weight: 700;
+  line-height: 1.2;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.18);
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+  vertical-align: middle;
+}
+
+.gs-table-sticky thead th:first-child {
+  border-left: 0;
+}
+
+.gs-table-sticky thead tr:nth-child(1) th {
+  top: 0;
+  height: var(--gs-voti-head-h);
+}
+
+.gs-table-sticky thead tr:nth-child(2) th {
+  top: var(--gs-voti-head-h);
+  height: var(--gs-voti-head-2h);
+  font-size: var(--gs-fs-xs);
+  font-weight: 600;
+  /* stessa tinta del gruppo, un velo piu' scura per distinguere le due righe */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12));
+  box-shadow: 0 6px 10px -8px rgba(23, 50, 77, 0.55);
+  border-bottom: 0;
+}
+
+/* le date e il "+" nella testata sono link su fondo colorato: restano
+   trasparenti, solo icona e testo bianchi */
+.gs-table-sticky thead .btn {
+  min-height: 0;
+  height: auto;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.14);
+  background-image: none;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: var(--gs-radius-sm);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.gs-table-sticky thead .btn:hover,
+.gs-table-sticky thead .btn:focus {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.gs-table-sticky thead .btn strong {
+  font-size: var(--gs-fs-sm);
+  line-height: 1.15;
+}
+
+/* ---------- colonna alunno fissa ---------- */
+.gs-table-sticky th.gs-col-sticky,
+.gs-table-sticky td.gs-col-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: var(--gs-surface);
+  color: var(--gs-text);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 1px 0 0 var(--gs-border), 10px 0 14px -12px rgba(23, 50, 77, 0.5);
+}
+
+.gs-table-sticky thead th.gs-col-sticky {
+  z-index: 5;
+  color: #ffffff;
+}
+
+/* ---------- corpo ---------- */
+.gs-table-sticky tbody td {
+  font-size: var(--gs-fs-md);
+  transition: background-color var(--gs-transition);
+}
+
+/* righe alternate: la colonna fissa ha sempre un fondo pieno, altrimenti
+   scorrendo in orizzontale si vedrebbero le celle sottostanti */
+.gs-table-sticky tbody tr:nth-child(even) td,
+.gs-table-sticky tbody tr:nth-child(even) td.gs-col-sticky {
+  background-color: var(--gs-surface-soft);
+}
+
+.gs-table-sticky tbody tr:hover td,
+.gs-table-sticky tbody tr:hover td.gs-col-sticky {
+  background-color: var(--gs-surface-muted);
+}
+
+/* colonna sotto il puntatore (script della pagina): evidenzia la colonna
+   della prova che si sta leggendo */
+.gs-table-sticky tbody td.gs-hover,
+.gs-table-sticky tbody td.gs-hover.gs-col-sticky {
+  background-color: var(--gs-primary-soft);
+}
+
+/* la media chiude la riga: sempre in evidenza */
+.gs-table-sticky tbody td:last-child {
+  background-color: var(--gs-primary-soft);
+}
+
+.gs-table-sticky tbody tr:nth-child(even) td:last-child {
+  background-color: #dde9f7;
+}
+
+
+/***** SCANSIONE ORARIA SETTIMANALE *****/
+/* Usata solo in admin/scuola/orario_scansione.html.twig: una scheda per giorno con
+   la tabella delle ore (Ora | Inizio | Fine | Durata | Azioni). L'intestazione sta
+   nel thead, una volta sola: qui si tiene allineata la griglia dei campi e si da'
+   spazio alle righe, cosi' l'interfaccia respira. */
+
+.gs-scansione-oraria .nav-tabs .nav-link {
+  text-transform: uppercase;
+}
+
+/* Bootstrap Italia aggiunge alle card un blocco ::after (48px sopra, 24px a
+   sinistra): qui e' solo spazio vuoto sotto i pulsanti, quindi non deve comparire.
+   Stessa specificita' non basta (main.css e gs-pages.css caricati dopo valgono,
+   ma la regola del vendor e' '.card:after'): con la classe in piu' non dipende
+   dall'ordine di caricamento. */
+.card.gs-card-orario::after {
+  display: none;
+  content: none;
+}
+
+/* le colonne seguono le larghezze dichiarate qui sotto, non il contenuto.
+   Il selettore comprende .table-responsive perche' main.css dichiara
+   'table-layout: auto' proprio su '.table-responsive table' (specificita' piu'
+   alta): senza, la colonna Durata si schiaccia sul suo contenuto mentre i campi
+   orari si allargano a dismisura. Stesso rimedio della pagina avvisi (gs-table). */
+.table-responsive .gs-orario-righe {
+  table-layout: fixed;
+}
+
+/* main.css, sul mobile, da' min-width: 400px alle tabelle dentro .table-responsive:
+   misura pensata per le tabelle di dati. Questa e' invece una griglia di campi da
+   compilare, che da 360px in su sta nella card senza obbligare a scorrere di lato
+   per arrivare al pulsante di cancellazione. Sotto i 360px i campi sarebbero
+   troppo stretti per mostrare "HH:MM", quindi la tabella torna a scorrere dentro
+   la card come tutte le altre. */
+@media (min-width: 360px) {
+  .table-responsive .gs-orario-righe {
+    min-width: 0;
+  }
+}
+
+.gs-orario-righe > thead > tr > th {
+  border-top: 0;
+  white-space: nowrap;
+}
+
+.gs-orario-righe > tbody > tr > td {
+  vertical-align: middle;
+  padding: 0.75rem 0.5rem;
+}
+
+/* ora e azioni restano strette: lo spazio va ai campi orari */
+.gs-orario-righe .gs-col-ora,
+.gs-orario-righe .gs-col-azioni {
+  width: 5rem;
+  text-align: center;
+}
+
+.gs-orario-righe .gs-ora {
+  /* il numero d'ordine dell'ora non deve sembrare un campo da compilare */
+  background-color: transparent;
+  border: 0;
+}
+
+/* i campi riempiono la cella senza sbordare, ma senza allargarsi a dismisura
+   sugli schermi grandi: la griglia resta leggibile */
+.gs-orario-righe .gs-inizio,
+.gs-orario-righe .gs-fine,
+.gs-orario-righe .gs-durata {
+  width: 100%;
+  max-width: 12rem;
+}
+
+/* l'input time nativo non deve mostrare l'icona dell'orologio del browser */
+.gs-orario-righe input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+@media (max-width: 575.98px) {
+  .gs-orario-righe > tbody > tr > td {
+    padding: 0.5rem 0.25rem;
+  }
+
+  /* colonne strette: le intestazioni vanno a capo invece di allargare la tabella */
+  .gs-orario-righe > thead > tr > th {
+    white-space: normal;
+    font-size: 0.8rem;
+  }
+
+  /* su schermo piccolo la colonna del numero d'ora e' di troppo: nasconderla
+     lascia ai tre campi la larghezza che serve a restare leggibili.
+     I campi di servizio che contiene (visibile) continuano a essere inviati
+     perche' display:none non esclude un campo dal form. */
+  .gs-orario-righe .gs-col-ora {
+    display: none;
+  }
+
+  .gs-orario-righe .gs-col-azioni {
+    width: 3.5rem;
+  }
+
+  /* i campi orari hanno bisogno di mostrare "HH:MM": il padding laterale di
+     Bootstrap Italia (0.75rem) se lo mangerebbe quasi tutto */
+  .gs-orario-righe .gs-inizio,
+  .gs-orario-righe .gs-fine,
+  .gs-orario-righe .gs-durata {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+}
+
+/***** SCRUTINI - VOTI NELLE TABELLE *****/
+
+/* I voti delle tabelle di scrutinio sono etichette con lo stesso raggio dei
+   pulsanti di riga: la forma a pillola di Bootstrap stona accanto alle icone
+   di modifica e fa sembrare piu' "pieno" il numero rispetto al pulsante. */
+#gs-fixed-header .label {
+  border-radius: var(--gs-radius-sm);
+}
+
+/***** SCRUTINI - NAVIGAZIONE FRA I PASSI *****/
+
+/* "Torna al passo precedente" e "Conferma e vai avanti" restano sulla stessa
+   riga anche sotto i 576px: Bootstrap impilerebbe le due colonne, mentre qui
+   la riga resta flex e le colonne si dividono lo spazio. Il testo dei
+   pulsanti va a capo e i pulsanti si restringono, senza sovrapporsi. */
+.gs-riga-passi {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+
+/* il clearfix di Bootstrap non serve in una riga flex */
+.gs-riga-passi::before,
+.gs-riga-passi::after {
+  display: none;
+  content: none;
+}
+
+.gs-riga-passi > [class*="col-"] {
+  float: none;
+  flex: 1 1 0;
+  width: auto;
+  max-width: none;
+  min-width: 0;
+}
+
+.gs-riga-passi .btn {
+  height: 100%;
+  max-width: 100%;
+  white-space: normal;
+}
+
+/* Se il pulsante di sinistra non c'e' (azione riservata allo staff), la
+   colonna vuota non deve rubare spazio: l'altro pulsante usa tutta la riga. */
+.gs-riga-passi:not(:has(> [class*="col-"]:first-child .btn)) > [class*="col-"]:first-child {
+  display: none;
+}
+
+@media (max-width: 575.98px) {
+  .gs-riga-passi .btn {
+    width: 100%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/***** VERBALE DI SCRUTINIO (scrutinio_P_6, scrutinio_F_9, scrutinio_G_4) *****/
+
+/* Campi del verbale: etichetta sopra e controllo di larghezza contenuta,
+   cosi' il numero e l'ora non si allargano a dismisura sugli schermi grandi */
+.gs-verbale-campo {
+  margin-bottom: 2rem;
+}
+
+.gs-verbale-etichetta {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: var(--gs-fs-lg);
+  font-weight: 600;
+  color: var(--gs-primary);
+}
+
+.gs-verbale-controllo {
+  max-width: 20rem;
+}
+
+/* Sezione di un argomento del verbale */
+.gs-verbale-sezione {
+  margin-bottom: 2rem;
+}
+
+.gs-verbale-titolo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  font-size: var(--gs-fs-lg);
+  font-weight: 600;
+  color: var(--gs-primary);
+}
+
+.gs-verbale-paragrafo {
+  margin-bottom: 0.75rem;
+  font-size: var(--gs-fs-lg);
+  line-height: 1.6;
+}
+
+/* Testo del verbale: riquadro verde tenue con il pulsante di modifica.
+   Se il testo non c'e' ancora, il riquadro resta neutro e mostra un invito:
+   un blocco verde vuoto sembrerebbe un errore di caricamento. */
+.gs-verbale-testo {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  background: var(--gs-success-soft);
+  border: 1px solid var(--gs-success-border);
+  border-left: 4px solid var(--gs-success);
+  border-radius: var(--gs-radius-md);
+}
+
+.gs-verbale-testo-vuoto {
+  background: var(--gs-surface-soft);
+  border-color: var(--gs-border);
+  border-left-color: var(--gs-border-strong);
+}
+
+.gs-verbale-contenuto {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--gs-fs-lg);
+  line-height: 1.5;
+}
+
+.gs-verbale-azione {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 575.98px) {
+  .gs-verbale-testo {
+    flex-direction: column;
+  }
+
+  .gs-verbale-azione,
+  .gs-verbale-azione .btn {
+    width: 100%;
+  }
+}
+
+/* Avviso prima della chiusura: riquadro di avviso in luogo dell'alert
+   pieno, che su questa pagina diventava un blocco blu molto pesante */
+.gs-verbale-avviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 2rem 0 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--gs-primary-soft);
+  border: 1px solid var(--gs-primary-border);
+  border-left: 4px solid var(--gs-primary);
+  border-radius: var(--gs-radius-md);
+  font-size: var(--gs-fs-lg);
+  line-height: 1.5;
+}
+
+.gs-verbale-avviso .icon {
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
+  color: var(--gs-primary);
+}

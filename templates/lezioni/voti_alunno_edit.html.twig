@@ -8,17 +8,17 @@
     </div>
     <div class="panel-body gs-pt-0">
       <div class="row bg-success">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Alunno:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Alunno:</strong></div>
         <div class="col-sm-4">
           <span class="gs-big">{{ label.alunno }}</span>
         </div>
-        <div class="col-sm-2 text-right"><strong class="gs-big">Classe:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Classe:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.classe }}</span></div>
       </div>
       <div class="row bg-success gs-mb-4">
-        <div class="col-sm-2 text-right"><strong class="gs-big">Materia:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Materia:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.materia }}</span></div>
-        <div class="col-sm-2 text-right"><strong class="gs-big">Valutazione:</strong></div>
+        <div class="col-sm-2"><strong class="gs-big">Valutazione:</strong></div>
         <div class="col-sm-4"><span class="gs-big">{{ label.tipo|trans }}</span></div>
       </div>
   {% if app.session.get('/APP/ROUTE/lezioni_voti_alunno/conferma') != 0 %}
@@ -42,13 +42,13 @@
         <div class="col-sm-10">
     {% if form.voto.vars.value > 0 %}
           <span style="display:inline-block;width:3em;padding:0.6em 0.2em;" class="label {{ form.voto.vars.value >= 6 ? 'label-success' : (form.voto.vars.value < 5 ? 'label-danger' : 'label-warning') }} gs-mr-1 gs-big">--</span>
-          <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi un voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
-          <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
-          <div style="display:inline">{{ form_widget(form.voto, {'attr': {'class': 'slider', 'data-slider-value': form.voto.vars.value}}) }}</div>
+          <button style="display:none" class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi un voto">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
+          <button class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}Cancella</button>
+          <div style="display:inline">{{ form_widget(form.voto, {attr: {class: 'slider', 'data-slider-value': form.voto.vars.value}}) }}</div>
     {% else %}
           <span style="display:inline-block;width:3em;padding:0.6em 0.2em;" class="label label-default gs-mr-1 gs-big">--</span>
-          <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi un voto"><span class="glyphicon glyphicon-plus gs-mr-2"></span>Aggiungi</button>
-          <button style="display:none" class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto"><span class="glyphicon glyphicon-remove gs-mr-2"></span>Cancella</button>
+          <button class="btn btn-primary btn-xs gs-mr-5 gs-button-add" type="button" title="Aggiungi un voto">{{ include('admin/include/icona.html.twig', {nome: 'plus', stile: 'outline', classe: 'gs-mr-2'}) }}Aggiungi</button>
+          <button style="display:none" class="btn btn-danger btn-xs gs-mr-5 gs-button-delete" type="button" title="Cancella il voto">{{ include('admin/include/icona.html.twig', {nome: 'x', stile: 'outline', classe: 'gs-mr-2'}) }}Cancella</button>
           <div style="display:none">{{ form_widget(form.voto) }}</div>
     {% endif %}
         </div>
@@ -80,7 +80,7 @@ $(document).ready(function() {
     daysOfWeekDisabled: "0",
     startDate: "{{ label.inizio }}",
     endDate: "{{ date()|date('d/m/Y') }}",
-    datesDisabled: {{ label.festivi|raw }},
+    {% if label.festivi %}datesDisabled: {{ label.festivi|raw }},{% endif %}
     todayBtn: "linked",
     todayHighlight: true,
     autoclose: true,

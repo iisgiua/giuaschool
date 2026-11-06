@@ -1,0 +1,110 @@
+{#
+ # Componente riutilizzabile: selettore sede/classe per le sostituzioni.
+ #
+ # Va incluso isolando il contesto così non eredita le variabili della pagina:
+ #
+ #   {{ include('include/selettore-classe.html.twig', {}, with_context = false) }}
+ #
+ # I dati sono condivisi in sessione (/APP/DOCENTE/classi), caricati al primo
+ # utilizzo dalla funzione gs_classi_selettore(), così il componente si può
+ # includere sotto qualunque pagina senza passare variabili.
+ #
+ # La scelta invia un form GET a "lezioni_seleziona": la classe viene memorizzata
+ # in sessione e la PAGINA CORRENTE viene ricaricata (si resta sulla stessa
+ # pagina, senza cambiare sezione). Scegliendo una classe in cui il docente ha
+ # già una cattedra attiva viene chiesta conferma (sostituzione in classe propria).
+ #
+ # Le classi sono elencate nell'ordine sede, sezione, anno, gruppo.
+ #
+ # Alla rendering la scelta già memorizzata in sessione viene mantenuta attiva
+ # (sede e classe selezionate, con evidenziazione) per mostrare come è stato
+ # impostato il filtro.
+ #
+ # Parametri (tutti opzionali):
+ #   classi     elenco classi [{id, sede, sezione, anno, gruppo, propria}]
+ #              - default: gs_classi_selettore() (dato condiviso in sessione,
+ #                caricato al primo utilizzo se manca)
+ #   id         id HTML del select delle classi - default: 'gs-selettore-classe'
+ #   etichetta  chiave di traduzione del segnaposto delle classi
+ #              - default: 'label.scegli_classe'
+ #   gruppo     se vero mostra la conferma per le proprie classi - default: true
+ #}
+{% set sc_classi = classi is defined ? classi : gs_classi_selettore() %}
+{% if sc_classi %}
+{% set sc_id = id is defined ? id : 'gs-selettore-classe' %}
+{% set sc_etichetta = etichetta is defined ? etichetta : 'label.scegli_classe' %}
+{% set sc_gruppo = gruppo is defined ? gruppo : true %}
+{% set sc_sedi = [] %}
+{% for c in sc_classi %}
+{% set sc_sede = c.sede|default('') %}
+{% if sc_sede not in sc_sedi %}{% set sc_sedi = sc_sedi|merge([sc_sede]) %}{% endif %}
+{% endfor %}
+{# scelta corrente in sessione: sede e classe restano selezionate #}
+{% set sc_attiva = gs_scelta_selettore().classe|default(0) %}
+{% set sc_classe_attiva = sc_attiva > 0 ? (sc_classi|filter(c => c.id == sc_attiva)|first) : null %}
+{% set sc_sede_attiva = sc_classe_attiva ? sc_classe_attiva.sede|default('') : '' %}
+<form id="{{ sc_id }}-form" class="gs-selettore-classe{{ sc_attiva > 0 ? ' gs-selettore-classe--attiva' : '' }}" method="get" action="{{ path('lezioni_seleziona') }}">
+  <div class="gs-selettore-classe-campo">
+    <div class="gs-selettore-classe-gruppo">
+      <label class="gs-selettore-classe-label" for="{{ sc_id }}-sede">{{ 'label.sede'|trans }}</label>
+      <select id="{{ sc_id }}-sede" class="form-control gs-selettore-classe-sede">
+        <option value="0"{% if sc_sede_attiva == '' %} selected{% endif %}>{{ 'label.tutte_sedi'|trans }}</option>
+{% for sc_sede in sc_sedi %}
+        <option value="{{ sc_sede }}"{% if sc_sede_attiva == sc_sede %} selected{% endif %}>{{ sc_sede }}</option>
+{% endfor %}
+      </select>
+    </div>
+    <div class="gs-selettore-classe-gruppo">
+      <label class="gs-selettore-classe-label" for="{{ sc_id }}">{{ 'label.classe'|trans }}</label>
+      <select id="{{ sc_id }}" name="classe" class="form-control gs-selettore-classe-classe">
+        <option value="0">{{ sc_etichetta|trans }}</option>
+{% for c in sc_classi %}
+        <option value="{{ c.id }}" data-sede="{{ c.sede|default('') }}" data-propria="{{ (c.propria|default(false) and sc_gruppo) ? '1' : '0' }}"{% if c.id == sc_attiva %} selected{% endif %}>{{ c.anno }}º {{ c.sezione }}{% if c.gruppo %}-{{ c.gruppo }}{% endif %}</option>
+{% endfor %}
+      </select>
+    </div>
+  </div>
+  <noscript>
+    <button type="submit" class="btn btn-primary">{{ 'label.visualizza'|trans }}</button>
+  </noscript>
+</form>
+<script>
+(function () {
+  var form = document.getElementById('{{ sc_id }}-form');
+  if (!form) { return; }
+  var sedeSel = form.querySelector('.gs-selettore-classe-sede');
+  var classeSel = form.querySelector('.gs-selettore-classe-classe');
+  if (!sedeSel || !classeSel) { return; }
+
+  function filtra() {
+    // le classi sono visibili solo per la sede scelta (tutte se è "Tutte le sedi")
+    var sede = sedeSel.value;
+    Array.prototype.forEach.call(classeSel.options, function (opt) {
+      if (opt.value === '0') { return; }
+      var valido = (sede === '0' || opt.getAttribute('data-sede') === sede);
+      opt.hidden = !valido;
+      opt.disabled = !valido;
+      opt.style.display = valido ? '' : 'none';
+    });
+    if (classeSel.value !== '0' && classeSel.options[classeSel.selectedIndex].disabled) {
+      // la classe scelta non appartiene più alla sede: torna al segnaposto
+      classeSel.value = '0';
+    }
+  }
+
+  sedeSel.addEventListener('change', filtra);
+  classeSel.addEventListener('change', function () {
+    var opt = classeSel.options[classeSel.selectedIndex];
+    if (!opt || opt.value === '0' || opt.disabled) { return; }
+    if (opt.getAttribute('data-propria') === '1' &&
+        !window.confirm('Stai entrando nel registro come SOSTITUTO in una tua classe. Vuoi continuare?')) {
+      classeSel.value = '0';
+      return;
+    }
+    // memorizza in sessione e ricarica la pagina corrente (si resta qui)
+    form.submit();
+  });
+  filtra();
+})();
+</script>
+{% endif %}

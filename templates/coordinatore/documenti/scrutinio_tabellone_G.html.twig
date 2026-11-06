@@ -18,7 +18,7 @@
 {% set esitoDim = 180 - (10 + 50 + (dati.classe.anno == 5 ? 60 : 0)) %}
     <td align="center" style="width:{{ esitoDim }}mm"><strong>Esito</strong></td>
   </tr>
-{% for id,alu in dati.alunni %}
+{% for id, alu in dati.alunni %}
   <tr nobr="true">
     <td align="center">{{ loop.index }}</td>
     <td><strong>{{ alu.cognome }} {{ alu.nome }}</strong></td>

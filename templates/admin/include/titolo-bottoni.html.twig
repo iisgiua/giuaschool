@@ -1,0 +1,31 @@
+{##
+  # titolo-bottoni: intestazione di una pagina di elenco, con il titolo e i
+  # pulsanti di pagina su una riga dedicata sotto il titolo, e la tabella subito sotto.
+  #
+  # Uso:
+  #   {{ include('admin/include/titolo-bottoni.html.twig', {
+  #     titolo: titolo|trans,
+  #     bottoni: [{url: path('...'), etichetta: 'label.add'|trans, titolo: 'Nuovo ...',
+  #                classe: 'btn btn-primary btn-sm'}]
+  #   }) }}
+  #
+  # bottoni: elenco di {url, etichetta, titolo, classe, attributi}. Se omesso, resta solo il titolo.
+  # attributi: dict di attributi extra sul pulsante, es. {'data-csrf': csrf_token('password')}
+  #            (con classe 'gs-post' il pulsante invia la richiesta in POST col token nel corpo).
+  # I pulsanti stanno SEMPRE qui, in testata sotto il titolo: non sotto la tabella e non
+  # in un tfoot, dove finivano nascosti dal bordo inferiore.
+  # #}
+
+{% set bottoni = bottoni|default([]) %}
+<div class="mb-4">
+  <h1 class="mb-0 text-center">{{ titolo }}</h1>
+  {% if bottoni is not empty %}
+  <div class="gs-azioni flex-wrap justify-content-center mt-3">
+    {% for bottone in bottoni %}
+      {# NOSONAR Web:S6819 - role="button" richiesto dall'a11y su un <a> con classe .btn #}
+      <a class="{{ bottone.classe|default('btn btn-primary btn-sm') }}" href="{{ bottone.url }}" role="button"
+        title="{{ bottone.titolo|default('') }}"{% for attributo, valore in bottone.attributi|default({}) %} {{ attributo }}="{{ valore }}"{% endfor %}>{{ bottone.etichetta|default('label.add'|trans) }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>

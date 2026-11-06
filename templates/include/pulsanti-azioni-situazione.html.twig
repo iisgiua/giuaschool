@@ -1,0 +1,125 @@
+{##
+  # pulsanti-azioni-situazione: toolbar compatta per le azioni della
+  # situazione degli alunni.
+  #
+  # Struttura: un bottone "Visualizza" con icona e testo (solo nelle liste,
+  # dove apre la scheda dell'alunno nel modal #gs-modal-info), poi un
+  # btn-group con le azioni principali a icona e, in fondo, il menu a
+  # tendina ⋮ con le altre azioni come voci di testo.
+  #
+  # I bottoni-icona non hanno testo: l'etichetta resta nel title (tooltip
+  # desktop) e nell'aria-label (screen reader). Le icone stanno una accanto
+  # all'altra in un btn-group, cosi' la cella della tabella resta stretta.
+  #
+  # parametri:
+  #   alunno   (obbligatorio) id dell'alunno, usato negli URL
+  #   azioni   (opzionale) lista di {etichetta, tipo}; senza, usa le sei
+  #            azioni standard (Voti, Scrutini, Assenze, Note, Osservazioni,
+  #            Tutto)
+  #   azioni_visibili (opzionale) etichette delle azioni da tenere a icona
+  #            (default Voti, Scrutini, Assenze); le altre finiscono nel
+  #            menu ⋮
+  #   dettagli_alunno (opzionale) {cognome, nome, data_nascita, index}:
+  #            aggiunge il bottone "Visualizza" che apre la scheda
+  #            dell'alunno nel modal #gs-modal-info
+  #   tipo_attivo (opzionale) tipo della pagina corrente (es. 'V'): l'azione
+  #            corrispondente esce evidenziata e non cliccabile; se sta nel
+  #            menu, si evidenzia il bottone ⋮ e la voce nel menu
+  #   con_etichette (opzionale) se vera le azioni a icona mostrano anche il
+  #            testo (usato nella testata della pagina di dettaglio, dove
+  #            c'e' spazio); nelle tabelle resta solo l'icona
+  #
+  # Icone: Voti chart-bar, Scrutini clipboard-check, Assenze calendar-x,
+  # Note notes, Osservazioni message-dots, Tutto list-details,
+  # Dettagli eye. Se non ci sono azioni esce un trattino grigio.
+  #
+  # NB: icone_azioni e' una mappa di nomi dinamici: tools/tabler_icons.py la
+  # legge e tiene questi simboli nel solo sprite outline. Se si aggiunge una
+  # voce alla mappa, rigenerare lo sprite con python3 tools/tabler_icons.py.
+  # ##}
+{% set icone_azioni = {
+  Voti: 'chart-bar',
+  Scrutini: 'clipboard-check',
+  Assenze: 'calendar-x',
+  Note: 'notes',
+  Osservazioni: 'message-dots',
+  Tutto: 'list-details',
+} %}
+{% set titoli_azioni = {
+  Voti: "Mostra la situazione dei voti dell'alunno",
+  Scrutini: "Mostra la situazione degli scrutini dell'alunno",
+  Assenze: "Mostra la situazione delle assenze dell'alunno",
+  Note: "Mostra la situazione delle note dell'alunno",
+  Osservazioni: "Mostra la situazione delle osservazioni sull'alunno",
+  Tutto: "Mostra la situazione complessiva dell'alunno",
+} %}
+{% set azioni = azioni|default([
+  {etichetta: 'Voti', tipo: 'V'},
+  {etichetta: 'Scrutini', tipo: 'S'},
+  {etichetta: 'Assenze', tipo: 'A'},
+  {etichetta: 'Note', tipo: 'N'},
+  {etichetta: 'Osservazioni', tipo: 'O'},
+  {etichetta: 'Tutto', tipo: 'T'},
+]) %}
+{% set azioni_visibili = azioni_visibili|default(['Voti', 'Scrutini', 'Assenze']) %}
+{% set tipo_corrente = tipo_attivo|default('') %}
+{% set con_etichette = con_etichette|default(false) %}
+
+{% set voci_visibili = [] %}
+{% set voci_menu = [] %}
+{% set corrente_in_menu = false %}
+{% for azione in azioni %}
+  {% set voce = {
+    etichetta: azione.etichetta,
+    tipo: azione.tipo|default(''),
+    icona: icone_azioni[azione.etichetta]|default('chart-bar'),
+    titolo: titoli_azioni[azione.etichetta]|default("Mostra la situazione dell'alunno"),
+    url: path('coordinatore_situazione_alunno', {alunno: alunno, tipo: azione.tipo, formato: 'H'}),
+  } %}
+  {% if azione.etichetta in azioni_visibili %}
+    {% set voci_visibili = voci_visibili|merge([voce]) %}
+  {% else %}
+    {% set voci_menu = voci_menu|merge([voce]) %}
+    {% if tipo_corrente is not empty and tipo_corrente == voce.tipo %}
+      {% set corrente_in_menu = true %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% set con_dettagli = dettagli_alunno is defined and dettagli_alunno %}
+{% set mostra_toolbar = voci_visibili|length > 0 or voci_menu|length > 0 %}
+{% if con_dettagli or mostra_toolbar %}
+  {% set nome_alunno = con_dettagli ? dettagli_alunno.cognome ~ ' ' ~ dettagli_alunno.nome : '' %}
+  <div class="gs-azioni-riga">
+  {% if con_dettagli %}
+    <button type="button" class="btn btn-default btn-sm gs-btn-az gs-btn-visualizza" title="Mostra i dettagli dell'alunno" aria-label="Mostra i dettagli dell'alunno" data-toggle="modal" data-target="#gs-modal-info" data-title="{{ nome_alunno }} ({{ dettagli_alunno.data_nascita|date('d/m/Y') }})" data-body="alunno-{{ dettagli_alunno.index }}">{{ include('admin/include/icona.html.twig', {nome: 'eye', stile: 'outline'}, with_context: false) }}<strong>{{ 'label.visualizza'|trans }}</strong></button>
+  {% endif %}
+  {% if mostra_toolbar %}
+    <div class="btn-group gs-azioni-toolbar gs-azioni-dropdown" role="group" aria-label="{{ nome_alunno ? 'Azioni per ' ~ nome_alunno : 'Azioni' }}">
+    {% for voce in voci_visibili %}
+      {% if tipo_corrente is not empty and tipo_corrente == voce.tipo %}
+      <span class="btn btn-default btn-sm gs-btn-az gs-btn-az-attivo{{ con_etichette ? ' gs-btn-az-testo' : '' }}" aria-current="page" title="{{ voce.titolo }}" aria-label="{{ voce.titolo }}">{{ include('admin/include/icona.html.twig', {nome: voce.icona, stile: 'outline'}, with_context: false) }}{% if con_etichette %}<strong>{{ voce.etichetta }}</strong>{% endif %}</span>
+      {% else %}
+      <a class="btn btn-default btn-sm gs-btn-az{{ con_etichette ? ' gs-btn-az-testo' : '' }}" href="{{ voce.url }}" role="button" title="{{ voce.titolo }}" aria-label="{{ voce.titolo }}">{{ include('admin/include/icona.html.twig', {nome: voce.icona, stile: 'outline'}, with_context: false) }}{% if con_etichette %}<strong>{{ voce.etichetta }}</strong>{% endif %}</a>
+      {% endif %}
+    {% endfor %}
+    {% if voci_menu is not empty %}
+      <button type="button" class="btn btn-default btn-sm gs-btn-az gs-btn-az-ultimo{{ corrente_in_menu ? ' gs-btn-az-attivo' }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Altre azioni" aria-label="{{ nome_alunno ? 'Altre azioni per ' ~ nome_alunno : 'Altre azioni' }}">{{ include('admin/include/icona.html.twig', {nome: 'dots-vertical', stile: 'outline'}, with_context: false) }}</button>
+      <ul class="dropdown-menu dropdown-menu-right">
+      {% for voce in voci_menu %}
+        <li>
+        {% if tipo_corrente is not empty and tipo_corrente == voce.tipo %}
+          <span class="gs-menu-corrente" aria-current="page">{{ voce.etichetta }}</span>
+        {% else %}
+          <a href="{{ voce.url }}" title="{{ voce.titolo }}">{{ voce.etichetta }}</a>
+        {% endif %}
+        </li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+    </div>
+  {% endif %}
+  </div>
+{% else %}
+  <span class="text-muted" aria-hidden="true">—</span><span class="sr-only">Nessuna azione disponibile</span>
+{% endif %}

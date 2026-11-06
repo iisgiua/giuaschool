@@ -31,36 +31,36 @@
       <td width="40%" align="center"><strong>DOCENTE</strong></td>
       <td width="60%" align="center"><strong>MATERIA</strong></td>
     </tr>
-{% set assenti=0 %}
-{% for kdoc,doc in dati.scrutinio.dati.presenze %}
+{% set assenti = 0 %}
+{% for kdoc, doc in dati.scrutinio.dati.presenze %}
   {% if doc.presenza %}
     <tr nobr="true">
       <td>{{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}</td>
       <td>
-    {% for kv,v in dati.docenti[doc.docente].materie %}
+    {% for kv, v in dati.docenti[doc.docente].materie %}
         <br>&bull; {{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}
     {% endfor %}
       </td>
     </tr>
   {% else %}
-    {% set assenti=assenti+1 %}
+    {% set assenti = assenti + 1 %}
   {% endif %}
 {% endfor %}
   </table>
 {% if assenti %}
   <p>Sono assenti i seguenti docenti:</p>
   <ul>
-  {% for kdoc,doc in dati.scrutinio.dati.presenze %}
+  {% for kdoc, doc in dati.scrutinio.dati.presenze %}
     {% if not doc.presenza %}
-      {% set assenti=assenti-1 %}
-    <li>{{ dati.docenti[doc.docente].sesso == 'M' ? 'Prof.' : 'Prof.ssa'}}
+      {% set assenti = assenti - 1 %}
+    <li>{{ dati.docenti[doc.docente].sesso == 'M' ? 'Prof.' : 'Prof.ssa' }}
       {{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}
-      sostituit{{ dati.docenti[doc.docente].sesso == 'M' ? 'o' : 'a'}}
+      sostituit{{ dati.docenti[doc.docente].sesso == 'M' ? 'o' : 'a' }}
       con nomina del Dirigente Scolastico
       (prot. n. {{ doc.surrogaProtocollo }} del {{ doc.surrogaData|date('d/m/Y') }})
       dal{{ doc.sessoSostituto == 'M' ? ' Prof.' : 'la Prof.ssa' }}
       {{ doc.sostituto|title }} per
-      {% for kv,v in dati.docenti[doc.docente].materie %}{{ not loop.first ? ', '}}{{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}{% endfor %}{{ assenti > 0 ? ';' : '.' }}
+      {% for kv, v in dati.docenti[doc.docente].materie %}{{ not loop.first ? ', ' }}{{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}{% endfor %}{{ assenti > 0 ? ';' : '.' }}
     </li>
     {% endif %}
   {% endfor %}
@@ -89,7 +89,7 @@
       <td width="40%" align="center"><strong>ALUNNO</strong></td>
       <td width="60%" align="center"><strong>Delibera</strong></td>
     </tr>
-  {% for kalu,alu in dati.alunni %}
+  {% for kalu, alu in dati.alunni %}
     {% if dati.esiti[kalu].esito == 'A' %}
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
@@ -139,16 +139,16 @@
       <td width="10%" align="center"><strong>Credito totale</strong></td>
     </tr>
   {% endif %}
-  {% for kalu,alu in dati.alunni %}
+  {% for kalu, alu in dati.alunni %}
     {% if dati.esiti[kalu].esito == 'A' %}
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
-      <td align="center">{{ dati.esiti[kalu].media|number_format(2,',','') }}</td>
+      <td align="center">{{ dati.esiti[kalu].media|number_format(2, ',', '') }}</td>
       <td style="font-size:9pt">
       {%- if kalu in dati.condotta9 -%}
         <em>{{ 'label.criterio_credito_condotta_no'|trans }}.</em>
       {% else %}
-        {% for cr in dati.esiti[kalu].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% endfor %}{% if dati.esiti[kalu].dati['creditoScolastico']|length %}.{% endif %}
+        {% for cr in dati.esiti[kalu].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_' ~ cr)|trans }}{{ not loop.last ? '; ' }}{% endfor %}{% if dati.esiti[kalu].dati['creditoScolastico']|length %}.{% endif %}
         <br><em>{{ (dati.creditoSospeso[kalu] ? 'label.criterio_credito_sospeso_si' : 'label.criterio_credito_sospeso_no')|trans }}.</em>
       {% endif %}
       </td>
@@ -156,7 +156,7 @@
       {% if dati.classe.anno == 4 %}
       <td align="center">{{ dati.esiti[kalu].creditoPrecedente }}</td>
       <td align="center">{{ dati.esiti[kalu].creditoPrecedente + dati.esiti[kalu].credito }}</td>
-      {% endif%}
+      {% endif %}
     </tr>
     {% endif %}
   {% endfor %}
@@ -181,7 +181,7 @@
       <td width="20%" align="center"><strong>Delibera</strong></td>
       <td width="50%" align="center"><strong>Motivazione della non ammissione</strong></td>
     </tr>
-  {% for kalu,alu in dati.alunni %}
+  {% for kalu, alu in dati.alunni %}
     {% if dati.esiti[kalu].esito == 'N' %}
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
@@ -208,7 +208,7 @@
       <td width="40%" align="center"><strong>ALUNNO</strong></td>
       <td width="60%" align="center"><strong>Motivazione</strong></td>
     </tr>
-  {% for kalu,alu in dati.alunni %}
+  {% for kalu, alu in dati.alunni %}
     {% if dati.esiti[kalu].esito == 'X' %}
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>

@@ -33,36 +33,36 @@
       <td width="40%" align="center"><strong>DOCENTE</strong></td>
       <td width="60%" align="center"><strong>MATERIA</strong></td>
     </tr>
-{% set assenti=0 %}
-{% for kdoc,doc in dati.scrutinio.dati.presenze %}
+{% set assenti = 0 %}
+{% for kdoc, doc in dati.scrutinio.dati.presenze %}
   {% if doc.presenza %}
     <tr nobr="true">
       <td>{{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}</td>
       <td>
-    {% for kv,v in dati.docenti[doc.docente].materie %}
+    {% for kv, v in dati.docenti[doc.docente].materie %}
         <br>&bull; {{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}
     {% endfor %}
       </td>
     </tr>
   {% else %}
-    {% set assenti=assenti+1 %}
+    {% set assenti = assenti + 1 %}
   {% endif %}
 {% endfor %}
 </table>
 {% if assenti %}
   <p>Sono assenti i seguenti docenti:</p>
   <ul>
-  {% for kdoc,doc in dati.scrutinio.dati.presenze %}
+  {% for kdoc, doc in dati.scrutinio.dati.presenze %}
     {% if not doc.presenza %}
-      {% set assenti=assenti-1 %}
-    <li>{{ dati.docenti[doc.docente].sesso == 'M' ? 'Prof.' : 'Prof.ssa'}}
+      {% set assenti = assenti - 1 %}
+    <li>{{ dati.docenti[doc.docente].sesso == 'M' ? 'Prof.' : 'Prof.ssa' }}
       {{ dati.docenti[doc.docente].cognome }} {{ dati.docenti[doc.docente].nome }}
-      sostituit{{ dati.docenti[doc.docente].sesso == 'M' ? 'o' : 'a'}}
+      sostituit{{ dati.docenti[doc.docente].sesso == 'M' ? 'o' : 'a' }}
       con nomina del Dirigente Scolastico
       (prot. n. {{ doc.surrogaProtocollo }} del {{ doc.surrogaData|date('d/m/Y') }})
       dal{{ doc.sessoSostituto == 'M' ? ' Prof.' : 'la Prof.ssa' }}
       {{ doc.sostituto|title }} per
-      {% for kv,v in dati.docenti[doc.docente].materie %}{{ not loop.first ? ', '}}{{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}{% endfor %}{{ assenti > 0 ? ';' : '.' }}
+      {% for kv, v in dati.docenti[doc.docente].materie %}{{ not loop.first ? ', ' }}{{ v['tipo_cattedra'] == 'I' ? 'Lab. ' }}{{ v['nome_materia'] }}{% endfor %}{{ assenti > 0 ? ';' : '.' }}
     </li>
     {% endif %}
   {% endfor %}
@@ -88,7 +88,7 @@
       <td width="20%" align="center"><strong>Numero massimo di ore di assenza consentite per la validità dell'A.S. (25% monte ore)</strong></td>
       <td width="20%" align="center"><strong>Ore di assenza dell'alunno</strong></td>
     </tr>
-  {% for idalunno,alu in dati.alunni %}
+  {% for idalunno, alu in dati.alunni %}
     {% if idalunno in dati.no_scrutinabili or idalunno in dati.deroga %}
     <tr nobr="true">
       <td>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</td>
@@ -109,7 +109,7 @@
       <td width="40%" align="center"><strong>ALUNNO</strong></td>
       <td width="60%" align="center"><strong>Motivazione della deroga</strong></td>
     </tr>
-    {% for idalunno,alu in dati.alunni %}
+    {% for idalunno, alu in dati.alunni %}
       {% if idalunno in dati.deroga %}
     <tr nobr="true">
       <td>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</td>
@@ -123,11 +123,11 @@
   <p>Il Consiglio di Classe, avendo constatato il superamento del numero massimo di assenze previsto
     dalla normativa in vigore (art. 14 comma 7 del D.P.R. 122 del 22 giugno 2009), non accompagnato
     da una adeguata e documentata motivazione, delibera <strong>l'esclusione dallo scrutinio e pertanto la non ammissione
-    {{ dati.classe.anno == 5 ? 'all\'Esame di Stato' : 'alla classe successiva'}}</strong>
+    {{ dati.classe.anno == 5 ? 'all\'Esame di Stato' : 'alla classe successiva' }}</strong>
     degli alunni seguenti:
    </p>
    <ul>
-    {% for idalunno,alu in dati.alunni %}
+    {% for idalunno, alu in dati.alunni %}
       {% if idalunno in dati.no_scrutinabili %}
       <li align="justify"><strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong></li>
       {% endif %}
@@ -167,7 +167,7 @@
       <td width="48%" align="center"><strong>Descrittori</strong></td>
       <td width="16%" align="center"><strong>Delibera</strong></td>
     </tr>
-{% for idalunno,alu in dati.alunni %}
+{% for idalunno, alu in dati.alunni %}
   {% if idalunno in dati.scrutinati %}
     <tr>
       <td>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</td>
@@ -193,7 +193,7 @@
 {% if (dati.ammessi - dati.insuff5|length) > 0 %}
   <p>&nbsp;</p>
   <p>Il Consiglio di Classe dichiara <strong>ammessi
-    {{ dati.classe.anno == 5 ? 'all\'Esame di Stato' : 'alla classe successiva'}}</strong>,
+    {{ dati.classe.anno == 5 ? 'all\'Esame di Stato' : 'alla classe successiva' }}</strong>,
     per avere riportato almeno sei decimi in ciascuna disciplina, i seguenti alunni:
   </p>
   <table border="1" cellpadding="3" style="text-align:left;font-family:helvetica;font-size:10pt">
@@ -201,7 +201,7 @@
       <td width="40%" align="center"><strong>ALUNNO</strong></td>
       <td width="60%" align="center"><strong>Delibera</strong></td>
     </tr>
-  {% for idalunno,alu in dati.alunni %}
+  {% for idalunno, alu in dati.alunni %}
     {% if idalunno in dati.scrutinati and dati.esiti[idalunno].esito == 'A' %}
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
@@ -229,7 +229,7 @@
       <td width="16%" align="center"><strong>Delibera</strong></td>
       <td width="44%" align="center"><strong>Motivazione</strong></td>
     </tr>
-  {% for idalunno,alu in dati.alunni %}
+  {% for idalunno, alu in dati.alunni %}
     {% if idalunno in dati.insuff5 %}
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }} ({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
@@ -265,23 +265,23 @@
       <td width="10%" align="center"><strong>Credito totale</strong></td>
     </tr>
   {% endif %}
-  {% for idalunno,alu in dati.alunni %}
+  {% for idalunno, alu in dati.alunni %}
     {% if idalunno in dati.scrutinati and dati.esiti[idalunno].esito == 'A' %}
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
-      <td align="center">{{ dati.esiti[idalunno].media|number_format(2,',','') }}</td>
+      <td align="center">{{ dati.esiti[idalunno].media|number_format(2, ',', '') }}</td>
       <td style="font-size:9pt">
       {%- if idalunno in dati.insuff5 -%}
         <em>{{ 'label.criterio_credito_quinta_no'|trans }}.</em>
       {% else %}
-        {%- for cr in dati.esiti[idalunno].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_'~cr)|trans }}{{ not loop.last ? '; '}}{% else %}---{% endfor %}{% if dati.esiti[idalunno].dati['creditoScolastico']|length %}.{% endif %}
+        {%- for cr in dati.esiti[idalunno].dati['creditoScolastico'] %}{{ ('label.criterio_credito_desc_' ~ cr)|trans }}{{ not loop.last ? '; ' }}{% else %}---{% endfor %}{% if dati.esiti[idalunno].dati['creditoScolastico']|length %}.{% endif %}
       {% endif %}
       </td>
       <td align="center">{{ dati.esiti[idalunno].credito }}</td>
       {% if dati.classe.anno >= 4 %}
       <td align="center">{{ dati.esiti[idalunno].creditoPrecedente }}</td>
       <td align="center">{{ dati.esiti[idalunno].creditoPrecedente + dati.esiti[idalunno].credito }}</td>
-      {% endif%}
+      {% endif %}
     </tr>
     {% endif %}
   {% endfor %}
@@ -297,7 +297,7 @@
     del superamento delle carenze riscontrate.
     Viene di seguito riportato il dettaglio dei debiti formativi per gli alunni con giudizio sospeso:
   </p>
-  {% for idalunno,alu in dati.alunni %}
+  {% for idalunno, alu in dati.alunni %}
     {% if idalunno in dati.debiti|keys %}
   <br>
   <ul>
@@ -317,7 +317,7 @@
       <td>{{ d.materia }}</td>
       <td align="center">{{ (d.unico == 0 or (d.tipo == 'E' and d.unico == 3)) ? 'NC' : d.unico }}</td>
       <td style="font-size:9pt">{{ d.debito }}</td>
-      <td align="center" style="font-size:9pt">{{ ('label.recupero_'~d.recupero)|trans }}</td>
+      <td align="center" style="font-size:9pt">{{ ('label.recupero_' ~ d.recupero)|trans }}</td>
     </tr>
         {% endfor %}
   </table>
@@ -343,7 +343,7 @@
       <td width="20%" align="center"><strong>Delibera</strong></td>
       <td width="50%" align="center"><strong>Motivazione della non ammissione</strong></td>
     </tr>
-  {% for idalunno,alu in dati.alunni %}
+  {% for idalunno, alu in dati.alunni %}
     {% if idalunno in dati.scrutinati and dati.esiti[idalunno].esito == 'N' %}
     <tr nobr="true">
       <td><strong>{{ alu.cognome }} {{ alu.nome }}<br>({{ alu.dataNascita|date('d/m/Y') }})</strong></td>
