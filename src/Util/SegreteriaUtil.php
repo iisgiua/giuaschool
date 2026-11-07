@@ -112,10 +112,12 @@ class SegreteriaUtil {
       ->getQuery()
       ->getArrayResult();
     foreach ($uscite as $u) {
-      if (isset($lista[$u['data']])) {
-        $dati['lista'][intval($u['data']->format('m'))][intval($u['data']->format('d'))] .= 'U';
+      $m = intval($u['data']->format('m'));
+      $d = intval($u['data']->format('d'));
+      if (isset($dati['lista'][$m][$d])) {
+        $dati['lista'][$m][$d] .= 'U';
       } else {
-        $dati['lista'][intval($u['data']->format('m'))][intval($u['data']->format('d'))] = 'U';
+        $dati['lista'][$m][$d] = 'U';
       }
     }
     // cambio classe
@@ -200,8 +202,8 @@ class SegreteriaUtil {
       // controlla presenza alunno in scrutinio
       $periodi = [];
       foreach ($scrutini as $sc) {
-        $alunni = (($sc->getPeriodo() == 'G' || $sc->getPeriodo() == 'R') ? $sc->getDato('sospesi') :
-          ($sc->getPeriodo() == 'X' ? $sc->getDato('alunni') : $sc->getDato('alunni')));
+        $alunni = (($sc->getPeriodo() == 'G' || $sc->getPeriodo() == 'R') ?
+          $sc->getDato('sospesi') : $sc->getDato('alunni'));
         if (in_array($alu->getId(), $alunni)) {
           $periodi[] = [$sc->getPeriodo(), $sc->getId()];
         }
