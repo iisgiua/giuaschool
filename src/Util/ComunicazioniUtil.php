@@ -78,8 +78,14 @@ class ComunicazioniUtil {
   public function convertePdf($nomefile): array {
     $info = pathinfo($nomefile);
     $file = $info['filename'];
-    $estensione = $info['extension'];
-    if (strtolower($estensione) != 'pdf') {
+    $estensione = $info['extension'] ?? '';
+    if (strtolower($estensione) == 'pdf') {
+      // il file dichiara di essere un PDF: verifica il tipo reale del contenuto
+      if (!$this->isPdf($this->dirTemp.'/'.$file.'.'.$estensione)) {
+        // non è un PDF: rifiuta il file per non pubblicare contenuti attivi con estensione ".pdf"
+        throw new Exception('Il file caricato non è un PDF valido.');
+      }
+    } else {
       // conversione
       try {
         $proc = new Process(['/usr/bin/unoconv', '-f', 'pdf', '-d', 'document', $file.'.'.$estensione],
@@ -87,9 +93,14 @@ class ComunicazioniUtil {
         $proc->setTimeout(0);
         $proc->run();
         if ($proc->isSuccessful() && file_exists($this->dirTemp.'/'.$file.'.pdf')) {
-          // conversione ok
-          unlink($this->dirTemp.'/'.$file.'.'.$estensione);
-          $estensione = 'pdf';
+          if ($this->isPdf($this->dirTemp.'/'.$file.'.pdf')) {
+            // conversione ok
+            unlink($this->dirTemp.'/'.$file.'.'.$estensione);
+            $estensione = 'pdf';
+          } else {
+            // la conversione non ha prodotto un PDF valido: elimina il risultato
+            unlink($this->dirTemp.'/'.$file.'.pdf');
+          }
         }
       } catch (Exception) {
         // errore: non fa niente
@@ -97,6 +108,24 @@ class ComunicazioniUtil {
     }
     // restituisce file ed estensione di nuovo file
     return [$file, $estensione];
+  }
+
+  /**
+   * Controlla se il file indicato è realmente in formato PDF.
+   *
+   * @param string $percorso Percorso completo del file da controllare
+   *
+   * @return bool Vero se il contenuto del file è in formato PDF
+   */
+  private function isPdf(string $percorso): bool {
+    if (!is_file($percorso)) {
+      return false;
+    }
+    if (class_exists('finfo')) {
+      $finfo = new \finfo(FILEINFO_MIME_TYPE);
+      return ((string) $finfo->file($percorso)) === 'application/pdf';
+    }
+    return ((string) @mime_content_type($percorso)) === 'application/pdf';
   }
 
   /**

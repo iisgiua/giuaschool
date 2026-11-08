@@ -64,6 +64,7 @@ var DZ = new Dropzone(".dropzone", {
   acceptedFiles: ".pdf,.odt,.doc,.docx,.rtf,.txt",
   timeout: 0,
   paramName: "files",
+  params: {_csrf_token: "{{ csrf_token('file') }}"},
   uploadMultiple: true,
   addRemoveLinks: true,
   createImageThumbnails: false,
@@ -85,7 +86,7 @@ var DZ = new Dropzone(".dropzone", {
     });
     this.on("removedfile", function(file) {
       if (file.uploaded) {
-        $.post("{{ path('file_remove', {'pagina': 'documenti_bes_add', 'param': 'files'}) }}", {"files": file.uploaded});
+        $.post("{{ path('file_remove', {pagina: 'documenti_bes_add', param: 'files'}) }}", {"files": file.uploaded, _csrf_token: "{{ csrf_token('file') }}"});
         if (file.status == 'success') {
           $('#documento_submit').attr('disabled', true);
         }
