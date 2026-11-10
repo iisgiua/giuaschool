@@ -23,7 +23,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -536,14 +535,19 @@ class DocumentiController extends BaseController {
     $file = $documento->getAllegati()[$allegato];
     $nomefile = $com->dirDocumento($documento).'/'.$file->getFile().'.'.$file->getEstensione();
     if (!file_exists($nomefile)) {
-      // compatibilità con vecchi documenti
-      $nomefile = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
-        $documento->getAlunno()->getClasse()->getAnno().$documento->getAlunno()->getClasse()->getSezione().
-        $documento->getAlunno()->getClasse()->getGruppo().'/riservato/'.
-        $file->getFile().'.'.$file->getEstensione();
+      // compatibilità solo se il documento ha un alunno ed è uno dei casi storici
+      $alunno = $documento->getAlunno();
+      if ($alunno && $alunno->getClasse()) {
+        $nomefile = $this->getParameter('kernel.project_dir').'/FILES/archivio/classi/'.
+          $alunno->getClasse()->getAnno().$alunno->getClasse()->getSezione().
+          $alunno->getClasse()->getGruppo().'/riservato/'.
+          $file->getFile().'.'.$file->getEstensione();
+      } else {
+        // errore: non posso ricavare il percorso senza un alunno e una classe
+        throw $this->createNotFoundException('exception.id_notfound');
+      }
     }
-    return $this->file($nomefile, $file->getNome().'.'.$file->getEstensione(),
-      ($tipo == 'V' ? ResponseHeaderBag::DISPOSITION_INLINE : ResponseHeaderBag::DISPOSITION_ATTACHMENT));
+    return $this->rispostaAllegato($nomefile, $file->getNome().'.'.$file->getEstensione(), $tipo == 'V');
   }
 
   /**
@@ -1045,6 +1049,7 @@ class DocumentiController extends BaseController {
   /**
    * Gestione ripristino dei documenti BES archiviati
    *
+   * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
@@ -1054,9 +1059,14 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/bes/restore/{documento}', name: 'documenti_bes_restore', requirements: ['documento' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function besRestore(TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
+  public function besRestore(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
+                             LogHandler $dblogger,
                              #[MapEntity] Documento $documento
                              ): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore
@@ -1119,6 +1129,7 @@ class DocumentiController extends BaseController {
   /**
    * Gestione archiviazione dei documenti BES
    *
+   * @param Request $request Pagina richiesta
    * @param TranslatorInterface $trans Gestore delle traduzioni
    * @param ComunicazioniUtil $com Funzioni di utilità per la gestione delle comunicazioni
    * @param LogHandler $dblogger Gestore dei log su database
@@ -1128,9 +1139,14 @@ class DocumentiController extends BaseController {
    */
   #[Route(path: '/documenti/bes/archive/{documento}', name: 'documenti_bes_archive', requirements: ['documento' => '\d+'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function besArchive(TranslatorInterface $trans, ComunicazioniUtil $com, LogHandler $dblogger,
+  public function besArchive(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
+                             LogHandler $dblogger,
                              #[MapEntity] Documento $documento
                              ): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla accesso a funzione
     if (!$this->getUser()->getResponsabileBes()) {
       // errore

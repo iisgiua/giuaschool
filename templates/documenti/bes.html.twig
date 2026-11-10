@@ -58,7 +58,7 @@
           <a class="btn btn-primary btn-xs" href="{{ path('documenti_bes_add', {'alunno': alu.id}) }}" role="button" title="Inserisci il documento per l'alunno BES indicato"><span class="glyphicon glyphicon-plus gs-mr-2"></span><strong>Aggiungi</strong></a>
       {% endif %}
       {% if dati.documenti[i].edit[0] is defined %}
-          <a class="btn btn-warning btn-xs" href="{{ path('documenti_bes_archive', {'documento': dati.documenti[i].lista[0].id}) }}" role="button" title="Archivia il documento indicato"><span class="glyphicon glyphicon-time gs-mr-2"></span><strong>Archivia</strong></a>
+          <a class="btn btn-warning btn-xs" href="{{ path('documenti_bes_archive', {'documento': dati.documenti[i].lista[0].id}) }}?_csrf_token={{ csrf_token('delete') }}" role="button" title="Archivia il documento indicato"><span class="glyphicon glyphicon-time gs-mr-2"></span><strong>Archivia</strong></a>
       {% endif %}
       {% if dati.documenti[i].delete[0] is defined %}
           <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella il documento indicato" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('documenti_delete', {'documento': dati.documenti[i].lista[0].id}) }}" data-text="{{ 'message.cancella_documenti_bes'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
