@@ -8,7 +8,7 @@
   </div>
   {% if info.prossimo > info.step %}
   <div class="text-center">
-    <a class="btn btn-primary" href="{{ path('sistema_aggiorna', {step: info.prossimo}) }}" role="button" title="Continua la procedura di aggiornamento"><strong>{{ 'label.continua'|trans }}</strong></a>
+    <a class="btn btn-primary" href="{{ path('sistema_aggiorna', {step: info.prossimo}) }}?_csrf_token={{ csrf_token('update') }}" role="button" title="Continua la procedura di aggiornamento"><strong>{{ 'label.continua'|trans }}</strong></a>
   </div>
   {% endif %}
 </div>

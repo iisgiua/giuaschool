@@ -11,7 +11,6 @@ namespace App\Controller;
 use App\Entity\Allegato;
 use App\Entity\Alunno;
 use App\Entity\Avviso;
-use App\Entity\CambioClasse;
 use App\Entity\Cattedra;
 use App\Entity\Circolare;
 use App\Entity\Classe;
@@ -1314,7 +1313,12 @@ class SistemaController extends BaseController {
    */
   #[Route(path: '/sistema/manutenzione/cache/', name: 'sistema_manutenzione_cache', methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function manutenzioneCache(TranslatorInterface $trans, KernelInterface $kernel): Response {
+  public function manutenzioneCache(Request $request, TranslatorInterface $trans,
+                                    KernelInterface $kernel): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // comandi per la pulizia della cache del database
@@ -1352,6 +1356,10 @@ class SistemaController extends BaseController {
   #[Route(path: '/sistema/manutenzione/logout/', name: 'sistema_manutenzione_logout', methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneLogout(Request $request): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // nome del file di sessione in uso
@@ -1443,6 +1451,10 @@ class SistemaController extends BaseController {
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneDebug(Request $request, TranslatorInterface $trans,
                                     KernelInterface $kernel): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('debug', $request->query->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // assicura che lo script non sia interrotto
     ini_set('max_execution_time', 0);
     // imposta nuovo livello di log
@@ -1490,7 +1502,11 @@ class SistemaController extends BaseController {
    */
   #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function aggiorna(int $step): Response {
+  public function aggiorna(Request $request, int $step): Response {
+    // controllo CSRF (il passo 0 effettua solo controlli, gli altri modificano il sistema)
+    if ($step > 0 && !$this->isCsrfTokenValid('update', $request->query->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // inizializza
     $dati = [];
     $info = [];
