@@ -698,7 +698,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
@@ -1035,7 +1035,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
@@ -1825,7 +1825,7 @@ class PagelleUtil {
         // controllo alunno
         if ( $dati['errore'] ) {
           // errore
-          return null;
+          throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
         }
         // crea documento
         $html = $this->tpl->render('coordinatore/documenti/scrutinio_pagella_' . $periodo . '.html.twig', [
@@ -1866,7 +1866,7 @@ class PagelleUtil {
         // controllo alunno
         if ( $dati['errore'] ) {
           // errore
-          return null;
+          throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
         }
         // crea documento
         $html = $this->tpl->render('coordinatore/documenti/scrutinio_pagella_G.html.twig', [
@@ -1879,7 +1879,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
@@ -2084,7 +2084,7 @@ class PagelleUtil {
         // controllo alunno
         if ( $dati['errore'] ) {
           // errore
-          return null;
+          throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
         }
         // crea documento
         $html = $this->tpl->render('coordinatore/documenti/scrutinio_debiti_' . $periodo . '.html.twig', [
@@ -2097,7 +2097,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
@@ -2246,7 +2246,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
@@ -2370,7 +2370,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
@@ -2487,7 +2487,7 @@ class PagelleUtil {
         // controllo alunno
         if ( $dati['tipo'] == null ) {
           // errore
-          return null;
+          throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
         } else {
           // crea comunicazione non ammissione (per scrutinio o per frequenza)
           $html = $this->tpl->render('coordinatore/documenti/scrutinio_non_ammesso_' . $periodo . '.html.twig', [
@@ -2529,7 +2529,7 @@ class PagelleUtil {
         // controllo alunno
         if ( $dati['tipo'] == null ) {
           // errore
-          return null;
+          throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
         } else {
           // crea comunicazione non ammissione (per scrutinio o per frequenza)
           $html = $this->tpl->render('coordinatore/documenti/scrutinio_non_ammesso_G.html.twig', [
@@ -2543,7 +2543,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
@@ -2791,7 +2791,7 @@ class PagelleUtil {
         // controllo alunno
         if ( $dati['errore'] ) {
           // errore
-          return null;
+          throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
         }
         // crea documento
         $html = $this->tpl->render('coordinatore/documenti/scrutinio_carenze_' . $periodo . '.html.twig', [
@@ -2804,7 +2804,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
@@ -3015,7 +3015,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
@@ -3147,7 +3147,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
@@ -3205,7 +3205,7 @@ class PagelleUtil {
       return $percorso . '/' . $nomefile;
     }
     // errore
-    return null;
+    throw new \RuntimeException('Periodo di scrutinio non gestito: '.$periodo);
   }
 
   /**
