@@ -137,27 +137,27 @@
                 <div class="form-row">
                   <div class="form-group col">
                     <label for="install_db_server" class="required active" style="transition: none 0s ease 0s;">Server database</label>
-                    <input type="text" id="install_db_server" name="install[db_server]" required="required" class="form-control" value="<?php echo $page['database']['host']; ?>">
+                    <input type="text" id="install_db_server" name="install[db_server]" required="required" class="form-control" value="<?php echo htmlspecialchars((string) $page['database']['host'], ENT_QUOTES, 'UTF-8'); ?>">
                   </div>
                   <div class="form-group col">
                     <label for="install_db_port" class="required active" style="transition: none 0s ease 0s;">Porta database</label>
-                    <input type="text" id="install_db_port" name="install[db_port]" required="required" class="form-control" value="<?php echo $page['database']['port']; ?>">
+                    <input type="text" id="install_db_port" name="install[db_port]" required="required" class="form-control" value="<?php echo htmlspecialchars((string) $page['database']['port'], ENT_QUOTES, 'UTF-8'); ?>">
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group col">
                     <label for="install_db_user" class="required active" style="transition: none 0s ease 0s;">Utente database</label>
-                    <input type="text" id="install_db_user" name="install[db_user]" required="required" class="form-control" value="<?php echo $page['database']['user']; ?>">
+                    <input type="text" id="install_db_user" name="install[db_user]" required="required" class="form-control" value="<?php echo htmlspecialchars((string) $page['database']['user'], ENT_QUOTES, 'UTF-8'); ?>">
                   </div>
                   <div class="form-group col">
                     <label for="install_db_password" class="required active" style="transition: none 0s ease 0s;">Password database</label>
-                    <input type="text" id="install_db_password" name="install[db_password]" required="required" class="form-control" value="<?php echo $page['database']['pass']; ?>">
+                    <input type="text" id="install_db_password" name="install[db_password]" required="required" class="form-control" value="<?php echo htmlspecialchars((string) $page['database']['pass'], ENT_QUOTES, 'UTF-8'); ?>">
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group col">
                     <label for="install_db_name" class="required active" style="transition: none 0s ease 0s;">Nome database</label>
-                    <input type="text" id="install_db_name" name="install[db_name]" required="required" class="form-control" value="<?php echo substr((string) $page['database']['path'], 1); ?>">
+                    <input type="text" id="install_db_name" name="install[db_name]" required="required" class="form-control" value="<?php echo htmlspecialchars(substr((string) $page['database']['path'], 1), ENT_QUOTES, 'UTF-8'); ?>">
                   </div>
                 </div>
                 <div class="form-group col text-center">

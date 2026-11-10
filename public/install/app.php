@@ -10,9 +10,11 @@ use App\Install\Updater;
 // impostazioni generali
 date_default_timezone_set('Europe/Rome');
 ini_set('max_execution_time', 0);
-// legge parametri
+// legge parametri (solo valori scalari: un array o un valore non numerico causerebbe un errore fatale)
 $token = $_GET['token'] ?? '';
-$step = $_GET['step'] ?? '0';
+$token = is_string($token) ? $token : '';
+$step = $_GET['step'] ?? '';
+$step = ((int) filter_var($step, FILTER_VALIDATE_INT));
 $path = dirname(__DIR__);
 // controlla esistenza file installazione
 if (!file_exists($path.'/../.gs-updating')) {
