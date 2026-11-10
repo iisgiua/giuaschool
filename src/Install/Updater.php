@@ -1248,12 +1248,12 @@ class Updater {
     $updates = $this->readUpdates();
     // carica substep
     $subStep = isset($_GET['sub']) ? (int) $_GET['sub'] : 0;
-    // controlla che il substep esista
-    if (!isset($updates['procedure'][$subStep]) || !is_string($updates['procedure'][$subStep])) {
+    // controlla che il substep esista e sia una procedura valida
+    if (!isset($updates['procedure'][$subStep]) || !($updates['procedure'][$subStep] instanceof \Closure)) {
       throw new Exception('Procedura di aggiornamento non valida', $step);
     }
-    // esegue procedura di aggiornamento
-    eval($updates['procedure'][$subStep]);
+    // esegue procedura di aggiornamento (le procedure sono Closure e non codice da valutare)
+    $updates['procedure'][$subStep]($this->pdo, $migrator);
     // visualizza pagina
     $page['version'] = $this->sys['version'].($this->sys['build'] == '0' ? '' : '#build');
     $page['step'] = $step.' - Migrazione dei dati';
