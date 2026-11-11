@@ -78,13 +78,9 @@ class PagelleUtil {
    * @return bool Vero se il template esiste
    */
   private function templateEsistente(string $template): bool {
-    try {
-      $r = new \ReflectionClass($this->tpl);
-      $dir = dirname($r->getFileName());
-      return is_file($dir.'/'.$template);
-    } catch (\Throwable) {
-      return false;
-    }
+    $root1 = dirname(__DIR__, 2).'/templates/';
+    $root2 = dirname(__DIR__, 2).'/PERSONAL/templates/';
+    return is_file($root1.$template) || is_file($root2.$template);
   }
 
   /**
