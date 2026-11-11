@@ -9,9 +9,8 @@
 namespace App\Install;
 
 require_once __DIR__.'/DataMigrator.php';
-require_once __DIR__.'/../Exception/InstallAuthException.php';
+require_once __DIR__.'/InstallAuthException.php';
 
-use App\Exception\InstallAuthException;
 use Exception;
 use PDO;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;

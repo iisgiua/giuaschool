@@ -720,7 +720,6 @@ class AlunniController extends BaseController {
   /**
    * Generazione e invio della password agli alunni o ai genitori
    *
-   * @param Request $request Pagina richiesta
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff

@@ -1880,6 +1880,7 @@ exception.colloquio_no_messaggio: Non hai inserito un messaggio per i genitori.
 exception.aggiornamento_no_versione: Impossibile recuperare le informazioni sull'esistenza di aggiornamenti.
 exception.aggiornamento_zip_non_presente: E' presente la nuova versione {versione}, ma il server non permette l'aggiornamento automatico.
 exception.aggiornamento_errore_file: Impossibile scaricare l'aggiornamento.
+exception.aggiornamento_zip_errato: Impossibile estrarre i file dell'aggiornamento.
 exception.mailserver_no_server: Non hai indicato un tipo di server tra quelli previsti.
 exception.mailserver_no_user: Non hai indicato il nome utente per accedere al server.
 exception.mailserver_no_password: Non hai indicato la password per accedere al server.

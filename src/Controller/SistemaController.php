@@ -55,6 +55,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use ZipArchive;
 
 
 /**
@@ -1622,22 +1623,53 @@ class SistemaController extends BaseController {
           break;
         }
         // conferma scaricamento
+        $this->reqstack->getSession()->set('/APP/ROUTE/sistema_aggiorna/zip',
+          dirname(__DIR__).'/Install/v'.$nuovaVersione.'.zip');
         $file = dirname(__DIR__).'/Install/v'.$nuovaVersione.'.ok';
         file_put_contents($file, '');
         $info['prossimo'] = 2;
         break;
       case 2:   // installazione
-        // salva dati per l'installazione
-        $nuovaVersione = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/versione');
-        $nuovaBuild = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/build');
-        $token = bin2hex(random_bytes(16));
-        $contenuto = 'token="'.$token.'"'."\n".
-          'version="'.$nuovaVersione.'"'."\n".
-          'build="'.$nuovaBuild.'"'."\n";
-        file_put_contents(dirname(__DIR__, 2).'/.gs-updating', $contenuto);
-        // reindirizza a pagina di installazione
-        $urlPath = $request->getSchemeAndHttpHost().$request->getBaseUrl().'/install/update.php';
-        return $this->redirect($urlPath.'?token='.$token.'&step=1');
+        // estrae i file di installazione per rendere possibile l'aggiornamento
+        $zipPath = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/zip', '');
+        $zip = new ZipArchive();
+        $errore = false;
+        if ($zip->open($zipPath) !== true) {
+          // errore nell'apertura del file zip
+          $errore = true;
+          $info['messaggio'] = 'exception.aggiornamento_zip_errato';
+        } else {
+          // estrae file
+          for($i = 0; $i < $zip->numFiles; $i++) {
+            $filename = $zip->getNameIndex($i);
+            if (str_starts_with($filename, 'public/Install/') || str_starts_with($filename, 'src/Install/')) {
+              // estrae file (percorso assoluto: non dipende dalla directory di lavoro del processo)
+              if (!$zip->extractTo($this->projectPath, [$filename])) {
+                // errore
+                $errore = true;
+                $info['messaggio'] = 'exception.aggiornamento_zip_errato';
+                break;
+              }
+            }
+          }
+          // fine estrazione file
+          $zip->close();
+        }
+        if (!$errore) {
+          // salva dati per l'installazione
+          $nuovaVersione = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/versione');
+          $nuovaBuild = $this->reqstack->getSession()->get('/APP/ROUTE/sistema_aggiorna/build');
+          $token = bin2hex(random_bytes(16));
+          $contenuto = 'token="'.$token.'"'."\n".
+            'version="'.$nuovaVersione.'"'."\n".
+            'build="'.$nuovaBuild.'"'."\n";
+          file_put_contents(dirname(__DIR__, 2).'/.gs-updating', $contenuto);
+          // reindirizza a pagina di installazione
+          $urlPath = $request->getSchemeAndHttpHost().$request->getBaseUrl().'/install/update.php';
+          return $this->redirect($urlPath.'?token='.$token.'&step=1');
+        }
+        // errore: visualizza messaggio
+        $info['tipo'] = 'danger';
     }
     // mostra la pagina di risposta
     return $this->renderHtml('sistema', 'aggiorna', $dati, $info);
