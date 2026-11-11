@@ -97,6 +97,13 @@ class PagelleUtil {
    */
   public function riepilogoVotiDati(Classe $classe, $periodo) {
     $dati = [];
+    // inizializza le liste usate anche quando lo scrutinio non ha docenti/alunni:
+    // l'ordinamento dei docenti e i cicli sugli alunni non devono trovare valori nulli
+    $dati['alunni'] = [];
+    $dati['docenti'] = [];
+    $dati['voti'] = [];
+    $dati['esiti'] = [];
+    $dati['materie'] = [];
     if ( $periodo == 'P' || $periodo == 'S' ) {
       $dati['classe'] = $classe;
       // legge scrutinio
@@ -240,7 +247,7 @@ class PagelleUtil {
         ->orderBy('a.cognome,a.nome,a.dataNascita', 'ASC')
 			  ->setParameter('lista', array_merge($dati['scrutinati'], $dati['no_scrutinabili'], $dati['estero']))
         ->getQuery()
-        ->getResult();
+        ->getArrayResult();
       foreach ($alunni as $alu) {
         $dati['alunni'][$alu['id']] = $alu;
       }
@@ -1068,6 +1075,12 @@ class PagelleUtil {
    */
   public function verbaleDati(Classe $classe, $periodo) {
     $dati = [];
+    // inizializza le liste usate anche quando lo scrutinio non ha docenti/alunni
+    $dati['alunni'] = [];
+    $dati['docenti'] = [];
+    $dati['voti'] = [];
+    $dati['esiti'] = [];
+    $dati['materie'] = [];
     // nomi mesi
     $dati['nomi_mesi'] = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     // scrutinio finale
@@ -1254,7 +1267,7 @@ class PagelleUtil {
 			  ->setParameter('lista', array_merge($dati['scrutinati'], $dati['no_scrutinabili'], $dati['estero']))
         ->orderBy('a.cognome,a.nome,a.dataNascita')
         ->getQuery()
-        ->getResult();
+        ->getArrayResult();
       $dati['alunni_noreligione'] = [];
       $religione_data = $dati['scrutinio']->getDato('religione') ?? [];
       foreach ($alunni as $alu) {
@@ -2423,7 +2436,7 @@ class PagelleUtil {
         ->setParameter('scrutinio', $dati['scrutinio'])
         ->setParameter('esito', 'A')
         ->getQuery()
-        ->getResult();
+        ->getArrayResult();
       foreach ($alunni as $alu) {
         $dati['ammessi'][$alu['id']] = $alu;
       }
@@ -2448,7 +2461,7 @@ class PagelleUtil {
         ->setParameter('lista', $sospesi)
         ->setParameter('esito', 'A')
         ->getQuery()
-        ->getResult();
+        ->getArrayResult();
       foreach ($alunni as $alu) {
         $dati['ammessi'][$alu['id']] = $alu;
       }

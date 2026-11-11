@@ -136,11 +136,11 @@ class DefinizioneConsiglio implements Stringable {
   /**
    * Modifica la data per lo svolgimento della riunione
    *
-   * @param DateTime $data Data per lo svolgimento della riunione
+   * @param DateTime|null $data Data per lo svolgimento della riunione
    *
    * @return self Oggetto modificato
    */
-  public function setData(DateTime $data): self {
+  public function setData(?DateTime $data): self {
     $this->data = $data;
     return $this;
   }
@@ -204,7 +204,7 @@ class DefinizioneConsiglio implements Stringable {
    * @return string Oggetto rappresentato come testo
    */
   public function __toString(): string {
-    return 'Consiglio di Classe per il '.$this->data->format('d/m/Y');
+    return 'Consiglio di Classe per il '.($this->data?->format('d/m/Y') ?? '');
   }
 
 }

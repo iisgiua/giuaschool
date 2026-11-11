@@ -934,7 +934,7 @@ class AvvisiController extends BaseController {
     // parametro classe
     $classe = $this->reqstack->getSession()->get('/APP/DOCENTE/classe_coordinatore');
     // controllo classe
-    $classe = $this->em->getRepository(Classe::class)->find($classe);
+    $classe = ($classe > 0) ? $this->em->getRepository(Classe::class)->find($classe) : null;
     if (!$classe) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
