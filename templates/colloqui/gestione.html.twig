@@ -49,9 +49,9 @@
           <a class="btn btn-primary btn-xs gs-mr-1 gs-mb-1" href="{{ path('colloqui_edit', {id: d.ricevimento.id}) }}" role="button" title="Modifica le impostazioni del ricevimento indicato"><strong>{{ 'label.edit'|trans }}</strong></a>
         {% endif %}
         {% if d.ricevimento.abilitato and d.richieste == 0 %}
-          <a class="btn btn-danger btn-xs gs-mr-1 gs-mb-1" href="{{ path('colloqui_enable', {id: d.ricevimento.id, stato: 0}) }}?_csrf_token={{ csrf_token('delete') }}" role="button" title="Disabilita il ricevimento indicato"><strong>Disabilita</strong></a>
+          <a class="btn btn-danger btn-xs gs-mr-1 gs-mb-1 gs-post-link" href="{{ path('colloqui_enable', {id: d.ricevimento.id, stato: 0}) }}" data-csrf="{{ csrf_token('delete') }}" role="button" title="Disabilita il ricevimento indicato"><strong>Disabilita</strong></a>
         {% elseif not d.ricevimento.abilitato %}
-          <a class="btn btn-success btn-xs gs-mr-1 gs-mb-1" href="{{ path('colloqui_enable', {id: d.ricevimento.id, stato: 1}) }}?_csrf_token={{ csrf_token('delete') }}" role="button" title="Abilita il ricevimento indicato"><strong>Abilita</strong></a>
+          <a class="btn btn-success btn-xs gs-mr-1 gs-mb-1 gs-post-link" href="{{ path('colloqui_enable', {id: d.ricevimento.id, stato: 1}) }}" data-csrf="{{ csrf_token('delete') }}" role="button" title="Abilita il ricevimento indicato"><strong>Abilita</strong></a>
         {% endif %}
       {% endif %}
         </td>

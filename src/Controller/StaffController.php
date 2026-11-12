@@ -990,12 +990,16 @@ class StaffController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/staff/password/create/{tipo}/{username}', name: 'staff_password_create', requirements: ['tipo' => 'E|P'], methods: ['GET'])]
+  #[Route(path: '/staff/password/create/{tipo}/{username}', name: 'staff_password_create', requirements: ['tipo' => 'E|P'], methods: ['POST'])]
   #[IsGranted('ROLE_STAFF')]
   public function passwordCreate(Request $request, UserPasswordHasherInterface $hasher,
                                  StaffUtil $staff, LogHandler $dblogger, LoggerInterface $logger ,
                                  PdfManager $pdf, MailerInterface $mailer, string $tipo,
                                  string $username = null): Response {
+     // controllo CSRF
+     if (!$this->isCsrfTokenValid('password', $request->request->get('_csrf_token'))) {
+       throw $this->createNotFoundException('exception.invalid_params');
+     }
      // controlla alunno
      $utente = $this->em->getRepository(Alunno::class)->findOneByUsername($username);
      if (!$utente) {

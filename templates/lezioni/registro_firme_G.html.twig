@@ -53,7 +53,7 @@
               {% endfor %}
             {% endif %}
           <div class="text-center gs-mt-4">
-            <a class="btn btn-success" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'circolare': c.id}) }}" role="button" title="Conferma la lettura della circolare alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
+            <a class="btn btn-success gs-post-link" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'circolare': c.id}) }}" data-csrf="{{ csrf_token('read') }}" role="button" title="Conferma la lettura della circolare alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
           </div>
         </div>
       </div>
@@ -62,7 +62,7 @@
         <div class="list-group-item-text">
           <div class="text-center gs-mt-3 gs-mb-3">
           {% if circolari|length > 1 %}
-            <a class="btn btn-success gs-mr-4" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'circolare': 0}) }}" role="button" title="Conferma la lettura di tutte le circolari alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
+            <a class="btn btn-success gs-mr-4 gs-post-link" href="{{ path('circolari_firma_classe', {'classe': classe.id, 'circolare': 0}) }}" data-csrf="{{ csrf_token('read') }}" role="button" title="Conferma la lettura di tutte le circolari alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
           {% endif %}
             <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Annulla</strong></button>
           </div>
@@ -378,5 +378,8 @@ $(document).ready(function() {
     $('body').addClass('modal-open');
   });
 });
+// forza chiamata POST per link
+$('#gs-modal-remote').on('click', '.gs-post-link', postLink);
+$('#gs-modal-info').on('click', '.gs-post-link', postLink);
 </script>
 {% endblock %}

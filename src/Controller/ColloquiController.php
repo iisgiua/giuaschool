@@ -357,16 +357,18 @@ class ColloquiController extends BaseController {
   /**
    * Abilita/dsabilita un ricevimento del docente.
    *
+   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
    * @param int $id Ricevimento da cancellare
+   * @param int $stato Nuovo stato di abilitazione del ricevimento
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/colloqui/enable/{id}/{stato}', name: 'colloqui_enable', requirements: ['id' => '\d+', 'stato' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/colloqui/enable/{id}/{stato}', name: 'colloqui_enable', requirements: ['id' => '\d+', 'stato' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function enable(Request $request, LogHandler $dblogger, int $id, int $stato): Response {
     // valida token CSRF
-    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
       throw $this->createNotFoundException('exception.invalid_token');
     }
     // controlla colloquio
@@ -514,7 +516,9 @@ class ColloquiController extends BaseController {
   /**
    * Invia la disdetta del genitore alla richiesta di colloquio.
    *
+   * @param Request $request Pagina richiesta
    * @param LogHandler $dblogger Gestore dei log su database
+   * @param int $id Richiesta di colloquio da annullare
    *
    * @return Response Pagina di risposta
    */

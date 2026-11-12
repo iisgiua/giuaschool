@@ -342,12 +342,16 @@ class AlunniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/alunni/password/{tipo}/{username}', name: 'alunni_password', requirements: ['tipo' => 'E|P'], methods: ['GET'])]
+  #[Route(path: '/alunni/password/{tipo}/{username}', name: 'alunni_password', requirements: ['tipo' => 'E|P'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function password(Request $request, UserPasswordHasherInterface $hasher,
                            PdfManager $pdf, StaffUtil $staff, MailerInterface $mailer,
                            LoggerInterface $logger, LogHandler $dblogger, string $tipo,
                            ?string $username): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('password', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // controlla alunno
     $utente = $this->em->getRepository(Alunno::class)->findOneByUsername($username);
     if (!$utente) {
@@ -728,6 +732,7 @@ class AlunniController extends BaseController {
   /**
    * Generazione e invio della password agli alunni o ai genitori
    *
+   * @param Request $request Pagina richiesta
    * @param UserPasswordHasherInterface $hasher Gestore della codifica delle password
    * @param PdfManager $pdf Gestore dei documenti PDF
    * @param StaffUtil $staff Funzioni disponibili allo staff
@@ -738,11 +743,15 @@ class AlunniController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/alunni/passwordFiltro/{genitore}', name: 'alunni_passwordFiltro', requirements: ['genitore' => '0|1'], methods: ['GET'])]
+  #[Route(path: '/alunni/passwordFiltro/{genitore}', name: 'alunni_passwordFiltro', requirements: ['genitore' => '0|1'], methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
-  public function passwordFiltro(UserPasswordHasherInterface $hasher,
+  public function passwordFiltro(Request $request, UserPasswordHasherInterface $hasher,
                                  PdfManager $pdf, StaffUtil $staff, LoggerInterface $logger,
                                  LogHandler $dblogger, int $genitore): Response {
+    // controllo CSRF
+    if (!$this->isCsrfTokenValid('password', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_params');
+    }
     // recupera criteri dalla sessione
     $criteri = [];
     $criteri['classe'] = (int) $this->reqstack->getSession()->get('/APP/ROUTE/alunni_modifica/classe');

@@ -1501,7 +1501,7 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET','POST'])]
+  #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET', 'POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function aggiorna(Request $request, int $step): Response {
     // controllo dei parametri (i passi validi sono 0, 1 e 2)

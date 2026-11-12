@@ -108,7 +108,7 @@
         {% else %}
                 <div>
                   <em>La circolare non è stata ancora letta.</em>
-                  <a class="btn btn-xs btn-success pull-right gs-ml-3" href="{{ path('circolari_firma', {'circolare': c.circolare.id}) }}" role="button" title="Conferma la lettura della circolare"><strong>Conferma lettura</strong></a>
+                  <a class="btn btn-xs btn-success pull-right gs-ml-3 gs-post-link" href="{{ path('circolari_firma', {'circolare': c.circolare.id}) }}" data-csrf="{{ csrf_token('sign') }}" role="button" title="Conferma la lettura della circolare"><strong>Conferma lettura</strong></a>
                 </div>
         {% endif %}
       {% else %}
@@ -158,5 +158,7 @@ $(document).ready(function() {
     $(this).find('#gs-modal-info-body').html(html);
   });
 });
+// forza chiamata POST per link
+$('#gs-modal-info').on('click', '.gs-post-link', postLink);
 </script>
 {% endblock %}

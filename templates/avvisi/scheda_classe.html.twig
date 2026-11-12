@@ -39,14 +39,14 @@
     </div>
   </div>
   <div class="text-center gs-mt-2">
-    <a class="btn btn-success" href="{{ path('avvisi_classe_firma', {'classe': info.classe.id, 'avviso': a.id}) }}" role="button" title="Conferma la lettura dell'avviso alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
+    <a class="btn btn-success gs-post-link" href="{{ path('avvisi_classe_firma', {'classe': info.classe.id, 'avviso': a.id}) }}" data-csrf="{{ csrf_token('read') }}" role="button" title="Conferma la lettura dell'avviso alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura alla classe</strong></a>
   </div>
 </div>
 <hr class="gs-hr gs-mb-0">
 {% endfor %}
 <div class="gs-mt-2 gs-mb-3 text-center">
 {% if dati|length > 1 %}
-  <a class="btn btn-success gs-mr-4" href="{{ path('avvisi_classe_firma', {'classe': info.classe.id}) }}" role="button" title="Conferma la lettura di tutti gli avvisi alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
+  <a class="btn btn-success gs-mr-4 gs-post-link" href="{{ path('avvisi_classe_firma', {'classe': info.classe.id}) }}" data-csrf="{{ csrf_token('read') }}" role="button" title="Conferma la lettura di tutti gli avvisi alla classe"><span class="glyphicon glyphicon-ok gs-mr-2"></span><strong>Conferma lettura di tutto</strong></a>
 {% endif %}
   <button type="button" class="btn btn-danger" data-dismiss="modal"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Annulla</strong></button>
 </div>

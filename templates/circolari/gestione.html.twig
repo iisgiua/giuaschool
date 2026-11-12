@@ -38,7 +38,7 @@
           <button class="btn btn-danger btn-xs gs-modal-confirm-button" title="Cancella la circolare indicata" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('circolari_delete', {'circolare': c.id}) }}" data-text="{{ 'message.cancella_circolare'|trans }}"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
       {% endif %}
       {% if dati.azioni['unpublish-'~k].publish is defined %}
-          <a class="btn btn-success btn-xs" href="{{ path('circolari_publish', {'circolare': c.id, 'pubblica': 1}) }}" role="button" title="Pubblica la circolare indicata"><span class="glyphicon glyphicon-book"></span></a>
+          <a class="btn btn-success btn-xs gs-post-link" href="{{ path('circolari_publish', {'circolare': c.id, 'pubblica': 1}) }}" data-csrf="{{ csrf_token('publish') }}" role="button" title="Pubblica la circolare indicata"><span class="glyphicon glyphicon-book"></span></a>
       {% endif %}
         </td>
       </tr>
@@ -94,7 +94,7 @@
         <td>
           <button class="btn btn-xs btn-primary gs-button-remote" type="button" title="Visualizza i dettagli della circolare" data-toggle="modal" data-target="#gs-modal-remote" data-href="{{ path('circolari_dettagli_gestione', {'circolare': c.id}) }}"><span class="glyphicon glyphicon-zoom-in"></span></button>
       {% if dati.azioni['publish-'~k].unpublish is defined %}
-          <a class="btn btn-warning btn-xs" href="{{ path('circolari_publish', {'circolare': c.id, 'pubblica': 0}) }}" role="button" title="Rimuove la pubblicazione della circolare indicata"><span class="glyphicon glyphicon-trash"></span></a>
+          <a class="btn btn-warning btn-xs gs-post-link" href="{{ path('circolari_publish', {'circolare': c.id, 'pubblica': 0}) }}" data-csrf="{{ csrf_token('publish') }}" role="button" title="Rimuove la pubblicazione della circolare indicata"><span class="glyphicon glyphicon-trash"></span></a>
       {% endif %}
         </td>
       </tr>
