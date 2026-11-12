@@ -11,6 +11,7 @@ namespace App\Controller;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
 use App\Entity\Utente;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use App\Entity\Alunno;
 use App\Entity\Amministratore;
@@ -27,6 +28,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -38,6 +40,8 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 
@@ -47,6 +51,35 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  * @author Antonello Dessì
  */
 class LoginController extends BaseController {
+
+  //==================== COSTANTI  DELLA CLASSE ====================
+
+  /**
+   * @var int MAX_RECOVERY_ORARIE Numero massimo di richieste di recupero password ogni ora per IP
+   */
+  private const MAX_RECOVERY_ORARIE = 5;
+
+  /**
+   * @var int RECOVERY_FINESTRA_SECONDI Durata della finestra di throttling per il recupero password (in secondi)
+   */
+  private const RECOVERY_FINESTRA_SECONDI = 3600;
+
+
+  //==================== METODI DELLA CLASSE ====================
+
+  /**
+   * Costruttore
+   *
+   * @param EntityManagerInterface $em Gestore delle entità
+   * @param RequestStack $reqstack Gestore dello stack delle variabili globali
+   * @param CacheInterface $throttleCache Gestore della cache per il throttling delle richieste di recupero password
+   */
+  public function __construct(
+      EntityManagerInterface $em,
+      RequestStack $reqstack,
+      private readonly CacheInterface $throttleCache) {
+    parent::__construct($em, $reqstack);
+  }
 
   /**
    * Login dell'utente attraverso username e password
@@ -152,112 +185,134 @@ class LoginController extends BaseController {
       ->getForm();
     $form->handleRequest($request);
     if ($form->isSubmitted() && $form->isValid()) {
-      $email = $form->get('email')->getData();
-      $utente = $this->em->getRepository(Utente::class)->findOneBy(['email' => $email, 'abilitato' => 1]);
-      // legge configurazione: id_provider
-      $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider', '');
-      $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
-      $spid = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/spid', 'N');
-      if (!$utente) {
-        // utente non esiste
-        $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', [
-          'email' => $email,
+      // protezione anti-enumeration e anti-bombing: massimo N richieste ogni ora per IP;
+      // la risposta mostrata e' sempre identica, a prescindere dall'esito
+      $recoveryKey = 'recovery_'.md5((string) $request->getClientIp());
+      $recoveryCount = (int) $this->throttleCache->get($recoveryKey, function (ItemInterface $item) {
+          $item->expiresAfter(self::RECOVERY_FINESTRA_SECONDI);
+          return 0;
+        });
+      if ($recoveryCount >= self::MAX_RECOVERY_ORARIE) {
+        // limite superato: risposta generica identica, nessuna operazione
+        $logger->error('Troppe richieste di recupero password dallo stesso IP.', [
           'ip' => $request->getClientIp()]);
-        $errore = 'exception.invalid_recovery_email';
-      } elseif (!$utente->getLoginSpeciale() &&
-                $spid == 'O' ||
-                (in_array($spid, ['A', 'M']) && !$utente->controllaRuolo('A')) ||
-                ($spid == 'M' && $utente->controllaRuoloFunzione('AM'))) {
-        // errore: niente recupero password se SPID/CIE obbligatorio
-        $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
-          'email' => $email,
-          'ip' => $request->getClientIp()]);
-        $errore = 'exception.invalid_user_type_recovery';
-      } elseif ($idProvider && $utente->controllaRuolo($idProviderTipo)) {
-        // errore: niente recupero password per utente su id provider
-        $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
-          'email' => $email,
-          'ip' => $request->getClientIp()]);
-        $errore = 'exception.invalid_user_type_recovery';
+        $successo = 'message.recovery_ok';
       } else {
-        // effettua il recupero password
-        if ($utente instanceOf Amministratore) {
-          // amministratore
-          $num_pwdchars = 12;
-          $template_html = 'email/credenziali_recupero_ata.html.twig';
-          $template_txt = 'email/credenziali_recupero_ata.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceOf Docente) {
-          // docenti/staff/preside
-          $num_pwdchars = 10;
-          $template_html = 'email/credenziali_recupero_docenti.html.twig';
-          $template_txt = 'email/credenziali_recupero_docenti.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'Prof.' : 'Prof.ssa');
-        } elseif ($utente instanceOf Ata) {
-          // ATA
-          $num_pwdchars = 8;
-          $template_html = 'email/credenziali_recupero_ata.html.twig';
-          $template_txt = 'email/credenziali_recupero_ata.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceOf Genitore) {
-          // genitori
-          $num_pwdchars = 8;
-          $template_html = 'email/credenziali_alunni.html.twig';
-          $template_txt = 'email/credenziali_alunni.txt.twig';
-          $utente_mail = $utente->getAlunno();
-          $sesso = ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a');
-        } elseif ($utente instanceOf Alunno) {
-          // alunni
-          $num_pwdchars = 8;
-          $template_html = 'email/credenziali_alunni.html.twig';
-          $template_txt = 'email/credenziali_alunni.txt.twig';
-          $utente_mail = $utente;
-          $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
-        }
-        // ok: genera password
-        $password = $staff->creaPassword($num_pwdchars);
-        $utente->setPasswordNonCifrata($password);
-        $pswd = $hasher->hashPassword($utente, $utente->getPasswordNonCifrata());
-        $utente->setPassword($pswd);
-        // memorizza su db
-        $this->em->flush();
-        // log azione
-        $logger->warning('Richiesta di recupero Password', [
-          'Username' => $utente->getUsername(),
-          'Email' => $email,
-          'Ruolo' => $utente->getRoles()[0]]);
-        // crea messaggio
-        $message = (new Email())
-          ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
-          ->to($email)
-          ->subject($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
-          ->text($this->renderView($template_txt, [
-            'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
-            'utente' => $utente_mail,
-            'username' => $utente->getUsername(),
-            'password' => $password,
-            'sesso' => $sesso]))
-          ->html($this->renderView($template_html, [
-            'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
-            'utente' => $utente_mail,
-            'username' => $utente->getUsername(),
-            'password' => $password,
-            'sesso' => $sesso]));
-        try {
-          // invia email
-          $mailer->send($message);
-          $successo = 'message.recovery_ok';
-        } catch (Exception $err) {
-          // errore di spedizione
-          $logger->error('Errore di spedizione email nella richiesta di recupero password.', [
-            'username' => $utente->getUsername(),
+        // registra la richiesta nella finestra di throttling oraria (scorrevole)
+        $nuovoConteggio = $recoveryCount + 1;
+        $this->throttleCache->delete($recoveryKey);
+        $this->throttleCache->get($recoveryKey, function (ItemInterface $item) use ($nuovoConteggio) {
+            $item->expiresAfter(self::RECOVERY_FINESTRA_SECONDI);
+            return $nuovoConteggio;
+          });
+        // legge email e cerca utente abilitato
+        $email = $form->get('email')->getData();
+        $utente = $this->em->getRepository(Utente::class)->findOneBy(['email' => $email, 'abilitato' => 1]);
+        // legge configurazione: id_provider
+        $idProvider = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider', '');
+        $idProviderTipo = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/id_provider_tipo', '');
+        $spid = $this->reqstack->getSession()->get('/CONFIG/ACCESSO/spid', 'N');
+        if (!$utente) {
+          // utente non esiste: risposta generica identica (anti-enumeration), solo log interno
+          $logger->error('Email non valida o utente disabilitato nella richiesta di recupero password.', [
             'email' => $email,
-            'ip' => $request->getClientIp(),
-            'errore' => $err->getMessage()]);
-          $errore = 'exception.error_recovery';
+            'ip' => $request->getClientIp()]);
+          $successo = 'message.recovery_ok';
+        } elseif (!$utente->getLoginSpeciale() &&
+                  $spid == 'O' ||
+                  (in_array($spid, ['A', 'M']) && !$utente->controllaRuolo('A')) ||
+                  ($spid == 'M' && $utente->controllaRuoloFunzione('AM'))) {
+          // errore: niente recupero password se SPID/CIE obbligatorio
+          $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
+            'email' => $email,
+            'ip' => $request->getClientIp()]);
+          $successo = 'message.recovery_ok';
+        } elseif ($idProvider && $utente->controllaRuolo($idProviderTipo)) {
+          // niente recupero password per utente su id provider: risposta generica
+          $logger->error('Tipo di utente non valido nella richiesta di recupero password.', [
+            'email' => $email,
+            'ip' => $request->getClientIp()]);
+          $successo = 'message.recovery_ok';
+        } else {
+          // effettua il recupero password
+          if ($utente instanceOf Amministratore) {
+            // amministratore
+            $num_pwdchars = 12;
+            $template_html = 'email/credenziali_recupero_ata.html.twig';
+            $template_txt = 'email/credenziali_recupero_ata.txt.twig';
+            $utente_mail = $utente;
+            $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
+          } elseif ($utente instanceOf Docente) {
+            // docenti/staff/preside
+            $num_pwdchars = 10;
+            $template_html = 'email/credenziali_recupero_docenti.html.twig';
+            $template_txt = 'email/credenziali_recupero_docenti.txt.twig';
+            $utente_mail = $utente;
+            $sesso = ($utente->getSesso() == 'M' ? 'Prof.' : 'Prof.ssa');
+          } elseif ($utente instanceOf Ata) {
+            // ATA
+            $num_pwdchars = 8;
+            $template_html = 'email/credenziali_recupero_ata.html.twig';
+            $template_txt = 'email/credenziali_recupero_ata.txt.twig';
+            $utente_mail = $utente;
+            $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
+          } elseif ($utente instanceOf Genitore) {
+            // genitori
+            $num_pwdchars = 8;
+            $template_html = 'email/credenziali_alunni.html.twig';
+            $template_txt = 'email/credenziali_alunni.txt.twig';
+            $utente_mail = $utente->getAlunno();
+            $sesso = ($utente->getAlunno()->getSesso() == 'M' ? 'o' : 'a');
+          } elseif ($utente instanceOf Alunno) {
+            // alunni
+            $num_pwdchars = 8;
+            $template_html = 'email/credenziali_alunni.html.twig';
+            $template_txt = 'email/credenziali_alunni.txt.twig';
+            $utente_mail = $utente;
+            $sesso = ($utente->getSesso() == 'M' ? 'o' : 'a');
+          }
+          // ok: genera password
+          $password = $staff->creaPassword($num_pwdchars);
+          $utente->setPasswordNonCifrata($password);
+          $pswd = $hasher->hashPassword($utente, $utente->getPasswordNonCifrata());
+          $utente->setPassword($pswd);
+          // memorizza su db
+          $this->em->flush();
+          // log azione
+          $logger->warning('Richiesta di recupero Password', [
+            'Username' => $utente->getUsername(),
+            'Email' => $email,
+            'Ruolo' => $utente->getRoles()[0]]);
+          // crea messaggio
+          $message = (new Email())
+            ->from(new Address($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/email_notifiche'), $this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')))
+            ->to($email)
+            ->subject($this->reqstack->getSession()->get('/CONFIG/ISTITUTO/intestazione_breve')." - Recupero credenziali del Registro Elettronico")
+            ->text($this->renderView($template_txt, [
+              'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
+              'utente' => $utente_mail,
+              'username' => $utente->getUsername(),
+              'password' => $password,
+              'sesso' => $sesso]))
+            ->html($this->renderView($template_html, [
+              'ruolo' => ($utente instanceOf Genitore) ? 'GENITORE' : (($utente instanceOf Alunno) ? 'ALUNNO' : ''),
+              'utente' => $utente_mail,
+              'username' => $utente->getUsername(),
+              'password' => $password,
+              'sesso' => $sesso]));
+          try {
+            // invia email
+            $mailer->send($message);
+            $successo = 'message.recovery_ok';
+          } catch (Exception $err) {
+            // errore di spedizione
+            $logger->error('Errore di spedizione email nella richiesta di recupero password.', [
+              'username' => $utente->getUsername(),
+              'email' => $email,
+              'ip' => $request->getClientIp(),
+              'errore' => $err->getMessage()]);
+            $errore = 'exception.error_recovery';
+          }
         }
       }
     }

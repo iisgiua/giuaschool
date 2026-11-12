@@ -1522,6 +1522,10 @@ message.documenti_archivio_bes: "Scarica, elimina o ripristina i documenti degli
 message.documento_bes_ripristinato: Il documento dell'alunn{sex} {alunno} è stato ripristinato.
 message.documento_bes_archiviato: Il documento dell'alunn{sex} {alunno} è stato archiviato.
 message.cancella_documenti_bes: Verrà cancellato il documento relativo all'alunno BES. Vuoi continuare?
+message.archivia_documento_bes: Verrà archiviato il documento relativo all'alunno BES. Vuoi continuare?
+message.ripristina_documento_bes: Verrà ripristinato il documento relativo all'alunno BES. Vuoi continuare?
+message.abilita_ricevimento: Verrà riabilitato il ricevimento indicato. Vuoi continuare?
+message.disabilita_ricevimento: Verrà disabilitato il ricevimento indicato. Vuoi continuare?
 message.alunno_assente_in_data: "ATTENZIONE: L'alunno risulta assente alla lezione della data indicata."
 message.modifica_data_o_conferma: "Puoi modificare la data o confermare i dati inseriti."
 message.alunni_assenti_in_data: "ATTENZIONE: Gli alunni seguenti risultano assenti alla lezione della data indicata:"
@@ -1624,8 +1628,8 @@ exception.cattedra_sostegno: Non puoi inserire una verifica per una cattedra di 
 exception.classe_errata: La classe non è corretta.
 exception.colloqui_errore: È presente un errore nell'impostazione dell'orario del colloquio del docente.
 exception.colloqui_esiste: Esiste già una richiesta per il colloquio con il docente.
+exception.colloqui_esauriti: Non ci sono più posti disponibili per il ricevimento indicato.
 exception.colloqui_sospesi: Il ricevimento dei genitori è sospeso sino al termine delle lezioni.
-exception.colloqui_esauriti: Spiacente, il tempo a disposizione non consente ulteriori ricevimenti.
 exception.conferma_invalida: "Procedura terminata con errore:<br>&nbsp;&nbsp;Utente sconosciuto"
 exception.conferma_scaduta: "Procedura terminata con errore:<br>&nbsp;&nbsp;La richiesta di attivazione è stata inviata più di 48 ore fa.<br><br>Effettua una nuova richiesta di attivazione e confermala entro 48 ore."
 exception.contrari_condotta: Non sono stati indicati i docenti contrari per una o più delibere a maggioranza.
