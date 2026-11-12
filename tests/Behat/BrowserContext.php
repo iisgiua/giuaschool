@@ -96,7 +96,38 @@ class BrowserContext extends BaseContext implements Context {
     $url = $this->getMinkParameter('base_url').$this->router->generate($pagina, $parametri);
     $this->session->visit($url);
     $this->waitForPage();
-    $this->log('GOTO', 'Pagina: '.$pagina);
+    $this->log('GOTO', 'Pagina: '.$url);
+  }
+
+  /**
+   * Invia una richiesta POST alla pagina indicata (senza token CSRF)
+   *  $pagina: nome della pagina
+   *  $tabella: tabella con nomi dei campi ed i valori da assegnare
+   *
+   * @When invio una richiesta POST alla pagina :pagina
+   * @When invio una richiesta POST alla pagina :pagina con parametri:
+   */
+  public function invioPostAllaPagina($pagina, TableNode $tabella=null): void {
+    $parametri = [];
+    if ($tabella) {
+      foreach ($tabella->getHash() as $row) {
+        foreach ($row as $key=>$val) {
+          $parametri[$key] = $this->convertText($val);
+        }
+      }
+    }
+    $url = $this->getMinkParameter('base_url').$this->router->generate($pagina, $parametri);
+    // invia il POST tramite un form, come fa l'applicazione per le azioni di modifica
+    $script = "var form=document.createElement('form');".
+      "form.method='POST';form.action=".json_encode($url).";form.style.display='none';".
+      "document.body.appendChild(form);form.submit();";
+    try {
+      $this->session->executeScript($script);
+    } catch (Exception) {
+      // la navigazione può interrompere l'esecuzione dello script
+    }
+    $this->waitForPage();
+    $this->log('POST', 'Pagina: '.$url);
   }
 
   /**

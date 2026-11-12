@@ -14,21 +14,21 @@ Funzionalità: Cancellazione di un avviso
 
 Scenario: visualizza errore per cancellazione di avviso non esistente
   Dato login utente "@staff_4:username"
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso |
     | 123456 |
   Allora vedi errore pagina "404"
 
 Scenario: visualizza errore per cancellazione di avviso senza permessi
   Dato login utente "@docente_curricolare_1:username"
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso       |
     | @avviso_E:id |
   Allora vedi errore pagina "404"
 
 Scenario: visualizza errore per cancellazione di avviso con annotazione senza permessi
   Dato login utente "@staff_4:username"
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso                      |
     | @avviso_non_modificabile:id |
   Allora vedi errore pagina "404"
@@ -39,7 +39,7 @@ Scenario: visualizza errore per cancellazione di avviso con annotazione senza pe
 
 Scenario: cancella avviso direttamente da URL
   Dato login utente "@staff_4:username"
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso       |
     | @avviso_C:id |
   Allora vedi la pagina "avvisi_gestione"
@@ -95,7 +95,7 @@ Scenario: cancella avviso compito da agenda
 Scenario: cancella avviso con allegato
   Dato login utente "@staff_4:username"
   E copia file "tests/data/documento-pdf.pdf" in "FILES/upload/avvisi/documento-pdf.pdf"
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso                |
     | @avviso_C_allegato:id |
   Allora vedi la pagina "avvisi_gestione"
@@ -106,14 +106,14 @@ Scenario: cancella avviso con allegato
 # Bisogna controllare accesso a pagina
 
 Scenario: accesso pagina cancellazione senza utente
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso       |
     | @avviso_C:id |
   Allora vedi la pagina "login_form"
 
 Schema dello scenario: accesso pagina cancellazione con altri utenti
   Dato login utente con ruolo esatto <ruolo>
-  Quando vai alla pagina "avvisi_delete" con parametri:
+  Quando invio una richiesta POST alla pagina "avvisi_delete" con parametri:
     | avviso       |
     | @avviso_C:id |
   Allora vedi errore pagina "403"

@@ -22,3 +22,7 @@ services:
   validator.traceable_validator:
     class: Symfony\Component\Validator\Validator\TraceableValidator
     public: true
+
+
+  security.csrf.token_manager:
+    class: App\Tests\Behat\FakedCsrfTokenManager
