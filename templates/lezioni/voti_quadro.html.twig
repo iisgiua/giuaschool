@@ -138,7 +138,7 @@
                 {% if v.docente_id == app.user.id and edit %}
                 <div class="list-group-item-text text-right">
                   <a class="btn btn-primary btn-sm" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': v.tipo, 'id': v.id}) }}" role="button" title="Modifica la valutazione">Modifica</a>
-                  <a class="btn btn-danger btn-sm gs-ml-2" href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" role="button" title="Elimina la valutazione">Cancella</a>
+                  <a class="btn btn-danger btn-sm gs-ml-2 gs-post-link" href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" data-csrf="{{ csrf_token('delete') }}" role="button" title="Elimina la valutazione">Cancella</a>
                 </div>
                 {% endif %}
               </div>
@@ -281,7 +281,7 @@
                 {% if v.docente_id == app.user.id and edit %}
                 <div class="list-group-item-text text-right">
                   <a class="btn btn-primary btn-sm" href="{{ path('lezioni_voti_alunno', {'cattedra': cattedra.id, 'alunno': a.id, 'tipo': v.tipo, 'id': v.id}) }}" role="button" title="Modifica la valutazione">Modifica</a>
-                  <a class="btn btn-danger btn-sm gs-ml-2" href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" role="button" title="Elimina la valutazione">Cancella</a>
+                  <a class="btn btn-danger btn-sm gs-ml-2 gs-post-link" href="{{ path('lezioni_voti_cancella', {id: v.id}) }}" data-csrf="{{ csrf_token('delete') }}" role="button" title="Elimina la valutazione">Cancella</a>
                 </div>
                 {% endif %}
               </div>
@@ -355,5 +355,7 @@ $(document).ready(function() {
     }
   });
 });
+// forza chiamata POST per link
+$('#gs-modal-info').on('click', '.gs-post-link', postLink);
 </script>
 {% endblock %}

@@ -51,7 +51,7 @@
         <td>
       {% if p.data > info.oggi %}
           <a class="btn btn-primary btn-xs gs-mr-2" href="{{ path('coordinatore_presenze_edit', {id: p.id, classe: info.classe.id}) }}" role="button" title="Modifica i dati della presenza fuori classe"><strong>{{ 'label.edit'|trans }}</strong></a>
-          <a class="btn btn-danger btn-xs" href="{{ path('coordinatore_presenze_delete', {id: p.id, classe: info.classe.id}) }}" role="button" title="Rimuove la presenza fuori classe"><strong>{{ 'label.delete'|trans }}</strong></a>
+          <a class="btn btn-danger btn-xs gs-post-link" href="{{ path('coordinatore_presenze_delete', {id: p.id, classe: info.classe.id}) }}" data-csrf="{{ csrf_token('delete') }}" role="button" title="Rimuove la presenza fuori classe"><strong>{{ 'label.delete'|trans }}</strong></a>
       {% endif %}
         </td>
       </tr>

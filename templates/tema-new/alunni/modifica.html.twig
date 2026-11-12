@@ -46,9 +46,9 @@
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'username': a.username, 'tipo': 'E'}) }}" role="button" title="Genera una nuova password per l'alunno e la invia tramite email">{{ 'label.email_password'|trans }}</a>
             <a class="btn btn-primary btn-xs mr-1 mb-1" href="{{ path('alunni_password', {'username': a.username, 'tipo': 'P'}) }}" role="button" title="Genera una nuova password per l'alunno e la scarica come documento PDF">{{ 'label.pdf_password'|trans }}</a>
     {% if a.abilitato %}
-            <a class="btn btn-danger btn-xs mb-1" href="{{ path('alunni_abilita', {'id': a.id, 'abilita': 0}) }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
+            <a class="btn btn-danger btn-xs mb-1 gs-post-link" href="{{ path('alunni_abilita', {'id': a.id, 'abilita': 0}) }}" data-csrf="{{ csrf_token('delete') }}" role="button" title="Disabilita l'utente">{{ 'label.disable'|trans }}</a>
     {% else %}
-            <a class="btn btn-success btn-xs mb-1" href="{{ path('alunni_abilita', {'id': a.id, 'abilita': 1}) }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
+            <a class="btn btn-success btn-xs mb-1 gs-post-link" href="{{ path('alunni_abilita', {'id': a.id, 'abilita': 1}) }}" data-csrf="{{ csrf_token('delete') }}" role="button" title="Abilita l'utente">{{ 'label.enable'|trans }}</a>
     {% endif %}
             <button type="button" class="btn btn-secondary btn-xs mr-1 mb-1" data-toggle="modal" data-target="#gs-scelta-genitore" title="Genera una nuova password per il genitore e la invia tramite email"
               data-title="Scegli il genitore a cui inviare la password"

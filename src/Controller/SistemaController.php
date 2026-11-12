@@ -1312,12 +1312,12 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/manutenzione/cache/', name: 'sistema_manutenzione_cache', methods: ['GET'])]
+  #[Route(path: '/sistema/manutenzione/cache/', name: 'sistema_manutenzione_cache', methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneCache(Request $request, TranslatorInterface $trans,
                                     KernelInterface $kernel): Response {
     // controllo CSRF
-    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+    if (!$this->isCsrfTokenValid('confirm', $request->request->get('_csrf_token'))) {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // assicura che lo script non sia interrotto
@@ -1354,11 +1354,11 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/manutenzione/logout/', name: 'sistema_manutenzione_logout', methods: ['GET'])]
+  #[Route(path: '/sistema/manutenzione/logout/', name: 'sistema_manutenzione_logout', methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneLogout(Request $request): Response {
     // controllo CSRF
-    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+    if (!$this->isCsrfTokenValid('confirm', $request->request->get('_csrf_token'))) {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // assicura che lo script non sia interrotto
@@ -1448,12 +1448,12 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/manutenzione/debug/', name: 'sistema_manutenzione_debug', methods: ['GET'])]
+  #[Route(path: '/sistema/manutenzione/debug/', name: 'sistema_manutenzione_debug', methods: ['POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function manutenzioneDebug(Request $request, TranslatorInterface $trans,
                                     KernelInterface $kernel): Response {
     // controllo CSRF
-    if (!$this->isCsrfTokenValid('debug', $request->query->get('_csrf_token'))) {
+    if (!$this->isCsrfTokenValid('confirm', $request->request->get('_csrf_token'))) {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // assicura che lo script non sia interrotto
@@ -1501,7 +1501,7 @@ class SistemaController extends BaseController {
    * @return Response Pagina di risposta
    *
    */
-  #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET'])]
+  #[Route(path: '/sistema/aggiorna/{step}', name: 'sistema_aggiorna', requirements: ['step' => '\d+'], defaults: ['step' => '0'], methods: ['GET','POST'])]
   #[IsGranted('ROLE_AMMINISTRATORE')]
   public function aggiorna(Request $request, int $step): Response {
     // controllo dei parametri (i passi validi sono 0, 1 e 2)
@@ -1509,7 +1509,7 @@ class SistemaController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controllo CSRF (il passo 0 effettua solo controlli, gli altri modificano il sistema)
-    if ($step > 0 && !$this->isCsrfTokenValid('update', $request->query->get('_csrf_token'))) {
+    if ($step > 0 && !$this->isCsrfTokenValid('update', $request->request->get('_csrf_token'))) {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // inizializza

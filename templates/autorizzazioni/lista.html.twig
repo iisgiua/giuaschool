@@ -40,9 +40,9 @@
           <a class="btn btn-primary btn-xs mb-1" href="{{ path('autorizzazioni_edit', {autorizzazione: a.id}) }}" role="button" title="Modifica i dati del modulo di autorizzazione"><strong>{{ 'label.edit'|trans }}</strong></a>
           <a class="btn btn-primary btn-xs mb-1" href="{{ path('autorizzazioni_dettagli', {modulo: a.id}) }}" role="button" title="Dettagli delle autorizzazioni inviate"><strong>{{ 'label.show'|trans }}</strong></a>
       {% if a.abilitata %}
-          <a class="btn btn-danger btn-xs mb-1" href="{{ path('autorizzazioni_abilita', {'autorizzazione': a.id, 'abilita': 0}) }}" role="button" title="Disabilita il modulo di autorizzazione"><strong>{{ 'label.disable'|trans }}</strong></a>
+          <a class="btn btn-danger btn-xs mb-1 gs-post-link" href="{{ path('autorizzazioni_abilita', {'autorizzazione': a.id, 'abilita': 0}) }}" data-csrf="{{ csrf_token('delete') }}" role="button" title="Disabilita il modulo di autorizzazione"><strong>{{ 'label.disable'|trans }}</strong></a>
       {% else %}
-          <a class="btn btn-success btn-xs mb-1" href="{{ path('autorizzazioni_abilita', {'autorizzazione': a.id, 'abilita': 1}) }}" role="button" title="Abilita il modulo di autorizzazione"><strong>{{ 'label.enable'|trans }}</strong></a>
+          <a class="btn btn-success btn-xs mb-1 gs-post-link" href="{{ path('autorizzazioni_abilita', {'autorizzazione': a.id, 'abilita': 1}) }}" data-csrf="{{ csrf_token('delete') }}" role="button" title="Abilita il modulo di autorizzazione"><strong>{{ 'label.enable'|trans }}</strong></a>
       {% endif %}
         </td>
       </tr>

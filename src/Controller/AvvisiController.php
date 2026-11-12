@@ -289,11 +289,14 @@ class AvvisiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/avvisi/delete/{avviso}', name: 'avvisi_delete', requirements: ['avviso' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/avvisi/delete/{avviso}', name: 'avvisi_delete', requirements: ['avviso' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(ComunicazioniUtil $com, RegistroUtil $reg, LogHandler $dblogger,
-                         #[MapEntity] Avviso $avviso
-                         ): Response {
+  public function delete(Request $request, ComunicazioniUtil $com, RegistroUtil $reg, LogHandler $dblogger,
+                         #[MapEntity] Avviso $avviso): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('confirm', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controllo permessi
     if (!$com->azioneAvviso('delete', $avviso->getData(), $this->getUser(), $avviso)) {
       // errore
@@ -421,11 +424,16 @@ class AvvisiController extends BaseController {
       }
       $this->em->persist($avviso);
     }
-    // controllo permessi
-    if (!$com->azioneAvviso(($edit ? 'edit' : 'add'), $avviso->getData(), $this->getUser(),
-        $edit ? $avviso : null)) {
+    // controllo permessi PRIMA di persistere
+    $permesso = $com->azioneAvviso(($edit ? 'edit' : 'add'), $avviso->getData(), $this->getUser(),
+        $edit ? $avviso : null);
+    if (!$permesso) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // persisti solo dopo il controllo dei permessi
+    if (!$edit) {
+      $this->em->persist($avviso);
     }
     // imposta autore dell'avviso
     $avviso->setAutore($this->getUser());

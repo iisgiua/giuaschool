@@ -222,9 +222,13 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/richieste/delete/{id}', name: 'richieste_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/richieste/delete/{id}', name: 'richieste_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted(attribute: new Expression("is_granted('ROLE_GENITORE') or is_granted('ROLE_ALUNNO')"))]
-  public function delete(LogHandler $dblogger, int $id): Response {
+  public function delete(Request $request, LogHandler $dblogger, int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('confirm', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla richiesta
     $richiesta = $this->em->getRepository(Richiesta::class)->findOneBy(['id' => $id, 'stato' => ['I', 'G']]);
     if (!$richiesta) {
@@ -804,11 +808,15 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/richieste/classe/delete/{classe}/{id}', name: 'richieste_classe_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/richieste/classe/delete/{classe}/{id}', name: 'richieste_classe_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function classeDelete(LogHandler $dblogger,
+  public function classeDelete(Request $request, LogHandler $dblogger,
                                #[MapEntity] Classe $classe,
                                int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('confirm', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla richiesta
     $criteri = $this->getUser()->controllaRuolo('D') ? ['id' => $id, 'stato' => ['I', 'G']] :
       ['id' => $id, 'utente' => $this->getUser(), 'stato' => ['I', 'G']];
@@ -1085,6 +1093,7 @@ class RichiesteController extends BaseController {
         // invia il documento
         $nomefile = $criteri['tipo'] == 'V' ? 'prove-evacuazione.zip' : 'designazioni-evacuazione.zip';
         $response = new BinaryFileResponse($zipPath);
+        $response->deleteFileAfterSend(true);
         $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $nomefile);
         $response->headers->set('Content-Disposition', $disposition);
         $response->headers->set('Content-Type', 'application/zip');
@@ -1574,11 +1583,15 @@ class RichiesteController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/richieste/coordinatore/delete/{classe}/{id}', name: 'richieste_coordinatore_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/richieste/coordinatore/delete/{classe}/{id}', name: 'richieste_coordinatore_delete', requirements: ['classe' => '\d+', 'id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function coordinatoreDelete(LogHandler $dblogger,
+  public function coordinatoreDelete(Request $request, LogHandler $dblogger,
                                #[MapEntity] Classe $classe,
                                int $id): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('confirm', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // controlla richiesta
     $criteri = $this->getUser()->controllaRuolo('D') ? ['id' => $id, 'stato' => ['I', 'G']] :
       ['id' => $id, 'utente' => $this->getUser(), 'stato' => ['I', 'G']];

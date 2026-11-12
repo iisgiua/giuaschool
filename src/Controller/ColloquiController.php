@@ -518,11 +518,11 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/colloqui/disdetta/{id}', name: 'colloqui_disdetta', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/colloqui/disdetta/{id}', name: 'colloqui_disdetta', requirements: ['id' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_GENITORE')]
   public function disdetta(Request $request, LogHandler $dblogger, int $id): Response {
     // valida token CSRF
-    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+    if (!$this->isCsrfTokenValid('confirm', $request->request->get('_csrf_token'))) {
       throw $this->createNotFoundException('exception.invalid_token');
     }
     // controlla alunno
@@ -719,9 +719,13 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/colloqui/delete/{tipo}', name: 'colloqui_delete', requirements: ['tipo' => 'D|T'], methods: ['GET'])]
+  #[Route(path: '/colloqui/delete/{tipo}', name: 'colloqui_delete', requirements: ['tipo' => 'D|T'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
-  public function delete(LogHandler $dblogger, string $tipo): Response {
+  public function delete(Request $request, LogHandler $dblogger, string $tipo): Response {
+    // valida token CSRF
+    if (!$this->isCsrfTokenValid('confirm', $request->request->get('_csrf_token'))) {
+      throw $this->createNotFoundException('exception.invalid_token');
+    }
     // legge ricevimenti
     $inizio = DateTime::createFromFormat('Y-m-d H:i:s',
       $this->reqstack->getSession()->get('/CONFIG/SCUOLA/anno_inizio').' 00:00:00');

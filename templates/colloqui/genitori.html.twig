@@ -28,13 +28,13 @@
         <div class="col-sm-4">
         {% if r.stato == 'R' %}
             <strong class="text-danger"><em>In attesa di conferma</em></strong>
-            <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_disdetta', {id: r.id}) }}?_csrf_token={{ csrf_token('delete') }}" data-text="{{ 'message.disdetta_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+            <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_disdetta', {id: r.id}) }}" data-text="{{ 'message.disdetta_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
         {% elseif r.stato == 'C' %}
             <strong class="text-success"><em>Appuntamento confermato</em></strong>
           {% if r.messaggio %}
             <br>Messaggio del docente:<small><br><strong><em>{{ r.messaggio }}</em></strong></small>
           {% endif %}
-            <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_disdetta', {id: r.id}) }}?_csrf_token={{ csrf_token('delete') }}" data-text="{{ 'message.disdetta_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
+            <button class="btn btn-danger btn-xs pull-right gs-modal-confirm-button" title="Cancella la richiesta di colloquio" data-toggle="modal" data-target="#gs-modal-confirm" data-href="{{ path('colloqui_disdetta', {id: r.id}) }}" data-text="{{ 'message.disdetta_colloquio'|trans }}"><span class="glyphicon glyphicon-remove gs-mr-2" aria-hidden="true"></span><strong>Cancella</strong></button>
         {% elseif r.stato == 'A' %}
             <strong class="text-danger"><em>Appuntamento annullato dal genitore</em></strong>
         {% elseif r.stato == 'N' %}

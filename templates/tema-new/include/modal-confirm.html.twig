@@ -11,7 +11,7 @@
       </div>
       <div class="modal-body" id="gs-modal-confirm-contenuto"></div>
       <div class="modal-footer mx-auto">
-        <a class="btn btn-primary btn-xs" id="gs-modal-confirm-yes" href="#" role="button">{{ 'label.continua'|trans }}</a>
+        <a class="btn btn-primary btn-xs gs-post-link" id="gs-modal-confirm-yes" href="#" data-csrf="{{ csrf_token('confirm') }}" role="button">{{ 'label.continua'|trans }}</a>
         <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">{{ 'label.cancel'|trans }}</button>
       </div>
     </div>
