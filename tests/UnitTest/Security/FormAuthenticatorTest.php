@@ -16,6 +16,7 @@ use App\Util\LogHandler;
 use App\Util\OtpUtil;
 use DateTime;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\RouterInterface;
@@ -88,6 +89,11 @@ class FormAuthenticatorTest extends DatabaseTestCase {
    */
   private $mockedSession;
 
+  /**
+   * @var $mockedCache Gestore della cache dei tentativi di accesso (moked)
+   */
+  private $mockedCache;
+
 
   //==================== METODI DELLA CLASSE ====================
 
@@ -137,11 +143,12 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     // session: inserisce in coda session
     $this->mockedSession = $this->createMock(Session::class);
     $this->mockedSession->method('get')->willReturnCallback(
-      function($key, $default=null) { return $this->session[$key] ?? $default; });
+      fn($key, $default=null) => $this->session[$key] ?? $default);
     $this->mockedSession->method('set')->willReturnCallback(
       function($key, $val) { $this->session[$key] = $val; });
-    $this->mockedSession->method('remove')->willReturnCallback(
-      function($key) { unset($this->session[$key]); });
+    // cache: adattatore in memoria, così la logica di blocco dei tentativi si comporta
+    // come in produzione (il callback viene eseguito in caso di cache miss)
+    $this->mockedCache = new ArrayAdapter();
   }
 
   /**
@@ -155,7 +162,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     // richiesta corretta: login standard
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
@@ -214,7 +221,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-    $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+    $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     // login standard
     $req = new Request([], ['_username' => 'user', '_password' => 'pass', '_otp' => 'otp', '_csrf_token' => 'TOKEN'],
       ['_route' => 'login_form'], [], [], ['REMOTE_ADDR' => '1.2.3.4'], null);
@@ -260,7 +267,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     // utente inesistente
     try {
       $exception = null;
@@ -353,7 +360,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider', 'gsuite');
     $this->em->getRepository(Configurazione::class)->setParametro('id_provider_tipo', 'DS');
     // SPID obbligatorio, login standard
@@ -602,7 +609,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     // login form, no profili
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
@@ -716,7 +723,7 @@ class FormAuthenticatorTest extends DatabaseTestCase {
     $this->conf = false;
     $this->session = [];
     $fa = new FormAuthenticator($this->mockedRouter, $this->em, $this->hasher, $this->mockedOtp,
-      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig);
+      $this->mockedLogger, $this->mockedDbLog, $this->mockedConfig, $this->mockedCache);
     $req = new Request([], [], ['_route' => 'login_form'], [], [], [], null);
     $req->setMethod('POST');
     $req->setSession($this->mockedSession);
