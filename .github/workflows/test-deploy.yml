@@ -14,7 +14,8 @@ jobs:
 
   build:
     name: Build release
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       IMAGE_CACHE_DIR: /tmp/cache/docker-image
     outputs:
