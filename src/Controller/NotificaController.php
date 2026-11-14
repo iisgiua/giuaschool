@@ -58,7 +58,7 @@ class NotificaController extends BaseController {
     }
     $secretHeader = $request->headers->get('X-Telegram-Bot-Api-Secret-Token');
     $secret = $this->em->getRepository(Configurazione::class)->getParametro('telegram_secret');
-    if ($secretHeader != $secret) {
+    if (empty($secret) || empty($secretHeader) || !hash_equals((string) $secret, (string) $secretHeader)) {
       // errore: violazione di sicurezza
       $logger->error('Telegram webhook: violazione di sicurezza su codice X-Telegram-Bot-Api-Secret-Token.',
         [$secretHeader, $richiesta]);

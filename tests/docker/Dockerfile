@@ -24,9 +24,8 @@ RUN apt-get -qq update && \
       php php-curl php-gd php-intl php-mbstring php-mysql php-xml php-zip \
       # installa LibreOffice e tool PDF
       libreoffice-nogui unoconv poppler-utils && \
-    # pulizia APT e file inutili
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* && \
+    # pulizia dei file inutili
+    rm -rf /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* && \
     # configura data/ora locale
     echo "it_IT.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen && \
@@ -36,6 +35,9 @@ RUN apt-get -qq update && \
     sed -ri 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/8.2/apache2/php.ini && \
     sed -ri 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/8.2/cli/php.ini && \
     sed -ri 's/;opcache.enable=1.*$/opcache.enable=1/' /etc/php/8.2/apache2/php.ini && \
+    # non divulga la versione di PHP negli header delle risposte
+    sed -ri 's/^;?expose_php\s*=.*$/expose_php = Off/' /etc/php/8.2/apache2/php.ini && \
+    sed -ri 's/^;?expose_php\s*=.*$/expose_php = Off/' /etc/php/8.2/cli/php.ini && \
     # configura Apache
     a2enmod rewrite ssl && \
     rm -f /etc/apache2/sites-available/default-ssl.conf
@@ -110,6 +112,13 @@ LABEL org.opencontainers.image.source="https://github.com/iisgiua/giuaschool"
 ########## Test Step - Installa ambiente di test
 FROM dev AS test
 
+# il frontend noninteractive non si eredita tra gli stage
+ARG DEBIAN_FRONTEND=noninteractive
+
+# l'ambiente di test carica .env.example e .env.test (non .env.local)
+ENV APP_ENV=test
+ENV APP_DEBUG=1
+
 WORKDIR /var/www/giuaschool
 
 # Installazione Chrome Headless + Xdebug
@@ -160,9 +169,9 @@ RUN composer install -q --no-dev --no-scripts && \
     # pulizia file inutili
     rm -rf /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* var/log/* && \
     rm -rf src/DataFixtures tests/*.php tests/Behat tests/data tests/features tests/temp tests/UnitTest && \
-    rm -f .dockerignore .env.test .gitignore behat.yml phpunit.xml publiccode.yml rector.php && \
-    # imposta permessi sui file
-    chown -R www-data:www-data .
+    rm -f .dockerignore .env .env.local .env.test .env-dist .gitignore behat.yml phpunit.xml publiccode.yml rector.php && \
+    # imposta permessi sui file creati come root (senza riscrivere l'intero albero)
+    find . -user root -exec chown www-data:www-data {} +
 
 EXPOSE 443
 ENTRYPOINT ["tests/docker/entrypoint.sh"]

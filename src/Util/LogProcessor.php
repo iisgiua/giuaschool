@@ -46,8 +46,11 @@ class LogProcessor {
     $req = $this->request->getCurrentRequest();
     if ($req) {
       $record->extra['client_ip'] = $req->getClientIp();
-      $record->extra['uri'] = $req->getUri();
-      $record->extra['query_string'] = $req->getQueryString();
+      // i segreti che viaggiano nell'URL non devono finire nei log
+      $record->extra['uri'] = self::oscuraSegreti($req->getUri());
+      $queryString = $req->getQueryString();
+      $record->extra['query_string'] = ($queryString === null) ? null :
+        self::oscuraSegreti($queryString);
       $record->extra['method'] = $req->getMethod();
     }
     // aggiunge dati sull'utente
@@ -58,6 +61,26 @@ class LogProcessor {
     }
     // restituisce record modificato
     return $record;
+  }
+
+  /**
+   * Oscura i valori sensibili presenti in una URL o in una stringa di query
+   * (codici di accesso, token, password e OTP: i log non sono un canale sicuro).
+   *
+   * @param string $testo URL o stringa di query
+   *
+   * @return string Testo con i valori sensibili sostituiti
+   */
+  private static function oscuraSegreti(string $testo): string {
+    $osc = '[osc]';
+    // parametri di query con nome sensibile (es. ?token=...&_csrf_token=...)
+    $risultato = preg_replace('/([?&][a-z0-9_\-]*(?:token|password|passwd|secret|otp|code|codice)'.
+      '[a-z0-9_\-]*=)[^&\s]+/i', '$1'.$osc, $testo);
+    // codici di accesso contenuti nel percorso (es. /login/connect/<otp>-<utente>)
+    $risultato = preg_replace('~(/login/connect/|/command/notify/)[^/?\s]+~i', '$1'.$osc,
+      $risultato ?? $testo);
+    // restituisce il testo modificato (in caso di errore l'originale)
+    return ($risultato === null) ? $testo : $risultato;
   }
 
 }
