@@ -1550,6 +1550,7 @@ message.cancella_modulo: Verrà cancellato il modulo indicato. Vuoi continuare?
 message.cancella_consultazione: Verrà cancellata la consultazione indicata. Vuoi continuare?
 message.no_moduli_richieste: Non sono presenti moduli di richiesta per l'utente.
 message.no_moduli_classe: Non sono presenti moduli per la classe.
+message.no_modulo_inviato: Non è stato ancora inviato nessun modulo.
 message.richieste_add: Inserisci i dati nel modulo e conferma l'invio.
 message.modulo_add: Inserisci i dati nel modulo e conferma l'invio.
 message.richieste_classe_add: Inserisci i dati nel modulo e conferma l'invio.
@@ -1874,6 +1875,7 @@ exception.modulo_campo_senza_nome: Non possono esistere campi del modulo senza n
 exception.modulo_campo_senza_tipo: Non possono esistere campi del modulo senza tipo.
 exception.campo_obbligatorio_vuoto: Non hai inserito un valore accettabile in un campo obbligatorio.
 exception.modulo_allegati_mancanti: Non hai caricato gli allegati richiesti.
+exception.modulo_template_mancante: "Il template del modulo non è disponibile: contatta l'amministratore."
 exception.modulo_campo_nome_riservato: Non puoi inserire un campo con il nome "data".
 exception.campo_data_vuoto: Non hai inserito un valore per la data.
 exception.campo_data_successivo_oggi: Non puoi inserire una data successiva a quella di oggi.
@@ -1923,7 +1925,9 @@ exception.documento_bes_non_autorizzato: Non hai i permessi per caricare documen
 exception.tipo_filtro_invalido: Il tipo di filtro non è valido
 exception.consultazione_intervallo_date_invalido: La data e ora iniziale deve precedere quella finale
 exception.consultazione_nessuna_classe: Devi indicare almeno una classe di destinazione
+exception.consultazione_template_mancante: "Il template della consultazione non è disponibile: contatta l'amministratore."
 exception.impossibile_creare_zip: Impossibile creare il file compresso
+exception.nessun_allegato_archivio: "Nessun documento presente: non c'è nulla da archiviare."
 exception.autorizzazione_intervallo_date_invalido: L'ora iniziale deve precedere quella finale
 exception.autorizzazione_nessuna_classe: Devi indicare almeno una classe di destinazione
 exception.autorizzazione_no_descrizione: Devi indicare la descrizione dell'attività

@@ -52,6 +52,9 @@
       </div>
         {% endif %}
       {% else %}
+      <div class="col-sm-12 gs-big">
+        <em>{{ 'message.no_modulo_inviato'|trans }}</em>
+      </div>
       <div class="text-right">
         <a class="btn btn-primary" href="{{ path('richieste_classe_add', {classe: info.classe.id, modulo: mk}) }}" title="Invia una nuovo modulo">
           <strong>{{ 'label.add'|trans }}</strong>
@@ -105,6 +108,10 @@
       </li>
         {% endfor %}
     </ul>
+      {% elseif dati.richieste[mk] is not defined %}
+    <div class="panel-body">
+      <em>{{ 'message.no_modulo_inviato'|trans }}</em>
+    </div>
       {% endif %}
     <div class="panel-footer text-right">
       <a class="btn btn-primary" href="{{ path('richieste_classe_add', {classe: info.classe.id, modulo: mk}) }}" title="Invia un nuovo modulo">
