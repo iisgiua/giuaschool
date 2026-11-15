@@ -39,6 +39,29 @@ class ConfigurazioneRepository extends EntityRepository {
   }
 
   /**
+   * Restituisce il valore del parametro indicato sotto forma di array.
+   * I parametri multi-valore (es. i voti finali) sono memorizzati in forma serializzata:
+   * la decodifica non istanzia classi, perché il contenuto atteso è di soli valori scalari.
+   *
+   * @param string $nome Nome del parametro
+   * @param array $default Valore di default nel caso il parametro non esista o non sia valido
+   *
+   * @return array Valore del parametro letto
+   */
+  public function getParametroArray($nome, array $default=[]): array {
+    // legge valore parametro
+    $valore = $this->getParametro($nome);
+    if (empty($valore) || !is_string($valore)) {
+      // parametro non configurato
+      return $default;
+    }
+    // decodifica senza istanziare classi
+    $array = @unserialize($valore, ['allowed_classes' => false]);
+    // restituisce valore
+    return is_array($array) ? $array : $default;
+  }
+
+  /**
    * Restituisce il valore presente nella configurazione del parametro indicato
    *
    * @param string $nome Nome del parametro

@@ -65,10 +65,10 @@ class SchedaController extends BaseController {
     $info['edcivica'] = ($cattedra->getMateria()->getTipo() == 'E');
     // valutazioni
     $materiaTipo = $cattedra->getMateria()->getTipo();
-    $valutazioni[$materiaTipo] = unserialize(
-      $this->em->getRepository(Configurazione::class)->getParametro('voti_finali_'.$materiaTipo));
-    $listaValori = explode(',', (string) $valutazioni[$materiaTipo]['valori']);
-    $listaVoti = explode(',', (string) $valutazioni[$materiaTipo]['votiAbbr']);
+    $valutazioni[$materiaTipo] = $this->em->getRepository(Configurazione::class)
+      ->getParametroArray('voti_finali_'.$materiaTipo);
+    $listaValori = explode(',', (string) ($valutazioni[$materiaTipo]['valori'] ?? ''));
+    $listaVoti = explode(',', (string) ($valutazioni[$materiaTipo]['votiAbbr'] ?? ''));
     foreach ($listaValori as $key=>$val) {
       $valutazioni['lista'][$val] = trim($listaVoti[$key], '"');
     }

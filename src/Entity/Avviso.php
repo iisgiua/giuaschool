@@ -63,7 +63,7 @@ class Avviso extends Comunicazione implements Stringable {
   private ?string $testo = '';
 
   /**
-   * @var string $sostituzioni Array associativo con le variabili segnaposto e il testo sostitutivo
+   * @var array $sostituzioni Array associativo con le variabili segnaposto e il testo sostitutivo
    */
   #[ORM\Column(type: Types::JSON, nullable: false)]
   private array $sostituzioni = [];

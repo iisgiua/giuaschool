@@ -490,10 +490,10 @@ class GenitoriController extends BaseController {
           // precedente A.S.
           $dati = $gen->pagellePrecedenti($alunno);
           // legge valutazioni da configurazione
-          $valutazioni['R'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_R'));
-          $valutazioni['E'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_E'));
-          $valutazioni['N'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_N'));
-          $valutazioni['C'] = unserialize($this->em->getRepository(Configurazione::class)->getParametro('voti_finali_C'));
+          $valutazioni['R'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_R');
+          $valutazioni['E'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_E');
+          $valutazioni['N'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_N');
+          $valutazioni['C'] = $this->em->getRepository(Configurazione::class)->getParametroArray('voti_finali_C');
           $listaValori = explode(',', (string) $valutazioni['R']['valori']);
           $listaVoti = explode(',', (string) $valutazioni['R']['votiAbbr']);
           foreach ($listaValori as $key=>$val) {
@@ -630,7 +630,7 @@ class GenitoriController extends BaseController {
         'attr' => ['class' => 'btn-danger']])
       ->getForm();
     $form->handleRequest($request);
-    if ($form->isSubmitted()) {
+    if ($form->isSubmitted() && $form->isValid()) {
       $errore = false;
       $motivazione = substr((string) $form->get('motivazione')->getData(), 0, 255);
       if ($form->get('delete')->isClicked()) {
@@ -761,7 +761,7 @@ class GenitoriController extends BaseController {
         'attr' => ['class' => 'btn-danger']])
       ->getForm();
     $form->handleRequest($request);
-    if ($form->isSubmitted()) {
+    if ($form->isSubmitted() && $form->isValid()) {
       if ($form->get('submit')->isClicked() && empty($form->get('motivazione')->getData())) {
         // errore: motivazione assente
         $this->addFlash('error', $trans->trans('exception.no_motivazione'));
@@ -875,7 +875,7 @@ class GenitoriController extends BaseController {
         'attr' => ['class' => 'btn-danger']])
       ->getForm();
     $form->handleRequest($request);
-    if ($form->isSubmitted()) {
+    if ($form->isSubmitted() && $form->isValid()) {
       if ($form->get('submit')->isClicked() && empty($form->get('motivazione')->getData())) {
         // errore: motivazione assente
         $this->addFlash('error', $trans->trans('exception.no_motivazione'));

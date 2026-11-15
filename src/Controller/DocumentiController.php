@@ -531,9 +531,6 @@ class DocumentiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
-    // segna lettura e memorizza su db
-    $com->leggeUtente($this->getUser(), $documento);
-    $this->em->flush();
     // invia il file
     $file = $documento->getAllegati()[$allegato];
     $nomefile = $com->dirDocumento($documento).'/'.$file->getFile().'.'.$file->getEstensione();
@@ -550,6 +547,13 @@ class DocumentiController extends BaseController {
         throw $this->createNotFoundException('exception.id_notfound');
       }
     }
+    if (!file_exists($nomefile)) {
+      // errore: file non trovato
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // segna lettura e memorizza su db solo dopo aver verificato il file
+    $com->leggeUtente($this->getUser(), $documento);
+    $this->em->flush();
     return $this->rispostaAllegato($nomefile, $file->getNome().'.'.$file->getEstensione(), $tipo == 'V');
   }
 
@@ -570,6 +574,8 @@ class DocumentiController extends BaseController {
     $criteri = [];
     $criteri['filtro'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/filtro', 'D');
     $criteri['tipo'] = $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/tipo', 'L');
+    // sanifica il tipo: un valore non previsto non consente di completare la query
+    $criteri['tipo'] = in_array($criteri['tipo'], ['L', 'P', 'R', 'M'], true) ? $criteri['tipo'] : 'L';
     $criteri['classe'] = $this->em->getRepository(Classe::class)->find(
       (int) $this->reqstack->getSession()->get('/APP/ROUTE/documenti_docenti/classe', 0));
     if ($pagina == 0) {

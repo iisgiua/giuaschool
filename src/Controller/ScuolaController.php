@@ -102,7 +102,10 @@ class ScuolaController extends BaseController {
         ->setPeriodo($periodo)
         ->setArgomenti($argomenti)
         ->setStruttura($struttura);
-      $this->em->persist($definizione);
+      if ($request->isMethod('POST')) {
+        // memorizza solo al salvataggio: la lettura della pagina non crea dati
+        $this->em->persist($definizione);
+      }
     }
     // form
     $form = $this->createForm(DefinizioneScrutinioType::class, $definizione,

@@ -13,6 +13,7 @@
     </div>
   </div>
   <div class="modal-footer">
+    {{ form_widget(form._token) }}
     {{ form_widget(form.submit) }}
   {% if info.assenza.giustificato %}
     {{ form_widget(form.delete) }}

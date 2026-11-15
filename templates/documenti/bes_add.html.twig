@@ -18,7 +18,7 @@
       <div class="help-block gs-text-normal gs-big gs-mb-4"><em>{{ 'message.inserimento_documenti_bes'|trans|raw }}</em></div>
       {{ form_start(form) }}
       {{ form_errors(form) }}
-  {% if info.alunno is not defined %}
+  {% if info.alunno is not defined and form.classe is defined %}
       {{ form_row(form.classe) }}
       <div class="form-group">
         <label class="col-sm-2 control-label" for="documento_alunnoIndividuale">Alunno</label>
@@ -28,6 +28,10 @@
           </div>
           <div id="gs-alunno-individuale" class="row" style="display:none"></div>
         </div>
+      </div>
+  {% elseif info.alunno is not defined %}
+      <div class="alert alert-warning gs-big" role="alert">
+        <strong>Nessuna classe disponibile: non è possibile inserire il documento.</strong>
       </div>
   {% endif %}
       {{ form_row(form.tipo) }}

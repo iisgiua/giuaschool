@@ -210,8 +210,9 @@ class AssenzeController extends BaseController {
                           int $posizione): Response {
     // controlla cattedra
     if ($cattedra > 0) {
-      // cattedra definita
-      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+      // lezione in propria cattedra: controlla esistenza
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+        'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -223,6 +224,11 @@ class AssenzeController extends BaseController {
     // controlla classe
     $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -381,8 +387,9 @@ class AssenzeController extends BaseController {
     // inizializza
     $label = [];
     if ($cattedra > 0) {
-      // cattedra definita
-      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+      // lezione in propria cattedra: controlla esistenza
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+        'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -394,6 +401,11 @@ class AssenzeController extends BaseController {
     // controlla classe
     $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -412,6 +424,10 @@ class AssenzeController extends BaseController {
     }
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
+    if (empty($orario)) {
+      // errore: orario non definito per la data indicata
+      throw $this->createNotFoundException('exception.orario_sede_invalido');
+    }
     // controlla entrata
     $entrata = $this->em->getRepository(Entrata::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($entrata) {
@@ -560,8 +576,9 @@ class AssenzeController extends BaseController {
     // inizializza
     $label = [];
     if ($cattedra > 0) {
-      // cattedra definita
-      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+      // lezione in propria cattedra: controlla esistenza
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+        'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -573,6 +590,11 @@ class AssenzeController extends BaseController {
     // controlla classe
     $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -591,6 +613,10 @@ class AssenzeController extends BaseController {
     }
     // legge prima/ultima ora
     $orario = $reg->orarioInData($data_obj, $classe->getSede());
+    if (empty($orario)) {
+      // errore: orario non definito per la data indicata
+      throw $this->createNotFoundException('exception.orario_sede_invalido');
+    }
     // controlla uscita
     $uscita = $this->em->getRepository(Uscita::class)->findOneBy(['alunno' => $alunno, 'data' => $data_obj]);
     if ($uscita) {
@@ -727,8 +753,9 @@ class AssenzeController extends BaseController {
     $label = [];
     $settimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
     if ($cattedra > 0) {
-      // cattedra definita
-      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+      // lezione in propria cattedra: controlla esistenza
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+        'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -740,6 +767,11 @@ class AssenzeController extends BaseController {
     // controlla classe
     $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
@@ -932,8 +964,9 @@ class AssenzeController extends BaseController {
     // inizializza
     $label = [];
     if ($cattedra > 0) {
-      // cattedra definita
-      $cattedra = $this->em->getRepository(Cattedra::class)->find($cattedra);
+      // lezione in propria cattedra: controlla esistenza
+      $cattedra = $this->em->getRepository(Cattedra::class)->findOneBy(['id' => $cattedra,
+        'docente' => $this->getUser(), 'attiva' => 1]);
       if (!$cattedra) {
         // errore
         throw $this->createNotFoundException('exception.id_notfound');
@@ -945,6 +978,11 @@ class AssenzeController extends BaseController {
     // controlla classe
     $classe = $this->em->getRepository(Classe::class)->find($classe);
     if (!$classe) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
+    // controlla accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }

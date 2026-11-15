@@ -755,7 +755,7 @@ class StaffUtil {
     if ($docente instanceOf Docente) {
       // statistiche di singolo docente
       $stat = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
-        ->select('d.cognome,d.nome,SUM(so.durata) AS ore')
+        ->select('d.id,d.cognome,d.nome,SUM(so.durata) AS ore')
         ->join(Firma::class, 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
@@ -767,13 +767,13 @@ class StaffUtil {
         ->setParameter('inizio', $inizio->format('Y-m-d'))
         ->setParameter('fine', $fine->format('Y-m-d'))
         ->setParameter('docente', $docente)
-        ->groupBy('d.id')
+        ->groupBy('d.id,d.cognome,d.nome')
         ->getQuery()
         ->getArrayResult();
     } elseif ($docente == -1) {
       // statistiche di tutti i docenti
       $stat = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
-        ->select('d.cognome,d.nome,SUM(so.durata) AS ore')
+        ->select('d.id,d.cognome,d.nome,SUM(so.durata) AS ore')
         ->join(Firma::class, 'f', 'WITH', 'd.id=f.docente')
         ->join('f.lezione', 'l')
         ->join('l.classe', 'cl')
@@ -784,15 +784,12 @@ class StaffUtil {
         ->setParameter('abilitato', 1)
         ->setParameter('inizio', $inizio->format('Y-m-d'))
         ->setParameter('fine', $fine->format('Y-m-d'))
-        ->groupBy('d.id')
+        ->groupBy('d.id,d.cognome,d.nome')
         ->getQuery()
         ->getArrayResult();
     } else {
-      // query vuota
-      $stat = $this->em->getRepository(Docente::class)->createQueryBuilder('d')
-        ->where('d.id=:valore')
-			  ->setParameter('valore', -999)
-        ->getQuery();
+      // query vuota: nessun docente selezionato
+      $stat = [];
     }
     // restituisce dati
     return $stat;
