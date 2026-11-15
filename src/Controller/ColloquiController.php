@@ -8,6 +8,7 @@
 
 namespace App\Controller;
 
+use Throwable;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use DateTime;
 use Doctrine\DBAL\LockMode;
@@ -569,8 +570,8 @@ class ColloquiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/colloqui/prenota/{docente}', name: 'colloqui_prenota')]
-  #[IsGranted('ROLE_GENITORE')] // requirements={"docente": "\d+"},
+  #[Route(path: '/colloqui/prenota/{docente}', name: 'colloqui_prenota', requirements: ['docente' => '\d+'])]
+  #[IsGranted('ROLE_GENITORE')]
   public function prenota(Request $request, ColloquiUtil $col, TranslatorInterface $trans,
                           LogHandler $dblogger, int $docente): Response {
     // inizializza
@@ -655,7 +656,7 @@ class ColloquiController extends BaseController {
           // redirezione
           return $this->redirectToRoute('colloqui_genitori');
         }
-      } catch (\Throwable $e) {
+      } catch (Throwable $e) {
         // annulla la transazione in caso di errore
         if ($conn->isTransactionActive()) {
           $conn->rollBack();
