@@ -247,6 +247,14 @@ class FormAuthenticator extends AbstractAuthenticator {
       return true;
     }
     // validazione fallita
+    // protezione brute-force: massimo N tentativi falliti ogni 15 minuti per utente+IP
+    $failCount++;
+    $this->throttleCache->delete($throttleKey);
+    $this->throttleCache->get($throttleKey, function (ItemInterface $item) use ($failCount) {
+      $item->expiresAfter(self::BLOCCO_LOGIN_SECONDI);
+      return $failCount;
+    });
+    // stesso messaggio generico sia per credenziali errate che per blocco temporaneo
     $this->logger->error('Password errata nella richiesta di login.', [
       'username' => $user->getUserIdentifier(),
       'ruolo' => $user->getCodiceRuolo(),

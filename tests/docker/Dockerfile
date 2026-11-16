@@ -24,20 +24,27 @@ RUN apt-get -qq update && \
       php php-curl php-gd php-intl php-mbstring php-mysql php-xml php-zip \
       # installa LibreOffice e tool PDF
       libreoffice-nogui unoconv poppler-utils && \
-    # pulizia dei file inutili
-    rm -rf /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* && \
+    # pulizia APT e file inutili
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* && \
     # configura data/ora locale
     echo "it_IT.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen && \
     ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata && \
-    # configura PHP
-    sed -ri 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/8.2/apache2/php.ini && \
-    sed -ri 's/^;date\.timezone *=.*$/date.timezone = Europe\/Rome/' /etc/php/8.2/cli/php.ini && \
-    sed -ri 's/;opcache.enable=1.*$/opcache.enable=1/' /etc/php/8.2/apache2/php.ini && \
-    # non divulga la versione di PHP negli header delle risposte
-    sed -ri 's/^;?expose_php\s*=.*$/expose_php = Off/' /etc/php/8.2/apache2/php.ini && \
-    sed -ri 's/^;?expose_php\s*=.*$/expose_php = Off/' /etc/php/8.2/cli/php.ini && \
+    # configura PHP (la versione viene rilevata, non codificata)
+    PHPVER="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')" && \
+    for sapi in apache2 cli; do \
+      printf '%s\n' \
+        'date.timezone = Europe/Rome' \
+        'expose_php = Off' \
+        'opcache.enable = 1' \
+        'opcache.enable_cli = 1' \
+        'opcache.validate_timestamps = 1' \
+        'realpath_cache_size = 4096k' \
+        'realpath_cache_ttl = 600' \
+        > "/etc/php/$PHPVER/$sapi/conf.d/99-giuaschool.ini"; \
+    done && \
     # configura Apache
     a2enmod rewrite ssl && \
     rm -f /etc/apache2/sites-available/default-ssl.conf
@@ -48,6 +55,9 @@ COPY ./tests/docker/apache2-certificate.key /etc/ssl/private/apache2-certificate
 COPY ./tests/docker/apache2-site.conf /etc/apache2/sites-available/000-default.conf
 COPY ./tests/docker/apache2-mpm.conf /etc/apache2/mods-available/mpm_prefork.conf
 COPY ./tests/docker/50-client.cnf /etc/mysql/mariadb.conf.d/50-client.cnf
+
+# limita i permessi della chiave privata del certificato
+RUN chmod 600 /etc/ssl/private/apache2-certificate.key
 
 
 ########## Composer Step - Installa e configura Composer
@@ -65,10 +75,19 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 FROM composer_builder AS database_builder
 
 WORKDIR /var/www/giuaschool
+
+# tuning MariaDB per gli ambienti di sviluppo e test (non incluso in produzione)
+COPY ./tests/docker/99-giuaschool-test.cnf /etc/mysql/mariadb.conf.d/99-giuaschool-test.cnf
+
 COPY --chown=www-data:www-data ./ ./
 
 # installa ambiente di sviluppo e inizializza il database
 RUN composer install -q --no-scripts --no-progress && \
+    # configurazione locale dell'immagine: stessi valori dell'ambiente di test
+    # (il dump delle fixture contiene note_bes cifrate con APP_SECRET)
+    grep -hE '^(DATABASE_URL|APP_SECRET)=' .env.test > .env.local && \
+    test -s .env.local && \
+    chmod 600 .env.local && \
     composer -q clear-cache && \
     # avvia servizio MariaDB
     service mariadb start && \
@@ -97,9 +116,9 @@ WORKDIR /var/www/giuaschool
 RUN mkdir -p var/cache/dev var/sessions/dev && \
     # pulizia file inutili
     rm -rf var/log/* tests/temp/mysql && \
-    # imposta permessi sui file
-    chown -R www-data:www-data . && \
-    chmod 755 tests/docker/*.sh
+    # imposta permessi sui file creati come root (senza riscrivere l'intero albero)
+    chmod 755 tests/docker/*.sh && \
+    find . -user root -exec chown www-data:www-data {} +
 
 EXPOSE 443
 ENTRYPOINT ["tests/docker/entrypoint.sh"]
@@ -121,27 +140,32 @@ ENV APP_DEBUG=1
 
 WORKDIR /var/www/giuaschool
 
-# Installazione Chrome Headless + Xdebug
+# Installazione Chrome Headless + Xdebug + PCOV
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg && \
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
     apt-get -qq update && \
-    apt-get -yqq --no-install-recommends install google-chrome-stable php-xdebug && \
-    # configurazione Chrome Headless + Xdebug
-    echo "xdebug.mode=coverage" >> /etc/php/8.2/mods-available/xdebug.ini && \
+    apt-get -yqq --no-install-recommends install google-chrome-stable php-xdebug php-pcov && \
+    # configurazione Chrome Headless + coverage: PCOV è il driver predefinito,
+    # Xdebug resta installato e si attiva con XDEBUG_MODE=debug
+    PHPVER="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')" && \
+    for sapi in apache2 cli; do \
+      printf '%s\n' \
+        'pcov.enabled = 1' \
+        'xdebug.mode = off' \
+        > "/etc/php/$PHPVER/$sapi/conf.d/99-giuaschool-test.ini"; \
+    done && \
     mkdir -p /var/lib/dbus /var/run/dbus && \
     dbus-uuidgen > /var/lib/dbus/machine-id && \
-    # imposta ambiente di test
-    sed -ri "s/^APP_ENV\s*=.*$/APP_ENV=test/" .env && \
     # crea directory di ambiente
     mkdir -p var/cache/test var/sessions/test && \
     # crea directory di download
     mkdir -p tests/temp/download && \
     chmod 777 tests/temp/download && \
-    # pulizia APT e file inutili
+    # pulizia dei file inutili
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* var/log/* var/cache/dev var/sessions/dev && \
-    # imposta permessi sui file
-    chown -R www-data:www-data .
+    # imposta permessi sui file creati come root (senza riscrivere l'intero albero)
+    find . -user root -exec chown www-data:www-data {} +
 
 EXPOSE 443
 ENTRYPOINT ["tests/docker/entrypoint.sh"]
@@ -154,6 +178,10 @@ LABEL org.opencontainers.image.source="https://github.com/iisgiua/giuaschool"
 ########## Production Step - Installa ambiente di produzione
 FROM composer_builder AS prod
 
+# l'ambiente di produzione usa .env.example come modello e .env.local per i valori della macchina
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
 WORKDIR /var/www/giuaschool
 COPY --chown=www-data:www-data ./ ./
 COPY --from=database_builder /var/www/giuaschool/tests/temp/mysql/ /var/lib/mysql/
@@ -162,7 +190,6 @@ COPY --from=database_builder /var/www/giuaschool/tests/temp/mysql/ /var/lib/mysq
 RUN composer install -q --no-dev --no-scripts && \
     composer -q clear-cache && \
     # imposta ambiente di produzione
-    sed -ri "s/^APP_ENV\s*=.*$/APP_ENV=prod/" .env && \
     rm -f src/Command/AliceLoadCommand.php  && \
     # crea directory di ambiente
     mkdir -p var/cache/prod var/sessions/prod && \

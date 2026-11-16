@@ -537,6 +537,11 @@ class CircolariController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
+    // controllo accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     $numeri = [];
     // lista circolari da firmare
     $circolari = $circolare ? [$circolare] :

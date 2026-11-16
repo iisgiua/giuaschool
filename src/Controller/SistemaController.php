@@ -1512,7 +1512,7 @@ class SistemaController extends BaseController {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // controllo CSRF (il passo 0 effettua solo controlli, gli altri modificano il sistema)
-    if ($step > 0 && !$this->isCsrfTokenValid('update', $request->request->get('_csrf_token'))) {
+    if ($step > 0 && (!$request->isMethod('POST') || !$this->isCsrfTokenValid('update', $request->request->get('_csrf_token')))) {
       throw $this->createNotFoundException('exception.invalid_params');
     }
     // inizializza

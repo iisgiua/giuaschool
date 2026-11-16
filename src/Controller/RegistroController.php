@@ -54,8 +54,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  *
  * @author Antonello Dessì
  */
-class RegistroController extends BaseController
-{
+class RegistroController extends BaseController {
 
   /**
    * Gestione del registro delle lezioni
@@ -68,9 +67,8 @@ class RegistroController extends BaseController
    * @param string $vista Tipo di vista del registro (giornaliera/mensile)
    *
    * @return Response Pagina di risposta
-   *
    */
-  #[Route(path: '/lezioni/registro/firme/{cattedra}/{classe}/{data}/{vista}', name: 'lezioni_registro_firme', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'vista' => 'G|M'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00', 'vista' => 'G'], methods: ['GET', 'POST'])]
+  #[Route(path: '/lezioni/registro/firme/{cattedra}/{classe}/{data}/{vista}', name: 'lezioni_registro_firme', requirements: ['cattedra' => '\d+', 'classe' => '\d+', 'data' => '\d\d\d\d-\d\d-\d\d', 'vista' => 'G|M'], defaults: ['cattedra' => 0, 'classe' => 0, 'data' => '0000-00-00', 'vista' => 'G'], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function firme(Request $request, RegistroUtil $reg,
                         int $cattedra, int $classe, string $data, string $vista): Response {

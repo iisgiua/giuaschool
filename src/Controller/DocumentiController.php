@@ -1066,14 +1066,14 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/documenti/bes/restore/{documento}', name: 'documenti_bes_restore', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/documenti/bes/restore/{documento}', name: 'documenti_bes_restore', requirements: ['documento' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function besRestore(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
                              LogHandler $dblogger,
                              #[MapEntity] Documento $documento
                              ): Response {
     // valida token CSRF
-    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
       throw $this->createNotFoundException('exception.invalid_token');
     }
     // controlla accesso a funzione
@@ -1146,14 +1146,14 @@ class DocumentiController extends BaseController {
    *
    * @return Response Pagina di risposta
    */
-  #[Route(path: '/documenti/bes/archive/{documento}', name: 'documenti_bes_archive', requirements: ['documento' => '\d+'], methods: ['GET'])]
+  #[Route(path: '/documenti/bes/archive/{documento}', name: 'documenti_bes_archive', requirements: ['documento' => '\d+'], methods: ['POST'])]
   #[IsGranted('ROLE_DOCENTE')]
   public function besArchive(Request $request, TranslatorInterface $trans, ComunicazioniUtil $com,
                              LogHandler $dblogger,
                              #[MapEntity] Documento $documento
                              ): Response {
     // valida token CSRF
-    if (!$this->isCsrfTokenValid('delete', $request->query->get('_csrf_token'))) {
+    if (!$this->isCsrfTokenValid('delete', $request->request->get('_csrf_token'))) {
       throw $this->createNotFoundException('exception.invalid_token');
     }
     // controlla accesso a funzione

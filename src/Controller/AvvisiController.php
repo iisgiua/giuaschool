@@ -805,6 +805,11 @@ class AvvisiController extends BaseController {
       // errore
       throw $this->createNotFoundException('exception.id_notfound');
     }
+    // controllo accesso alla classe
+    if (!$this->accessoClasse($this->getUser(), $classe)) {
+      // errore
+      throw $this->createNotFoundException('exception.id_notfound');
+    }
     // inizializza
     $lista = [];
     // controlla avvisi da firmare

@@ -45,6 +45,19 @@ class ConfigLoader {
   }
 
   /**
+   * Legge la configurazione solo se non è già stata caricata nella sessione
+   * Evita di sovrascrivere la configurazione già presente (es. tema e menu
+   * dell'utente autenticato) quando la richiesta avviene in un contesto in cui
+   * l'utente non è disponibile, come le sotto-richieste di errore 404.
+   */
+  public function caricaSeNecessario() {
+    if ($this->reqstack->getSession()->get('/CONFIG/SISTEMA/versione') === null) {
+      // configurazione assente: la carica
+      $this->carica();
+    }
+  }
+
+  /**
    * Legge tutta la configurazione e la memorizza nella sessione
    */
   public function carica() {
