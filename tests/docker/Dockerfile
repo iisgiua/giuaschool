@@ -156,6 +156,8 @@ RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearm
     done && \
     mkdir -p /var/lib/dbus /var/run/dbus && \
     dbus-uuidgen > /var/lib/dbus/machine-id && \
+    # imposta ambiente di test
+    sed -ri "s/^APP_ENV\s*=.*$/APP_ENV='test'/" .env && \
     # crea directory di ambiente
     mkdir -p var/cache/test var/sessions/test && \
     # crea directory di download
@@ -190,6 +192,7 @@ COPY --from=database_builder /var/www/giuaschool/tests/temp/mysql/ /var/lib/mysq
 RUN composer install -q --no-dev --no-scripts && \
     composer -q clear-cache && \
     # imposta ambiente di produzione
+    sed -ri "s/^APP_ENV\s*=.*$/APP_ENV='prod'/" .env && \
     rm -f src/Command/AliceLoadCommand.php  && \
     # crea directory di ambiente
     mkdir -p var/cache/prod var/sessions/prod && \
