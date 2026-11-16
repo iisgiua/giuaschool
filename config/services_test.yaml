@@ -23,6 +23,15 @@ services:
     class: Symfony\Component\Validator\Validator\TraceableValidator
     public: true
 
+  # registrato qui perché in produzione Faker e Alice non sono disponibili
+  App\Command\AliceLoadCommand:
+    arguments:
+      $dirProgetto: '%kernel.project_dir%'
+    tags:
+      - { name: console.command }
+      - { name: monolog.logger, channel: command }
+
+  # evita controllo reale CSRF nei test
   security.csrf.token_manager:
     class: App\Tests\Behat\FakedCsrfTokenManager
     public: true

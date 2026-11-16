@@ -45,6 +45,8 @@ services:
   # explicit commands registration
   App\Command\:
     resource: '../src/Command/*'
+    # il comando delle fixture richiede Faker e Alice, disponibili solo in dev e test
+    exclude: '../src/Command/AliceLoadCommand.php'
     tags:
       - { name: console.command }
       - { name: monolog.logger, channel: command }
