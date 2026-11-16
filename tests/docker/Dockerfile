@@ -196,7 +196,7 @@ RUN composer install -q --no-dev --no-scripts && \
     # pulizia file inutili
     rm -rf /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* var/log/* && \
     rm -rf src/DataFixtures tests/*.php tests/Behat tests/data tests/features tests/temp tests/UnitTest && \
-    rm -f .dockerignore .env .env.local .env.test .env-dist .gitignore behat.yml phpunit.xml publiccode.yml rector.php && \
+    rm -f .dockerignore .env.local .env.test .env-dist .gitignore behat.yml phpunit.xml publiccode.yml rector.php && \
     # imposta permessi sui file creati come root (senza riscrivere l'intero albero)
     find . -user root -exec chown www-data:www-data {} +
 
