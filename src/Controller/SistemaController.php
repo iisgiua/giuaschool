@@ -1648,7 +1648,7 @@ class SistemaController extends BaseController {
             $filename = $zip->getNameIndex($i);
             if (str_starts_with($filename, 'public/Install/') || str_starts_with($filename, 'src/Install/')) {
               // estrae file (percorso assoluto: non dipende dalla directory di lavoro del processo)
-              if (!$zip->extractTo($this->projectPath, [$filename])) {
+              if (!$zip->extractTo($this->getParameter('kernel.project_dir'), [$filename])) {
                 // errore
                 $errore = true;
                 $info['messaggio'] = 'exception.aggiornamento_zip_errato';

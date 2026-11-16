@@ -931,11 +931,9 @@ class CoordinatoreController extends BaseController {
   /**
    * Controllo moduli formativi svolti: situazione degli alunni
    *
-   * @param Request $request Pagina richiesta
    * @param int $classe Identificativo della classe
    *
    * @return Response Pagina di risposta
-   *
    */
   #[Route(path: '/coordinatore/moduliFormativi/alunni/{classe}', name: 'coordinatore_moduliFormativi_alunni', requirements: ['classe' => '\d+'], defaults: ['classe' => 0], methods: ['GET'])]
   #[IsGranted('ROLE_DOCENTE')]
